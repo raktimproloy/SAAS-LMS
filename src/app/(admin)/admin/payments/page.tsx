@@ -59,7 +59,7 @@ interface Payment {
 }
 
 const MONTHS = [
-  "January", "February", "March", "April", "May", "June", 
+  "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"
 ];
 
@@ -93,7 +93,7 @@ export default function PaymentsPage() {
   // Actions states
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [paymentToDelete, setPaymentToDelete] = useState<number | null>(null);
-  
+
   // Receipt Modal
   const [isReceiptOpen, setIsReceiptOpen] = useState(false);
   const [selectedReceipt, setSelectedReceipt] = useState<Payment | null>(null);
@@ -105,7 +105,7 @@ export default function PaymentsPage() {
         fetch("/api/admin/payments"),
         fetch("/api/admin/students")
       ]);
-      
+
       if (payRes.ok) setPayments(await payRes.json());
       if (stuRes.ok) setStudents(await stuRes.json());
     } catch (err) {
@@ -121,7 +121,7 @@ export default function PaymentsPage() {
 
   const generateReceiptNumber = () => {
     const d = new Date();
-    return `RCPT-${d.getFullYear()}${String(d.getMonth()+1).padStart(2, '0')}-${Math.floor(1000 + Math.random() * 9000)}`;
+    return `RCPT-${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}-${Math.floor(1000 + Math.random() * 9000)}`;
   };
 
   const getStudentTotalFee = (stuId: string) => {
@@ -147,7 +147,7 @@ export default function PaymentsPage() {
     const paid = parseFloat(val) || 0;
     const due = Math.max(0, totalFee - paid);
     setDueAmount(due.toString());
-    
+
     if (paid >= totalFee && totalFee > 0) {
       setStatus("paid");
     } else if (paid > 0) {
@@ -237,13 +237,13 @@ export default function PaymentsPage() {
           month, year, status, receipt_number: receiptNumber, note
         }),
       });
-      
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to save payment");
 
       setIsDialogOpen(false);
       fetchData();
-      
+
       // Auto show receipt on new payment
       if (!editingPaymentId && data.data) {
         const studentInfo = students.find(s => s.id.toString() === studentId);
@@ -269,11 +269,11 @@ export default function PaymentsPage() {
       const matchStatus = statusFilter === "all" || p.status === statusFilter;
       const matchBatch = batchFilter === "all" || p.student?.batch?.id?.toString() === batchFilter;
       const q = searchQuery.toLowerCase();
-      const matchSearch = q === "" || 
-        p.student?.name?.toLowerCase().includes(q) || 
+      const matchSearch = q === "" ||
+        p.student?.name?.toLowerCase().includes(q) ||
         p.student?.student_id?.toLowerCase().includes(q) ||
         p.receipt_number?.toLowerCase().includes(q);
-      
+
       return matchStatus && matchBatch && matchSearch;
     });
   }, [payments, statusFilter, batchFilter, searchQuery]);
@@ -315,15 +315,15 @@ export default function PaymentsPage() {
                     {formError}
                   </div>
                 )}
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2 md:col-span-2">
                     <Label htmlFor="student">Student</Label>
-                    <select 
-                      id="student" 
+                    <select
+                      id="student"
                       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                      value={studentId} 
-                      onChange={(e) => handleStudentChange(e.target.value)} 
+                      value={studentId}
+                      onChange={(e) => handleStudentChange(e.target.value)}
                       required
                     >
                       <option value="">Select Student...</option>
@@ -341,14 +341,14 @@ export default function PaymentsPage() {
                       <span className="text-lg font-bold text-primary">৳ {totalFee.toFixed(2)}</span>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="month">For Month</Label>
-                    <select 
-                      id="month" 
+                    <select
+                      id="month"
                       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                      value={month} 
-                      onChange={(e) => setMonth(e.target.value)} 
+                      value={month}
+                      onChange={(e) => setMonth(e.target.value)}
                       required
                     >
                       {MONTHS.map((m, i) => (
@@ -361,24 +361,24 @@ export default function PaymentsPage() {
                     <Label htmlFor="year">For Year</Label>
                     <Input id="year" type="number" value={year} onChange={(e) => setYear(e.target.value)} required />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="amount">Paid Amount (৳)</Label>
                     <Input id="amount" type="number" step="0.01" value={amount} onChange={(e) => handleAmountChange(e.target.value)} required />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="due">Due Amount (৳)</Label>
                     <Input id="due" type="number" step="0.01" value={dueAmount} onChange={(e) => setDueAmount(e.target.value)} />
                   </div>
-                  
+
                   <div className="space-y-2">
                     <Label htmlFor="status">Payment Status</Label>
-                    <select 
-                      id="status" 
+                    <select
+                      id="status"
                       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                      value={status} 
-                      onChange={(e) => setStatus(e.target.value)} 
+                      value={status}
+                      onChange={(e) => setStatus(e.target.value)}
                       required
                     >
                       <option value="paid">Full Paid</option>
@@ -397,7 +397,7 @@ export default function PaymentsPage() {
                     <Input id="note" value={note} onChange={(e) => setNote(e.target.value)} />
                   </div>
                 </div>
-                
+
                 <div className="flex justify-end pt-4 border-t">
                   <Button type="submit" disabled={isSubmitting}>
                     {isSubmitting ? "Recording..." : (editingPaymentId ? "Update Payment" : "Record Payment")}
@@ -445,7 +445,7 @@ export default function PaymentsPage() {
                     <h2 className="text-2xl font-bold uppercase tracking-wider text-slate-800 dark:text-slate-100">Doctor Biology</h2>
                     <p className="text-sm text-slate-500">Official Payment Receipt</p>
                   </div>
-                  
+
                   <div className="flex justify-between mb-8 text-sm">
                     <div>
                       <p className="text-slate-500 mb-1">Receipt No:</p>
@@ -463,13 +463,13 @@ export default function PaymentsPage() {
                     <div className="grid grid-cols-2 gap-y-3">
                       <div className="text-slate-500">Student Name:</div>
                       <div className="font-semibold">{selectedReceipt.student?.name}</div>
-                      
+
                       <div className="text-slate-500">Student ID:</div>
                       <div className="font-semibold">{selectedReceipt.student?.student_id}</div>
-                      
+
                       <div className="text-slate-500">Batch / Course:</div>
                       <div className="font-semibold">{selectedReceipt.student?.batch?.name}</div>
-                      
+
                       <div className="text-slate-500">Payment For:</div>
                       <div className="font-semibold">{MONTHS[selectedReceipt.month - 1]} {selectedReceipt.year}</div>
                     </div>
@@ -504,14 +504,14 @@ export default function PaymentsPage() {
               <div className="flex flex-wrap items-center gap-2">
                 <div className="relative">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input 
-                    placeholder="Search by ID, Name or Receipt..." 
-                    className="pl-9 w-[250px] bg-background" 
+                  <Input
+                    placeholder="Search by ID, Name or Receipt..."
+                    className="pl-9 w-[250px] bg-background"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
-                <select 
+                <select
                   className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
@@ -521,7 +521,7 @@ export default function PaymentsPage() {
                   <option value="partial">Partial Paid</option>
                   <option value="due">Due</option>
                 </select>
-                <select 
+                <select
                   className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
                   value={batchFilter}
                   onChange={(e) => setBatchFilter(e.target.value)}
@@ -625,7 +625,7 @@ export default function PaymentsPage() {
               <h1 className="text-4xl font-extrabold uppercase tracking-widest mb-1">Doctor Biology</h1>
               <p className="text-lg text-gray-600">Official Payment Receipt</p>
             </div>
-            
+
             <div className="flex justify-between mb-10 text-lg">
               <div>
                 <p className="text-gray-500 mb-1 text-sm uppercase font-semibold">Receipt No</p>
@@ -643,13 +643,13 @@ export default function PaymentsPage() {
               <div className="grid grid-cols-2 gap-y-6">
                 <div className="text-gray-600">Student Name:</div>
                 <div className="font-bold">{selectedReceipt.student?.name}</div>
-                
+
                 <div className="text-gray-600">Student ID:</div>
                 <div className="font-bold">{selectedReceipt.student?.student_id}</div>
-                
+
                 <div className="text-gray-600">Batch / Course:</div>
                 <div className="font-bold">{selectedReceipt.student?.batch?.name}</div>
-                
+
                 <div className="text-gray-600">Payment For:</div>
                 <div className="font-bold">{MONTHS[selectedReceipt.month - 1]} {selectedReceipt.year}</div>
               </div>

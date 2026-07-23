@@ -92,7 +92,7 @@ export default function StudentsPage() {
         fetch("/api/admin/students"),
         fetch("/api/admin/batches")
       ]);
-      
+
       if (stuRes.ok) setStudents(await stuRes.json());
       if (batRes.ok) setBatches(await batRes.json());
     } catch (err) {
@@ -139,7 +139,7 @@ export default function StudentsPage() {
     setParentName(student.parent_name || "");
     setParentPhone(student.parent_phone || "");
     setAddress(student.address || "");
-    
+
     setIsDialogOpen(true);
   };
 
@@ -156,7 +156,7 @@ export default function StudentsPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to delete student");
-      
+
       setIsDeleteDialogOpen(false);
       setStudentToDelete(null);
       fetchData();
@@ -194,11 +194,11 @@ export default function StudentsPage() {
     setIsSubmitting(true);
 
     try {
-      const url = editingStudentId 
-        ? `/api/admin/students/${editingStudentId}` 
+      const url = editingStudentId
+        ? `/api/admin/students/${editingStudentId}`
         : "/api/admin/students";
       const method = editingStudentId ? "PUT" : "POST";
-      
+
       // If editing and password is empty, don't send it
       const payload: Record<string, string | number | undefined> = {
         name, gender, dob, phone, email, batch_id: batchId,
@@ -211,7 +211,7 @@ export default function StudentsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || `Failed to ${editingStudentId ? "update" : "create"} student`);
 
@@ -276,20 +276,20 @@ export default function StudentsPage() {
                   {formError}
                 </div>
               )}
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Full Name</Label>
                   <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="batch">Batch / Segment</Label>
-                  <select 
-                    id="batch" 
+                  <select
+                    id="batch"
                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    value={batchId} 
-                    onChange={(e) => setBatchId(e.target.value)} 
+                    value={batchId}
+                    onChange={(e) => setBatchId(e.target.value)}
                     required
                   >
                     <option value="">Select Batch...</option>
@@ -300,7 +300,7 @@ export default function StudentsPage() {
                     ))}
                   </select>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="phone">Phone Number (Login ID)</Label>
                   <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required />
@@ -313,11 +313,11 @@ export default function StudentsPage() {
 
                 <div className="space-y-2">
                   <Label htmlFor="gender">Gender</Label>
-                  <select 
-                    id="gender" 
+                  <select
+                    id="gender"
                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    value={gender} 
-                    onChange={(e) => setGender(e.target.value)} 
+                    value={gender}
+                    onChange={(e) => setGender(e.target.value)}
                     required
                   >
                     <option value="">Select...</option>
@@ -325,33 +325,33 @@ export default function StudentsPage() {
                     <option value="Female">Female</option>
                   </select>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="dob">Date of Birth</Label>
                   <Input id="dob" type="date" value={dob} onChange={(e) => setDob(e.target.value)} />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="email">Email (Optional)</Label>
                   <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="parent_name">Parent Name</Label>
                   <Input id="parent_name" value={parentName} onChange={(e) => setParentName(e.target.value)} />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="parent_phone">Parent Phone</Label>
                   <Input id="parent_phone" value={parentPhone} onChange={(e) => setParentPhone(e.target.value)} />
                 </div>
-                
+
                 <div className="space-y-2 md:col-span-2">
                   <Label htmlFor="address">Address</Label>
                   <Input id="address" value={address} onChange={(e) => setAddress(e.target.value)} />
                 </div>
               </div>
-              
+
               <div className="flex justify-end pt-4 border-t">
                 <Button type="submit" disabled={isSubmitting}>
                   {isSubmitting ? "Enrolling..." : "Enroll Student"}
@@ -432,27 +432,27 @@ export default function StudentsPage() {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-1">
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
+                            <Button
+                              variant="ghost"
+                              size="icon"
                               className={`h-8 w-8 ${student.status === 'active' ? 'text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/20' : 'text-muted-foreground hover:text-primary'}`}
                               onClick={() => handleToggleStatus(student)}
                               title={student.status === 'active' ? 'Deactivate' : 'Activate'}
                             >
                               <Power className="h-4 w-4" />
                             </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
+                            <Button
+                              variant="ghost"
+                              size="icon"
                               className="h-8 w-8 text-muted-foreground hover:text-primary"
                               onClick={() => handleEditClick(student)}
                               title="Edit"
                             >
                               <Pencil className="h-4 w-4" />
                             </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
+                            <Button
+                              variant="ghost"
+                              size="icon"
                               className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                               onClick={() => handleDeleteClick(student.id)}
                               title="Delete"
