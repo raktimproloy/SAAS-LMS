@@ -6,7 +6,7 @@ import { cookies } from "next/headers";
 
 export async function POST(request: Request) {
   try {
-    const { email, password } = await request.json();
+    const { email, password, rememberMe } = await request.json();
 
     if (!email || !password) {
       return NextResponse.json({ error: "Email and password are required" }, { status: 400 });
@@ -26,11 +26,14 @@ export async function POST(request: Request) {
     }
 
     // Generate token
+    const expiresIn = rememberMe ? "30d" : "1d";
+    const maxAge = rememberMe ? 30 * 24 * 60 * 60 : 24 * 60 * 60; // 30 days or 1 day
+
     const token = signToken({
       id: admin.id,
       role: admin.role,
       email: admin.email,
-    });
+    }, expiresIn);
 
     // Set HTTP-only cookie
     cookies().set({
@@ -38,7 +41,7 @@ export async function POST(request: Request) {
       value: token,
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      maxAge: 7 * 24 * 60 * 60, // 7 days
+      maxAge: maxAge,
       path: "/",
     });
 

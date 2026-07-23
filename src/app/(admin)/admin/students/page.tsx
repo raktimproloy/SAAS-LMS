@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Pencil, Trash2, Power, AlertTriangle } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Plus, Pencil, Trash2, Power, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -61,8 +62,10 @@ interface Student {
 }
 
 export default function StudentsPage() {
+  const router = useRouter();
   const [students, setStudents] = useState<Student[]>([]);
   const [batches, setBatches] = useState<Batch[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Form states
@@ -72,6 +75,7 @@ export default function StudentsPage() {
   const [editingStudentId, setEditingStudentId] = useState<number | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [studentToDelete, setStudentToDelete] = useState<number | null>(null);
+  const [successData, setSuccessData] = useState<{ id: number; name: string } | null>(null);
 
   // Fields
   const [name, setName] = useState("");
@@ -80,6 +84,7 @@ export default function StudentsPage() {
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [selectedCourseId, setSelectedCourseId] = useState("");
   const [batchId, setBatchId] = useState("");
   const [parentName, setParentName] = useState("");
   const [parentPhone, setParentPhone] = useState("");
@@ -88,13 +93,15 @@ export default function StudentsPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [stuRes, batRes] = await Promise.all([
+      const [stuRes, batRes, couRes] = await Promise.all([
         fetch("/api/admin/students"),
-        fetch("/api/admin/batches")
+        fetch("/api/admin/batches"),
+        fetch("/api/admin/courses")
       ]);
       
       if (stuRes.ok) setStudents(await stuRes.json());
       if (batRes.ok) setBatches(await batRes.json());
+      if (couRes.ok) setCourses(await couRes.json());
     } catch (err) {
       console.error(err);
     } finally {
@@ -113,6 +120,7 @@ export default function StudentsPage() {
     setPhone("");
     setEmail("");
     setPassword("");
+    setSelectedCourseId("");
     setBatchId("");
     setParentName("");
     setParentPhone("");
@@ -135,6 +143,7 @@ export default function StudentsPage() {
     setPhone(student.phone || "");
     setEmail(student.email || "");
     setPassword(""); // Leave password blank on edit unless they want to change it
+    setSelectedCourseId(student.batch?.course?.id?.toString() || "");
     setBatchId(student.batch?.id?.toString() || "");
     setParentName(student.parent_name || "");
     setParentPhone(student.parent_phone || "");
@@ -215,8 +224,14 @@ export default function StudentsPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || `Failed to ${editingStudentId ? "update" : "create"} student`);
 
-      resetForm();
-      setIsDialogOpen(false);
+      if (!editingStudentId && data.data) {
+        setSuccessData({ id: data.data.id, name: data.data.name });
+        setIsDialogOpen(false);
+      } else {
+        resetForm();
+        setIsDialogOpen(false);
+      }
+      
       fetchData();
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -284,18 +299,38 @@ export default function StudentsPage() {
                 </div>
                 
                 <div className="space-y-2">
+                  <Label htmlFor="course">Course</Label>
+                  <select 
+                    id="course" 
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    value={selectedCourseId} 
+                    onChange={(e) => {
+                      setSelectedCourseId(e.target.value);
+                      setBatchId("");
+                    }} 
+                    required
+                  >
+                    <option value="">Select Course...</option>
+                    {courses.map(c => (
+                      <option key={c.id} value={c.id}>{c.title}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-2">
                   <Label htmlFor="batch">Batch / Segment</Label>
                   <select 
                     id="batch" 
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50"
                     value={batchId} 
                     onChange={(e) => setBatchId(e.target.value)} 
                     required
+                    disabled={!selectedCourseId}
                   >
                     <option value="">Select Batch...</option>
-                    {batches.map(b => (
+                    {batches.filter(b => b.course?.id?.toString() === selectedCourseId).map(b => (
                       <option key={b.id} value={b.id}>
-                        {b.name} ({b.course?.title}) - {b.year}
+                        {b.name}
                       </option>
                     ))}
                   </select>
@@ -380,6 +415,35 @@ export default function StudentsPage() {
               </Button>
               <Button variant="destructive" onClick={handleDeleteConfirm}>
                 Delete
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={!!successData} onOpenChange={(open) => {
+          if (!open) {
+            setSuccessData(null);
+            resetForm();
+          }
+        }}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-green-600">
+                <CheckCircle2 className="h-5 w-5" />
+                Enrollment Successful
+              </DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <p className="text-sm text-muted-foreground">
+                <strong>{successData?.name}</strong> has been enrolled successfully. Would you like to process their initial payment now?
+              </p>
+            </div>
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button variant="outline" onClick={() => { setSuccessData(null); resetForm(); }}>
+                Cancel
+              </Button>
+              <Button onClick={() => router.push('/admin/payments')}>
+                Go to Payment
               </Button>
             </div>
           </DialogContent>

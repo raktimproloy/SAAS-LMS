@@ -37,7 +37,8 @@ interface Course {
   title: string;
   fee: number | null;
   discount_fee: number | null;
-  duration: string | null;
+  start_date: string | null;
+  end_date: string | null;
   details: string | null;
   thumbnail: string | null;
   status: string;
@@ -46,8 +47,9 @@ interface Course {
 interface Batch {
   id: number;
   name: string;
-  year: string;
-  max_students: number;
+  start_time: string;
+  end_time: string;
+  max_students: number | null;
   course: Course;
   status: string;
 }
@@ -74,7 +76,8 @@ export default function CoursesBatchesPage() {
   // Course specific
   const [fee, setFee] = useState("");
   const [discountFee, setDiscountFee] = useState("");
-  const [duration, setDuration] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [details, setDetails] = useState("");
   const [thumbnail, setThumbnail] = useState("");
   
@@ -82,7 +85,8 @@ export default function CoursesBatchesPage() {
   const [courseId, setCourseId] = useState("");
 
   // Batch specific
-  const [year, setYear] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
   const [maxStudents, setMaxStudents] = useState("");
 
   // Fetch Data
@@ -137,11 +141,13 @@ export default function CoursesBatchesPage() {
     setTitle("");
     setFee("");
     setDiscountFee("");
-    setDuration("");
+    setStartDate("");
+    setEndDate("");
     setDetails("");
     setThumbnail("");
     setCourseId("");
-    setYear("");
+    setStartTime("");
+    setEndTime("");
     setMaxStudents("");
     setEditMode(false);
     setEditId(null);
@@ -160,7 +166,8 @@ export default function CoursesBatchesPage() {
     setTitle(course.title);
     setFee(course.fee ? course.fee.toString() : "");
     setDiscountFee(course.discount_fee ? course.discount_fee.toString() : "");
-    setDuration(course.duration || "");
+    setStartDate(course.start_date ? course.start_date.split('T')[0] : "");
+    setEndDate(course.end_date ? course.end_date.split('T')[0] : "");
     setDetails(course.details || "");
     setThumbnail(course.thumbnail || "");
     setIsDialogOpen(true);
@@ -172,8 +179,9 @@ export default function CoursesBatchesPage() {
     setEditId(batch.id);
     setTitle(batch.name);
     setCourseId(batch.course.id.toString());
-    setYear(batch.year);
-    setMaxStudents(batch.max_students.toString());
+    setStartTime(batch.start_time || "");
+    setEndTime(batch.end_time || "");
+    setMaxStudents(batch.max_students ? batch.max_students.toString() : "");
     setIsDialogOpen(true);
   };
 
@@ -189,10 +197,10 @@ export default function CoursesBatchesPage() {
 
     if (activeTab === "courses") {
       endpoint = editMode ? `/api/admin/courses/${editId}` : "/api/admin/courses";
-      payload = { title, fee, discount_fee: discountFee, duration, details, thumbnail };
+      payload = { title, fee, discount_fee: discountFee, start_date: startDate, end_date: endDate, details, thumbnail };
     } else if (activeTab === "batches") {
       endpoint = editMode ? `/api/admin/batches/${editId}` : "/api/admin/batches";
-      payload = { name: title, course_id: courseId, year, max_students: maxStudents };
+      payload = { name: title, course_id: courseId, start_time: startTime, end_time: endTime, max_students: maxStudents };
     }
 
     try {
@@ -373,9 +381,15 @@ export default function CoursesBatchesPage() {
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="grid gap-2">
-                        <Label htmlFor="duration">Duration</Label>
-                        <Input id="duration" placeholder="e.g. 3 months" value={duration} onChange={(e) => setDuration(e.target.value)} />
+                        <Label htmlFor="startDate">Start Date</Label>
+                        <Input id="startDate" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
                       </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="endDate">End Date</Label>
+                        <Input id="endDate" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
                       <div className="grid gap-2">
                         <Label htmlFor="thumbnail">Course Thumbnail</Label>
                         <Input id="thumbnail" type="file" accept="image/*" onChange={handleFileUpload} disabled={isUploading} />
@@ -399,13 +413,19 @@ export default function CoursesBatchesPage() {
                 {activeTab === "batches" && (
                   <>
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="grid gap-2">
-                        <Label htmlFor="year">Year <span className="text-red-500">*</span></Label>
-                        <Input id="year" placeholder="e.g. 2026" value={year} onChange={(e) => setYear(e.target.value)} required />
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="grid gap-2">
+                          <Label htmlFor="startTime">Start Time <span className="text-red-500">*</span></Label>
+                          <Input id="startTime" type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} required />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label htmlFor="endTime">End Time <span className="text-red-500">*</span></Label>
+                          <Input id="endTime" type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} required />
+                        </div>
                       </div>
                       <div className="grid gap-2">
                         <Label htmlFor="max">Max Students</Label>
-                        <Input id="max" type="number" value={maxStudents} onChange={(e) => setMaxStudents(e.target.value)} placeholder="Default: 50" />
+                        <Input id="max" type="number" value={maxStudents} onChange={(e) => setMaxStudents(e.target.value)} placeholder="Optional (e.g. 50)" />
                       </div>
                     </div>
                   </>
@@ -444,7 +464,7 @@ export default function CoursesBatchesPage() {
                           <TableHead className="py-4">Course Title</TableHead>
                           <TableHead>Fee</TableHead>
                           <TableHead>Discount Fee</TableHead>
-                          <TableHead>Duration</TableHead>
+                          <TableHead>Dates</TableHead>
                           <TableHead>Status</TableHead>
                           <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
@@ -471,7 +491,13 @@ export default function CoursesBatchesPage() {
                                 <span className="text-green-600 font-medium">৳ {course.discount_fee}</span>
                               ) : "-"}
                             </TableCell>
-                            <TableCell>{course.duration || "-"}</TableCell>
+                            <TableCell>
+                              {course.start_date || course.end_date ? (
+                                <div className="text-sm">
+                                  {course.start_date ? new Date(course.start_date).toLocaleDateString() : 'N/A'} - {course.end_date ? new Date(course.end_date).toLocaleDateString() : 'N/A'}
+                                </div>
+                              ) : "-"}
+                            </TableCell>
                             <TableCell>
                               <Badge className={course.status === "active" ? "bg-green-100 text-green-700 hover:bg-green-100 border-none" : "bg-red-100 text-red-700 hover:bg-red-100 border-none"}>
                                 {course.status === "active" ? "Active" : "Inactive"}
@@ -532,7 +558,7 @@ export default function CoursesBatchesPage() {
                         <TableRow>
                           <TableHead className="py-4">Batch Name</TableHead>
                           <TableHead>Associated Course</TableHead>
-                          <TableHead>Year</TableHead>
+                          <TableHead>Time</TableHead>
                           <TableHead>Capacity</TableHead>
                           <TableHead>Status</TableHead>
                           <TableHead className="text-right">Actions</TableHead>
@@ -554,8 +580,23 @@ export default function CoursesBatchesPage() {
                                 {batch.course?.title || "Unknown Course"}
                               </Badge>
                             </TableCell>
-                            <TableCell className="font-medium text-slate-600 dark:text-slate-400">{batch.year}</TableCell>
-                            <TableCell>{batch.max_students} Students</TableCell>
+                            <TableCell className="font-medium text-slate-600 dark:text-slate-400">
+                              {batch.start_time ? (
+                                (() => {
+                                  // Convert 24h to 12h format
+                                  const formatTime = (t: string) => {
+                                    if (!t) return "";
+                                    const [h, m] = t.split(":");
+                                    let hour = parseInt(h, 10);
+                                    const ampm = hour >= 12 ? "PM" : "AM";
+                                    hour = hour % 12 || 12;
+                                    return `${hour}:${m} ${ampm}`;
+                                  };
+                                  return `${formatTime(batch.start_time)} - ${formatTime(batch.end_time)}`;
+                                })()
+                              ) : "Not Set"}
+                            </TableCell>
+                            <TableCell>{batch.max_students ? `${batch.max_students} Students` : "Not Set"}</TableCell>
                             <TableCell>
                               <Badge className={batch.status === "active" ? "bg-green-100 text-green-700 hover:bg-green-100 border-none" : "bg-red-100 text-red-700 hover:bg-red-100 border-none"}>
                                 {batch.status === "active" ? "Active" : "Inactive"}

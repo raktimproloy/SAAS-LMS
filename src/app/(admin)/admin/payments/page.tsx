@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { Plus, Pencil, ReceiptText, Trash2, AlertTriangle, Printer, Search } from "lucide-react";
+import { Plus, Pencil, ReceiptText, Trash2, AlertTriangle, Printer, Search, Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -18,6 +19,19 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -70,11 +84,14 @@ export default function PaymentsPage() {
 
   // Form states
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [openStudentPopover, setOpenStudentPopover] = useState(false);
   const [formError, setFormError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingPaymentId, setEditingPaymentId] = useState<number | null>(null);
 
   // Fields
+  const [selectedCourseId, setSelectedCourseId] = useState("");
+  const [selectedBatchId, setSelectedBatchId] = useState("");
   const [studentId, setStudentId] = useState("");
   const [amount, setAmount] = useState("");
   const [dueAmount, setDueAmount] = useState("");
@@ -134,6 +151,14 @@ export default function PaymentsPage() {
 
   const handleStudentChange = (val: string) => {
     setStudentId(val);
+    if (!val) {
+      setTotalFee(0);
+      setDueAmount("");
+      setAmount("");
+      setStatus("due");
+      setReceiptNumber("");
+      return;
+    }
     const fee = getStudentTotalFee(val);
     setTotalFee(fee);
     setDueAmount(fee.toString());
@@ -158,6 +183,8 @@ export default function PaymentsPage() {
   };
 
   const resetForm = () => {
+    setSelectedCourseId("");
+    setSelectedBatchId("");
     setStudentId("");
     setAmount("");
     setDueAmount("");
@@ -179,6 +206,8 @@ export default function PaymentsPage() {
   const handleEditClick = (payment: Payment) => {
     resetForm();
     setEditingPaymentId(payment.id);
+    setSelectedCourseId(payment.student.batch?.course?.id?.toString() || "");
+    setSelectedBatchId(payment.student.batch?.id?.toString() || "");
     setStudentId(payment.student.id.toString());
     const fee = getStudentTotalFee(payment.student.id.toString());
     setTotalFee(fee);
@@ -288,6 +317,28 @@ export default function PaymentsPage() {
     return Array.from(batchesMap.entries());
   }, [students]);
 
+  const uniqueCoursesForForm = useMemo(() => {
+    const map = new Map();
+    students.forEach(s => {
+      if (s.batch?.course) map.set(s.batch.course.id, s.batch.course.title);
+    });
+    return Array.from(map.entries());
+  }, [students]);
+
+  const filteredBatchesForForm = useMemo(() => {
+    const map = new Map();
+    students.forEach(s => {
+      if (s.batch && s.batch.course?.id?.toString() === selectedCourseId) {
+        map.set(s.batch.id, s.batch.name);
+      }
+    });
+    return Array.from(map.entries());
+  }, [students, selectedCourseId]);
+
+  const filteredStudentsForForm = useMemo(() => {
+    return students.filter(s => s.batch?.id?.toString() === selectedBatchId);
+  }, [students, selectedBatchId]);
+
   return (
     <>
       <div className="flex flex-col gap-6 print:hidden">
@@ -317,22 +368,100 @@ export default function PaymentsPage() {
                 )}
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="student">Student</Label>
-                    <select 
-                      id="student" 
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                      value={studentId} 
-                      onChange={(e) => handleStudentChange(e.target.value)} 
-                      required
-                    >
-                      <option value="">Select Student...</option>
-                      {students.map(s => (
-                        <option key={s.id} value={s.id}>
-                          {s.student_id} - {s.name} ({s.batch?.name})
-                        </option>
-                      ))}
-                    </select>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:col-span-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="course">Course</Label>
+                      <select 
+                        id="course" 
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+                        value={selectedCourseId}
+                        onChange={(e) => {
+                          setSelectedCourseId(e.target.value);
+                          setSelectedBatchId("");
+                          handleStudentChange(""); // reset student and fees
+                        }}
+                        required
+                      >
+                        <option value="">Select Course...</option>
+                        {uniqueCoursesForForm.map(([id, title]) => (
+                          <option key={id} value={id}>{title}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="batch">Batch</Label>
+                      <select 
+                        id="batch" 
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background disabled:opacity-50"
+                        value={selectedBatchId}
+                        onChange={(e) => {
+                          setSelectedBatchId(e.target.value);
+                          handleStudentChange(""); // reset student and fees
+                        }}
+                        disabled={!selectedCourseId}
+                        required
+                      >
+                        <option value="">Select Batch...</option>
+                        {filteredBatchesForForm.map(([id, name]) => (
+                          <option key={id} value={id}>{name}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="space-y-2 md:col-span-2 flex flex-col">
+                      <Label htmlFor="student">Student</Label>
+                      <Popover open={openStudentPopover} onOpenChange={setOpenStudentPopover}>
+                        {/* @ts-expect-error - Radix UI type mismatch for asChild */}
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={openStudentPopover}
+                            className="w-full justify-between"
+                            disabled={!selectedBatchId}
+                          >
+                            {studentId
+                              ? (() => {
+                                  const s = filteredStudentsForForm.find((s) => s.id.toString() === studentId);
+                                  return s ? `${s.student_id} - ${s.name}` : "Select Student...";
+                                })()
+                              : "Select Student..."}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[400px] p-0" align="start">
+                          <Command>
+                            <CommandInput placeholder="Search student by name or ID..." />
+                            <CommandList>
+                              <CommandEmpty>No student found.</CommandEmpty>
+                              <CommandGroup>
+                                {filteredStudentsForForm.map((s) => (
+                                  <CommandItem
+                                    key={s.id}
+                                    value={`${s.student_id} ${s.name}`}
+                                    onSelect={() => {
+                                      handleStudentChange(s.id.toString());
+                                      setOpenStudentPopover(false);
+                                    }}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        studentId === s.id.toString() ? "opacity-100" : "opacity-0"
+                                      )}
+                                    />
+                                    {s.student_id} - {s.name}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
+                      {/* Hidden input to make HTML5 validation work if studentId is empty */}
+                      <input type="text" className="hidden" required value={studentId} readOnly />
+                    </div>
                   </div>
 
                   <div className="space-y-2 md:col-span-2">
@@ -506,7 +635,7 @@ export default function PaymentsPage() {
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input 
                     placeholder="Search by ID, Name or Receipt..." 
-                    className="pl-9 w-[250px] bg-background" 
+                    className="pl-9 w-[250px] bg-slate-100 dark:bg-slate-800 border-none outline-none focus-visible:ring-1 focus-visible:ring-primary" 
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />

@@ -21,8 +21,15 @@ export async function GET(request: Request, { params }: { params: { id: string }
     const questions = await prisma.examQuestion.findMany({
       where: { exam_id: parseInt(params.id) },
       orderBy: { sort_order: "asc" },
+      include: {
+        children: {
+          orderBy: { sort_order: "asc" }
+        }
+      }
     });
-    return NextResponse.json(questions);
+    // Return only top level (parent_id = null)
+    const topLevel = questions.filter(q => q.parent_id === null);
+    return NextResponse.json(topLevel);
   } catch {
     return NextResponse.json({ error: "Failed to fetch questions" }, { status: 500 });
   }
@@ -35,12 +42,12 @@ export async function POST(request: Request, { params }: { params: { id: string 
   try {
     const body = await request.json();
     const { 
-      question_text, option_a, option_b, option_c, option_d, 
-      correct_option, marks, explanation 
+      type, question_text, options, correct_option, 
+      marks, explanation, parent_id
     } = body;
 
-    if (!question_text || !option_a || !option_b || !option_c || !option_d || !correct_option) {
-      return NextResponse.json({ error: "Required fields are missing" }, { status: 400 });
+    if (!question_text) {
+      return NextResponse.json({ error: "Question text is required" }, { status: 400 });
     }
 
     const exam_id = parseInt(params.id);
@@ -55,10 +62,12 @@ export async function POST(request: Request, { params }: { params: { id: string 
     const newQuestion = await prisma.examQuestion.create({
       data: {
         exam_id,
+        type: type || "mcq",
+        parent_id: parent_id || null,
         question_text,
-        option_a, option_b, option_c, option_d,
+        options: options || undefined,
         correct_option,
-        marks: marks ? parseFloat(marks) : 1.0,
+        marks: marks ? parseFloat(marks) : (type === 'passage' ? 0 : 1.0),
         explanation,
         sort_order
       }

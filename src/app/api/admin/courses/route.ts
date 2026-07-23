@@ -38,7 +38,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { title, fee, discount_fee, duration, details, thumbnail } = body;
+    const { title, fee, discount_fee, start_date, end_date, details, thumbnail } = body;
 
     if (!title) {
       return NextResponse.json({ error: "Title is required" }, { status: 400 });
@@ -50,7 +50,8 @@ export async function POST(request: Request) {
         slug: generateSlug(title),
         fee: fee ? parseFloat(fee) : null,
         discount_fee: discount_fee ? parseFloat(discount_fee) : null,
-        duration: duration || null,
+        start_date: start_date ? new Date(start_date) : null,
+        end_date: end_date ? new Date(end_date) : null,
         details: details || null,
         thumbnail: thumbnail || null,
       },

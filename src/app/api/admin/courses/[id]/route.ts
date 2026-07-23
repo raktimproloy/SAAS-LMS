@@ -20,7 +20,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
   try {
     const body = await request.json();
-    const { title, fee, discount_fee, duration, details, thumbnail, status } = body;
+    const { title, fee, discount_fee, start_date, end_date, details, thumbnail, status } = body;
 
     const dataToUpdate: Record<string, unknown> = {};
     if (title) {
@@ -29,7 +29,8 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     }
     if (fee !== undefined) dataToUpdate.fee = fee ? parseFloat(fee) : null;
     if (discount_fee !== undefined) dataToUpdate.discount_fee = discount_fee ? parseFloat(discount_fee) : null;
-    if (duration !== undefined) dataToUpdate.duration = duration || null;
+    if (start_date !== undefined) dataToUpdate.start_date = start_date ? new Date(start_date) : null;
+    if (end_date !== undefined) dataToUpdate.end_date = end_date ? new Date(end_date) : null;
     if (details !== undefined) dataToUpdate.details = details || null;
     if (thumbnail !== undefined) dataToUpdate.thumbnail = thumbnail || null;
     if (status !== undefined) dataToUpdate.status = status;

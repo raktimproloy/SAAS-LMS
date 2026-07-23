@@ -10,8 +10,9 @@ export interface JwtPayload {
   student_id?: string;
 }
 
-export const signToken = (payload: JwtPayload): string => {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+export const signToken = (payload: JwtPayload, expiresIn: string = JWT_EXPIRES_IN): string => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: expiresIn as any });
 };
 
 export const verifyToken = (token: string): JwtPayload | null => {

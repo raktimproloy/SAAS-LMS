@@ -25,7 +25,8 @@ model Course {
   slug                   String   @unique
   fee                    Float?
   discount_fee           Float?
-  duration               String?
+  start_date             DateTime?
+  end_date               DateTime?
   thumbnail              String?
   details                String?  @db.Text
   subjects               Json?
@@ -44,9 +45,10 @@ model Batch {
   id           Int      @id @default(autoincrement())
   course_id    Int
   name         String
-  year         String
+  start_time   String   @default("10:00 AM")
+  end_time     String   @default("12:00 PM")
   status       String   @default("active")
-  max_students Int      @default(50)
+  max_students Int?
   created_at   DateTime @default(now())
   updated_at   DateTime @updatedAt
 
@@ -105,11 +107,11 @@ model Exam {
   course_id        Int?
   type             String   // "online_mcq" | "offline"
   is_public        Boolean  @default(false)
-  start_time       DateTime
-  end_time         DateTime
+  start_time       DateTime?
+  end_time         DateTime?
   duration_minutes Int
   total_marks      Float
-  status           String   @default("draft") // "draft" | "published" | "completed"
+  status           String   @default("active") // "active" | "inactive" | "completed"
   negative_marking Float    @default(0.0)
   created_at       DateTime @default(now())
 
@@ -123,17 +125,18 @@ model Exam {
 model ExamQuestion {
   id             Int      @id @default(autoincrement())
   exam_id        Int
+  parent_id      Int?
+  type           String   @default("mcq") // "mcq" | "passage"
   question_text  String   @db.Text
-  option_a       String
-  option_b       String
-  option_c       String
-  option_d       String
-  correct_option String   // "a" | "b" | "c" | "d"
+  options        Json?    // Dynamic options array
+  correct_option String?
   marks          Float    @default(1.0)
   explanation    String?  @db.Text
   sort_order     Int      @default(0)
 
   exam           Exam     @relation(fields: [exam_id], references: [id])
+  parent         ExamQuestion?  @relation("PassageQuestions", fields: [parent_id], references: [id])
+  children       ExamQuestion[] @relation("PassageQuestions")
 }
 
 model ExamResult {

@@ -32,17 +32,15 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 
-// Types
-interface Segment {
+interface Course {
   id: number;
-  name: string;
+  title: string;
 }
 
 interface Batch {
   id: number;
   name: string;
-  year: string;
-  segment: Segment;
+  course: Course;
 }
 
 interface Exam {
@@ -50,23 +48,27 @@ interface Exam {
   title: string;
   type: string;
   is_public: boolean;
-  start_time: string;
-  end_time: string;
+  start_time: string | null;
+  end_time: string | null;
   duration_minutes: number;
   total_marks: number;
   status: string;
   batch?: Batch;
-  segment?: Segment;
+  course?: Course;
+  _count?: {
+    questions: number;
+  };
 }
 
 export default function ExamsPage() {
   const [exams, setExams] = useState<Exam[]>([]);
-  const [segments, setSegments] = useState<Segment[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
   const [batches, setBatches] = useState<Batch[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Form states
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [editingExamId, setEditingExamId] = useState<number | null>(null);
   const [formError, setFormError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -80,19 +82,20 @@ export default function ExamsPage() {
   const [totalMarks, setTotalMarks] = useState("");
   const [negativeMarking, setNegativeMarking] = useState("0");
   const [batchId, setBatchId] = useState("");
-  const [segmentId, setSegmentId] = useState("");
+  const [courseId, setCourseId] = useState("");
+  const [status, setStatus] = useState("active");
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [exRes, segRes, batRes] = await Promise.all([
+      const [exRes, crsRes, batRes] = await Promise.all([
         fetch("/api/admin/exams"),
-        fetch("/api/admin/segments"),
+        fetch("/api/admin/courses"),
         fetch("/api/admin/batches")
       ]);
       
       if (exRes.ok) setExams(await exRes.json());
-      if (segRes.ok) setSegments(await segRes.json());
+      if (crsRes.ok) setCourses(await crsRes.json());
       if (batRes.ok) setBatches(await batRes.json());
     } catch (err) {
       console.error(err);
@@ -111,30 +114,23 @@ export default function ExamsPage() {
     setIsSubmitting(true);
 
     try {
-      const res = await fetch("/api/admin/exams", {
-        method: "POST",
+      const url = editingExamId ? `/api/admin/exams/${editingExamId}` : "/api/admin/exams";
+      const method = editingExamId ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          title, type, is_public: isPublic, start_time: startTime, end_time: endTime,
+          title, type, is_public: isPublic, start_time: startTime || null, end_time: endTime || null,
           duration_minutes: durationMinutes, total_marks: totalMarks, negative_marking: negativeMarking,
-          batch_id: batchId || null, segment_id: segmentId || null
+          batch_id: batchId || null, course_id: courseId || null, status
         }),
       });
       
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to create exam");
+      if (!res.ok) throw new Error(data.error || `Failed to ${editingExamId ? "update" : "create"} exam`);
 
-      // Reset
-      setTitle("");
-      setType("online_mcq");
-      setIsPublic(false);
-      setStartTime("");
-      setEndTime("");
-      setDurationMinutes("");
-      setTotalMarks("");
-      setNegativeMarking("0");
-      setBatchId("");
-      setSegmentId("");
+      resetForm();
       setIsDialogOpen(false);
       
       fetchData();
@@ -146,6 +142,67 @@ export default function ExamsPage() {
       }
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const resetForm = () => {
+    setTitle("");
+    setType("online_mcq");
+    setIsPublic(false);
+    setStartTime("");
+    setEndTime("");
+    setDurationMinutes("");
+    setTotalMarks("");
+    setNegativeMarking("0");
+    setBatchId("");
+    setCourseId("");
+    setStatus("inactive");
+    setEditingExamId(null);
+  };
+
+  const handleEdit = (exam: Exam) => {
+    setEditingExamId(exam.id);
+    setTitle(exam.title);
+    setType(exam.type);
+    setIsPublic(exam.is_public);
+    setStartTime(exam.start_time ? new Date(exam.start_time).toISOString().slice(0, 16) : "");
+    setEndTime(exam.end_time ? new Date(exam.end_time).toISOString().slice(0, 16) : "");
+    setDurationMinutes(exam.duration_minutes.toString());
+    setTotalMarks(exam.total_marks.toString());
+    // @ts-expect-error - negative_marking might not be defined on Exam interface
+    setNegativeMarking(exam.negative_marking?.toString() || "0");
+    setBatchId(exam.batch?.id.toString() || "");
+    setCourseId(exam.course?.id.toString() || (exam.batch?.course?.id?.toString() || ""));
+    setStatus(exam.status);
+    setIsDialogOpen(true);
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!window.confirm("Are you sure you want to delete this exam? All questions will be deleted. (Cannot be undone if no results exist)")) return;
+    try {
+      const res = await fetch(`/api/admin/exams/${id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (!res.ok) alert(data.error || "Failed to delete exam");
+      else fetchData();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete exam");
+    }
+  };
+
+  const handleToggleStatus = async (exam: Exam) => {
+    const newStatus = exam.status === "active" ? "inactive" : "active";
+    try {
+      const res = await fetch(`/api/admin/exams/${exam.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus })
+      });
+      if (res.ok) fetchData();
+      else alert("Failed to change status");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to change status");
     }
   };
 
@@ -178,17 +235,20 @@ export default function ExamsPage() {
           <p className="text-muted-foreground mt-1">Manage online MCQs and offline exam results.</p>
         </div>
 
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog open={isDialogOpen} onOpenChange={(open) => {
+          setIsDialogOpen(open);
+          if (!open) resetForm();
+        }}>
           {/* @ts-expect-error - Radix UI type mismatch for asChild */}
           <DialogTrigger asChild>
-            <Button className="gap-2">
+            <Button className="gap-2" onClick={() => resetForm()}>
               <Plus className="h-4 w-4" />
               Create Exam
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Setup New Exam</DialogTitle>
+              <DialogTitle>{editingExamId ? "Edit Exam" : "Setup New Exam"}</DialogTitle>
             </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-6 py-4">
               {formError && (
@@ -232,33 +292,38 @@ export default function ExamsPage() {
                 {!isPublic && (
                   <>
                     <div className="space-y-2">
-                      <Label htmlFor="batch">Target Batch (Optional)</Label>
+                      <Label htmlFor="course">Target Course</Label>
                       <select 
-                        id="batch" 
+                        id="course" 
                         className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                        value={batchId} 
-                        onChange={(e) => setBatchId(e.target.value)} 
+                        value={courseId} 
+                        onChange={(e) => {
+                          setCourseId(e.target.value);
+                          setBatchId("");
+                        }}
+                        required={!isPublic}
                       >
-                        <option value="">Select Batch...</option>
-                        {batches.map(b => (
-                          <option key={b.id} value={b.id}>
-                            {b.name} ({b.segment?.name})
-                          </option>
+                        <option value="">Select Course...</option>
+                        {courses.map(c => (
+                          <option key={c.id} value={c.id}>{c.title}</option>
                         ))}
                       </select>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="segment">Target Segment (Optional)</Label>
+                      <Label htmlFor="batch">Target Batch (Optional)</Label>
                       <select 
-                        id="segment" 
+                        id="batch" 
                         className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                        value={segmentId} 
-                        onChange={(e) => setSegmentId(e.target.value)} 
+                        value={batchId} 
+                        onChange={(e) => setBatchId(e.target.value)}
+                        disabled={!courseId}
                       >
-                        <option value="">Select Segment...</option>
-                        {segments.map(s => (
-                          <option key={s.id} value={s.id}>{s.name}</option>
+                        <option value="">Select Batch...</option>
+                        {batches.filter(b => b.course?.id?.toString() === courseId).map(b => (
+                          <option key={b.id} value={b.id}>
+                            {b.name}
+                          </option>
                         ))}
                       </select>
                     </div>
@@ -266,13 +331,13 @@ export default function ExamsPage() {
                 )}
                 
                 <div className="space-y-2">
-                  <Label htmlFor="start_time">Start Time</Label>
-                  <Input id="start_time" type="datetime-local" value={startTime} onChange={(e) => setStartTime(e.target.value)} required />
+                  <Label htmlFor="start_time">Start Time (Optional)</Label>
+                  <Input id="start_time" type="datetime-local" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="end_time">End Time</Label>
-                  <Input id="end_time" type="datetime-local" value={endTime} onChange={(e) => setEndTime(e.target.value)} required />
+                  <Label htmlFor="end_time">End Time (Optional)</Label>
+                  <Input id="end_time" type="datetime-local" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
                 </div>
                 
                 <div className="space-y-2">
@@ -289,11 +354,25 @@ export default function ExamsPage() {
                   <Label htmlFor="negative">Negative Marking per Question</Label>
                   <Input id="negative" type="number" step="0.25" value={negativeMarking} onChange={(e) => setNegativeMarking(e.target.value)} />
                 </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="status">Status</Label>
+                  <select 
+                    id="status" 
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    value={status} 
+                    onChange={(e) => setStatus(e.target.value)} 
+                    required
+                  >
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                </div>
               </div>
               
               <div className="flex justify-end pt-4 border-t">
                 <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Creating..." : "Create Exam"}
+                  {isSubmitting ? "Saving..." : editingExamId ? "Update Exam" : "Create Exam"}
                 </Button>
               </div>
             </form>
@@ -315,12 +394,12 @@ export default function ExamsPage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Title</TableHead>
-                      <TableHead>Target</TableHead>
+                      <TableHead>Target (Course/Batch)</TableHead>
                       <TableHead>Type</TableHead>
-                      <TableHead>Schedule</TableHead>
-                      <TableHead>Marks</TableHead>
+                      <TableHead>Schedule & Duration</TableHead>
+                      <TableHead>Details</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Manage</TableHead>
+                      <TableHead className="text-right min-w-[200px]">Manage</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -328,43 +407,71 @@ export default function ExamsPage() {
                       <TableRow key={exam.id}>
                         <TableCell className="font-medium">{exam.title}</TableCell>
                         <TableCell>
-                          {exam.is_public ? (
-                            <Badge variant="secondary">Public</Badge>
-                          ) : exam.batch ? (
-                            <Badge variant="outline">{exam.batch.name}</Badge>
-                          ) : exam.segment ? (
-                            <Badge variant="outline">{exam.segment.name}</Badge>
-                          ) : (
-                            <span className="text-muted-foreground text-sm">Global</span>
-                          )}
+                          <div className="flex flex-col gap-1 items-start">
+                            {exam.is_public ? (
+                              <Badge variant="secondary">Public Exam</Badge>
+                            ) : exam.batch ? (
+                              <>
+                                <Badge variant="outline" className="bg-blue-50 text-blue-700 hover:bg-blue-50 border-blue-200">
+                                  Course: {exam.batch.course?.title || exam.course?.title}
+                                </Badge>
+                                <Badge variant="outline" className="bg-purple-50 text-purple-700 hover:bg-purple-50 border-purple-200">
+                                  Batch: {exam.batch.name}
+                                </Badge>
+                              </>
+                            ) : exam.course ? (
+                              <Badge variant="outline" className="bg-blue-50 text-blue-700 hover:bg-blue-50 border-blue-200">
+                                Course: {exam.course.title}
+                              </Badge>
+                            ) : (
+                              <span className="text-muted-foreground text-sm">Global</span>
+                            )}
+                          </div>
                         </TableCell>
                         <TableCell>
                           {exam.type === "online_mcq" ? "Online MCQ" : "Offline"}
                         </TableCell>
                         <TableCell className="text-sm">
                           <div className="whitespace-nowrap">
-                            {new Date(exam.start_time).toLocaleString()}
+                            {exam.start_time ? new Date(exam.start_time).toLocaleString() : "Always On"}
                           </div>
-                          <div className="text-muted-foreground">
+                          {exam.end_time && (
+                            <div className="whitespace-nowrap text-muted-foreground text-xs">
+                              End: {new Date(exam.end_time).toLocaleString()}
+                            </div>
+                          )}
+                          <div className="font-medium text-primary mt-1">
                             {exam.duration_minutes} mins
                           </div>
                         </TableCell>
-                        <TableCell>{exam.total_marks}</TableCell>
+                        <TableCell className="text-sm">
+                          <div><strong>{exam.total_marks}</strong> Marks</div>
+                          <div className="text-muted-foreground"><strong>{exam._count?.questions || 0}</strong> Questions</div>
+                        </TableCell>
                         <TableCell>
-                          <Badge variant={exam.status === "published" ? "default" : exam.status === "draft" ? "secondary" : "outline"}>
+                          <Badge 
+                            variant={exam.status === "active" ? "default" : "secondary"}
+                            className="cursor-pointer"
+                            onClick={() => handleToggleStatus(exam)}
+                          >
                             {exam.status.toUpperCase()}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-right flex items-center justify-end gap-2">
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary">
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Link href={`/admin/exams/${exam.id}/questions`}>
-                            <Button variant="outline" size="sm" className="h-8">
-                              <Settings className="h-4 w-4 mr-2" />
-                              Setup
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Link href={`/admin/exams/${exam.id}/questions`}>
+                              <Button variant="outline" size="sm" className="h-8">
+                                <Settings className="h-4 w-4 mr-2" />
+                                Setup
+                              </Button>
+                            </Link>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50" onClick={() => handleEdit(exam)}>
+                              <Pencil className="h-4 w-4" />
                             </Button>
-                          </Link>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50" onClick={() => handleDelete(exam.id)}>
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
