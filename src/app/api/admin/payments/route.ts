@@ -40,8 +40,8 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { 
-      student_id, amount, due_amount, month, year, status, note, receipt_number 
+    const {
+      student_id, amount, due_amount, month, year, status, note, receipt_number
     } = body;
 
     if (!student_id || !amount || !month || !year || !status) {

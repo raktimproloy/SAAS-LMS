@@ -12,8 +12,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Student ID and password are required" }, { status: 400 });
     }
 
-    const student = await prisma.student.findUnique({
-      where: { student_id },
+    const student = await prisma.student.findFirst({
+      where: {
+        OR: [
+          { student_id: student_id },
+          { phone: student_id }
+        ]
+      },
       include: { batch: true },
     });
 

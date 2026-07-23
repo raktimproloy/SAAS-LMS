@@ -49,7 +49,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const router = useRouter();
-  
+
   const [user, setUser] = useState<AdminUser | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -171,11 +171,11 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
               <SidebarContent />
             </SheetContent>
           </Sheet>
-          
+
           <div className="w-full flex-1">
             {/* Can add global search or breadcrumbs here */}
           </div>
-          
+
           <div className="flex items-center gap-4">
             <ThemeToggle />
             <Separator orientation="vertical" className="h-6" />

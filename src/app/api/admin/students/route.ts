@@ -52,9 +52,9 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { 
-      name, gender, dob, phone, email, password, batch_id, 
-      parent_name, parent_phone, address 
+    const {
+      name, gender, dob, phone, email, password, batch_id,
+      parent_name, parent_phone, address
     } = body;
 
     if (!name || !gender || !phone || !password || !batch_id) {

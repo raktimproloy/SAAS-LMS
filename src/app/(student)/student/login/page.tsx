@@ -60,11 +60,11 @@ export default function StudentLoginPage() {
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="studentId">Student ID</Label>
+            <Label htmlFor="studentId">Student ID or Phone</Label>
             <Input
               id="studentId"
               type="text"
-              placeholder="e.g. #0001"
+              placeholder="e.g. #0001 or 017..."
               value={studentId}
               onChange={(e) => setStudentId(e.target.value)}
               required
