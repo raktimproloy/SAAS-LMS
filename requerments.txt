@@ -1,0 +1,257 @@
+I want a Educational Website,
+Which will have Dark And White both modes.
+Colorful Theme, With the color palate:[]
+Smooth Animation and AOS
+separate file structure
+Avoid creating Large code line files.
+Common component Use 
+Seo System with default and page wise meta tags make sure use every single meta tag
+
+
+
+
+
+
+📋 Website Structure
+
+Public Figure Section
+Public Exam/ note for Registration. [Data, Info, name, DOB, School/Class, Address]
+-
+
+
+৩টি সেগমেন্ট:
+🎓 SSC
+📖 HSC
+🩺 Medical Admission
+
+প্রতিটি সেগমেন্টে:
+Offline Course Details
+Online Course Details
+Course Fee
+ভর্তি বাটন
+
+📝 Exam
+Upcoming Exams
+Online MCQ Exam
+Results
+
+
+📈 Student Portal
+Progress Report []
+Ranking []
+Online Exam - Result - Ranking
+Offline Results
+Routine
+
+💳 Payment Status
+Money Receipt
+Payment History
+
+📱 SMS System
+Notification
+Exam Notice
+Result SMS
+Attendance SMS
+
+
+🌐 Social Media
+Facebook
+YouTube
+
+
+
+Public View
+
+Home 
+Hero Banner [Teacher Photo, Short Description, Background Image]
+Bio Section 
+Left Side [Teachers' Profile Section (Teacher Bio, Qualification)]Teacher-Introduction-Qualifications Experience
+Right Side - [Promotion Video]
+Courses, Routine, Batches
+Notice Board
+Gallery Section
+Video Course Section
+কেনো আমরা আলাদা?
+Student Reviews & Rating
+Contact | Registration | Google Map
+WhatsApp contact floating button 
+
+About Page
+Hero Section
+আমাদের কথা
+Gallery
+Location
+Contact
+
+Teacher Success
+Student Success Slider
+Top Student
+Student Gallery
+
+
+
+
+Student Portal
+
+Student Login
+Student Id
+Student Password
+Dashboard
+Attendance [select any date; show Report, result, event, attendance status ]
+Recent Report
+Recent Result
+Show Ranking if he gets rank 1 to 10
+Exam 
+Exam List 
+Get Details exam report
+Exam Leaderboard
+Online Exam List [ After exam finish, get leaderboard ]
+Notes/Book
+List 
+Download
+Payment
+Payment list
+Current Payment Status: Paid/due
+Download
+Notice
+Notice list
+
+
+
+Admin Panel
+Admin Dashboard
+Total Students
+Batchwise Students [In Table]
+Total Payment Received
+Total Payment Due
+Recent Result
+
+Teacher Routine
+Weekly/monthly Class Schedules of Teacher, among all batches, with time.
+
+Assistants Team [as Admin] [Admin Only Access Section]
+Add Assistant
+Assistant Profile
+Info [Name, Age, Address, Contacts, Email]
+Permission
+Admin [All Permissions]
+Student Payment
+Courses
+Student Management
+Study Materials
+Exam Questions
+Segment 
+Batches
+Notes
+Segment 
+Batches
+
+
+Student Payment
+Payment Dashboard
+Total Due amount short by month, 
+Due Payment Students List
+Click to open Student Profile
+Due Amount, Short by Months
+
+Courses
+SSC | HSC | Admission
+Batches
+Batch Routine
+Course Fee
+Course Details
+Course Subjects
+Course Duration
+Next Batch Registration Date
+
+Video Course
+Upload | Link
+
+Student Management
+Segment [SSC | HSC | Admission] [Total Student]
+Batches [Total Student]
+Add Students
+Profile
+Name
+Gender
+DOB
+Address
+Contact [Phone Number]
+Email
+ID
+Parents
+Name
+Relation
+Contact Number
+Results
+Ranking
+Students List
+Student Profile
+Student Study Status
+Student Exam Results
+Student Exam Ranking
+Student overall Ranking
+Edit | Delete Student
+Individual Batch Routine
+Online MCQ Exam
+Ranking Students
+Offline Exam Results Publish
+Ranking Students
+Study Materials / Books, Notes
+
+Notifications
+Subscription Status
+Segment Select
+Batches
+Notification
+Exam Notice [Push Phone | SMS] [Selection]
+Result Publish [Push Phone | SMS] 
+
+Website Section
+Hero Banner Edit
+Teacher Photo
+Short Description
+Background Image
+
+Promotion Video
+Title
+Upload Video
+
+Teachers Profile
+Add Teacher
+Info
+Name
+Bio
+Qualifications
+Specialist Subjects
+
+Teacher Successes
+Successful Students 
+Personal Medical Success Stories
+Add Students
+Info
+Board Exam | Admission Place
+GPA
+Placement
+Photos Gallery
+
+Social Media
+Add
+Name
+URL
+
+Gallery
+Image upload
+Category selection [ home, success, about ]
+
+Student Review
+Add review
+Image, name, batch, current position, small description
+Exam
+Create
+MCQ
+Public / Private
+Start / End
+Batch
+List
+Leaderboard

@@ -1,0 +1,9 @@
+{
+  "common": {
+    "login": "লগইন",
+    "dashboard": "ড্যাশবোর্ড",
+    "logout": "লগআউট",
+    "register": "রেজিস্টার",
+    "submit": "জমা দিন"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "common": {
+    "login": "Login",
+    "dashboard": "Dashboard",
+    "logout": "Logout",
+    "register": "Register",
+    "submit": "Submit"
+  }
+}

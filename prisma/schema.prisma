@@ -1,0 +1,336 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id          Int      @id @default(autoincrement())
+  name        String
+  email       String   @unique
+  password    String
+  role        String   // "super_admin" | "assistant"
+  permissions Json?
+  is_active   Boolean  @default(true)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+}
+
+model Course {
+  id                     Int      @id @default(autoincrement())
+  title                  String
+  slug                   String   @unique
+  fee                    Float?
+  discount_fee           Float?
+  duration               String?
+  thumbnail              String?
+  details                String?  @db.Text
+  subjects               Json?
+  next_registration_date DateTime?
+  status                 String   @default("active")
+  sort_order             Int      @default(0)
+  created_at             DateTime @default(now())
+
+  batches                Batch[]
+  video_courses          VideoCourse[]
+  exams                  Exam[]
+  notes                  NoteMaterial[]
+}
+
+model Batch {
+  id           Int      @id @default(autoincrement())
+  course_id    Int
+  name         String
+  year         String
+  status       String   @default("active")
+  max_students Int      @default(50)
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  course       Course   @relation(fields: [course_id], references: [id])
+  students     Student[]
+  routines     Routine[]
+  exams        Exam[]
+  notes        NoteMaterial[]
+}
+
+model Student {
+  id              Int      @id @default(autoincrement())
+  student_id      String   @unique // Auto format #0001
+  name            String
+  gender          String
+  dob             DateTime?
+  address         String?  @db.Text
+  phone           String
+  email           String?
+  password        String
+  batch_id        Int
+  parent_name     String?
+  parent_relation String?
+  parent_phone    String?
+  photo           String?
+  status          String   @default("active") // "active" | "inactive"
+  enrolled_at     DateTime @default(now())
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  batch           Batch    @relation(fields: [batch_id], references: [id])
+  payments        Payment[]
+  exam_results    ExamResult[]
+  attendance      Attendance[]
+  reviews         StudentReview[]
+}
+
+model Routine {
+  id           Int      @id @default(autoincrement())
+  batch_id     Int
+  day_of_week  String
+  start_time   String
+  end_time     String
+  subject      String
+  room         String?
+  teacher_name String?
+  created_at   DateTime @default(now())
+
+  batch        Batch    @relation(fields: [batch_id], references: [id])
+}
+
+model Exam {
+  id               Int      @id @default(autoincrement())
+  title            String
+  batch_id         Int?     // Nullable for course-wide or public exams
+  course_id        Int?
+  type             String   // "online_mcq" | "offline"
+  is_public        Boolean  @default(false)
+  start_time       DateTime
+  end_time         DateTime
+  duration_minutes Int
+  total_marks      Float
+  status           String   @default("draft") // "draft" | "published" | "completed"
+  negative_marking Float    @default(0.0)
+  created_at       DateTime @default(now())
+
+  batch            Batch?   @relation(fields: [batch_id], references: [id])
+  course           Course?  @relation(fields: [course_id], references: [id])
+  questions        ExamQuestion[]
+  results          ExamResult[]
+  public_participants PublicExamParticipant[]
+}
+
+model ExamQuestion {
+  id             Int      @id @default(autoincrement())
+  exam_id        Int
+  question_text  String   @db.Text
+  option_a       String
+  option_b       String
+  option_c       String
+  option_d       String
+  correct_option String   // "a" | "b" | "c" | "d"
+  marks          Float    @default(1.0)
+  explanation    String?  @db.Text
+  sort_order     Int      @default(0)
+
+  exam           Exam     @relation(fields: [exam_id], references: [id])
+}
+
+model ExamResult {
+  id                   Int      @id @default(autoincrement())
+  exam_id              Int
+  student_id           Int?     // Nullable for public participants
+  obtained_marks       Float
+  total_marks          Float
+  correct_count        Int      @default(0)
+  wrong_count          Int      @default(0)
+  skipped_count        Int      @default(0)
+  rank                 Int?
+  answers              Json?
+  time_taken_seconds   Int?
+  created_at           DateTime @default(now())
+
+  exam                 Exam     @relation(fields: [exam_id], references: [id])
+  student              Student? @relation(fields: [student_id], references: [id])
+  public_participant   PublicExamParticipant?
+}
+
+model PublicExamParticipant {
+  id             Int      @id @default(autoincrement())
+  exam_id        Int
+  name           String
+  phone          String
+  institution    String?
+  study_level    String?
+  location       String?
+  exam_result_id Int      @unique
+  created_at     DateTime @default(now())
+
+  exam           Exam     @relation(fields: [exam_id], references: [id])
+  result         ExamResult @relation(fields: [exam_result_id], references: [id])
+}
+
+model Payment {
+  id             Int      @id @default(autoincrement())
+  student_id     Int
+  amount         Float
+  due_amount     Float    @default(0.0)
+  month          Int
+  year           Int
+  status         String   // "paid" | "due" | "partial"
+  receipt_number String?  @unique
+  paid_at        DateTime?
+  note           String?  @db.Text
+  created_at     DateTime @default(now())
+
+  student        Student  @relation(fields: [student_id], references: [id])
+}
+
+model Attendance {
+  id         Int      @id @default(autoincrement())
+  student_id Int
+  batch_id   Int
+  date       DateTime @db.Date
+  status     String   // "present" | "absent" | "late"
+  note       String?
+  created_at DateTime @default(now())
+
+  student    Student  @relation(fields: [student_id], references: [id])
+}
+
+model Notice {
+  id          Int      @id @default(autoincrement())
+  title       String
+  content     String   @db.Text
+  target_type String   // "all" | "course" | "batch"
+  target_id   Int?
+  type        String   // "general" | "exam" | "result"
+  is_pinned   Boolean  @default(false)
+  created_at  DateTime @default(now())
+}
+
+model Gallery {
+  id         Int      @id @default(autoincrement())
+  image_path String
+  category   String   // "home" | "success" | "about"
+  caption    String?
+  sort_order Int      @default(0)
+  created_at DateTime @default(now())
+}
+
+model Teacher {
+  id                 Int      @id @default(autoincrement())
+  name               String
+  bio                String?  @db.Text
+  qualifications     String?
+  specialist_subjects Json?
+  experience         String?
+  photo              String?
+  sort_order         Int      @default(0)
+  created_at         DateTime @default(now())
+  
+  success_stories    TeacherSuccess[]
+}
+
+model TeacherSuccess {
+  id           Int      @id @default(autoincrement())
+  teacher_id   Int
+  student_name String
+  exam_type    String
+  gpa          String?
+  placement    String?
+  photo        String?
+  year         String?
+  sort_order   Int      @default(0)
+  created_at   DateTime @default(now())
+
+  teacher      Teacher  @relation(fields: [teacher_id], references: [id])
+}
+
+model StudentReview {
+  id               Int      @id @default(autoincrement())
+  student_name     String
+  image            String?
+  batch_name       String?
+  current_position String?
+  description      String   @db.Text
+  rating           Int      @default(5)
+  is_featured      Boolean  @default(false)
+  sort_order       Int      @default(0)
+  created_at       DateTime @default(now())
+
+  student_id       Int?
+  student          Student? @relation(fields: [student_id], references: [id])
+}
+
+model VideoCourse {
+  id          Int      @id @default(autoincrement())
+  course_id   Int
+  title       String
+  description String?  @db.Text
+  url         String   // YouTube/external link
+  price       Float    @default(0.0)
+  thumbnail   String?
+  status      String   @default("active")
+  sort_order  Int      @default(0)
+  created_at  DateTime @default(now())
+
+  course      Course   @relation(fields: [course_id], references: [id])
+}
+
+model NoteMaterial {
+  id          Int      @id @default(autoincrement())
+  title       String
+  file_path   String
+  batch_id    Int?
+  course_id   Int?
+  type        String   // "book" | "note"
+  description String?  @db.Text
+  sort_order  Int      @default(0)
+  created_at  DateTime @default(now())
+
+  batch       Batch?   @relation(fields: [batch_id], references: [id])
+  course      Course?  @relation(fields: [course_id], references: [id])
+}
+
+model SiteSetting {
+  id            Int      @id @default(autoincrement())
+  setting_key   String   @unique
+  setting_value String   @db.Text
+  setting_type  String   // "text" | "image" | "json" | "boolean"
+  group_name    String?
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+}
+
+model SocialMedia {
+  id            Int      @id @default(autoincrement())
+  platform_name String
+  url           String
+  icon          String?
+  sort_order    Int      @default(0)
+  is_active     Boolean  @default(true)
+  created_at    DateTime @default(now())
+}
+
+model HeroBanner {
+  id            Int      @id @default(autoincrement())
+  teacher_photo String?
+  description   String?  @db.Text
+  bg_image      String?
+  cta_text      String?
+  cta_link      String?
+  is_active     Boolean  @default(true)
+  created_at    DateTime @default(now())
+}
+
+model SmsLog {
+  id         Int      @id @default(autoincrement())
+  student_id Int?
+  phone      String
+  message    String   @db.Text
+  type       String   // "exam_notice" | "result" | "attendance"
+  status     String   // "sent" | "failed" | "queued"
+  sent_at    DateTime?
+  created_at DateTime @default(now())
+}
