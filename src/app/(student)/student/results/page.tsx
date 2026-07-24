@@ -106,9 +106,9 @@ export default function StudentResultsPage() {
                   <div className="flex items-end gap-6 text-right">
                     {/* @ts-ignore */}
                     {result.exam.is_grading_enabled && (
-                      <div className="flex flex-col items-end">
+                      <div className="flex flex-col items-center">
                         <div className="text-sm font-medium text-muted-foreground mb-1">Grade</div>
-                        <Badge className="bg-green-500 hover:bg-green-600 text-white text-2xl font-black px-4 py-0.5 shadow-sm leading-none">
+                        <Badge className="bg-green-500 hover:bg-green-600 text-white text-2xl font-black px-4 py-0 h-9 shadow-sm flex items-center justify-center">
                           {result.grade || calculateGrade(result.obtained_marks, result.total_marks)}
                         </Badge>
                       </div>

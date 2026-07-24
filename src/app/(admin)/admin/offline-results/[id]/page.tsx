@@ -358,7 +358,7 @@ export default function EditOfflineResultPage({ params }: { params: { id: string
                       </div>
                       <div className="flex items-center gap-4 text-right">
                         {isGradingEnabled && (
-                          <Badge className="bg-green-500 hover:bg-green-600 text-white text-sm px-3 py-0.5 shadow-sm">
+                          <Badge className="bg-green-500 hover:bg-green-600 text-white text-sm px-3 py-0.5 h-auto shadow-sm">
                             {student.exam_results[0].grade || calculateGrade(student.exam_results[0].obtained_marks, parseFloat(totalMarks))}
                           </Badge>
                         )}
