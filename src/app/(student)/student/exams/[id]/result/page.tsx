@@ -87,7 +87,7 @@ export default function StudentExamResultPage() {
         <div className="flex gap-8 text-center">
           <div>
             <div className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">Score</div>
-            <div className="text-4xl font-bold text-primary">{result.obtained_marks} <span className="text-lg text-slate-400">/ {exam.total_marks}</span></div>
+            <div className="text-4xl font-bold text-primary">{result.obtained_marks} <span className="text-lg text-slate-400">/ {result.total_marks}</span></div>
           </div>
           <div className="w-px bg-slate-200 dark:bg-slate-800"></div>
           <div>

@@ -123,7 +123,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
         exam_id: examId,
         student_id: studentId,
         obtained_marks,
-        total_marks: exam.total_marks,
+        total_marks: exam.questions.reduce((acc, q) => acc + (q.marks || 0), 0),
         correct_count,
         wrong_count,
         skipped_count,
