@@ -20,6 +20,7 @@ export interface Question {
   type: string;
   question_text: string;
   image_url?: string;
+  image_urls?: string[];
   options?: Option[];
   correct_option?: string;
   marks?: number;
@@ -333,8 +334,9 @@ export default function QuestionEditor({ examId, initialQuestions, defaultMark }
                                 className="min-h-[100px] rounded-sm resize-y"
                               />
                               
-                              {q.image_url ? (
-                                <div className="relative inline-block border rounded-md overflow-hidden bg-muted/30 p-1">
+                              {/* Legacy single image */}
+                              {q.image_url && (!q.image_urls || q.image_urls.length === 0) && (
+                                <div className="relative inline-block border rounded-md overflow-hidden bg-muted/30 p-1 mb-2">
                                   <img src={q.image_url} alt="Question" className="max-h-48 object-contain" />
                                   <Button
                                     variant="destructive"
@@ -349,31 +351,62 @@ export default function QuestionEditor({ examId, initialQuestions, defaultMark }
                                     <X className="h-3 w-3" />
                                   </Button>
                                 </div>
-                              ) : (
-                                <div>
-                                  <input
-                                    type="file"
-                                    accept="image/*"
-                                    id={`q-img-${index}`}
-                                    className="hidden"
-                                    onChange={async (e) => {
-                                      const file = e.target.files?.[0];
-                                      if (file) {
-                                        const url = await handleSingleImageUpload(file);
-                                        if (url) {
+                              )}
+                              
+                              {/* Multiple images array */}
+                              {q.image_urls && q.image_urls.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mb-2">
+                                  {q.image_urls.map((url, imgIdx) => (
+                                    <div key={imgIdx} className="relative inline-block border rounded-md overflow-hidden bg-muted/30 p-1">
+                                      <img src={url} alt={`Question image ${imgIdx + 1}`} className="max-h-48 object-contain" />
+                                      <Button
+                                        variant="destructive"
+                                        size="icon"
+                                        className="absolute top-2 right-2 h-6 w-6 rounded-full opacity-80 hover:opacity-100"
+                                        onClick={() => {
                                           const newQs = structuredClone(questions);
-                                          newQs[index].image_url = url;
+                                          newQs[index].image_urls?.splice(imgIdx, 1);
                                           setQuestions(newQs);
-                                        }
-                                      }
-                                      e.target.value = '';
-                                    }}
-                                  />
-                                  <Label htmlFor={`q-img-${index}`} className="cursor-pointer inline-flex items-center justify-center h-10 px-4 mt-2 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors text-sm font-medium gap-2">
-                                    <ImagePlus className="h-4 w-4 text-muted-foreground" /> Add Image
-                                  </Label>
+                                        }}
+                                      >
+                                        <X className="h-3 w-3" />
+                                      </Button>
+                                    </div>
+                                  ))}
                                 </div>
                               )}
+
+                              <div>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  id={`q-img-${index}`}
+                                  className="hidden"
+                                  onChange={async (e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                      const url = await handleSingleImageUpload(file);
+                                      if (url) {
+                                        const newQs = structuredClone(questions);
+                                        if (!newQs[index].image_urls) {
+                                          newQs[index].image_urls = [];
+                                        }
+                                        // Migration from old single image logic on first new image upload
+                                        if (newQs[index].image_url && newQs[index].image_urls!.length === 0) {
+                                          newQs[index].image_urls!.push(newQs[index].image_url as string);
+                                          newQs[index].image_url = undefined;
+                                        }
+                                        newQs[index].image_urls!.push(url);
+                                        setQuestions(newQs);
+                                      }
+                                    }
+                                    e.target.value = '';
+                                  }}
+                                />
+                                <Label htmlFor={`q-img-${index}`} className="cursor-pointer inline-flex items-center justify-center h-10 px-4 mt-2 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors text-sm font-medium gap-2">
+                                  <ImagePlus className="h-4 w-4 text-muted-foreground" /> Add Image
+                                </Label>
+                              </div>
                             </div>
                             
                             {q.type === 'mcq' && q.options && (
@@ -561,8 +594,9 @@ export default function QuestionEditor({ examId, initialQuestions, defaultMark }
                                          className="min-h-[100px] rounded-sm resize-y"
                                        />
                                        
-                                       {cq.image_url ? (
-                                         <div className="relative inline-block border rounded-md overflow-hidden bg-muted/30 p-1">
+                                       {/* Legacy single image */}
+                                       {cq.image_url && (!cq.image_urls || cq.image_urls.length === 0) && (
+                                         <div className="relative inline-block border rounded-md overflow-hidden bg-muted/30 p-1 mb-2">
                                            <img src={cq.image_url} alt="Question" className="max-h-48 object-contain" />
                                            <Button
                                              variant="destructive"
@@ -577,31 +611,62 @@ export default function QuestionEditor({ examId, initialQuestions, defaultMark }
                                              <X className="h-3 w-3" />
                                            </Button>
                                          </div>
-                                       ) : (
-                                         <div>
-                                            <input
-                                              type="file"
-                                              accept="image/*"
-                                              id={`cq-img-${index}-${cIdx}`}
-                                              className="hidden"
-                                              onChange={async (e) => {
-                                                const file = e.target.files?.[0];
-                                                if (file) {
-                                                  const url = await handleSingleImageUpload(file);
-                                                  if (url) {
-                                                    const newQs = structuredClone(questions);
-                                                    newQs[index].children![cIdx].image_url = url;
-                                                    setQuestions(newQs);
-                                                  }
-                                                }
-                                                e.target.value = '';
-                                              }}
-                                            />
-                                            <Label htmlFor={`cq-img-${index}-${cIdx}`} className="cursor-pointer inline-flex items-center justify-center h-10 px-4 mt-2 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors text-sm font-medium gap-2">
-                                              <ImagePlus className="h-4 w-4 text-muted-foreground" /> Add Image
-                                            </Label>
+                                       )}
+                                       
+                                       {/* Multiple images array */}
+                                       {cq.image_urls && cq.image_urls.length > 0 && (
+                                         <div className="flex flex-wrap gap-2 mb-2">
+                                           {cq.image_urls.map((url, imgIdx) => (
+                                             <div key={imgIdx} className="relative inline-block border rounded-md overflow-hidden bg-muted/30 p-1">
+                                               <img src={url} alt={`Child question image ${imgIdx + 1}`} className="max-h-48 object-contain" />
+                                               <Button
+                                                 variant="destructive"
+                                                 size="icon"
+                                                 className="absolute top-2 right-2 h-6 w-6 rounded-full opacity-80 hover:opacity-100"
+                                                 onClick={() => {
+                                                   const newQs = structuredClone(questions);
+                                                   newQs[index].children![cIdx].image_urls?.splice(imgIdx, 1);
+                                                   setQuestions(newQs);
+                                                 }}
+                                               >
+                                                 <X className="h-3 w-3" />
+                                               </Button>
+                                             </div>
+                                           ))}
                                          </div>
                                        )}
+
+                                       <div>
+                                          <input
+                                            type="file"
+                                            accept="image/*"
+                                            id={`cq-img-${index}-${cIdx}`}
+                                            className="hidden"
+                                            onChange={async (e) => {
+                                              const file = e.target.files?.[0];
+                                              if (file) {
+                                                const url = await handleSingleImageUpload(file);
+                                                if (url) {
+                                                  const newQs = structuredClone(questions);
+                                                  if (!newQs[index].children![cIdx].image_urls) {
+                                                    newQs[index].children![cIdx].image_urls = [];
+                                                  }
+                                                  // Migration from old single image logic on first new image upload
+                                                  if (newQs[index].children![cIdx].image_url && newQs[index].children![cIdx].image_urls!.length === 0) {
+                                                    newQs[index].children![cIdx].image_urls!.push(newQs[index].children![cIdx].image_url as string);
+                                                    newQs[index].children![cIdx].image_url = undefined;
+                                                  }
+                                                  newQs[index].children![cIdx].image_urls!.push(url);
+                                                  setQuestions(newQs);
+                                                }
+                                              }
+                                              e.target.value = '';
+                                            }}
+                                          />
+                                          <Label htmlFor={`cq-img-${index}-${cIdx}`} className="cursor-pointer inline-flex items-center justify-center h-10 px-4 mt-2 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors text-sm font-medium gap-2">
+                                            <ImagePlus className="h-4 w-4 text-muted-foreground" /> Add Image
+                                          </Label>
+                                       </div>
                                      </div>
                                     
                                     {cq.options && (

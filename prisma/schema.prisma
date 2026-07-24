@@ -131,6 +131,7 @@ model ExamQuestion {
   type           String  @default("mcq") // "mcq" | "passage"
   question_text  String  @db.Text
   image_url      String?
+  image_urls     Json?
   options        Json? // Dynamic options array
   correct_option String?
   marks          Float   @default(1.0)

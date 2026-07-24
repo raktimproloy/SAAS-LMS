@@ -115,8 +115,15 @@ export default function StudentViewQuestionsPage() {
                     <p className="text-lg font-medium text-foreground leading-snug">
                       {q.question_text}
                     </p>
-                    {q.image_url && (
+                    {q.image_url && (!q.image_urls || q.image_urls.length === 0) && (
                       <img src={q.image_url} alt="Question image" className="mt-4 max-h-64 rounded-md object-contain border bg-muted/20" />
+                    )}
+                    {q.image_urls && q.image_urls.length > 0 && (
+                      <div className="flex flex-col gap-4 mt-4">
+                        {q.image_urls.map((url: string, imgIdx: number) => (
+                          <img key={imgIdx} src={url} alt={`Question image ${imgIdx + 1}`} className="max-h-64 rounded-md object-contain border bg-muted/20 self-start" />
+                        ))}
+                      </div>
                     )}
                   </div>
                 </div>
@@ -199,8 +206,15 @@ export default function StudentViewQuestionsPage() {
                     <div className="text-lg text-foreground leading-relaxed font-medium">
                       {q.question_text}
                     </div>
-                    {q.image_url && (
+                    {q.image_url && (!q.image_urls || q.image_urls.length === 0) && (
                       <img src={q.image_url} alt="Passage image" className="mt-4 max-h-64 rounded-md object-contain border bg-muted/20" />
+                    )}
+                    {q.image_urls && q.image_urls.length > 0 && (
+                      <div className="flex flex-col gap-4 mt-4">
+                        {q.image_urls.map((url: string, imgIdx: number) => (
+                          <img key={imgIdx} src={url} alt={`Passage image ${imgIdx + 1}`} className="max-h-64 rounded-md object-contain border bg-muted/20 self-start" />
+                        ))}
+                      </div>
                     )}
                   </div>
                   <div className="p-6 bg-background/50 space-y-6">
