@@ -260,6 +260,9 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
                             </span>
                           </div>
                           <p className="text-lg font-medium text-foreground leading-snug">{q.question_text}</p>
+                          {q.image_url && (
+                            <img src={q.image_url} alt="Question image" className="mt-4 max-h-64 rounded-md object-contain border bg-muted/20" />
+                          )}
                         </div>
                       </div>
 
@@ -296,7 +299,12 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
                                 <div className={`w-6 h-6 rounded-md flex items-center justify-center text-xs font-bold shrink-0 ${letterBgColor}`}>
                                   {letter}
                                 </div>
-                                <span className="font-medium text-sm">{optText}</span>
+                                <div className="flex flex-col flex-1 gap-2 py-1">
+                                  <span className="font-medium text-sm">{optText}</span>
+                                  {opt.image_url && (
+                                    <img src={opt.image_url} alt="Option image" className="max-h-32 object-contain rounded border bg-muted/20 self-start" />
+                                  )}
+                                </div>
                                 {icon}
                               </div>
                             );
@@ -331,6 +339,9 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
                             <span className="px-3 py-1 bg-primary/10 text-primary dark:bg-primary/20 text-xs font-bold rounded-full uppercase tracking-wider">Read The Passage</span>
                           </div>
                           <div className="text-lg text-foreground leading-relaxed font-medium">{q.question_text}</div>
+                          {q.image_url && (
+                            <img src={q.image_url} alt="Passage image" className="mt-4 max-h-64 rounded-md object-contain border bg-muted/20" />
+                          )}
                         </div>
                         <div className="p-6 bg-background/50 space-y-6">
                           <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider mb-2">Questions in this passage</h4>
@@ -419,6 +430,9 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
                     <p className="text-lg font-medium text-foreground leading-snug">
                       {q.question_text}
                     </p>
+                    {q.image_url && (
+                      <img src={q.image_url} alt="Question image" className="mt-4 max-h-64 rounded-md object-contain border bg-muted/20" />
+                    )}
                   </div>
                 </div>
 
@@ -452,8 +466,13 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
                           <div className={`w-6 h-6 rounded-md flex items-center justify-center text-xs font-bold shrink-0 transition-colors ${letterBgColor}`}>
                             {letter}
                           </div>
-                          <span className={`font-medium text-sm flex-1 ${textStyle}`}>{optText}</span>
-                          {isThisSelected && <CheckCircle2 className="w-5 h-5 text-primary ml-auto" />}
+                          <div className={`flex flex-col flex-1 gap-2 text-left py-1`}>
+                            <span className={`font-medium text-sm ${textStyle}`}>{optText}</span>
+                            {opt.image_url && (
+                              <img src={opt.image_url} alt="Option image" className="max-h-32 object-contain rounded border bg-muted/20 self-start" />
+                            )}
+                          </div>
+                          {isThisSelected && <CheckCircle2 className="w-5 h-5 text-primary ml-auto shrink-0" />}
                         </button>
                       );
                     })}
@@ -477,6 +496,9 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
                     <div className="text-lg text-foreground leading-relaxed font-medium">
                       {q.question_text}
                     </div>
+                    {q.image_url && (
+                      <img src={q.image_url} alt="Passage image" className="mt-4 max-h-64 rounded-md object-contain border bg-muted/20" />
+                    )}
                   </div>
                   <div className="p-6 bg-background/50 space-y-6">
                     <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider mb-2">

@@ -489,7 +489,7 @@ export default function MaterialsPage() {
                           <TableCell>
                             {note.course ? (
                               <div className="flex flex-col gap-1">
-                                <Badge variant="outline" className="w-fit">{note.course.title}</Badge>
+                                <Badge variant="outline" className="bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20 backdrop-blur-md w-fit">{note.course.title}</Badge>
                                 {note.batch && <span className="text-xs text-muted-foreground ml-1">{note.batch.name}</span>}
                               </div>
                             ) : (
@@ -498,9 +498,9 @@ export default function MaterialsPage() {
                           </TableCell>
                           <TableCell>
                             {note.is_public ? (
-                              <Badge variant="secondary" className="bg-blue-100 text-blue-700 hover:bg-blue-100 border-none">Public</Badge>
+                              <Badge variant="secondary" className="bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20">Public</Badge>
                             ) : (
-                              <Badge variant="secondary" className="bg-slate-100 text-slate-700 hover:bg-slate-100 border-none">Protected</Badge>
+                              <Badge variant="secondary" className="bg-slate-500/10 text-slate-700 dark:text-slate-400 border-slate-500/20">Protected</Badge>
                             )}
                           </TableCell>
                           <TableCell>
@@ -513,7 +513,14 @@ export default function MaterialsPage() {
                               onClick={() => handleToggleStatus(note.id, note.status)}
                               className="focus:outline-none"
                             >
-                              <Badge className={note.status === "active" ? "bg-green-100 text-green-700 hover:bg-green-100 border-none cursor-pointer" : "bg-red-100 text-red-700 hover:bg-red-100 border-none cursor-pointer"}>
+                              <Badge 
+                                variant="outline"
+                                className={`cursor-pointer transition-colors shadow-sm ${
+                                  note.status === "active" 
+                                    ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 hover:bg-emerald-500/20 dark:text-emerald-400" 
+                                    : "bg-slate-500/10 text-slate-600 border-slate-500/20 hover:bg-slate-500/20 dark:text-slate-400"
+                                }`}
+                              >
                                 {note.status === "active" ? "Active" : "Inactive"}
                               </Badge>
                             </button>

@@ -488,13 +488,20 @@ export default function StudentsPage() {
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="outline" className="font-normal">
+                          <Badge variant="outline" className="bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/20 backdrop-blur-md font-normal">
                             {student.batch?.name} ({student.batch?.course?.title})
                           </Badge>
                         </TableCell>
                         <TableCell>{student.phone}</TableCell>
                         <TableCell>
-                          <Badge variant={student.status === "active" ? "default" : "destructive"}>
+                          <Badge 
+                            variant="outline"
+                            className={`transition-colors shadow-sm ${
+                              student.status === "active" 
+                                ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:text-emerald-400" 
+                                : "bg-rose-500/10 text-rose-600 border-rose-500/20 dark:text-rose-400"
+                            }`}
+                          >
                             {student.status === "active" ? "Active" : "Inactive"}
                           </Badge>
                         </TableCell>

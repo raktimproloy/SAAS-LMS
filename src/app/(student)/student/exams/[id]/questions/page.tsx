@@ -115,6 +115,9 @@ export default function StudentViewQuestionsPage() {
                     <p className="text-lg font-medium text-foreground leading-snug">
                       {q.question_text}
                     </p>
+                    {q.image_url && (
+                      <img src={q.image_url} alt="Question image" className="mt-4 max-h-64 rounded-md object-contain border bg-muted/20" />
+                    )}
                   </div>
                 </div>
 
@@ -142,7 +145,12 @@ export default function StudentViewQuestionsPage() {
                           <div className={`w-6 h-6 rounded-md flex items-center justify-center text-xs font-bold shrink-0 ${letterBgColor}`}>
                             {letter}
                           </div>
-                          <span className="font-medium text-sm">{optText}</span>
+                          <div className="flex flex-col flex-1 gap-2 py-1">
+                            <span className="font-medium text-sm">{optText}</span>
+                            {opt.image_url && (
+                              <img src={opt.image_url} alt="Option image" className="max-h-32 object-contain rounded border bg-muted/20 self-start" />
+                            )}
+                          </div>
                           {icon}
                         </div>
                       );
@@ -152,22 +160,22 @@ export default function StudentViewQuestionsPage() {
                   {!isExplanationExpanded ? (
                     <button 
                       onClick={() => toggleExplanation(q.id)}
-                      className="w-full bg-muted/50 hover:bg-muted rounded-xl p-4 border border-dashed border-border flex items-center justify-center gap-2 text-muted-foreground font-medium transition-colors cursor-pointer"
+                      className="w-full bg-green-50/50 hover:bg-green-100/50 dark:bg-green-900/10 dark:hover:bg-green-900/20 rounded-xl p-4 border border-dashed border-green-200 dark:border-green-900/30 flex items-center justify-center gap-2 text-green-700 dark:text-green-400 font-medium transition-colors cursor-pointer"
                     >
                       <ChevronDown className="w-4 h-4" /> View Solution Explanation
                     </button>
                   ) : (
-                    <div className="bg-muted/50 rounded-xl p-4 border border-border relative">
+                    <div className="bg-green-50/50 dark:bg-green-900/10 rounded-xl p-4 border border-green-200 dark:border-green-900/50 relative">
                       <button 
                         onClick={() => toggleExplanation(q.id)}
-                        className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
+                        className="absolute top-4 right-4 text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 transition-colors"
                       >
                         <ChevronUp className="w-4 h-4" />
                       </button>
-                      <h4 className="font-bold text-foreground mb-2 flex items-center gap-2">
+                      <h4 className="font-bold text-green-800 dark:text-green-400 mb-2 flex items-center gap-2">
                         Solution Explanation
                       </h4>
-                      <p className="text-muted-foreground text-sm leading-relaxed pr-6">
+                      <p className="text-green-900/80 dark:text-green-100/70 text-sm leading-relaxed pr-6">
                         {q.explanation || "No explanation provided for this question."}
                       </p>
                     </div>
@@ -191,6 +199,9 @@ export default function StudentViewQuestionsPage() {
                     <div className="text-lg text-foreground leading-relaxed font-medium">
                       {q.question_text}
                     </div>
+                    {q.image_url && (
+                      <img src={q.image_url} alt="Passage image" className="mt-4 max-h-64 rounded-md object-contain border bg-muted/20" />
+                    )}
                   </div>
                   <div className="p-6 bg-background/50 space-y-6">
                     <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider mb-2">

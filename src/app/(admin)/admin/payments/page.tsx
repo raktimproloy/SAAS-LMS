@@ -723,7 +723,16 @@ export default function PaymentsPage() {
                             {payment.due_amount}
                           </TableCell>
                           <TableCell>
-                            <Badge variant={payment.status === "paid" ? "default" : payment.status === "partial" ? "secondary" : "destructive"}>
+                            <Badge 
+                              variant="outline"
+                              className={`shadow-sm ${
+                                payment.status === "paid" 
+                                  ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:text-emerald-400" 
+                                  : payment.status === "partial" 
+                                    ? "bg-amber-500/10 text-amber-600 border-amber-500/20 dark:text-amber-400" 
+                                    : "bg-rose-500/10 text-rose-600 border-rose-500/20 dark:text-rose-400"
+                              }`}
+                            >
                               {payment.status.toUpperCase()}
                             </Badge>
                           </TableCell>

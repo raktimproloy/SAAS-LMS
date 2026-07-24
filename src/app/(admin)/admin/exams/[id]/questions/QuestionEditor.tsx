@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
-import { GripVertical, Plus, FileDown, UploadCloud, Type, Trash2, Check } from "lucide-react";
+import { GripVertical, Plus, FileDown, UploadCloud, Type, Trash2, Check, ImagePlus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,12 +12,14 @@ import { Label } from "@/components/ui/label";
 interface Option {
   id: string;
   text: string;
+  image_url?: string;
 }
 
 export interface Question {
   id?: number | string;
   type: string;
   question_text: string;
+  image_url?: string;
   options?: Option[];
   correct_option?: string;
   marks?: number;
@@ -220,6 +222,25 @@ export default function QuestionEditor({ examId, initialQuestions, defaultMark }
     }
   };
 
+  const handleSingleImageUpload = async (file: File): Promise<string | null> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+      const res = await fetch(`/api/upload`, {
+        method: "POST",
+        body: formData
+      });
+      if (res.ok) {
+        const data = await res.json();
+        return data.url;
+      }
+    } catch (err) {
+      console.error(err);
+    }
+    alert("Image upload failed");
+    return null;
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap gap-3 p-4 bg-muted/30 rounded-lg border">
@@ -300,16 +321,60 @@ export default function QuestionEditor({ examId, initialQuestions, defaultMark }
                             </Button>
                           </div>
                           <div className="p-4">
-                            <Textarea 
-                              value={q.question_text} 
-                              onChange={(e) => {
-                                const newQs = structuredClone(questions);
-                                newQs[index].question_text = e.target.value;
-                                setQuestions(newQs);
-                              }}
-                              placeholder={q.type === 'passage' ? "Enter passage text..." : "Enter question text..."}
-                              className="min-h-[150px] mb-4 rounded-sm resize-y"
-                            />
+                            <div className="mb-4 space-y-2">
+                              <Textarea 
+                                value={q.question_text} 
+                                onChange={(e) => {
+                                  const newQs = structuredClone(questions);
+                                  newQs[index].question_text = e.target.value;
+                                  setQuestions(newQs);
+                                }}
+                                placeholder={q.type === 'passage' ? "Enter passage text..." : "Enter question text..."}
+                                className="min-h-[100px] rounded-sm resize-y"
+                              />
+                              
+                              {q.image_url ? (
+                                <div className="relative inline-block border rounded-md overflow-hidden bg-muted/30 p-1">
+                                  <img src={q.image_url} alt="Question" className="max-h-48 object-contain" />
+                                  <Button
+                                    variant="destructive"
+                                    size="icon"
+                                    className="absolute top-2 right-2 h-6 w-6 rounded-full opacity-80 hover:opacity-100"
+                                    onClick={() => {
+                                      const newQs = structuredClone(questions);
+                                      newQs[index].image_url = undefined;
+                                      setQuestions(newQs);
+                                    }}
+                                  >
+                                    <X className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              ) : (
+                                <div>
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    id={`q-img-${index}`}
+                                    className="hidden"
+                                    onChange={async (e) => {
+                                      const file = e.target.files?.[0];
+                                      if (file) {
+                                        const url = await handleSingleImageUpload(file);
+                                        if (url) {
+                                          const newQs = structuredClone(questions);
+                                          newQs[index].image_url = url;
+                                          setQuestions(newQs);
+                                        }
+                                      }
+                                      e.target.value = '';
+                                    }}
+                                  />
+                                  <Label htmlFor={`q-img-${index}`} className="cursor-pointer inline-flex items-center justify-center h-10 px-4 mt-2 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors text-sm font-medium gap-2">
+                                    <ImagePlus className="h-4 w-4 text-muted-foreground" /> Add Image
+                                  </Label>
+                                </div>
+                              )}
+                            </div>
                             
                             {q.type === 'mcq' && q.options && (
                               <div className="space-y-3 pl-4 border-l-2 border-muted">
@@ -336,22 +401,70 @@ export default function QuestionEditor({ examId, initialQuestions, defaultMark }
                                      }`}>
                                        {String.fromCharCode(65 + oIdx)}
                                      </div>
-                                     <Input 
-                                       value={opt.text}
-                                       placeholder="Option text..."
-                                       onChange={(e) => {
-                                         const newQs = structuredClone(questions);
-                                         if (newQs[index].options) {
-                                           newQs[index].options![oIdx].text = e.target.value;
-                                         }
-                                         setQuestions(newQs);
-                                       }}
-                                       className={q.correct_option === opt.id ? "border-green-500" : ""}
-                                     />
+                                     <div className="flex flex-col flex-1 gap-2">
+                                       <Input 
+                                         value={opt.text}
+                                         placeholder="Option text..."
+                                         onChange={(e) => {
+                                           const newQs = structuredClone(questions);
+                                           if (newQs[index].options) {
+                                             newQs[index].options![oIdx].text = e.target.value;
+                                           }
+                                           setQuestions(newQs);
+                                         }}
+                                         className={q.correct_option === opt.id ? "border-green-500" : ""}
+                                       />
+                                       {opt.image_url && (
+                                         <div className="relative inline-block border rounded-md overflow-hidden bg-muted/30 p-1 self-start mt-2">
+                                           <img src={opt.image_url} alt="Option" className="max-h-24 object-contain" />
+                                           <Button
+                                             variant="destructive"
+                                             size="icon"
+                                             className="absolute top-1 right-1 h-5 w-5 rounded-full opacity-80 hover:opacity-100"
+                                             onClick={() => {
+                                               const newQs = structuredClone(questions);
+                                               if (newQs[index].options) {
+                                                 newQs[index].options![oIdx].image_url = undefined;
+                                               }
+                                               setQuestions(newQs);
+                                             }}
+                                           >
+                                             <X className="h-3 w-3" />
+                                           </Button>
+                                         </div>
+                                       )}
+                                     </div>
+                                     {!opt.image_url && (
+                                       <div className="flex shrink-0">
+                                          <input
+                                            type="file"
+                                            accept="image/*"
+                                            id={`opt-img-${index}-${oIdx}`}
+                                            className="hidden"
+                                            onChange={async (e) => {
+                                              const file = e.target.files?.[0];
+                                              if (file) {
+                                                const url = await handleSingleImageUpload(file);
+                                                if (url) {
+                                                  const newQs = structuredClone(questions);
+                                                  if (newQs[index].options) {
+                                                    newQs[index].options![oIdx].image_url = url;
+                                                  }
+                                                  setQuestions(newQs);
+                                                }
+                                              }
+                                              e.target.value = '';
+                                            }}
+                                          />
+                                          <Label htmlFor={`opt-img-${index}-${oIdx}`} className="cursor-pointer inline-flex items-center justify-center h-10 px-3 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors text-sm font-medium gap-2 shrink-0">
+                                            <ImagePlus className="h-4 w-4 text-muted-foreground" /> Add Image
+                                          </Label>
+                                       </div>
+                                     )}
                                      <Button 
                                        variant="ghost" 
                                        size="icon"
-                                       className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50 shrink-0"
+                                       className="h-10 w-10 text-red-500 hover:text-red-700 hover:bg-red-50 shrink-0"
                                        onClick={() => {
                                          const newQs = structuredClone(questions);
                                          newQs[index].options?.splice(oIdx, 1);
@@ -436,16 +549,60 @@ export default function QuestionEditor({ examId, initialQuestions, defaultMark }
                                         <Trash2 className="h-4 w-4" />
                                       </Button>
                                     </div>
-                                    <Textarea 
-                                      value={cq.question_text} 
-                                      onChange={(e) => {
-                                        const newQs = structuredClone(questions);
-                                        newQs[index].children![cIdx].question_text = e.target.value;
-                                        setQuestions(newQs);
-                                      }} 
-                                      placeholder="Enter child question text..."
-                                      className="min-h-[150px] mb-4 rounded-sm resize-y"
-                                    />
+                                    <div className="mb-4 space-y-2">
+                                       <Textarea 
+                                         value={cq.question_text} 
+                                         onChange={(e) => {
+                                           const newQs = structuredClone(questions);
+                                           newQs[index].children![cIdx].question_text = e.target.value;
+                                           setQuestions(newQs);
+                                         }} 
+                                         placeholder="Enter child question text..."
+                                         className="min-h-[100px] rounded-sm resize-y"
+                                       />
+                                       
+                                       {cq.image_url ? (
+                                         <div className="relative inline-block border rounded-md overflow-hidden bg-muted/30 p-1">
+                                           <img src={cq.image_url} alt="Question" className="max-h-48 object-contain" />
+                                           <Button
+                                             variant="destructive"
+                                             size="icon"
+                                             className="absolute top-2 right-2 h-6 w-6 rounded-full opacity-80 hover:opacity-100"
+                                             onClick={() => {
+                                               const newQs = structuredClone(questions);
+                                               newQs[index].children![cIdx].image_url = undefined;
+                                               setQuestions(newQs);
+                                             }}
+                                           >
+                                             <X className="h-3 w-3" />
+                                           </Button>
+                                         </div>
+                                       ) : (
+                                         <div>
+                                            <input
+                                              type="file"
+                                              accept="image/*"
+                                              id={`cq-img-${index}-${cIdx}`}
+                                              className="hidden"
+                                              onChange={async (e) => {
+                                                const file = e.target.files?.[0];
+                                                if (file) {
+                                                  const url = await handleSingleImageUpload(file);
+                                                  if (url) {
+                                                    const newQs = structuredClone(questions);
+                                                    newQs[index].children![cIdx].image_url = url;
+                                                    setQuestions(newQs);
+                                                  }
+                                                }
+                                                e.target.value = '';
+                                              }}
+                                            />
+                                            <Label htmlFor={`cq-img-${index}-${cIdx}`} className="cursor-pointer inline-flex items-center justify-center h-10 px-4 mt-2 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors text-sm font-medium gap-2">
+                                              <ImagePlus className="h-4 w-4 text-muted-foreground" /> Add Image
+                                            </Label>
+                                         </div>
+                                       )}
+                                     </div>
                                     
                                     {cq.options && (
                                       <div className="space-y-3 pl-4 border-l-2 border-muted mb-4">
@@ -472,22 +629,70 @@ export default function QuestionEditor({ examId, initialQuestions, defaultMark }
                                              }`}>
                                                {String.fromCharCode(65 + oIdx)}
                                              </div>
-                                             <Input 
-                                               value={opt.text}
-                                               placeholder="Option text..."
-                                               onChange={(e) => {
-                                                 const newQs = structuredClone(questions);
-                                                 if (newQs[index].children![cIdx].options) {
-                                                   newQs[index].children![cIdx].options![oIdx].text = e.target.value;
-                                                 }
-                                                 setQuestions(newQs);
-                                               }}
-                                               className={cq.correct_option === opt.id ? "border-green-500" : ""}
-                                             />
+                                             <div className="flex flex-col flex-1 gap-2">
+                                               <Input 
+                                                 value={opt.text}
+                                                 placeholder="Option text..."
+                                                 onChange={(e) => {
+                                                   const newQs = structuredClone(questions);
+                                                   if (newQs[index].children![cIdx].options) {
+                                                     newQs[index].children![cIdx].options![oIdx].text = e.target.value;
+                                                   }
+                                                   setQuestions(newQs);
+                                                 }}
+                                                 className={cq.correct_option === opt.id ? "border-green-500" : ""}
+                                               />
+                                               {opt.image_url && (
+                                                 <div className="relative inline-block border rounded-md overflow-hidden bg-muted/30 p-1 self-start mt-2">
+                                                   <img src={opt.image_url} alt="Option" className="max-h-24 object-contain" />
+                                                   <Button
+                                                     variant="destructive"
+                                                     size="icon"
+                                                     className="absolute top-1 right-1 h-5 w-5 rounded-full opacity-80 hover:opacity-100"
+                                                     onClick={() => {
+                                                       const newQs = structuredClone(questions);
+                                                       if (newQs[index].children![cIdx].options) {
+                                                         newQs[index].children![cIdx].options![oIdx].image_url = undefined;
+                                                       }
+                                                       setQuestions(newQs);
+                                                     }}
+                                                   >
+                                                     <X className="h-3 w-3" />
+                                                   </Button>
+                                                 </div>
+                                               )}
+                                             </div>
+                                             {!opt.image_url && (
+                                               <div className="flex shrink-0">
+                                                  <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    id={`cq-img-${index}-${cIdx}-${oIdx}`}
+                                                    className="hidden"
+                                                    onChange={async (e) => {
+                                                      const file = e.target.files?.[0];
+                                                      if (file) {
+                                                        const url = await handleSingleImageUpload(file);
+                                                        if (url) {
+                                                          const newQs = structuredClone(questions);
+                                                          if (newQs[index].children![cIdx].options) {
+                                                            newQs[index].children![cIdx].options![oIdx].image_url = url;
+                                                          }
+                                                          setQuestions(newQs);
+                                                        }
+                                                      }
+                                                      e.target.value = '';
+                                                    }}
+                                                  />
+                                                  <Label htmlFor={`cq-img-${index}-${cIdx}-${oIdx}`} className="cursor-pointer inline-flex items-center justify-center h-10 px-3 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors text-sm font-medium gap-2 shrink-0">
+                                                    <ImagePlus className="h-4 w-4 text-muted-foreground" /> Add Image
+                                                  </Label>
+                                               </div>
+                                             )}
                                              <Button 
                                                variant="ghost" 
                                                size="icon"
-                                               className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50 shrink-0"
+                                               className="h-10 w-10 text-red-500 hover:text-red-700 hover:bg-red-50 shrink-0"
                                                onClick={() => {
                                                  const newQs = structuredClone(questions);
                                                  newQs[index].children![cIdx].options?.splice(oIdx, 1);

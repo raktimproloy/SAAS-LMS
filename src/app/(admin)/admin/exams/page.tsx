@@ -409,18 +409,18 @@ export default function ExamsPage() {
                         <TableCell>
                           <div className="flex flex-col gap-1 items-start">
                             {exam.is_public ? (
-                              <Badge variant="secondary">Public Exam</Badge>
+                              <Badge variant="secondary" className="bg-slate-500/10 text-slate-700 dark:text-slate-300 border-slate-500/20">Public Exam</Badge>
                             ) : exam.batch ? (
                               <>
-                                <Badge variant="outline" className="bg-blue-50 text-blue-700 hover:bg-blue-50 border-blue-200">
+                                <Badge variant="outline" className="bg-blue-500/10 text-blue-700 dark:text-blue-400 hover:bg-blue-500/20 border-blue-500/20 transition-colors">
                                   Course: {exam.batch.course?.title || exam.course?.title}
                                 </Badge>
-                                <Badge variant="outline" className="bg-purple-50 text-purple-700 hover:bg-purple-50 border-purple-200">
+                                <Badge variant="outline" className="bg-purple-500/10 text-purple-700 dark:text-purple-400 hover:bg-purple-500/20 border-purple-500/20 transition-colors">
                                   Batch: {exam.batch.name}
                                 </Badge>
                               </>
                             ) : exam.course ? (
-                              <Badge variant="outline" className="bg-blue-50 text-blue-700 hover:bg-blue-50 border-blue-200">
+                              <Badge variant="outline" className="bg-blue-500/10 text-blue-700 dark:text-blue-400 hover:bg-blue-500/20 border-blue-500/20 transition-colors">
                                 Course: {exam.course.title}
                               </Badge>
                             ) : (
@@ -450,8 +450,12 @@ export default function ExamsPage() {
                         </TableCell>
                         <TableCell>
                           <Badge 
-                            variant={exam.status === "active" ? "default" : "secondary"}
-                            className="cursor-pointer"
+                            variant="outline"
+                            className={`cursor-pointer transition-colors shadow-sm ${
+                              exam.status === "active" 
+                                ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 hover:bg-emerald-500/20 dark:text-emerald-400" 
+                                : "bg-slate-500/10 text-slate-600 border-slate-500/20 hover:bg-slate-500/20 dark:text-slate-400"
+                            }`}
                             onClick={() => handleToggleStatus(exam)}
                           >
                             {exam.status.toUpperCase()}

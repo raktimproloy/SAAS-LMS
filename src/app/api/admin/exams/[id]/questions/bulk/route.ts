@@ -46,6 +46,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
               correct_option: q.correct_option,
               marks: q.marks !== undefined ? parseFloat(q.marks) : undefined,
               explanation: q.explanation,
+              image_url: q.image_url,
               sort_order: q.sort_order,
               parent_id: null,
             }
@@ -63,6 +64,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
               correct_option: q.correct_option,
               marks: q.marks !== undefined ? parseFloat(q.marks) : undefined,
               explanation: q.explanation,
+              image_url: q.image_url,
               sort_order: q.sort_order,
               parent_id: null,
             }
@@ -83,6 +85,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
                   correct_option: cq.correct_option,
                   marks: cq.marks !== undefined ? parseFloat(cq.marks) : undefined,
                   explanation: cq.explanation,
+                  image_url: cq.image_url,
                   sort_order: cq.sort_order,
                   parent_id: parentId,
                 }
@@ -98,6 +101,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
                   correct_option: cq.correct_option,
                   marks: cq.marks !== undefined ? parseFloat(cq.marks) : undefined,
                   explanation: cq.explanation,
+                  image_url: cq.image_url,
                   sort_order: cq.sort_order,
                   parent_id: parentId,
                 }

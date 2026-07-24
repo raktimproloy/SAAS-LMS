@@ -499,7 +499,14 @@ export default function CoursesBatchesPage() {
                               ) : "-"}
                             </TableCell>
                             <TableCell>
-                              <Badge className={course.status === "active" ? "bg-green-100 text-green-700 hover:bg-green-100 border-none" : "bg-red-100 text-red-700 hover:bg-red-100 border-none"}>
+                              <Badge 
+                                variant="outline"
+                                className={`cursor-pointer transition-colors shadow-sm ${
+                                  course.status === "active" 
+                                    ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 hover:bg-emerald-500/20 dark:text-emerald-400" 
+                                    : "bg-slate-500/10 text-slate-600 border-slate-500/20 hover:bg-slate-500/20 dark:text-slate-400"
+                                }`}
+                              >
                                 {course.status === "active" ? "Active" : "Inactive"}
                               </Badge>
                             </TableCell>
@@ -576,7 +583,7 @@ export default function CoursesBatchesPage() {
                               </div>
                             </TableCell>
                             <TableCell>
-                              <Badge variant="outline" className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 font-normal">
+                              <Badge variant="outline" className="bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20 backdrop-blur-md">
                                 {batch.course?.title || "Unknown Course"}
                               </Badge>
                             </TableCell>
@@ -598,7 +605,14 @@ export default function CoursesBatchesPage() {
                             </TableCell>
                             <TableCell>{batch.max_students ? `${batch.max_students} Students` : "Not Set"}</TableCell>
                             <TableCell>
-                              <Badge className={batch.status === "active" ? "bg-green-100 text-green-700 hover:bg-green-100 border-none" : "bg-red-100 text-red-700 hover:bg-red-100 border-none"}>
+                              <Badge 
+                                variant="outline"
+                                className={`cursor-pointer transition-colors shadow-sm ${
+                                  batch.status === "active" 
+                                    ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 hover:bg-emerald-500/20 dark:text-emerald-400" 
+                                    : "bg-slate-500/10 text-slate-600 border-slate-500/20 hover:bg-slate-500/20 dark:text-slate-400"
+                                }`}
+                              >
                                 {batch.status === "active" ? "Active" : "Inactive"}
                               </Badge>
                             </TableCell>
