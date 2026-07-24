@@ -12,7 +12,7 @@ model Admin {
   name        String
   email       String   @unique
   password    String
-  role        String   // "super_admin" | "assistant"
+  role        String // "super_admin" | "assistant"
   permissions Json?
   is_active   Boolean  @default(true)
   created_at  DateTime @default(now())
@@ -20,25 +20,25 @@ model Admin {
 }
 
 model Course {
-  id                     Int      @id @default(autoincrement())
+  id                     Int       @id @default(autoincrement())
   title                  String
-  slug                   String   @unique
+  slug                   String    @unique
   fee                    Float?
   discount_fee           Float?
   start_date             DateTime?
   end_date               DateTime?
   thumbnail              String?
-  details                String?  @db.Text
+  details                String?   @db.Text
   subjects               Json?
   next_registration_date DateTime?
-  status                 String   @default("active")
-  sort_order             Int      @default(0)
-  created_at             DateTime @default(now())
+  status                 String    @default("active")
+  sort_order             Int       @default(0)
+  created_at             DateTime  @default(now())
 
-  batches                Batch[]
-  video_courses          VideoCourse[]
-  exams                  Exam[]
-  notes                  NoteMaterial[]
+  batches       Batch[]
+  video_courses VideoCourse[]
+  exams         Exam[]
+  notes         NoteMaterial[]
 }
 
 model Batch {
@@ -52,20 +52,21 @@ model Batch {
   created_at   DateTime @default(now())
   updated_at   DateTime @updatedAt
 
-  course       Course   @relation(fields: [course_id], references: [id])
+  course       Course         @relation(fields: [course_id], references: [id])
   students     Student[]
   routines     Routine[]
   exams        Exam[]
   notes        NoteMaterial[]
+  videoCourses VideoCourse[]
 }
 
 model Student {
-  id              Int      @id @default(autoincrement())
-  student_id      String   @unique // Auto format #0001
+  id              Int       @id @default(autoincrement())
+  student_id      String    @unique // Auto format #0001
   name            String
   gender          String
   dob             DateTime?
-  address         String?  @db.Text
+  address         String?   @db.Text
   phone           String
   email           String?
   password        String
@@ -74,17 +75,17 @@ model Student {
   parent_relation String?
   parent_phone    String?
   photo           String?
-  status          String   @default("active") // "active" | "inactive"
-  enrolled_at     DateTime @default(now())
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
+  status          String    @default("active") // "active" | "inactive"
+  enrolled_at     DateTime  @default(now())
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
 
-  batch           Batch    @relation(fields: [batch_id], references: [id])
-  payments        Payment[]
-  exam_results    ExamResult[]
-  attendance      Attendance[]
-  reviews         StudentReview[]
-  reports         StudentReport[]
+  batch        Batch           @relation(fields: [batch_id], references: [id])
+  payments     Payment[]
+  exam_results ExamResult[]
+  attendance   Attendance[]
+  reviews      StudentReview[]
+  reports      StudentReport[]
 }
 
 model Routine {
@@ -98,65 +99,65 @@ model Routine {
   teacher_name String?
   created_at   DateTime @default(now())
 
-  batch        Batch    @relation(fields: [batch_id], references: [id])
+  batch Batch @relation(fields: [batch_id], references: [id])
 }
 
 model Exam {
-  id               Int      @id @default(autoincrement())
+  id               Int       @id @default(autoincrement())
   title            String
-  batch_id         Int?     // Nullable for course-wide or public exams
+  batch_id         Int? // Nullable for course-wide or public exams
   course_id        Int?
-  type             String   // "online_mcq" | "offline"
-  is_public        Boolean  @default(false)
+  type             String // "online_mcq" | "offline"
+  is_public        Boolean   @default(false)
   start_time       DateTime?
   end_time         DateTime?
   duration_minutes Int
   total_marks      Float
-  status           String   @default("active") // "active" | "inactive" | "completed"
-  negative_marking Float    @default(0.0)
-  created_at       DateTime @default(now())
+  status           String    @default("active") // "active" | "inactive" | "completed"
+  negative_marking Float     @default(0.0)
+  created_at       DateTime  @default(now())
 
-  batch            Batch?   @relation(fields: [batch_id], references: [id])
-  course           Course?  @relation(fields: [course_id], references: [id])
-  questions        ExamQuestion[]
-  results          ExamResult[]
+  batch               Batch?                  @relation(fields: [batch_id], references: [id])
+  course              Course?                 @relation(fields: [course_id], references: [id])
+  questions           ExamQuestion[]
+  results             ExamResult[]
   public_participants PublicExamParticipant[]
 }
 
 model ExamQuestion {
-  id             Int      @id @default(autoincrement())
+  id             Int     @id @default(autoincrement())
   exam_id        Int
   parent_id      Int?
-  type           String   @default("mcq") // "mcq" | "passage"
-  question_text  String   @db.Text
-  options        Json?    // Dynamic options array
+  type           String  @default("mcq") // "mcq" | "passage"
+  question_text  String  @db.Text
+  options        Json? // Dynamic options array
   correct_option String?
-  marks          Float    @default(1.0)
-  explanation    String?  @db.Text
-  sort_order     Int      @default(0)
+  marks          Float   @default(1.0)
+  explanation    String? @db.Text
+  sort_order     Int     @default(0)
 
-  exam           Exam     @relation(fields: [exam_id], references: [id])
-  parent         ExamQuestion?  @relation("PassageQuestions", fields: [parent_id], references: [id])
-  children       ExamQuestion[] @relation("PassageQuestions")
+  exam     Exam           @relation(fields: [exam_id], references: [id])
+  parent   ExamQuestion?  @relation("PassageQuestions", fields: [parent_id], references: [id])
+  children ExamQuestion[] @relation("PassageQuestions")
 }
 
 model ExamResult {
-  id                   Int      @id @default(autoincrement())
-  exam_id              Int
-  student_id           Int?     // Nullable for public participants
-  obtained_marks       Float
-  total_marks          Float
-  correct_count        Int      @default(0)
-  wrong_count          Int      @default(0)
-  skipped_count        Int      @default(0)
-  rank                 Int?
-  answers              Json?
-  time_taken_seconds   Int?
-  created_at           DateTime @default(now())
+  id                 Int      @id @default(autoincrement())
+  exam_id            Int
+  student_id         Int? // Nullable for public participants
+  obtained_marks     Float
+  total_marks        Float
+  correct_count      Int      @default(0)
+  wrong_count        Int      @default(0)
+  skipped_count      Int      @default(0)
+  rank               Int?
+  answers            Json?
+  time_taken_seconds Int?
+  created_at         DateTime @default(now())
 
-  exam                 Exam     @relation(fields: [exam_id], references: [id])
-  student              Student? @relation(fields: [student_id], references: [id])
-  public_participant   PublicExamParticipant?
+  exam               Exam                   @relation(fields: [exam_id], references: [id])
+  student            Student?               @relation(fields: [student_id], references: [id])
+  public_participant PublicExamParticipant?
 }
 
 model PublicExamParticipant {
@@ -170,24 +171,24 @@ model PublicExamParticipant {
   exam_result_id Int      @unique
   created_at     DateTime @default(now())
 
-  exam           Exam     @relation(fields: [exam_id], references: [id])
-  result         ExamResult @relation(fields: [exam_result_id], references: [id])
+  exam   Exam       @relation(fields: [exam_id], references: [id])
+  result ExamResult @relation(fields: [exam_result_id], references: [id])
 }
 
 model Payment {
-  id             Int      @id @default(autoincrement())
+  id             Int       @id @default(autoincrement())
   student_id     Int
   amount         Float
-  due_amount     Float    @default(0.0)
+  due_amount     Float     @default(0.0)
   month          Int
   year           Int
-  status         String   // "paid" | "due" | "partial"
-  receipt_number String?  @unique
+  status         String // "paid" | "due" | "partial"
+  receipt_number String?   @unique
   paid_at        DateTime?
-  note           String?  @db.Text
-  created_at     DateTime @default(now())
+  note           String?   @db.Text
+  created_at     DateTime  @default(now())
 
-  student        Student  @relation(fields: [student_id], references: [id])
+  student Student @relation(fields: [student_id], references: [id])
 }
 
 model Attendance {
@@ -195,20 +196,20 @@ model Attendance {
   student_id Int
   batch_id   Int
   date       DateTime @db.Date
-  status     String   // "present" | "absent" | "late"
+  status     String // "present" | "absent" | "late"
   note       String?
   created_at DateTime @default(now())
 
-  student    Student  @relation(fields: [student_id], references: [id])
+  student Student @relation(fields: [student_id], references: [id])
 }
 
 model Notice {
   id          Int      @id @default(autoincrement())
   title       String
   content     String   @db.Text
-  target_type String   // "all" | "course" | "batch"
+  target_type String // "all" | "course" | "batch"
   target_id   Int?
-  type        String   // "general" | "exam" | "result"
+  type        String // "general" | "exam" | "result"
   is_pinned   Boolean  @default(false)
   created_at  DateTime @default(now())
 }
@@ -216,24 +217,24 @@ model Notice {
 model Gallery {
   id         Int      @id @default(autoincrement())
   image_path String
-  category   String   // "home" | "success" | "about"
+  category   String // "home" | "success" | "about"
   caption    String?
   sort_order Int      @default(0)
   created_at DateTime @default(now())
 }
 
 model Teacher {
-  id                 Int      @id @default(autoincrement())
-  name               String
-  bio                String?  @db.Text
-  qualifications     String?
+  id                  Int      @id @default(autoincrement())
+  name                String
+  bio                 String?  @db.Text
+  qualifications      String?
   specialist_subjects Json?
-  experience         String?
-  photo              String?
-  sort_order         Int      @default(0)
-  created_at         DateTime @default(now())
-  
-  success_stories    TeacherSuccess[]
+  experience          String?
+  photo               String?
+  sort_order          Int      @default(0)
+  created_at          DateTime @default(now())
+
+  success_stories TeacherSuccess[]
 }
 
 model TeacherSuccess {
@@ -248,7 +249,7 @@ model TeacherSuccess {
   sort_order   Int      @default(0)
   created_at   DateTime @default(now())
 
-  teacher      Teacher  @relation(fields: [teacher_id], references: [id])
+  teacher Teacher @relation(fields: [teacher_id], references: [id])
 }
 
 model StudentReview {
@@ -263,23 +264,28 @@ model StudentReview {
   sort_order       Int      @default(0)
   created_at       DateTime @default(now())
 
-  student_id       Int?
-  student          Student? @relation(fields: [student_id], references: [id])
+  student_id Int?
+  student    Student? @relation(fields: [student_id], references: [id])
 }
 
 model VideoCourse {
   id          Int      @id @default(autoincrement())
   course_id   Int
+  batch_id    Int?
   title       String
   description String?  @db.Text
-  url         String   // YouTube/external link
+  url         String // YouTube/external link
   price       Float    @default(0.0)
+  is_free     Boolean  @default(false)
+  is_public   Boolean  @default(true)
+  tags        Json?
   thumbnail   String?
   status      String   @default("active")
   sort_order  Int      @default(0)
   created_at  DateTime @default(now())
 
-  course      Course   @relation(fields: [course_id], references: [id])
+  course Course @relation(fields: [course_id], references: [id])
+  batch  Batch? @relation(fields: [batch_id], references: [id])
 }
 
 model NoteMaterial {
@@ -288,22 +294,22 @@ model NoteMaterial {
   file_path   String
   batch_id    Int?
   course_id   Int?
-  type        String   // "book" | "note"
+  type        String // "book" | "note"
   description String?  @db.Text
   is_public   Boolean  @default(false)
   status      String   @default("active") // "active" | "inactive"
   sort_order  Int      @default(0)
   created_at  DateTime @default(now())
 
-  batch       Batch?   @relation(fields: [batch_id], references: [id])
-  course      Course?  @relation(fields: [course_id], references: [id])
+  batch  Batch?  @relation(fields: [batch_id], references: [id])
+  course Course? @relation(fields: [course_id], references: [id])
 }
 
 model SiteSetting {
   id            Int      @id @default(autoincrement())
   setting_key   String   @unique
   setting_value String   @db.Text
-  setting_type  String   // "text" | "image" | "json" | "boolean"
+  setting_type  String // "text" | "image" | "json" | "boolean"
   group_name    String?
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
@@ -331,14 +337,14 @@ model HeroBanner {
 }
 
 model SmsLog {
-  id         Int      @id @default(autoincrement())
+  id         Int       @id @default(autoincrement())
   student_id Int?
   phone      String
-  message    String   @db.Text
-  type       String   // "exam_notice" | "result" | "attendance"
-  status     String   // "sent" | "failed" | "queued"
+  message    String    @db.Text
+  type       String // "exam_notice" | "result" | "attendance"
+  status     String // "sent" | "failed" | "queued"
   sent_at    DateTime?
-  created_at DateTime @default(now())
+  created_at DateTime  @default(now())
 }
 
 model StudentReport {
@@ -349,5 +355,5 @@ model StudentReport {
   type        String   @default("general") // "general" | "disciplinary" | "academic" | "good"
   created_at  DateTime @default(now())
 
-  student     Student  @relation(fields: [student_id], references: [id])
+  student Student @relation(fields: [student_id], references: [id])
 }
