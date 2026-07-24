@@ -103,6 +103,8 @@ export async function POST(request: Request, { params }: { params: { id: string 
     let skipped_count = 0;
 
     exam.questions.forEach(q => {
+      if (q.type === 'passage') return; // Do not evaluate passage containers
+      
       const studentAnswer = answers[q.id];
       if (!studentAnswer) {
         skipped_count++;
@@ -122,7 +124,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
         is_practice: true,
         practice_result: {
           obtained_marks,
-          total_marks: exam.questions.reduce((acc, q) => acc + (q.marks || 0), 0),
+          total_marks: exam.questions.reduce((acc, q) => acc + (q.type === 'passage' ? 0 : (q.marks || 0)), 0),
           correct_count,
           wrong_count,
           skipped_count,
@@ -139,7 +141,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
         exam_id: examId,
         student_id: studentId,
         obtained_marks,
-        total_marks: exam.questions.reduce((acc, q) => acc + (q.marks || 0), 0),
+        total_marks: exam.questions.reduce((acc, q) => acc + (q.type === 'passage' ? 0 : (q.marks || 0)), 0),
         correct_count,
         wrong_count,
         skipped_count,

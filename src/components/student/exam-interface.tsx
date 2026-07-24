@@ -6,6 +6,7 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Clock, CheckCircle2, XCircle, AlertCircle, ChevronDown, ChevronUp } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface Question {
   id: number;
@@ -29,6 +30,7 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const [practiceResultData, setPracticeResultData] = useState<any>(null);
   const [expandedExplanations, setExpandedExplanations] = useState<Record<number, boolean>>({});
@@ -106,9 +108,6 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
 
   const handleSubmit = async (isAutoSubmit = false) => {
     if (isSubmitting) return;
-    if (!isAutoSubmit && !confirm("Are you sure you want to submit the exam? You cannot change your answers after submission.")) {
-      return;
-    }
     
     setIsSubmitting(true);
 
@@ -136,6 +135,9 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
 
         if (data.is_practice && data.practice_result) {
           setPracticeResultData(data.practice_result);
+          setTimeout(() => {
+            document.getElementById('student-main-scroll')?.scrollTo({ top: 0, behavior: 'smooth' });
+          }, 100);
         } else {
           router.push(`/student/exams/${examId}/result`);
         }
@@ -520,7 +522,7 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
           <Button 
             size="lg"
             className="px-8 font-bold text-base shadow-md group"
-            onClick={() => handleSubmit()}
+            onClick={() => setShowConfirmDialog(true)}
             disabled={isSubmitting}
           >
             {isSubmitting ? (
@@ -532,6 +534,29 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
 
         </div>
       </div>
+
+      {/* Submit Confirmation Dialog */}
+      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Submit Exam?</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to submit the exam? You cannot change your answers after submission.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>Cancel</Button>
+            <Button 
+              onClick={() => {
+                setShowConfirmDialog(false);
+                handleSubmit(false);
+              }}
+            >
+              Confirm Submit
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
