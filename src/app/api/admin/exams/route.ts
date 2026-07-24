@@ -23,7 +23,7 @@ export async function GET() {
         batch: { include: { course: true } },
         course: true,
         _count: {
-          select: { questions: true }
+          select: { questions: { where: { type: 'mcq' } } }
         }
       },
       orderBy: { created_at: "desc" },

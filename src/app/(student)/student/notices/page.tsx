@@ -26,31 +26,31 @@ export default function StudentNoticesPage() {
   return (
     <div className="space-y-6 max-w-4xl mx-auto animate-in fade-in duration-500">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Notice Board</h1>
-        <div className="flex items-center gap-2 text-sm text-slate-500">
+        <h1 className="text-3xl font-bold text-foreground">Notice Board</h1>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Bell className="w-4 h-4" /> {notices.length} Updates
         </div>
       </div>
 
       <div className="space-y-4">
         {notices.length === 0 ? (
-          <Card className="p-12 text-center text-slate-500 bg-slate-50 border-dashed">
+          <Card className="p-12 text-center text-muted-foreground bg-muted/50 border-dashed">
             No notices at this time.
           </Card>
         ) : (
           notices.map(notice => (
             <Card key={notice.id} className="hover:shadow-md transition-shadow group overflow-hidden">
               <div className="flex flex-col md:flex-row">
-                <div className="bg-slate-50 dark:bg-slate-900 p-6 flex md:flex-col items-center md:justify-center border-b md:border-b-0 md:border-r min-w-[140px] gap-3">
+                <div className="bg-muted/50 p-6 flex md:flex-col items-center md:justify-center border-b md:border-b-0 md:border-r min-w-[140px] gap-3 border-border">
                   <Calendar className="w-6 h-6 text-primary/60" />
                   <div className="text-center">
                     <div className="font-bold text-lg">{format(new Date(notice.created_at), "MMM d")}</div>
-                    <div className="text-xs text-slate-500 uppercase tracking-wider">{format(new Date(notice.created_at), "yyyy")}</div>
+                    <div className="text-xs text-muted-foreground uppercase tracking-wider">{format(new Date(notice.created_at), "yyyy")}</div>
                   </div>
                 </div>
                 <div className="p-6 flex-1">
-                  <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{notice.title}</h3>
-                  <p className="text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">{notice.content}</p>
+                  <h3 className="text-xl font-bold text-foreground mb-2">{notice.title}</h3>
+                  <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">{notice.content}</p>
                 </div>
               </div>
             </Card>

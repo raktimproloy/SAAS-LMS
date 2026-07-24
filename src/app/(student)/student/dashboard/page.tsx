@@ -39,12 +39,12 @@ export default function StudentDashboard() {
     <div className="space-y-6 animate-in fade-in duration-500">
 
       {/* Top Banner Row */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white dark:bg-slate-900 p-6 rounded-xl border shadow-sm relative overflow-hidden">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-card text-card-foreground p-6 rounded-xl border shadow-sm relative overflow-hidden">
         <div className="relative z-10 space-y-1">
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
             Welcome back, {student?.name}!
           </h1>
-          <p className="text-slate-500 dark:text-slate-400">
+          <p className="text-muted-foreground">
             {student?.batch?.course?.title} — {student?.batch?.name}
           </p>
         </div>
@@ -84,14 +84,14 @@ export default function StudentDashboard() {
               {data?.notices && data.notices.length > 0 ? (
                 <div className="space-y-4">
                   {data.notices.map((notice) => (
-                    <div key={notice.id} className="p-4 rounded-lg bg-slate-50 dark:bg-slate-800/50 border">
-                      <h4 className="font-semibold text-slate-900 dark:text-slate-100">{notice.title}</h4>
-                      <p className="text-sm text-slate-600 dark:text-slate-400 mt-1 line-clamp-2">{notice.content}</p>
+                    <div key={notice.id} className="p-4 rounded-lg bg-muted/50 border">
+                      <h4 className="font-semibold text-foreground">{notice.title}</h4>
+                      <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{notice.content}</p>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-slate-500 text-center py-4">No new notices.</p>
+                <p className="text-muted-foreground text-center py-4">No new notices.</p>
               )}
             </CardContent>
           </Card>
@@ -109,27 +109,27 @@ export default function StudentDashboard() {
             <CardContent>
               {data?.upcomingExam ? (
                 <div className="space-y-3">
-                  <div className="font-bold text-xl text-slate-900 dark:text-white">
+                  <div className="font-bold text-xl text-foreground">
                     {data.upcomingExam.title}
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <CalendarClock className="w-4 h-4" />
                     {new Date(data.upcomingExam.start_time).toLocaleString()}
                   </div>
                   <div className="mt-4 pt-4 border-t border-primary/10">
                     <div className="text-xs font-semibold text-primary uppercase tracking-wider mb-2">Details</div>
                     <div className="grid grid-cols-2 gap-2 text-sm">
-                      <div className="text-slate-500">Duration:</div>
+                      <div className="text-muted-foreground">Duration:</div>
                       <div className="font-medium text-right">{data.upcomingExam.duration_minutes} min</div>
-                      <div className="text-slate-500">Marks:</div>
+                      <div className="text-muted-foreground">Marks:</div>
                       <div className="font-medium text-right">{data.upcomingExam.total_marks}</div>
                     </div>
                   </div>
                 </div>
               ) : (
-                <div className="text-center py-8 text-slate-500">
-                  <div className="bg-white/50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <CheckCircle2 className="w-6 h-6 text-slate-400" />
+                <div className="text-center py-8 text-muted-foreground">
+                  <div className="bg-muted/50 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <CheckCircle2 className="w-6 h-6 text-muted-foreground/70" />
                   </div>
                   No upcoming exams scheduled.
                 </div>
@@ -147,14 +147,14 @@ export default function StudentDashboard() {
             <CardContent>
               {data?.recentResult ? (
                 <div className="space-y-4">
-                  <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border text-center relative overflow-hidden">
+                  <div className="p-4 rounded-xl bg-muted/30 border text-center relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-4 opacity-5">
                       <FileText className="w-24 h-24" />
                     </div>
                     <div className="relative z-10">
-                      <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">{data.recentResult.exam.title}</p>
-                      <div className="text-4xl font-black text-slate-900 dark:text-white mb-2">
-                        {data.recentResult.obtained_marks} <span className="text-lg font-medium text-slate-400">/ {data.recentResult.total_marks}</span>
+                      <p className="text-sm font-medium text-muted-foreground mb-1">{data.recentResult.exam.title}</p>
+                      <div className="text-4xl font-black text-foreground mb-2">
+                        {data.recentResult.obtained_marks} <span className="text-lg font-medium text-muted-foreground/70">/ {data.recentResult.total_marks}</span>
                       </div>
                       <div className="flex justify-center gap-4 text-sm mt-4">
                         <div className="text-green-600 font-medium">Correct: {data.recentResult.correct_count}</div>
@@ -164,7 +164,7 @@ export default function StudentDashboard() {
                   </div>
                 </div>
               ) : (
-                <p className="text-slate-500 text-center py-4">No results available yet.</p>
+                <p className="text-muted-foreground text-center py-4">No results available yet.</p>
               )}
             </CardContent>
           </Card>

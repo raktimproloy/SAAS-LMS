@@ -14,14 +14,13 @@ export async function GET(request: Request, { params }: { params: { id: string }
     const studentId = payload.id as number;
     const examId = parseInt(params.id);
 
-    // Check if result already exists
+    // Check if result already exists (for practice mode info, if needed later)
     const existingResult = await prisma.examResult.findFirst({
       where: { exam_id: examId, student_id: studentId }
     });
 
-    if (existingResult) {
-      return NextResponse.json({ error: "You have already taken this exam" }, { status: 403 });
-    }
+    // We allow retaking exams for practice. The frontend will handle it.
+
 
     const exam = await prisma.exam.findUnique({
       where: { id: examId },
@@ -32,7 +31,9 @@ export async function GET(request: Request, { params }: { params: { id: string }
             question_text: true,
             options: true,
             marks: true,
-            sort_order: true
+            sort_order: true,
+            type: true,
+            parent_id: true
           },
           orderBy: { sort_order: 'asc' }
         }
@@ -77,9 +78,6 @@ export async function POST(request: Request, { params }: { params: { id: string 
       where: { exam_id: examId, student_id: studentId }
     });
 
-    if (existingResult) {
-      return NextResponse.json({ error: "Exam already submitted" }, { status: 403 });
-    }
 
     const exam = await prisma.exam.findUnique({
       where: { id: examId },
@@ -116,6 +114,24 @@ export async function POST(request: Request, { params }: { params: { id: string 
         obtained_marks -= exam.negative_marking;
       }
     });
+
+    // If already submitted, this is a practice attempt. We don't record it, just return the evaluated result.
+    if (existingResult) {
+      return NextResponse.json({ 
+        success: true, 
+        is_practice: true,
+        practice_result: {
+          obtained_marks,
+          total_marks: exam.questions.reduce((acc, q) => acc + (q.marks || 0), 0),
+          correct_count,
+          wrong_count,
+          skipped_count,
+          answers,
+          time_taken_seconds,
+          questions: exam.questions
+        }
+      });
+    }
 
     // Create result
     const result = await prisma.examResult.create({

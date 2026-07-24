@@ -21,7 +21,7 @@ export function StudentHeader() {
   }, []);
 
   return (
-    <header className="flex h-16 items-center justify-between border-b bg-white px-6 dark:bg-slate-900 w-full">
+    <header className="flex h-16 items-center justify-between border-b bg-background px-6 w-full text-foreground">
       <div className="flex items-center gap-4 lg:hidden">
         <Button variant="ghost" size="icon" className="lg:hidden">
           <Menu className="h-5 w-5" />
@@ -34,7 +34,7 @@ export function StudentHeader() {
           <div className="flex items-center gap-3">
             <div className="hidden text-right md:block">
               <p className="text-sm font-medium leading-none">{student.name}</p>
-              <p className="text-xs text-slate-500 mt-1">Student</p>
+              <p className="text-xs text-muted-foreground mt-1">Student</p>
             </div>
             <Avatar>
               <AvatarImage src={student.photo || ""} alt={student.name} />

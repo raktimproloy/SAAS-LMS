@@ -31,7 +31,7 @@ export async function GET() {
       },
       include: {
         _count: {
-          select: { questions: true }
+          select: { questions: { where: { type: 'mcq' } } }
         },
         results: {
           where: { student_id: studentId },

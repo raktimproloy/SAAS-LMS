@@ -4,7 +4,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Clock, CheckCircle2 } from "lucide-react";
+import { Clock, CheckCircle2, XCircle, AlertCircle, ChevronDown, ChevronUp } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface Question {
@@ -12,6 +12,8 @@ interface Question {
   question_text: string;
   options: any; // e.g. ["A option", "B option", "C option"] or [{id:"a", text:"..."}]
   marks: number;
+  type?: string;
+  parent_id?: number | null;
 }
 
 interface ExamInterfaceProps {
@@ -28,6 +30,8 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isReady, setIsReady] = useState(false);
+  const [practiceResultData, setPracticeResultData] = useState<any>(null);
+  const [expandedExplanations, setExpandedExplanations] = useState<Record<number, boolean>>({});
 
   const autoSubmitTriggered = useRef(false);
 
@@ -129,7 +133,12 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
         // Cleanup local storage
         localStorage.removeItem(`lms_exam_${examId}_answers`);
         localStorage.removeItem(`lms_exam_${examId}_start`);
-        router.push(`/student/exams/${examId}/result`);
+
+        if (data.is_practice && data.practice_result) {
+          setPracticeResultData(data.practice_result);
+        } else {
+          router.push(`/student/exams/${examId}/result`);
+        }
       } else {
         alert(data.error || "Failed to submit exam");
         setIsSubmitting(false);
@@ -139,6 +148,13 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
       alert("An error occurred during submission.");
       setIsSubmitting(false);
     }
+  };
+
+  const toggleExplanation = (qId: number) => {
+    setExpandedExplanations(prev => ({
+      ...prev,
+      [qId]: !prev[qId]
+    }));
   };
 
   const handleOptionSelect = (qId: number, optionValue: string) => {
@@ -154,101 +170,349 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
 
   if (!isReady || timeLeft === null) return null;
 
+  if (practiceResultData) {
+    const result = practiceResultData;
+    return (
+      <div className="min-h-screen bg-background pb-20 animate-in fade-in duration-500">
+        <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
+          
+          <div className="bg-card/80 backdrop-blur-xl p-8 rounded-2xl border border-border shadow-sm flex flex-col md:flex-row items-center justify-between gap-8">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground mb-2">Practice Result: {title}</h1>
+              <p className="text-muted-foreground flex items-center gap-2">
+                <Clock className="w-4 h-4" /> Time Taken: {Math.floor(result.time_taken_seconds / 60)}m {result.time_taken_seconds % 60}s
+              </p>
+            </div>
+            <div className="flex gap-8 text-center">
+              <div>
+                <div className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-1">Score</div>
+                <div className="text-4xl font-bold text-primary">{result.obtained_marks} <span className="text-lg text-muted-foreground/70">/ {result.total_marks}</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <div className="bg-green-50/50 dark:bg-green-900/10 border border-green-200 dark:border-green-900/50 shadow-sm rounded-xl p-6 text-center">
+              <CheckCircle2 className="w-8 h-8 text-green-500 dark:text-green-400 mx-auto mb-2" />
+              <div className="text-3xl font-bold text-green-700 dark:text-green-400">{result.correct_count}</div>
+              <div className="text-sm text-green-600 dark:text-green-500 font-medium">Correct</div>
+            </div>
+            <div className="bg-red-50/50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/50 shadow-sm rounded-xl p-6 text-center">
+              <XCircle className="w-8 h-8 text-red-500 dark:text-red-400 mx-auto mb-2" />
+              <div className="text-3xl font-bold text-red-700 dark:text-red-400">{result.wrong_count}</div>
+              <div className="text-sm text-red-600 dark:text-red-500 font-medium">Wrong</div>
+            </div>
+            <div className="bg-muted/50 border border-border shadow-sm rounded-xl p-6 text-center">
+              <AlertCircle className="w-8 h-8 text-amber-500 dark:text-amber-400 mx-auto mb-2" />
+              <div className="text-3xl font-bold text-foreground">{result.skipped_count}</div>
+              <div className="text-sm text-muted-foreground font-medium">Skipped</div>
+            </div>
+          </div>
+
+          <div className="space-y-4 mt-8">
+            <h2 className="text-xl font-bold text-foreground px-1">Review Answers</h2>
+            <div className="space-y-6">
+              {(() => {
+                let globalQuestionCounter = 1;
+                const practiceQs = result.questions || [];
+                const rootQuestions = practiceQs.filter((q: any) => !q.parent_id);
+                const childrenMap: Record<number, any[]> = {};
+                practiceQs.forEach((q: any) => {
+                  if (q.parent_id) {
+                    if (!childrenMap[q.parent_id]) childrenMap[q.parent_id] = [];
+                    childrenMap[q.parent_id].push(q);
+                  }
+                });
+
+                const renderResultMCQ = (q: any, qNumber: number, isChild: boolean = false) => {
+                  const studentAns = result.answers[q.id];
+                  const correctAns = q.correct_option;
+                  const isCorrect = studentAns === correctAns;
+                  const isSkipped = !studentAns;
+                  const isExplanationExpanded = !!expandedExplanations[q.id];
+
+                  let optionsList: any[] = [];
+                  if (Array.isArray(q.options)) {
+                    optionsList = q.options;
+                  } else if (typeof q.options === 'object' && q.options !== null) {
+                    optionsList = Object.values(q.options);
+                  }
+
+                  return (
+                    <div key={q.id} className={`rounded-xl border shadow-sm transition-all overflow-hidden bg-card ${
+                      isCorrect ? 'border-green-200 dark:border-green-900/50' : isSkipped ? 'border-amber-200 dark:border-amber-900/50' : 'border-red-200 dark:border-red-900/50'
+                    } ${isChild ? 'mb-4 border-l-4' : ''}`}>
+                      <div className={`p-5 flex gap-4 ${
+                        isCorrect ? 'bg-green-50/30 dark:bg-green-900/10' : isSkipped ? 'bg-amber-50/30 dark:bg-amber-900/10' : 'bg-red-50/30 dark:bg-red-900/10'
+                      }`}>
+                        <div className="flex-none pt-1">
+                          {isCorrect ? <CheckCircle2 className="w-6 h-6 text-green-500" /> : isSkipped ? <AlertCircle className="w-6 h-6 text-amber-500" /> : <XCircle className="w-6 h-6 text-red-500" />}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-sm font-bold text-muted-foreground">Question {qNumber}</span>
+                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                              isCorrect ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' : isSkipped ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300'
+                            }`}>
+                              {isCorrect ? `+${q.marks}` : isSkipped ? '0' : `Wrong`} Marks
+                            </span>
+                          </div>
+                          <p className="text-lg font-medium text-foreground leading-snug">{q.question_text}</p>
+                        </div>
+                      </div>
+
+                      <div className="p-5 border-t border-border bg-card/50">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                          {optionsList.map((opt: any, optIdx: number) => {
+                            const optId = typeof opt === 'string' ? opt : opt.id || String(optIdx);
+                            const optText = typeof opt === 'string' ? opt : opt.text || opt.value || String(opt);
+                            const letter = String.fromCharCode(65 + optIdx);
+                            
+                            const isThisCorrect = String(optId) === String(correctAns);
+                            const isThisStudentSelected = String(optId) === String(studentAns);
+
+                            let bgColor = "bg-muted/50 border-border";
+                            let icon = null;
+                            let letterBgColor = "bg-muted-foreground/20 text-muted-foreground";
+
+                            if (isSkipped && isThisCorrect) {
+                              bgColor = "bg-amber-50 border-amber-300 text-amber-900 dark:bg-amber-900/20 dark:border-amber-700 dark:text-amber-100 shadow-sm ring-1 ring-amber-300";
+                              icon = <CheckCircle2 className="w-5 h-5 text-amber-600 dark:text-amber-400 ml-auto" />;
+                              letterBgColor = "bg-amber-200 text-amber-800 dark:bg-amber-800 dark:text-amber-100";
+                            } else if (!isSkipped && isThisCorrect) {
+                              bgColor = "bg-green-50 border-green-300 text-green-900 dark:bg-green-900/20 dark:border-green-700 dark:text-green-100 shadow-sm ring-1 ring-green-300";
+                              icon = <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400 ml-auto" />;
+                              letterBgColor = "bg-green-200 text-green-800 dark:bg-green-800 dark:text-green-100";
+                            } else if (isThisStudentSelected && !isThisCorrect) {
+                              bgColor = "bg-red-50 border-red-300 text-red-900 dark:bg-red-900/20 dark:border-red-700 dark:text-red-100 shadow-sm";
+                              icon = <XCircle className="w-5 h-5 text-red-600 dark:text-red-400 ml-auto" />;
+                              letterBgColor = "bg-red-200 text-red-800 dark:bg-red-800 dark:text-red-100";
+                            }
+
+                            return (
+                              <div key={optIdx} className={`p-4 rounded-xl border flex items-center gap-3 ${bgColor}`}>
+                                <div className={`w-6 h-6 rounded-md flex items-center justify-center text-xs font-bold shrink-0 ${letterBgColor}`}>
+                                  {letter}
+                                </div>
+                                <span className="font-medium text-sm">{optText}</span>
+                                {icon}
+                              </div>
+                            );
+                          })}
+                        </div>
+                        
+                        {!isExplanationExpanded ? (
+                          <button onClick={() => toggleExplanation(q.id)} className="w-full bg-muted/50 hover:bg-muted rounded-xl p-4 border border-dashed border-border flex items-center justify-center gap-2 text-muted-foreground font-medium transition-colors cursor-pointer">
+                            <ChevronDown className="w-4 h-4" /> View Solution Explanation
+                          </button>
+                        ) : (
+                          <div className="bg-muted/50 rounded-xl p-4 border border-border relative">
+                            <button onClick={() => toggleExplanation(q.id)} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground">
+                              <ChevronUp className="w-4 h-4" />
+                            </button>
+                            <h4 className="font-bold text-foreground mb-2 flex items-center gap-2">Solution Explanation</h4>
+                            <p className="text-muted-foreground text-sm leading-relaxed pr-6">{q.explanation || "No explanation provided for this question."}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                };
+
+                return rootQuestions.map((q: any) => {
+                  if (q.type === 'passage') {
+                    const childQuestions = childrenMap[q.id] || [];
+                    return (
+                      <div key={q.id} className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden mb-8">
+                        <div className="p-6 bg-muted/40 border-b border-border">
+                          <div className="flex items-center gap-2 mb-3">
+                            <span className="px-3 py-1 bg-primary/10 text-primary dark:bg-primary/20 text-xs font-bold rounded-full uppercase tracking-wider">Passage block</span>
+                          </div>
+                          <div className="text-lg text-foreground leading-relaxed font-medium">{q.question_text}</div>
+                        </div>
+                        <div className="p-6 bg-background/50 space-y-6">
+                          <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider mb-2">Questions in this passage</h4>
+                          {childQuestions.map(cq => {
+                            const qNum = globalQuestionCounter++;
+                            return renderResultMCQ(cq, qNum, true);
+                          })}
+                        </div>
+                      </div>
+                    );
+                  } else {
+                    const qNum = globalQuestionCounter++;
+                    return renderResultMCQ(q, qNum, false);
+                  }
+                });
+              })()}
+            </div>
+          </div>
+          
+          <div className="pt-8 flex justify-center">
+            <Button size="lg" onClick={() => router.push('/student/exams')}>
+              Back to My Exams
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const attemptedCount = Object.keys(answers).length;
 
   return (
-    <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950 pb-28">
+    <div className="min-h-screen bg-background pb-28">
       {/* Top Header */}
-      <div className="bg-white dark:bg-slate-900 border-b sticky top-0 z-10 shadow-sm">
+      <div className="bg-card/80 backdrop-blur-xl border-b border-border sticky top-0 z-10 shadow-sm dark:shadow-none">
         <div className="max-w-4xl mx-auto px-4 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-xl font-bold text-slate-900 dark:text-white leading-tight">{title}</h1>
-            <p className="text-sm text-slate-500 mt-1">Select an option to lock your answer. You cannot change it later.</p>
+            <h1 className="text-xl font-bold text-foreground leading-tight">{title}</h1>
+            <p className="text-sm text-muted-foreground mt-1">Select an option to lock your answer. You cannot change it later.</p>
           </div>
         </div>
       </div>
 
       {/* Questions Feed */}
       <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
-        {questions.map((q, index) => {
-          const isAnswered = !!answers[q.id];
-          const selectedValue = answers[q.id];
-          let optionsList: any[] = [];
+        {(() => {
+          let globalQuestionCounter = 1;
+          const rootQuestions = questions.filter(q => !q.parent_id);
+          const childrenMap: Record<number, Question[]> = {};
           
-          if (Array.isArray(q.options)) {
-            optionsList = q.options;
-          } else if (typeof q.options === 'object' && q.options !== null) {
-            optionsList = Object.values(q.options);
-          }
+          questions.forEach(q => {
+            if (q.parent_id) {
+              if (!childrenMap[q.parent_id]) childrenMap[q.parent_id] = [];
+              childrenMap[q.parent_id].push(q);
+            }
+          });
 
-          return (
-            <div key={q.id} className="bg-white dark:bg-slate-900 rounded-2xl border p-6 shadow-sm">
-              <div className="flex gap-4">
-                <div className="flex-none">
-                  <span className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 font-semibold text-sm">
-                    {index + 1}
-                  </span>
-                </div>
-                <div className="flex-1">
-                  <div className="text-lg text-slate-800 dark:text-slate-200 font-medium mb-6">
-                    {q.question_text}
+          // Helper to render a single MCQ
+          const renderMCQ = (q: Question, qNumber: number, isChild: boolean = false) => {
+            const isAnswered = !!answers[q.id];
+            const selectedValue = answers[q.id];
+            let optionsList: any[] = [];
+            
+            if (Array.isArray(q.options)) {
+              optionsList = q.options;
+            } else if (typeof q.options === 'object' && q.options !== null) {
+              optionsList = Object.values(q.options);
+            }
+
+            return (
+              <div key={q.id} className={`rounded-xl border border-border shadow-sm transition-all overflow-hidden bg-card ${isChild ? 'mb-4 border-l-4 border-l-primary/50' : ''}`}>
+                <div className="p-5 flex gap-4 bg-muted/30">
+                  <div className="flex-none pt-1">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted text-muted-foreground font-bold text-sm shadow-inner">
+                      {qNumber}
+                    </div>
                   </div>
                   
-                  <div className="space-y-3">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-sm font-bold text-muted-foreground">Question {qNumber}</span>
+                      <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300">
+                        {q.marks} Marks
+                      </span>
+                    </div>
+                    <p className="text-lg font-medium text-foreground leading-snug">
+                      {q.question_text}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-5 border-t border-border bg-card/50">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {optionsList.map((opt: any, optIdx: number) => {
-                      const optValue = typeof opt === 'string' ? opt : opt.value || opt.text || String(opt);
-                      const isThisSelected = selectedValue === optValue;
-                      const letter = String.fromCharCode(65 + optIdx); // A, B, C, D...
+                      const optId = typeof opt === 'string' ? opt : opt.id || String(optIdx);
+                      const optText = typeof opt === 'string' ? opt : opt.text || opt.value || String(opt);
+                      const isThisSelected = String(selectedValue) === String(optId);
+                      const letter = String.fromCharCode(65 + optIdx);
                       
+                      let bgColor = "bg-muted/50 border-border hover:border-primary/30 hover:bg-muted cursor-pointer";
+                      let letterBgColor = "bg-muted-foreground/20 text-muted-foreground";
+                      let textStyle = "text-foreground";
+
+                      if (isThisSelected) {
+                        bgColor = "bg-primary/5 border-primary text-primary dark:bg-primary/10 dark:border-primary shadow-sm ring-1 ring-primary/20";
+                        letterBgColor = "bg-primary text-white";
+                        textStyle = "text-primary dark:text-primary";
+                      } else if (isAnswered) {
+                        bgColor = "bg-muted/30 border-border/50 opacity-60 cursor-not-allowed";
+                      }
+
                       return (
                         <button
                           key={optIdx}
-                          onClick={() => handleOptionSelect(q.id, optValue)}
+                          onClick={() => handleOptionSelect(q.id, optId)}
                           disabled={isAnswered}
-                          className={`w-full text-left p-4 rounded-xl border-2 transition-all flex items-center gap-4 ${
-                            isThisSelected 
-                              ? 'border-primary bg-primary/5 text-primary shadow-sm' 
-                              : isAnswered
-                                ? 'border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-slate-400 dark:text-slate-600 cursor-not-allowed opacity-60'
-                                : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:hover:border-slate-600 text-slate-700 dark:text-slate-300'
-                          }`}
+                          className={`p-4 rounded-xl border flex items-center text-left gap-3 transition-all ${bgColor}`}
                         >
-                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 font-bold ${
-                            isThisSelected ? 'bg-primary text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
-                          }`}>
+                          <div className={`w-6 h-6 rounded-md flex items-center justify-center text-xs font-bold shrink-0 transition-colors ${letterBgColor}`}>
                             {letter}
                           </div>
-                          <span className="text-base font-medium">{optValue}</span>
-                          {isThisSelected && <CheckCircle2 className="w-5 h-5 ml-auto text-primary" />}
+                          <span className={`font-medium text-sm flex-1 ${textStyle}`}>{optText}</span>
+                          {isThisSelected && <CheckCircle2 className="w-5 h-5 text-primary ml-auto" />}
                         </button>
                       );
                     })}
                   </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          };
+
+          return rootQuestions.map((q) => {
+            if (q.type === 'passage') {
+              const childQuestions = childrenMap[q.id] || [];
+              return (
+                <div key={q.id} className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
+                  <div className="p-6 bg-muted/40 border-b border-border">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="px-3 py-1 bg-primary/10 text-primary dark:bg-primary/20 text-xs font-bold rounded-full uppercase tracking-wider">
+                        Passage block
+                      </span>
+                    </div>
+                    <div className="text-lg text-foreground leading-relaxed font-medium">
+                      {q.question_text}
+                    </div>
+                  </div>
+                  <div className="p-6 bg-background/50 space-y-6">
+                    <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider mb-2">
+                      Questions in this passage
+                    </h4>
+                    {childQuestions.map(cq => {
+                      const qNum = globalQuestionCounter++;
+                      return renderMCQ(cq, qNum, true);
+                    })}
+                  </div>
+                </div>
+              );
+            } else {
+              const qNum = globalQuestionCounter++;
+              return renderMCQ(q, qNum, false);
+            }
+          });
+        })()}
       </div>
 
       {/* Sticky Bottom Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t shadow-[0_-4px_15px_-5px_rgba(0,0,0,0.1)] p-4 z-50">
+      <div className="fixed bottom-0 left-0 right-0 bg-card/90 backdrop-blur-xl border-t border-border shadow-sm p-4 z-50">
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
           
           <div className="flex items-center gap-6">
-            <div className={`flex items-center gap-2 px-4 py-2 rounded-lg font-mono font-bold text-xl border ${
-              timeLeft <= 60 ? 'bg-red-50 text-red-600 border-red-200 animate-pulse' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+            <div className={`flex items-center gap-2 px-4 py-2 rounded-lg font-mono font-bold text-xl border shadow-sm ${
+              timeLeft <= 60 ? 'bg-destructive/10 text-destructive border-destructive/20 animate-pulse' : 'bg-muted text-foreground border-border'
             }`}>
               <Clock className="w-5 h-5" />
               {formatTime(timeLeft)}
             </div>
 
             <div className="hidden sm:flex flex-col">
-              <span className="text-sm font-bold text-slate-700 dark:text-slate-200">
-                Attempted: {attemptedCount} / {questions.length}
+              <span className="text-sm font-bold text-foreground">
+                Attempted: {attemptedCount} / {questions.filter(q => q.type !== 'passage').length}
               </span>
-              <span className="text-xs text-slate-500">
-                {questions.length - attemptedCount} remaining
+              <span className="text-xs text-muted-foreground font-medium">
+                {questions.filter(q => q.type !== 'passage').length - attemptedCount} remaining
               </span>
             </div>
           </div>

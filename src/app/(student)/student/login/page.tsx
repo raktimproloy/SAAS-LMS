@@ -45,11 +45,11 @@ export default function StudentLoginPage() {
   };
 
   return (
-    <div className="flex h-screen w-full items-center justify-center bg-slate-50 dark:bg-slate-900">
-      <div className="w-full max-w-md p-8 bg-white dark:bg-slate-800 rounded-2xl shadow-xl">
+    <div className="flex h-screen w-full items-center justify-center bg-background">
+      <div className="w-full max-w-md p-8 bg-card text-card-foreground rounded-2xl shadow-xl border border-border">
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Student Portal</h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-2">Sign in to access your courses and exams</p>
+          <h1 className="text-3xl font-bold text-foreground">Student Portal</h1>
+          <p className="text-muted-foreground mt-2">Sign in to access your courses and exams</p>
         </div>
 
         {error && (

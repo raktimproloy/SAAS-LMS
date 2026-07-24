@@ -16,7 +16,7 @@ export default function StudentLayout({
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-950">
+    <div className="flex h-screen overflow-hidden bg-background">
       <div className="hidden lg:block">
         <StudentSidebar />
       </div>

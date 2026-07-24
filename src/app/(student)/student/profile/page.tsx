@@ -41,8 +41,8 @@ export default function StudentProfile() {
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto animate-in fade-in duration-500">
-      <div className="flex flex-col md:flex-row items-center md:items-start gap-8 bg-white dark:bg-slate-900 p-8 rounded-2xl border shadow-sm">
-        <Avatar className="w-32 h-32 border-4 border-slate-50 dark:border-slate-800 shadow-md">
+      <div className="flex flex-col md:flex-row items-center md:items-start gap-8 bg-card text-card-foreground p-8 rounded-2xl border shadow-sm">
+        <Avatar className="w-32 h-32 border-4 border-background shadow-md">
           <AvatarImage src={student.photo || ""} />
           <AvatarFallback className="text-4xl">{student.name.substring(0, 2).toUpperCase()}</AvatarFallback>
         </Avatar>
@@ -50,10 +50,10 @@ export default function StudentProfile() {
           <div className="inline-block px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-semibold tracking-wider uppercase mb-2">
             Student ID: {student.student_id}
           </div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white">{student.name}</h1>
-          <p className="text-lg text-slate-500">{student.batch?.course?.title} — {student.batch?.name}</p>
+          <h1 className="text-3xl font-bold text-foreground">{student.name}</h1>
+          <p className="text-lg text-muted-foreground">{student.batch?.course?.title} — {student.batch?.name}</p>
           
-          <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 pt-4 text-sm text-slate-600 dark:text-slate-400">
+          <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 pt-4 text-sm text-muted-foreground">
             {student.phone && (
               <div className="flex items-center gap-2">
                 <Phone className="w-4 h-4" /> {student.phone}
@@ -77,21 +77,21 @@ export default function StudentProfile() {
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
-              <User className="w-5 h-5 text-slate-400" />
+              <User className="w-5 h-5 text-muted-foreground/70" />
               Personal Information
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-3 gap-2 border-b pb-3">
-              <div className="text-sm text-slate-500">Gender</div>
+              <div className="text-sm text-muted-foreground">Gender</div>
               <div className="col-span-2 font-medium capitalize">{student.gender || "Not specified"}</div>
             </div>
             <div className="grid grid-cols-3 gap-2 border-b pb-3">
-              <div className="text-sm text-slate-500">Date of Birth</div>
+              <div className="text-sm text-muted-foreground">Date of Birth</div>
               <div className="col-span-2 font-medium">{student.dob ? format(new Date(student.dob), "MMMM d, yyyy") : "Not specified"}</div>
             </div>
             <div className="grid grid-cols-3 gap-2">
-              <div className="text-sm text-slate-500 flex items-center gap-2"><MapPin className="w-4 h-4"/> Address</div>
+              <div className="text-sm text-muted-foreground flex items-center gap-2"><MapPin className="w-4 h-4"/> Address</div>
               <div className="col-span-2 font-medium">{student.address || "Not specified"}</div>
             </div>
           </CardContent>
@@ -100,21 +100,21 @@ export default function StudentProfile() {
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
-              <Users className="w-5 h-5 text-slate-400" />
+              <Users className="w-5 h-5 text-muted-foreground/70" />
               Guardian Information
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-3 gap-2 border-b pb-3">
-              <div className="text-sm text-slate-500">Parent Name</div>
+              <div className="text-sm text-muted-foreground">Parent Name</div>
               <div className="col-span-2 font-medium">{student.parent_name || "Not specified"}</div>
             </div>
             <div className="grid grid-cols-3 gap-2 border-b pb-3">
-              <div className="text-sm text-slate-500">Relation</div>
+              <div className="text-sm text-muted-foreground">Relation</div>
               <div className="col-span-2 font-medium capitalize">{student.parent_relation || "Not specified"}</div>
             </div>
             <div className="grid grid-cols-3 gap-2">
-              <div className="text-sm text-slate-500 flex items-center gap-2"><Phone className="w-4 h-4"/> Parent Phone</div>
+              <div className="text-sm text-muted-foreground flex items-center gap-2"><Phone className="w-4 h-4"/> Parent Phone</div>
               <div className="col-span-2 font-medium">{student.parent_phone || "Not specified"}</div>
             </div>
           </CardContent>
