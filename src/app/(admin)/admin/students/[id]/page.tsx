@@ -352,8 +352,8 @@ export default function StudentProfilePage() {
                             <TableCell className="text-sm">{format(new Date(res.created_at), 'dd MMM yy')}</TableCell>
                             <TableCell className="font-medium">{res.exam?.title}</TableCell>
                             <TableCell>
-                              <Badge variant={res.obtained_marks >= (res.exam?.total_marks / 2) ? "default" : "secondary"}>
-                                {res.obtained_marks} / {res.exam?.total_marks}
+                              <Badge variant={res.obtained_marks >= (res.total_marks / 2) ? "default" : "secondary"}>
+                                {res.obtained_marks} / {res.total_marks}
                               </Badge>
                             </TableCell>
                             <TableCell>{accuracy}%</TableCell>

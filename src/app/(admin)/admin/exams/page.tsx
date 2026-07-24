@@ -346,7 +346,7 @@ export default function ExamsPage() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="total_marks">Total Marks</Label>
+                  <Label htmlFor="total_marks">Default Marks / Question</Label>
                   <Input id="total_marks" type="number" step="0.5" value={totalMarks} onChange={(e) => setTotalMarks(e.target.value)} required />
                 </div>
                 
@@ -445,7 +445,7 @@ export default function ExamsPage() {
                           </div>
                         </TableCell>
                         <TableCell className="text-sm">
-                          <div><strong>{exam.total_marks}</strong> Marks</div>
+                          <div><strong>{exam.total_marks}</strong> Default Marks/Q</div>
                           <div className="text-muted-foreground"><strong>{exam._count?.questions || 0}</strong> Questions</div>
                         </TableCell>
                         <TableCell>
