@@ -220,13 +220,6 @@ export default function QuestionEditor({ examId, initialQuestions, defaultMark }
             <UploadCloud className="mr-2 h-4 w-4" /> {isUploading ? "Uploading..." : "Upload File"}
           </Button>
         </div>
-        <div className="flex-1" />
-        <Button onClick={() => handleAddPassage()} variant="secondary">
-          <Type className="mr-2 h-4 w-4" /> Add Passage (MCQ Group)
-        </Button>
-        <Button onClick={() => handleAddMCQ()}>
-          <Plus className="mr-2 h-4 w-4" /> Add Single MCQ
-        </Button>
       </div>
 
       <div className="flex justify-between items-center text-sm text-muted-foreground">
@@ -501,6 +494,15 @@ export default function QuestionEditor({ examId, initialQuestions, defaultMark }
           )}
         </Droppable>
       </DragDropContext>
+
+      <div className="flex flex-wrap gap-3 p-4 bg-muted/10 rounded-lg border border-dashed justify-center items-center mt-4">
+        <Button onClick={() => handleAddPassage()} variant="secondary" size="lg">
+          <Type className="mr-2 h-5 w-5" /> Add Passage (MCQ Group)
+        </Button>
+        <Button onClick={() => handleAddMCQ()} size="lg">
+          <Plus className="mr-2 h-5 w-5" /> Add Single MCQ
+        </Button>
+      </div>
     </div>
   );
 }
