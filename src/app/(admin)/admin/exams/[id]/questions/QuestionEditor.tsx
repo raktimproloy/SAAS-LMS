@@ -241,7 +241,7 @@ export default function QuestionEditor({ examId, initialQuestions, defaultMark }
                       <div className="p-2 border-b bg-muted/20 flex items-center justify-between cursor-grab" {...provided.dragHandleProps}>
                         <div className="flex items-center gap-2">
                           <GripVertical className="h-4 w-4 text-muted-foreground" />
-                          <Badge variant="outline">{q.type === 'passage' ? 'Passage Block' : 'MCQ'}</Badge>
+                          <Badge variant="outline">{q.type === 'passage' ? `Passage Block ${index + 1}` : `Question ${index + 1}`}</Badge>
                         </div>
                         <Button 
                           variant="ghost" 
@@ -369,7 +369,7 @@ export default function QuestionEditor({ examId, initialQuestions, defaultMark }
                             {q.children?.map((cq, cIdx) => (
                               <div key={cq.id} className="mb-4 pl-4 border-l-2 py-2">
                                 <div className="flex justify-between items-center mb-2">
-                                  <Badge variant="outline">Child MCQ</Badge>
+                                  <Badge variant="outline">{`Question ${index + 1}.${cIdx + 1}`}</Badge>
                                   <Button 
                                     variant="ghost" 
                                     size="icon"
