@@ -97,7 +97,7 @@ export default function StudentViewQuestionsPage() {
             }
 
             return (
-              <div key={q.id} className={`rounded-xl border border-border shadow-sm transition-all overflow-hidden bg-card ${isChild ? 'mb-4 border-l-4 border-l-primary/50' : ''}`}>
+              <div key={q.id} className={`rounded-xl border border-border shadow-sm transition-all overflow-hidden bg-card ${isChild ? 'mb-4' : ''}`}>
                 <div className="p-5 flex gap-4 bg-muted/30">
                   <div className="flex-none pt-1">
                     <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted text-muted-foreground font-bold text-sm shadow-inner">
@@ -185,7 +185,7 @@ export default function StudentViewQuestionsPage() {
                   <div className="p-6 bg-muted/40 border-b border-border">
                     <div className="flex items-center gap-2 mb-3">
                       <span className="px-3 py-1 bg-primary/10 text-primary dark:bg-primary/20 text-xs font-bold rounded-full uppercase tracking-wider">
-                        Passage block
+                        Read The Passage
                       </span>
                     </div>
                     <div className="text-lg text-foreground leading-relaxed font-medium">

@@ -252,14 +252,27 @@ export default function QuestionEditor({ examId, initialQuestions, defaultMark }
       <DragDropContext onDragEnd={handleDragEnd}>
         <Droppable droppableId="questions-list" type="group">
           {(provided) => {
-            let globalQuestionCounter = 1;
+            let questionCounter = 1;
+            let passageCounter = 1;
+            const numberMap: Record<string | number, string> = {};
+            
+            questions.forEach((q) => {
+              const qIdStr = q.id?.toString() || Math.random().toString();
+              if (q.type === 'passage') {
+                numberMap[qIdStr] = `Passage Block ${passageCounter++}`;
+                q.children?.forEach(cq => {
+                  const cqIdStr = cq.id?.toString() || Math.random().toString();
+                  numberMap[cqIdStr] = `Question ${questionCounter++}`;
+                });
+              } else {
+                numberMap[qIdStr] = `Question ${questionCounter++}`;
+              }
+            });
+
             return (
               <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-4">
                 {questions.map((q, index) => {
-                  const currentGlobalCounter = globalQuestionCounter;
-                  if (q.type !== 'passage') {
-                    globalQuestionCounter++;
-                  }
+                  const qIdStr = q.id?.toString() || "";
                   
                   return (
                     <Draggable key={q.id?.toString() || index.toString()} draggableId={q.id?.toString() || index.toString()} index={index}>
@@ -268,7 +281,7 @@ export default function QuestionEditor({ examId, initialQuestions, defaultMark }
                           <div className="p-2 border-b bg-muted/20 flex items-center justify-between cursor-grab" {...provided.dragHandleProps}>
                             <div className="flex items-center gap-2">
                               <GripVertical className="h-4 w-4 text-muted-foreground" />
-                              <Badge variant="outline">{q.type === 'passage' ? `Passage Block ${index + 1}` : `Question ${currentGlobalCounter}`}</Badge>
+                              <Badge variant="outline">{numberMap[qIdStr]}</Badge>
                             </div>
                             <Button 
                               variant="ghost" 
@@ -402,11 +415,11 @@ export default function QuestionEditor({ examId, initialQuestions, defaultMark }
                                 </h4>
                                 
                                 {q.children?.map((cq, cIdx) => {
-                                  const childGlobalCounter = globalQuestionCounter++;
+                                  const cqIdStr = cq.id?.toString() || "";
                                   return (
                                     <div key={cq.id} className="mb-4 pl-4 border-l-2 py-2">
                                       <div className="flex justify-between items-center mb-2">
-                                        <Badge variant="outline">{`Question ${childGlobalCounter}`}</Badge>
+                                        <Badge variant="outline">{numberMap[cqIdStr]}</Badge>
                                         <Button 
                                         variant="ghost" 
                                         size="icon"

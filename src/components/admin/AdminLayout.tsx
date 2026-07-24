@@ -154,7 +154,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[260px_1fr]">
       {/* Desktop Sidebar */}
-      <div className="hidden border-r bg-muted/20 md:block">
+      <div className="hidden border-r bg-muted/20 md:block sticky top-0 h-screen">
         <SidebarContent />
       </div>
 

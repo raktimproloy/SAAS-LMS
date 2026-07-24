@@ -241,7 +241,7 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
                   return (
                     <div key={q.id} className={`rounded-xl border shadow-sm transition-all overflow-hidden bg-card ${
                       isCorrect ? 'border-green-200 dark:border-green-900/50' : isSkipped ? 'border-amber-200 dark:border-amber-900/50' : 'border-red-200 dark:border-red-900/50'
-                    } ${isChild ? 'mb-4 border-l-4' : ''}`}>
+                    } ${isChild ? 'mb-4' : ''}`}>
                       <div className={`p-5 flex gap-4 ${
                         isCorrect ? 'bg-green-50/30 dark:bg-green-900/10' : isSkipped ? 'bg-amber-50/30 dark:bg-amber-900/10' : 'bg-red-50/30 dark:bg-red-900/10'
                       }`}>
@@ -326,7 +326,7 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
                       <div key={q.id} className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden mb-8">
                         <div className="p-6 bg-muted/40 border-b border-border">
                           <div className="flex items-center gap-2 mb-3">
-                            <span className="px-3 py-1 bg-primary/10 text-primary dark:bg-primary/20 text-xs font-bold rounded-full uppercase tracking-wider">Passage block</span>
+                            <span className="px-3 py-1 bg-primary/10 text-primary dark:bg-primary/20 text-xs font-bold rounded-full uppercase tracking-wider">Read The Passage</span>
                           </div>
                           <div className="text-lg text-foreground leading-relaxed font-medium">{q.question_text}</div>
                         </div>
@@ -363,7 +363,7 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
   return (
     <div className="min-h-screen bg-background pb-28">
       {/* Top Header */}
-      <div className="bg-card/80 backdrop-blur-xl border-b border-border sticky top-0 z-10 shadow-sm dark:shadow-none">
+      <div className="bg-card/80 backdrop-blur-xl border-b border-border shadow-sm dark:shadow-none">
         <div className="max-w-4xl mx-auto px-4 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-xl font-bold text-foreground leading-tight">{title}</h1>
@@ -399,7 +399,7 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
             }
 
             return (
-              <div key={q.id} className={`rounded-xl border border-border shadow-sm transition-all overflow-hidden bg-card ${isChild ? 'mb-4 border-l-4 border-l-primary/50' : ''}`}>
+              <div key={q.id} className={`rounded-xl border border-border shadow-sm transition-all overflow-hidden bg-card ${isChild ? 'mb-4' : ''}`}>
                 <div className="p-5 flex gap-4 bg-muted/30">
                   <div className="flex-none pt-1">
                     <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted text-muted-foreground font-bold text-sm shadow-inner">
@@ -469,7 +469,7 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
                   <div className="p-6 bg-muted/40 border-b border-border">
                     <div className="flex items-center gap-2 mb-3">
                       <span className="px-3 py-1 bg-primary/10 text-primary dark:bg-primary/20 text-xs font-bold rounded-full uppercase tracking-wider">
-                        Passage block
+                        Read The Passage
                       </span>
                     </div>
                     <div className="text-lg text-foreground leading-relaxed font-medium">

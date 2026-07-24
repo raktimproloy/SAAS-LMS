@@ -148,7 +148,7 @@ export default function StudentExamResultPage() {
                   return (
                     <div key={q.id} className={`rounded-xl border shadow-sm transition-all overflow-hidden bg-card ${
                       isCorrect ? 'border-green-200 dark:border-green-900/50' : isSkipped ? 'border-amber-200 dark:border-amber-900/50' : 'border-red-200 dark:border-red-900/50'
-                    } ${isChild ? 'mb-4 border-l-4' : ''}`}>
+                    } ${isChild ? 'mb-4' : ''}`}>
                       {/* Question Header */}
                       <div 
                         className={`p-5 flex gap-4 ${
@@ -259,7 +259,7 @@ export default function StudentExamResultPage() {
                         <div className="p-6 bg-muted/40 border-b border-border">
                           <div className="flex items-center gap-2 mb-3">
                             <span className="px-3 py-1 bg-primary/10 text-primary dark:bg-primary/20 text-xs font-bold rounded-full uppercase tracking-wider">
-                              Passage block
+                              Read The Passage
                             </span>
                           </div>
                           <div className="text-lg text-foreground leading-relaxed font-medium">
