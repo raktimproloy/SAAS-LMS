@@ -38,17 +38,9 @@ export async function POST(request: Request) {
       student_id: student.student_id,
     });
 
-    // Set HTTP-only cookie
-    cookies().set({
-      name: "student_token",
-      value: token,
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 7 * 24 * 60 * 60, // 7 days
-      path: "/",
-    });
+    const maxAge = 7 * 24 * 60 * 60; // 7 days
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       user: {
         id: student.id,
@@ -57,6 +49,18 @@ export async function POST(request: Request) {
         batch_name: student.batch.name,
       },
     });
+
+    response.cookies.set({
+      name: "student_token",
+      value: token,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: maxAge,
+      expires: new Date(Date.now() + maxAge * 1000),
+      path: "/",
+    });
+
+    return response;
   } catch (error) {
     console.error("Student login error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

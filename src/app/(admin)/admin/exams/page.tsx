@@ -231,8 +231,8 @@ export default function ExamsPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Exam System</h1>
-          <p className="text-muted-foreground mt-1">Manage online MCQs and offline exam results.</p>
+          <h1 className="text-3xl font-bold tracking-tight">Online Exams</h1>
+          <p className="text-muted-foreground mt-1">Manage online exams, questions, and view results.</p>
         </div>
 
         <Dialog open={isDialogOpen} onOpenChange={(open) => {
@@ -273,7 +273,6 @@ export default function ExamsPage() {
                     required
                   >
                     <option value="online_mcq">Online MCQ</option>
-                    <option value="offline">Offline Written</option>
                   </select>
                 </div>
                 

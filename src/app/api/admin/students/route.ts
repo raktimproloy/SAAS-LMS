@@ -14,10 +14,7 @@ async function checkPermission(permission: string) {
   return adminPayload.permissions?.includes("all") || adminPayload.permissions?.includes(permission);
 }
 
-// Helper to format ID like #0001
-function formatStudentId(count: number): string {
-  return `#${(count + 1).toString().padStart(4, "0")}`;
-}
+// Helper removed since ID is manually entered
 
 export async function GET() {
   const hasPerm = await checkPermission("students");
@@ -53,12 +50,20 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const {
-      name, gender, dob, phone, email, password, batch_id,
+      student_id, name, gender, dob, phone, email, password, batch_id,
       parent_name, parent_phone, address
     } = body;
 
-    if (!name || !gender || !phone || !password || !batch_id) {
+    if (!student_id || !name || !gender || !phone || !password || !batch_id) {
       return NextResponse.json({ error: "Required fields are missing" }, { status: 400 });
+    }
+
+    // Check if student_id already exists
+    const existingId = await prisma.student.findUnique({
+      where: { student_id }
+    });
+    if (existingId) {
+      return NextResponse.json({ error: "Student ID already exists" }, { status: 400 });
     }
 
     // Check if phone/email already exists (optional but good practice)
@@ -69,9 +74,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Student with this phone number already exists" }, { status: 400 });
     }
 
-    // Generate student_id
-    const studentCount = await prisma.student.count();
-    const student_id = formatStudentId(studentCount);
+    // student_id is manually provided
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);

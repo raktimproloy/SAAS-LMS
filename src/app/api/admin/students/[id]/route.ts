@@ -24,7 +24,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
     const body = await request.json();
     const { 
-      name, gender, dob, phone, email, password, batch_id, 
+      student_id, name, gender, dob, phone, email, password, batch_id, 
       parent_name, parent_phone, address, status
     } = body;
 
@@ -34,6 +34,14 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     // Prepare update data
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updateData: any = {};
+    if (student_id) {
+      // Check if another student has this student_id
+      const existingId = await prisma.student.findFirst({
+        where: { student_id, id: { not: id } }
+      });
+      if (existingId) return NextResponse.json({ error: "Student ID already exists" }, { status: 400 });
+      updateData.student_id = student_id;
+    }
     if (name) updateData.name = name;
     if (gender) updateData.gender = gender;
     if (dob) updateData.dob = new Date(dob);

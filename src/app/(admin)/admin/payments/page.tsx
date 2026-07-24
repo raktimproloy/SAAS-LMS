@@ -106,6 +106,7 @@ export default function PaymentsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [batchFilter, setBatchFilter] = useState("all");
+  const [courseFilter, setCourseFilter] = useState("all");
 
   // Actions states
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -297,15 +298,17 @@ export default function PaymentsPage() {
     return payments.filter(p => {
       const matchStatus = statusFilter === "all" || p.status === statusFilter;
       const matchBatch = batchFilter === "all" || p.student?.batch?.id?.toString() === batchFilter;
+      const matchCourse = courseFilter === "all" || p.student?.batch?.course?.id?.toString() === courseFilter;
+
       const q = searchQuery.toLowerCase();
       const matchSearch = q === "" ||
         p.student?.name?.toLowerCase().includes(q) ||
         p.student?.student_id?.toLowerCase().includes(q) ||
         p.receipt_number?.toLowerCase().includes(q);
 
-      return matchStatus && matchBatch && matchSearch;
+      return matchStatus && matchBatch && matchCourse && matchSearch;
     });
-  }, [payments, statusFilter, batchFilter, searchQuery]);
+  }, [payments, statusFilter, batchFilter, courseFilter, searchQuery]);
 
   const uniqueBatches = useMemo(() => {
     const batchesMap = new Map();
@@ -317,7 +320,7 @@ export default function PaymentsPage() {
     return Array.from(batchesMap.entries());
   }, [students]);
 
-  const uniqueCoursesForForm = useMemo(() => {
+  const uniqueCourses = useMemo(() => {
     const map = new Map();
     students.forEach(s => {
       if (s.batch?.course) map.set(s.batch.course.id, s.batch.course.title);
@@ -369,21 +372,7 @@ export default function PaymentsPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="student">Student</Label>
-                    <select
-                      id="student"
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                      value={studentId}
-                      onChange={(e) => handleStudentChange(e.target.value)}
-                      required
-                    >
-                      <option value="">Select Student...</option>
-                      {students.map(s => (
-                        <option key={s.id} value={s.id}>
-                          {s.student_id} - {s.name} ({s.batch?.name})
-                        </option>
-                      ))}
-                    </select>
+                    {/* Duplicate select removed */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:col-span-2">
                       <div className="space-y-2">
                         <Label htmlFor="course">Course</Label>
@@ -399,7 +388,7 @@ export default function PaymentsPage() {
                           required
                         >
                           <option value="">Select Course...</option>
-                          {uniqueCoursesForForm.map(([id, title]) => (
+                          {uniqueCourses.map(([id, title]) => (
                             <option key={id} value={id}>{title}</option>
                           ))}
                         </select>
@@ -669,11 +658,30 @@ export default function PaymentsPage() {
                 </select>
                 <select
                   className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+                  value={courseFilter}
+                  onChange={(e) => {
+                    setCourseFilter(e.target.value);
+                    setBatchFilter("all");
+                  }}
+                >
+                  <option value="all">All Courses</option>
+                  {uniqueCourses.map(([id, name]) => (
+                    <option key={id} value={id.toString()}>{name}</option>
+                  ))}
+                </select>
+                <select
+                  className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
                   value={batchFilter}
                   onChange={(e) => setBatchFilter(e.target.value)}
                 >
                   <option value="all">All Batches</option>
-                  {uniqueBatches.map(([id, name]) => (
+                  {uniqueBatches
+                    .filter(([_, __], index) => {
+                      if (courseFilter === "all") return true;
+                      const batch = students.find(s => s.batch?.id === _[0])?.batch;
+                      return batch?.course.id.toString() === courseFilter;
+                    })
+                    .map(([id, name]) => (
                     <option key={id} value={id.toString()}>{name}</option>
                   ))}
                 </select>

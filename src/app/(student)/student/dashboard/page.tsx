@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CalendarClock, CheckCircle2, XCircle, FileText, AlertTriangle } from "lucide-react";
@@ -9,7 +10,7 @@ import { RankBadge } from "@/components/student/rank-badge";
 
 type DashboardData = {
   attendance: { date: string | Date; status: "present" | "absent" | "late" }[];
-  recentResult: { obtained_marks: number; total_marks: number; correct_count: number; wrong_count: number; rank?: number; exam: { title: string } } | null;
+  recentResult: { obtained_marks: number; total_marks: number; correct_count?: number; wrong_count?: number; rank?: number; grade?: string; exam: { title: string; type: string; id: number } } | null;
   upcomingExam: { title: string; start_time: string | Date; duration_minutes: number; total_marks: number } | null;
   paymentStatus: string;
   notices: { id: number; title: string; content: string }[];
@@ -162,9 +163,24 @@ export default function StudentDashboard() {
                       <div className="text-4xl font-black text-foreground mb-2">
                         {data.recentResult.obtained_marks} <span className="text-lg font-medium text-muted-foreground/70">/ {data.recentResult.total_marks}</span>
                       </div>
-                      <div className="flex justify-center gap-4 text-sm mt-4">
-                        <div className="text-green-600 font-medium">Correct: {data.recentResult.correct_count}</div>
-                        <div className="text-red-500 font-medium">Wrong: {data.recentResult.wrong_count}</div>
+                      
+                      {data.recentResult.grade && (
+                        <div className="mb-2">
+                          <Badge variant="secondary" className="text-lg">{data.recentResult.grade}</Badge>
+                        </div>
+                      )}
+
+                      {data.recentResult.exam.type !== 'offline' && (
+                        <div className="flex justify-center gap-4 text-sm mt-4">
+                          <div className="text-green-600 font-medium">Correct: {data.recentResult.correct_count}</div>
+                          <div className="text-red-500 font-medium">Wrong: {data.recentResult.wrong_count}</div>
+                        </div>
+                      )}
+                      
+                      <div className="mt-4 pt-3 border-t border-muted">
+                        <Link href="/student/results" className="text-sm text-primary font-medium hover:underline">
+                          View All Results &rarr;
+                        </Link>
                       </div>
                     </div>
                   </div>

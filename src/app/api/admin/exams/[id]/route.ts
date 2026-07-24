@@ -13,6 +13,30 @@ async function checkPermission(permission: string) {
   return adminPayload.permissions?.includes("all") || adminPayload.permissions?.includes(permission);
 }
 
+export async function GET(request: Request, { params }: { params: { id: string } }) {
+  const hasPerm = await checkPermission("exams");
+  if (!hasPerm) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+
+  try {
+    const id = parseInt(params.id);
+    if (isNaN(id)) return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
+
+    const exam = await prisma.exam.findUnique({
+      where: { id },
+      include: {
+        batch: { include: { course: true } },
+        course: true,
+      }
+    });
+
+    if (!exam) return NextResponse.json({ error: "Exam not found" }, { status: 404 });
+    return NextResponse.json(exam);
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ error: "Failed to fetch exam" }, { status: 500 });
+  }
+}
+
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   const hasPerm = await checkPermission("exams");
   if (!hasPerm) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
@@ -36,6 +60,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     if (body.is_public !== undefined) updateData.is_public = body.is_public;
     if (body.batch_id !== undefined) updateData.batch_id = body.batch_id ? parseInt(body.batch_id) : null;
     if (body.course_id !== undefined) updateData.course_id = body.course_id ? parseInt(body.course_id) : null;
+    if (body.is_grading_enabled !== undefined) updateData.is_grading_enabled = body.is_grading_enabled;
 
     const updatedExam = await prisma.exam.update({
       where: { id },

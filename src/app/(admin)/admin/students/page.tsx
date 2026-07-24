@@ -79,6 +79,7 @@ export default function StudentsPage() {
   const [successData, setSuccessData] = useState<{ id: number; name: string } | null>(null);
 
   // Fields
+  const [student_id, setStudent_id] = useState("");
   const [name, setName] = useState("");
   const [gender, setGender] = useState("");
   const [dob, setDob] = useState("");
@@ -115,6 +116,7 @@ export default function StudentsPage() {
   }, []);
 
   const resetForm = () => {
+    setStudent_id("");
     setName("");
     setGender("");
     setDob("");
@@ -138,6 +140,7 @@ export default function StudentsPage() {
   const handleEditClick = (student: Student) => {
     resetForm();
     setEditingStudentId(student.id);
+    setStudent_id(student.student_id || "");
     setName(student.name || "");
     setGender(student.gender || "");
     setDob(student.dob ? new Date(student.dob).toISOString().split('T')[0] : "");
@@ -211,7 +214,7 @@ export default function StudentsPage() {
 
       // If editing and password is empty, don't send it
       const payload: Record<string, string | number | undefined> = {
-        name, gender, dob, phone, email, batch_id: batchId,
+        student_id, name, gender, dob, phone, email, batch_id: batchId,
         parent_name: parentName, parent_phone: parentPhone, address
       };
       if (password) payload.password = password;
@@ -294,6 +297,11 @@ export default function StudentsPage() {
               )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="student_id">Student ID</Label>
+                  <Input id="student_id" value={student_id} onChange={(e) => setStudent_id(e.target.value)} required placeholder="e.g. 1001" />
+                </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="name">Full Name</Label>
                   <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required />

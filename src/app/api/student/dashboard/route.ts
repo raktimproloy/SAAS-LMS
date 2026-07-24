@@ -44,7 +44,7 @@ export async function GET() {
       orderBy: { created_at: 'desc' },
       include: {
         exam: {
-          select: { title: true }
+          select: { title: true, type: true }
         }
       }
     });

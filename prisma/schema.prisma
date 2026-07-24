@@ -115,6 +115,7 @@ model Exam {
   total_marks      Float
   status           String    @default("active") // "active" | "inactive" | "completed"
   negative_marking Float     @default(0.0)
+  is_grading_enabled Boolean @default(false)
   created_at       DateTime  @default(now())
 
   batch               Batch?                  @relation(fields: [batch_id], references: [id])
@@ -155,6 +156,8 @@ model ExamResult {
   rank               Int?
   answers            Json?
   time_taken_seconds Int?
+  comment            String?  @db.Text
+  grade              String?
   created_at         DateTime @default(now())
 
   exam               Exam                   @relation(fields: [exam_id], references: [id])

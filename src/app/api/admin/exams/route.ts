@@ -19,6 +19,7 @@ export async function GET() {
 
   try {
     const exams = await prisma.exam.findMany({
+      where: { type: 'online' },
       include: {
         batch: { include: { course: true } },
         course: true,
@@ -42,7 +43,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { 
       title, type, start_time, end_time, duration_minutes, 
-      total_marks, negative_marking, is_public, batch_id, course_id, status 
+      total_marks, negative_marking, is_public, batch_id, course_id, status, is_grading_enabled
     } = body;
 
     if (!title || !type || !duration_minutes || !total_marks) {
@@ -66,6 +67,7 @@ export async function POST(request: Request) {
         is_public: is_public || false,
         batch_id: batch_id ? parseInt(batch_id) : null,
         course_id: course_id ? parseInt(course_id) : null,
+        is_grading_enabled: is_grading_enabled || false,
       }
     });
 

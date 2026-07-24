@@ -35,17 +35,7 @@ export async function POST(request: Request) {
       email: admin.email,
     }, expiresIn);
 
-    // Set HTTP-only cookie
-    cookies().set({
-      name: "admin_token",
-      value: token,
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      maxAge: maxAge,
-      path: "/",
-    });
-
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       user: {
         id: admin.id,
@@ -54,6 +44,18 @@ export async function POST(request: Request) {
         role: admin.role,
       },
     });
+
+    response.cookies.set({
+      name: "admin_token",
+      value: token,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: maxAge,
+      expires: new Date(Date.now() + maxAge * 1000),
+      path: "/",
+    });
+
+    return response;
   } catch (error) {
     console.error("Admin login error:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

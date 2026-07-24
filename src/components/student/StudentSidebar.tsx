@@ -9,7 +9,8 @@ import {
   GraduationCap, 
   CreditCard,
   Bell,
-  LogOut
+  LogOut,
+  FileText
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,8 @@ import { useRouter } from "next/navigation";
 const navItems = [
   { title: "Dashboard", href: "/student/dashboard", icon: LayoutDashboard },
   { title: "Profile", href: "/student/profile", icon: User },
-  { title: "My Exams", href: "/student/exams", icon: GraduationCap },
+  { title: "Online Exams", href: "/student/exams", icon: GraduationCap },
+  { title: "Results", href: "/student/results", icon: FileText },
   { title: "Study Materials", href: "/student/notes", icon: BookOpen },
   { title: "Payments", href: "/student/payments", icon: CreditCard },
   { title: "Notices", href: "/student/notices", icon: Bell },
