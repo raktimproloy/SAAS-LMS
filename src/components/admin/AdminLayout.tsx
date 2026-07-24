@@ -13,7 +13,8 @@ import {
   Settings,
   Menu,
   LogOut,
-  Database
+  Database,
+  Video
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -29,6 +30,7 @@ const sidebarLinks = [
   { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard }, // no perm needed
   { name: "Assistants Team", href: "/admin/assistants", icon: Users, perm: "assistants" },
   { name: "Courses & Batches", href: "/admin/courses", icon: BookOpen, perm: "courses" },
+  { name: "Video Courses", href: "/admin/video-courses", icon: Video, perm: "courses" },
   { name: "Student Management", href: "/admin/students", icon: Users, perm: "students" },
   { name: "Student Payment", href: "/admin/payments", icon: CreditCard, perm: "payments" },
   { name: "Exams", href: "/admin/exams", icon: FileText, perm: "exams" },
