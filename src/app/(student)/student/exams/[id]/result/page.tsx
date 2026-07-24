@@ -50,7 +50,7 @@ export default function StudentExamResultPage() {
 
   if (!data) return null;
 
-  const { result, leaderboard } = data;
+  const { result } = data;
   const exam = result.exam;
 
   const toggleExplanation = (qId: number) => {

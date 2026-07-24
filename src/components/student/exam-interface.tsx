@@ -15,6 +15,10 @@ interface Question {
   marks: number;
   type?: string;
   parent_id?: number | null;
+  image_url?: string | null;
+  image_urls?: any;
+  explanation?: string | null;
+  correct_option?: string | null;
 }
 
 interface ExamInterfaceProps {
@@ -84,7 +88,7 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
     if (timeLeft <= 0) {
       if (!autoSubmitTriggered.current) {
         autoSubmitTriggered.current = true;
-        handleSubmit(true); // auto-submit
+        handleSubmit(); // auto-submit
       }
       return;
     }
@@ -95,7 +99,7 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
           clearInterval(timerId);
           if (!autoSubmitTriggered.current) {
             autoSubmitTriggered.current = true;
-            handleSubmit(true);
+            handleSubmit();
           }
           return 0;
         }
@@ -106,7 +110,7 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
     return () => clearInterval(timerId);
   }, [timeLeft, isReady, isSubmitting]);
 
-  const handleSubmit = async (isAutoSubmit = false) => {
+  const handleSubmit = async () => {
     if (isSubmitting) return;
     
     setIsSubmitting(true);
@@ -599,7 +603,7 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
             <Button 
               onClick={() => {
                 setShowConfirmDialog(false);
-                handleSubmit(false);
+                handleSubmit();
               }}
             >
               Confirm Submit

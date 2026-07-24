@@ -15,7 +15,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
     const examId = parseInt(params.id);
 
     // Check if result already exists (for practice mode info, if needed later)
-    const existingResult = await prisma.examResult.findFirst({
+    await prisma.examResult.findFirst({
       where: { exam_id: examId, student_id: studentId }
     });
 
@@ -33,6 +33,8 @@ export async function GET(request: Request, { params }: { params: { id: string }
             marks: true,
             sort_order: true,
             type: true,
+            image_url: true,
+            image_urls: true,
             parent_id: true
           },
           orderBy: { sort_order: 'asc' }

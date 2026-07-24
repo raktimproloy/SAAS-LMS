@@ -36,12 +36,16 @@ export default async function ExamQuestionsPage({ params }: { params: { id: stri
     correct_option: q.correct_option || undefined,
     explanation: q.explanation || undefined,
     parent_id: q.parent_id || undefined,
+    image_url: q.image_url || undefined,
+    image_urls: q.image_urls ? JSON.parse(JSON.stringify(q.image_urls)) : undefined,
     children: q.children.map(c => ({
       ...c,
       options: c.options ? JSON.parse(JSON.stringify(c.options)) : undefined,
       correct_option: c.correct_option || undefined,
       explanation: c.explanation || undefined,
       parent_id: c.parent_id || undefined,
+      image_url: c.image_url || undefined,
+      image_urls: c.image_urls ? JSON.parse(JSON.stringify(c.image_urls)) : undefined,
     }))
   }));
 
