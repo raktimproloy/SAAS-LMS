@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { buttonVariants } from "@/components/ui/button";
-import { FileText, Download, Eye, Calendar } from "lucide-react";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { FileText, Download, Eye, Calendar, ChevronLeft, ChevronRight, Image as ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
@@ -18,6 +19,9 @@ interface Note {
 export default function StudentNotesPage() {
   const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  const [galleryImages, setGalleryImages] = useState<string[] | null>(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
     fetch('/api/student/materials/notes')
@@ -59,13 +63,26 @@ export default function StudentNotesPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {notes.map(note => (
+            {notes.map(note => {
+              let isGallery = false;
+              let imageUrls: string[] = [];
+              try {
+                if (note.file_path.startsWith('[')) {
+                  const parsed = JSON.parse(note.file_path);
+                  if (Array.isArray(parsed)) {
+                    isGallery = true;
+                    imageUrls = parsed;
+                  }
+                }
+              } catch { }
+
+              return (
               <Card key={note.id} className="group overflow-hidden hover:shadow-lg dark:hover:shadow-primary/5 transition-all duration-300 border-border bg-card">
                 <CardContent className="p-6 relative">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -z-10 group-hover:scale-110 transition-transform duration-500" />
                   
                   <div className="w-12 h-12 bg-primary/10 dark:bg-primary/20 text-primary rounded-2xl flex items-center justify-center mb-5 shadow-sm group-hover:-translate-y-1 transition-transform duration-300">
-                    <FileText className="w-6 h-6" />
+                    {isGallery ? <ImageIcon className="w-6 h-6" /> : <FileText className="w-6 h-6" />}
                   </div>
                   
                   <h3 className="font-bold text-lg text-foreground line-clamp-2 mb-2 group-hover:text-primary transition-colors">{note.title}</h3>
@@ -80,20 +97,77 @@ export default function StudentNotesPage() {
                     </div>
                   </div>
                   
-                  <div className="flex gap-3">
-                    <a href={note.file_path} target="_blank" rel="noreferrer" className={cn(buttonVariants({ variant: "outline" }), "flex-1 gap-2 border-border hover:bg-muted text-foreground")}>
-                      <Eye className="w-4 h-4" /> View
-                    </a>
-                    <a href={note.file_path} download target="_blank" rel="noreferrer" className={cn(buttonVariants({ variant: "default" }), "gap-2 px-4 shadow-sm hover:shadow-md transition-shadow")}>
-                      <Download className="w-4 h-4" />
-                    </a>
-                  </div>
+                  {isGallery ? (
+                    <div className="flex gap-3">
+                      <Button 
+                        variant="outline" 
+                        className="flex-1 gap-2 border-border hover:bg-muted text-foreground"
+                        onClick={() => {
+                          setGalleryImages(imageUrls);
+                          setCurrentImageIndex(0);
+                        }}
+                      >
+                        <Eye className="w-4 h-4" /> View Gallery ({imageUrls.length})
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex gap-3">
+                      <a href={note.file_path} target="_blank" rel="noreferrer" className={cn(buttonVariants({ variant: "outline" }), "flex-1 gap-2 border-border hover:bg-muted text-foreground")}>
+                        <Eye className="w-4 h-4" /> View
+                      </a>
+                      <a href={note.file_path} download target="_blank" rel="noreferrer" className={cn(buttonVariants({ variant: "default" }), "gap-2 px-4 shadow-sm hover:shadow-md transition-shadow")}>
+                        <Download className="w-4 h-4" />
+                      </a>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
-            ))}
+            )})}
           </div>
         )}
       </div>
+
+      {galleryImages && (
+        <Dialog open={!!galleryImages} onOpenChange={(open) => {
+          if (!open) {
+            setGalleryImages(null);
+            setCurrentImageIndex(0);
+          }
+        }}>
+          <DialogContent className="max-w-[95vw] md:max-w-4xl max-h-[95vh] h-[95vh] flex flex-col p-0 bg-black/95 border-none overflow-hidden">
+            <DialogHeader className="p-4 bg-gradient-to-b from-black/80 to-transparent absolute top-0 w-full z-50 pointer-events-none">
+              <DialogTitle className="text-white text-center drop-shadow-md">
+                Image Gallery ({currentImageIndex + 1} of {galleryImages.length})
+              </DialogTitle>
+            </DialogHeader>
+            <div className="flex-1 flex items-center justify-center relative w-full h-full">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img 
+                src={galleryImages[currentImageIndex]} 
+                alt={`Gallery view ${currentImageIndex + 1}`} 
+                className="max-w-full max-h-[95vh] object-contain select-none" 
+              />
+              
+              {galleryImages.length > 1 && (
+                <>
+                  <button 
+                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/80 text-white p-3 rounded-full z-50 backdrop-blur-sm transition-all shadow-lg"
+                    onClick={() => setCurrentImageIndex((prev) => (prev === 0 ? galleryImages.length - 1 : prev - 1))}
+                  >
+                    <ChevronLeft className="w-8 h-8" />
+                  </button>
+                  <button 
+                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/80 text-white p-3 rounded-full z-50 backdrop-blur-sm transition-all shadow-lg"
+                    onClick={() => setCurrentImageIndex((prev) => (prev === galleryImages.length - 1 ? 0 : prev + 1))}
+                  >
+                    <ChevronRight className="w-8 h-8" />
+                  </button>
+                </>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }

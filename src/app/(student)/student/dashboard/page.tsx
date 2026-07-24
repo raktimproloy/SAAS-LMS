@@ -13,6 +13,8 @@ type DashboardData = {
   upcomingExam: { title: string; start_time: string | Date; duration_minutes: number; total_marks: number } | null;
   paymentStatus: string;
   notices: { id: number; title: string; content: string }[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  reports?: any[];
 };
 
 export default function StudentDashboard() {
@@ -71,7 +73,11 @@ export default function StudentDashboard() {
 
         {/* Left Column: Calendar & Notices */}
         <div className="lg:col-span-2 space-y-6">
-          <AttendanceCalendar attendanceData={data?.attendance || []} />
+          <AttendanceCalendar 
+            attendanceData={data?.attendance || []} 
+            reports={data?.reports || []}
+            readOnly={true}
+          />
 
           <Card>
             <CardHeader>

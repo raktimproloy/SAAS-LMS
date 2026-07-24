@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { AttendanceCalendar } from "@/components/student/attendance-calendar";
 import { cn } from "@/lib/utils";
 import {
   Table,
@@ -370,9 +371,17 @@ export default function StudentProfilePage() {
 
             {/* ATTENDANCE TAB */}
             {activeTab === "attendance" && (
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold mb-4">Attendance History</h3>
-              <Card className="border-none shadow-sm dark:bg-slate-800/50">
+            <div className="space-y-6">
+              <AttendanceCalendar 
+                attendanceData={student.attendance || []} 
+                reports={student.reports || []}
+                studentId={student.id}
+                readOnly={false}
+              />
+              
+              <div>
+                <h3 className="text-lg font-semibold mb-4">Attendance History</h3>
+                <Card className="border-none shadow-sm dark:bg-slate-800/50">
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
@@ -402,6 +411,7 @@ export default function StudentProfilePage() {
                   </Table>
                 </div>
               </Card>
+              </div>
             </div>
             )}
 

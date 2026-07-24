@@ -20,14 +20,19 @@ export async function POST(request: Request) {
 
   try {
     const formData = await request.formData();
-    const file = formData.get("file") as File | null;
-
-    if (!file) {
-      return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
+    
+    // Support both 'files' (multiple) and 'file' (single)
+    const files = formData.getAll("files") as File[];
+    const singleFile = formData.get("file") as File | null;
+    
+    const allFiles = [...files];
+    if (singleFile && !allFiles.some(f => f.name === singleFile.name && f.size === singleFile.size)) {
+      allFiles.push(singleFile);
     }
 
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    if (allFiles.length === 0) {
+      return NextResponse.json({ error: "No files uploaded" }, { status: 400 });
+    }
 
     // Ensure public/uploads directory exists
     const uploadDir = path.join(process.cwd(), "public", "uploads");
@@ -37,19 +42,30 @@ export async function POST(request: Request) {
       // Directory already exists or can't be created
     }
 
-    // Generate unique filename
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-    const originalExt = path.extname(file.name);
-    const fileName = `upload-${uniqueSuffix}${originalExt}`;
-    const filePath = path.join(uploadDir, fileName);
+    const fileUrls: string[] = [];
 
-    await writeFile(filePath, buffer);
+    for (const file of allFiles) {
+      const bytes = await file.arrayBuffer();
+      const buffer = Buffer.from(bytes);
 
-    const fileUrl = `/uploads/${fileName}`;
+      // Generate unique filename
+      const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+      const originalExt = path.extname(file.name);
+      const fileName = `upload-${uniqueSuffix}${originalExt}`;
+      const filePath = path.join(uploadDir, fileName);
 
-    return NextResponse.json({ success: true, url: fileUrl });
+      await writeFile(filePath, buffer);
+      fileUrls.push(`/uploads/${fileName}`);
+    }
+
+    // Return urls array, and url as the first one for backward compatibility
+    return NextResponse.json({ 
+      success: true, 
+      url: fileUrls[0],
+      urls: fileUrls 
+    });
   } catch (error) {
     console.error("Upload error:", error);
-    return NextResponse.json({ error: "Failed to upload file" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to upload files" }, { status: 500 });
   }
 }

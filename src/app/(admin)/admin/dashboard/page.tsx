@@ -9,21 +9,56 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import prisma from "@/lib/db";
+import { format } from "date-fns";
 
-export default function AdminDashboard() {
-  // Mock data for initial UI setup
+export default async function AdminDashboard() {
+  const [totalStudents, activeBatches, activeExams] = await Promise.all([
+    prisma.student.count(),
+    prisma.batch.count({ where: { status: "active" } }),
+    prisma.exam.count({ where: { status: "active" } }),
+  ]);
+
+  const currentMonth = new Date().getMonth() + 1;
+  const currentYear = new Date().getFullYear();
+
+  const thisMonthPayments = await prisma.payment.aggregate({
+    where: {
+      month: currentMonth,
+      year: currentYear,
+      status: "paid"
+    },
+    _sum: {
+      amount: true
+    }
+  });
+
+  const totalRevenue = thisMonthPayments._sum.amount || 0;
+
+  const recentStudentsData = await prisma.student.findMany({
+    take: 5,
+    orderBy: { created_at: "desc" },
+    include: {
+      batch: true,
+      payments: {
+        orderBy: { created_at: "desc" },
+        take: 1
+      }
+    }
+  });
+
+  const upcomingExamsData = await prisma.exam.findMany({
+    where: { start_time: { gt: new Date() }, status: "active" },
+    take: 5,
+    orderBy: { start_time: "asc" },
+    include: { batch: true, course: true }
+  });
+
   const stats = [
-    { title: "Total Students", value: "2,543", icon: Users, color: "text-blue-500", bg: "bg-blue-500/10" },
-    { title: "Active Batches", value: "12", icon: GraduationCap, color: "text-green-500", bg: "bg-green-500/10" },
-    { title: "Total Revenue (This Month)", value: "৳ 450,000", icon: CreditCard, color: "text-purple-500", bg: "bg-purple-500/10" },
-    { title: "Active Exams", value: "3", icon: Activity, color: "text-orange-500", bg: "bg-orange-500/10" },
-  ];
-
-  const recentStudents = [
-    { id: "#0012", name: "Rahim Islam", batch: "SSC 2026 - Morning", date: "Today", status: "Paid" },
-    { id: "#0013", name: "Karim Khan", batch: "HSC 2026 - Evening", date: "Today", status: "Pending" },
-    { id: "#0014", name: "Nusrat Jahan", batch: "Medical Admission", date: "Yesterday", status: "Paid" },
-    { id: "#0015", name: "Sadiya Akter", batch: "SSC 2026 - Morning", date: "Yesterday", status: "Paid" },
+    { title: "Total Students", value: totalStudents.toLocaleString(), icon: Users, color: "text-blue-500", bg: "bg-blue-500/10" },
+    { title: "Active Batches", value: activeBatches.toLocaleString(), icon: GraduationCap, color: "text-green-500", bg: "bg-green-500/10" },
+    { title: "Revenue (This Month)", value: `৳ ${totalRevenue.toLocaleString()}`, icon: CreditCard, color: "text-purple-500", bg: "bg-purple-500/10" },
+    { title: "Active Exams", value: activeExams.toLocaleString(), icon: Activity, color: "text-orange-500", bg: "bg-orange-500/10" },
   ];
 
   return (
@@ -67,19 +102,27 @@ export default function AdminDashboard() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {recentStudents.map((student) => (
+                  {recentStudentsData.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center text-muted-foreground py-6">
+                        No recent enrollments
+                      </TableCell>
+                    </TableRow>
+                  ) : recentStudentsData.map((student) => {
+                    const status = student.payments.length > 0 ? student.payments[0].status : "Pending";
+                    return (
                     <TableRow key={student.id}>
-                      <TableCell className="font-medium">{student.id}</TableCell>
+                      <TableCell className="font-medium">{student.student_id}</TableCell>
                       <TableCell>{student.name}</TableCell>
-                      <TableCell>{student.batch}</TableCell>
-                      <TableCell className="text-muted-foreground">{student.date}</TableCell>
+                      <TableCell>{student.batch.name}</TableCell>
+                      <TableCell className="text-muted-foreground">{format(new Date(student.created_at), 'dd MMM yyyy')}</TableCell>
                       <TableCell className="text-right">
-                        <Badge variant={student.status === "Paid" ? "default" : "destructive"}>
-                          {student.status}
+                        <Badge variant={status.toLowerCase() === "paid" ? "default" : "destructive"} className="capitalize">
+                          {status}
                         </Badge>
                       </TableCell>
                     </TableRow>
-                  ))}
+                  )})}
                 </TableBody>
               </Table>
             </div>
@@ -92,18 +135,20 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {[
-                { title: "Botany Chapter 1-3", date: "Tommorrow, 10:00 AM", batch: "HSC 2026" },
-                { title: "Zoology Final Model Test", date: "25 Jul, 3:00 PM", batch: "Medical Admission" },
-                { title: "Physics 1st Paper", date: "28 Jul, 10:00 AM", batch: "HSC 2026" },
-              ].map((exam, i) => (
-                <div key={i} className="flex items-center gap-4">
+              {upcomingExamsData.length === 0 ? (
+                <div className="text-center text-muted-foreground py-6 border rounded-lg border-dashed">
+                  No upcoming exams scheduled
+                </div>
+              ) : upcomingExamsData.map((exam) => (
+                <div key={exam.id} className="flex items-center gap-4 border-b last:border-0 pb-3 last:pb-0">
                   <div className="p-2 rounded-full bg-primary/10">
                     <FileText className="h-4 w-4 text-primary" />
                   </div>
                   <div>
                     <p className="text-sm font-medium">{exam.title}</p>
-                    <p className="text-xs text-muted-foreground">{exam.date} • {exam.batch}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      {exam.start_time ? format(new Date(exam.start_time), "dd MMM, h:mm a") : "TBA"} • {exam.batch?.name || exam.course?.title || "Global"}
+                    </p>
                   </div>
                 </div>
               ))}

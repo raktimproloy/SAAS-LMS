@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -5,12 +6,18 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { format } from "date-fns";
-import { CheckCircle2, XCircle, Clock, AlertTriangle, FileText, BarChart } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, AlertTriangle, FileText, BarChart, Plus, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type DayDetails = {
   date: Date;
   attendance?: "present" | "absent" | "late";
+  reports?: Array<any>;
   exam?: { title: string; time: string };
   result?: { examTitle: string; marks: number; rank?: number; total: number };
   notice?: { title: string };
@@ -20,23 +27,65 @@ interface DayDetailsModalProps {
   details: DayDetails | null;
   isOpen: boolean;
   onClose: () => void;
+  readOnly?: boolean;
+  studentId?: number;
+  onReportAdded?: () => void;
 }
 
-export function DayDetailsModal({ details, isOpen, onClose }: DayDetailsModalProps) {
+export function DayDetailsModal({ details, isOpen, onClose, readOnly = true, studentId, onReportAdded }: DayDetailsModalProps) {
+  const [isAddingReport, setIsAddingReport] = useState(false);
+  const [reportTitle, setReportTitle] = useState("");
+  const [reportDesc, setReportDesc] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   if (!details) return null;
 
+  const handleAddReport = async () => {
+    if (!reportTitle || !reportDesc || !studentId) return;
+    
+    try {
+      setIsSubmitting(true);
+      const res = await fetch(`/api/admin/students/${studentId}/reports/by-date`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: reportTitle,
+          description: reportDesc,
+          type: "general",
+          date: format(details.date, "yyyy-MM-dd'T'HH:mm:ss.SSSxxx")
+        })
+      });
+      
+      if (res.ok) {
+        setReportTitle("");
+        setReportDesc("");
+        setIsAddingReport(false);
+        if (onReportAdded) onReportAdded();
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleClose = () => {
+    setIsAddingReport(false);
+    onClose();
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+    <Dialog open={isOpen} onOpenChange={handleClose}>
+      <DialogContent className="w-[95vw] sm:w-full sm:max-w-md max-h-[85vh] overflow-y-auto p-4 sm:p-6 rounded-xl sm:rounded-lg">
         <DialogHeader>
-          <DialogTitle className="text-xl">
+          <DialogTitle className="text-lg sm:text-xl">
             📅 {format(details.date, "MMMM d, yyyy")}
           </DialogTitle>
         </DialogHeader>
         
         <div className="space-y-4 py-4">
           {/* Attendance Section */}
-          <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 border">
+          <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 border">
             {details.attendance === "present" ? (
               <CheckCircle2 className="h-6 w-6 text-green-500" />
             ) : details.attendance === "absent" ? (
@@ -44,57 +93,72 @@ export function DayDetailsModal({ details, isOpen, onClose }: DayDetailsModalPro
             ) : details.attendance === "late" ? (
               <Clock className="h-6 w-6 text-yellow-500" />
             ) : (
-              <div className="h-6 w-6 rounded-full border-2 border-dashed border-slate-300" />
+              <div className="h-6 w-6 rounded-full border-2 border-dashed border-slate-300 dark:border-slate-600" />
             )}
             <div className="flex-1">
-              <h4 className="font-semibold text-slate-900">Attendance</h4>
-              <p className="text-sm text-slate-500 capitalize">
+              <h4 className="font-semibold text-slate-900 dark:text-slate-100">Attendance</h4>
+              <p className="text-sm text-slate-500 dark:text-slate-400 capitalize">
                 {details.attendance || "No record"}
               </p>
             </div>
           </div>
 
-          {/* Exam Section */}
-          {details.exam && (
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-blue-50 border border-blue-100">
-              <FileText className="h-6 w-6 text-blue-500" />
-              <div className="flex-1">
-                <h4 className="font-semibold text-blue-900">Exam Scheduled</h4>
-                <p className="text-sm text-blue-700">{details.exam.title}</p>
-                <p className="text-xs text-blue-600 mt-1">{details.exam.time}</p>
-              </div>
-            </div>
-          )}
-
-          {/* Result Section */}
-          {details.result && (
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-purple-50 border border-purple-100">
-              <BarChart className="h-6 w-6 text-purple-500" />
-              <div className="flex-1">
-                <h4 className="font-semibold text-purple-900">Result Published</h4>
-                <p className="text-sm text-purple-700">{details.result.examTitle}</p>
-                <div className="flex items-center gap-2 mt-1">
-                  <Badge variant="outline" className="bg-white border-purple-200">
-                    Score: {details.result.marks}/{details.result.total}
-                  </Badge>
-                  {details.result.rank && (
-                    <Badge className="bg-purple-500 hover:bg-purple-600">
-                      Rank #{details.result.rank}
-                    </Badge>
-                  )}
+          {/* Reports Section */}
+          {details.reports && details.reports.length > 0 && (
+            <div className="space-y-3">
+              <h4 className="font-semibold text-slate-900 dark:text-slate-100 text-sm">Reports ({details.reports.length})</h4>
+              {details.reports.map((report, idx) => (
+                <div key={idx} className="flex gap-3 p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/50">
+                  <FileText className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+                  <div>
+                    <h5 className="font-semibold text-amber-900 dark:text-amber-200">{report.title}</h5>
+                    <p className="text-sm text-amber-700 dark:text-amber-400 mt-1 whitespace-pre-wrap">{report.description}</p>
+                    <div className="mt-2 flex items-center gap-2">
+                      <Badge variant="outline" className="text-[10px] bg-white dark:bg-slate-800 uppercase border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400">
+                        {report.type}
+                      </Badge>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              ))}
             </div>
           )}
 
-          {/* Notice Section */}
-          {details.notice && (
-            <div className="flex items-center gap-3 p-3 rounded-lg bg-amber-50 border border-amber-100">
-              <AlertTriangle className="h-6 w-6 text-amber-500" />
-              <div className="flex-1">
-                <h4 className="font-semibold text-amber-900">Notice</h4>
-                <p className="text-sm text-amber-700">{details.notice.title}</p>
-              </div>
+          {/* Add Report Actions (Admin only) */}
+          {!readOnly && (
+            <div className="pt-2 border-t mt-4">
+              {!isAddingReport ? (
+                <Button variant="outline" className="w-full gap-2 border-dashed" onClick={() => setIsAddingReport(true)}>
+                  <Plus className="w-4 h-4" /> Add Report for this date
+                </Button>
+              ) : (
+                <div className="space-y-3 p-4 bg-slate-50 dark:bg-slate-900 rounded-lg border">
+                  <div>
+                    <Label className="text-xs mb-1.5 block">Report Title</Label>
+                    <Input 
+                      placeholder="e.g. Disciplinary action" 
+                      value={reportTitle}
+                      onChange={(e) => setReportTitle(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs mb-1.5 block">Description</Label>
+                    <Textarea 
+                      placeholder="Detailed notes..." 
+                      className="min-h-[80px]"
+                      value={reportDesc}
+                      onChange={(e) => setReportDesc(e.target.value)}
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2 pt-2">
+                    <Button variant="ghost" size="sm" onClick={() => setIsAddingReport(false)} disabled={isSubmitting}>Cancel</Button>
+                    <Button size="sm" onClick={handleAddReport} disabled={isSubmitting || !reportTitle || !reportDesc}>
+                      {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                      Save Report
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

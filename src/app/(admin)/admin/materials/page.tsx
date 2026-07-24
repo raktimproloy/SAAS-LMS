@@ -106,14 +106,16 @@ export default function MaterialsPage() {
   }, []);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
 
     setIsUploading(true);
     setFormError("");
     
     const formData = new FormData();
-    formData.append("file", file);
+    Array.from(files).forEach((file) => {
+      formData.append("files", file);
+    });
 
     try {
       const res = await fetch("/api/upload", {
@@ -122,7 +124,12 @@ export default function MaterialsPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to upload");
-      setFileUrl(data.url);
+      
+      if (data.urls && data.urls.length > 1) {
+        setFileUrl(JSON.stringify(data.urls));
+      } else {
+        setFileUrl(data.url);
+      }
     } catch (err: unknown) {
       if (err instanceof Error) setFormError(err.message);
       else setFormError("Upload failed");
@@ -375,16 +382,17 @@ export default function MaterialsPage() {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label className="text-sm">Option 1: Upload File</Label>
+                    <Label className="text-sm">Option 1: Upload File(s)</Label>
                     <Input 
                       type="file" 
+                      multiple
                       onChange={handleFileUpload} 
-                      disabled={isUploading || (!fileUrl?.startsWith('/uploads/') && fileUrl?.length > 0)} 
-                      accept=".pdf,.doc,.docx,.txt" 
+                      disabled={isUploading || fileUrl?.startsWith('/uploads/') || fileUrl?.startsWith('[')} 
+                      accept=".pdf,.doc,.docx,.txt,image/*" 
                     />
                     {isUploading && <p className="text-xs text-blue-500">Uploading...</p>}
-                    {fileUrl && fileUrl.startsWith('/uploads/') && (
-                      <p className="text-xs text-green-600 font-medium mt-1">✓ File uploaded successfully</p>
+                    {(fileUrl?.startsWith('/uploads/') || fileUrl?.startsWith('[')) && (
+                      <p className="text-xs text-green-600 font-medium mt-1">✓ File(s) uploaded successfully</p>
                     )}
                   </div>
 
@@ -402,13 +410,13 @@ export default function MaterialsPage() {
                     <Input 
                       id="fileUrl" 
                       type="text" 
-                      value={fileUrl?.startsWith('/uploads/') ? '' : fileUrl} 
+                      value={(fileUrl?.startsWith('/uploads/') || fileUrl?.startsWith('[')) ? '' : fileUrl} 
                       onChange={(e) => setFileUrl(e.target.value)} 
                       placeholder="https://..." 
-                      disabled={fileUrl?.startsWith('/uploads/')}
+                      disabled={fileUrl?.startsWith('/uploads/') || fileUrl?.startsWith('[')}
                     />
-                    {fileUrl?.startsWith('/uploads/') && (
-                       <p className="text-xs text-muted-foreground">URL input is disabled because a file was uploaded. If you want to use a URL instead, please close and reopen this form.</p>
+                    {(fileUrl?.startsWith('/uploads/') || fileUrl?.startsWith('[')) && (
+                       <p className="text-xs text-muted-foreground">URL input is disabled because file(s) were uploaded. If you want to use a URL instead, please close and reopen this form.</p>
                     )}
                   </div>
                 </div>
@@ -504,9 +512,25 @@ export default function MaterialsPage() {
                             )}
                           </TableCell>
                           <TableCell>
-                            <a href={note.file_path} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-blue-600 hover:underline">
-                              View File
-                            </a>
+                            {(() => {
+                              try {
+                                if (note.file_path.startsWith('[')) {
+                                  const urls = JSON.parse(note.file_path);
+                                  if (Array.isArray(urls)) {
+                                    return (
+                                      <span className="text-sm font-medium text-blue-600">
+                                        {urls.length} Images Uploaded
+                                      </span>
+                                    );
+                                  }
+                                }
+                              } catch { }
+                              return (
+                                <a href={note.file_path} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-blue-600 hover:underline">
+                                  View File
+                                </a>
+                              );
+                            })()}
                           </TableCell>
                           <TableCell>
                             <button 

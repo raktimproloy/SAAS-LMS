@@ -14,7 +14,8 @@ import {
   Menu,
   LogOut,
   Database,
-  Video
+  Video,
+  ClipboardList
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -35,6 +36,7 @@ const sidebarLinks = [
   { name: "Student Payment", href: "/admin/payments", icon: CreditCard, perm: "payments" },
   { name: "Exams", href: "/admin/exams", icon: FileText, perm: "exams" },
   { name: "Study Materials", href: "/admin/materials", icon: Database, perm: "materials" },
+  { name: "Reports", href: "/admin/reports", icon: ClipboardList, perm: "reports" },
   { name: "Website Content", href: "/admin/content", icon: Bell, perm: "content" },
   { name: "Settings", href: "/admin/settings", icon: Settings }, // no perm needed
 ];

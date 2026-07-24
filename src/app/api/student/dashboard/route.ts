@@ -87,12 +87,24 @@ export async function GET() {
       take: 5
     });
 
+    // 6. Fetch reports for current month to display on calendar
+    const reports = await prisma.studentReport.findMany({
+      where: {
+        student_id: studentId,
+        created_at: {
+          gte: startOfMonth,
+          lte: endOfMonth,
+        }
+      }
+    });
+
     return NextResponse.json({
       attendance,
       recentResult,
       upcomingExam,
       paymentStatus: payment ? payment.status : "due",
-      notices
+      notices,
+      reports
     });
   } catch (error) {
     console.error("Student Dashboard API error:", error);
