@@ -36,7 +36,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { title, file_path, batch_id, course_id, type, description } = body;
+    const { title, file_path, batch_id, course_id, type, description, is_public, status } = body;
 
     if (!title || !file_path || !type) {
       return NextResponse.json({ error: "Required fields are missing" }, { status: 400 });
@@ -48,6 +48,8 @@ export async function POST(request: Request) {
         file_path,
         type,
         description,
+        is_public: is_public || false,
+        status: status || "active",
         batch_id: batch_id ? parseInt(batch_id) : null,
         course_id: course_id ? parseInt(course_id) : null,
       }

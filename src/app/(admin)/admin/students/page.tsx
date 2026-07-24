@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Pencil, Trash2, Power, AlertTriangle, CheckCircle2 } from "lucide-react";
+import Link from "next/link";
+import { Plus, Pencil, Trash2, Power, AlertTriangle, CheckCircle2, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -319,12 +320,7 @@ export default function StudentsPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="batch">Batch / Segment</Label>
-                  <select
-                    id="batch"
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    value={batchId}
-                    onChange={(e) => setBatchId(e.target.value)}
+                  <Label htmlFor="batch">Batch</Label>
                   <select
                     id="batch"
                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50"
@@ -483,7 +479,9 @@ export default function StudentsPage() {
                         <TableCell className="font-medium">{student.student_id}</TableCell>
                         <TableCell>
                           <div className="flex flex-col">
-                            <span>{student.name}</span>
+                            <Link href={`/admin/students/${student.id}`} className="font-semibold text-primary hover:underline">
+                              {student.name}
+                            </Link>
                             <span className="text-xs text-muted-foreground">
                               {new Date(student.enrolled_at).toLocaleDateString()}
                             </span>
@@ -511,6 +509,16 @@ export default function StudentsPage() {
                             >
                               <Power className="h-4 w-4" />
                             </Button>
+                            <Link href={`/admin/students/${student.id}`}>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-muted-foreground hover:text-primary"
+                                title="View Profile"
+                              >
+                                <User className="h-4 w-4" />
+                              </Button>
+                            </Link>
                             <Button
                               variant="ghost"
                               size="icon"

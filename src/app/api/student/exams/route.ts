@@ -22,7 +22,7 @@ export async function GET() {
 
     const exams = await prisma.exam.findMany({
       where: {
-        status: { in: ["published", "completed"] },
+        status: { in: ["active", "published", "completed"] },
         OR: [
           { batch_id: student.batch_id },
           { course_id: student.batch.course_id },
@@ -30,8 +30,20 @@ export async function GET() {
         ]
       },
       include: {
+        _count: {
+          select: { questions: true }
+        },
         results: {
-          where: { student_id: studentId }
+          where: { student_id: studentId },
+          select: {
+            id: true,
+            obtained_marks: true,
+            total_marks: true,
+            correct_count: true,
+            wrong_count: true,
+            skipped_count: true,
+            time_taken_seconds: true
+          }
         }
       },
       orderBy: { start_time: 'desc' }

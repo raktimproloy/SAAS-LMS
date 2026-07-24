@@ -84,6 +84,7 @@ model Student {
   exam_results    ExamResult[]
   attendance      Attendance[]
   reviews         StudentReview[]
+  reports         StudentReport[]
 }
 
 model Routine {
@@ -289,6 +290,8 @@ model NoteMaterial {
   course_id   Int?
   type        String   // "book" | "note"
   description String?  @db.Text
+  is_public   Boolean  @default(false)
+  status      String   @default("active") // "active" | "inactive"
   sort_order  Int      @default(0)
   created_at  DateTime @default(now())
 
@@ -336,4 +339,15 @@ model SmsLog {
   status     String   // "sent" | "failed" | "queued"
   sent_at    DateTime?
   created_at DateTime @default(now())
+}
+
+model StudentReport {
+  id          Int      @id @default(autoincrement())
+  student_id  Int
+  title       String
+  description String   @db.Text
+  type        String   @default("general") // "general" | "disciplinary" | "academic" | "good"
+  created_at  DateTime @default(now())
+
+  student     Student  @relation(fields: [student_id], references: [id])
 }

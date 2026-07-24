@@ -30,10 +30,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
           select: {
             id: true,
             question_text: true,
-            option_a: true,
-            option_b: true,
-            option_c: true,
-            option_d: true,
+            options: true,
             marks: true,
             sort_order: true
           },
@@ -42,16 +39,16 @@ export async function GET(request: Request, { params }: { params: { id: string }
       }
     });
 
-    if (!exam || exam.status !== "published") {
+    if (!exam || !["active", "published", "completed"].includes(exam.status)) {
       return NextResponse.json({ error: "Exam not available" }, { status: 404 });
     }
 
     const now = new Date();
-    if (now < exam.start_time) {
+    if (exam.start_time && now < exam.start_time) {
       return NextResponse.json({ error: "Exam has not started yet" }, { status: 403 });
     }
 
-    if (now > exam.end_time) {
+    if (exam.end_time && now > exam.end_time) {
       return NextResponse.json({ error: "Exam has ended" }, { status: 403 });
     }
 
@@ -94,9 +91,11 @@ export async function POST(request: Request, { params }: { params: { id: string 
     // Validate submission time (optional strictness, but we skip tight check for now)
     const now = new Date();
     // Allow slight buffer if they submitted right at the end
-    const bufferEndTime = new Date(exam.end_time.getTime() + 5 * 60000); // 5 mins buffer
-    if (now > bufferEndTime) {
-      return NextResponse.json({ error: "Submission rejected: time limit exceeded" }, { status: 403 });
+    if (exam.end_time) {
+      const bufferEndTime = new Date(exam.end_time.getTime() + 5 * 60000); // 5 mins buffer
+      if (now > bufferEndTime) {
+        return NextResponse.json({ error: "Submission rejected: time limit exceeded" }, { status: 403 });
+      }
     }
 
     // Evaluate answers

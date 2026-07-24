@@ -1,17 +1,16 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Clock, Flag, ChevronLeft, ChevronRight, CheckCircle2 } from "lucide-react";
+import { Clock, CheckCircle2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface Question {
   id: number;
   question_text: string;
-  option_a: string;
-  option_b: string;
-  option_c: string;
-  option_d: string;
+  options: any; // e.g. ["A option", "B option", "C option"] or [{id:"a", text:"..."}]
   marks: number;
 }
 
@@ -24,42 +23,112 @@ interface ExamInterfaceProps {
 
 export function ExamInterface({ examId, title, durationMinutes, questions }: ExamInterfaceProps) {
   const router = useRouter();
-  const [currentQ, setCurrentQ] = useState(0);
+  
   const [answers, setAnswers] = useState<Record<number, string>>({});
-  const [markedForReview, setMarkedForReview] = useState<Record<number, boolean>>({});
-  const [timeLeft, setTimeLeft] = useState(durationMinutes * 60);
+  const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
+  const autoSubmitTriggered = useRef(false);
+
+  // Initialize and persist state
   useEffect(() => {
-    // Timer logic
+    const storageKeyAnswers = `lms_exam_${examId}_answers`;
+    const storageKeyStart = `lms_exam_${examId}_start`;
+
+    // Load saved answers
+    const savedAnswers = localStorage.getItem(storageKeyAnswers);
+    if (savedAnswers) {
+      try {
+        setAnswers(JSON.parse(savedAnswers));
+      } catch {}
+    }
+
+    // Load or set start time
+    let startTime = localStorage.getItem(storageKeyStart);
+    if (!startTime) {
+      startTime = Date.now().toString();
+      localStorage.setItem(storageKeyStart, startTime);
+    }
+
+    const elapsedSeconds = Math.floor((Date.now() - parseInt(startTime)) / 1000);
+    const totalDurationSeconds = durationMinutes * 60;
+    const remaining = totalDurationSeconds - elapsedSeconds;
+
+    if (remaining <= 0) {
+      setTimeLeft(0);
+    } else {
+      setTimeLeft(remaining);
+    }
+    
+    setIsReady(true);
+  }, [examId, durationMinutes]);
+
+  // Save answers whenever they change (Auto-save)
+  useEffect(() => {
+    if (isReady) {
+      localStorage.setItem(`lms_exam_${examId}_answers`, JSON.stringify(answers));
+    }
+  }, [answers, examId, isReady]);
+
+  // Timer logic
+  useEffect(() => {
+    if (timeLeft === null || !isReady || isSubmitting) return;
+
     if (timeLeft <= 0) {
-      handleSubmit();
+      if (!autoSubmitTriggered.current) {
+        autoSubmitTriggered.current = true;
+        handleSubmit(true); // auto-submit
+      }
       return;
     }
+
     const timerId = setInterval(() => {
-      setTimeLeft((prev) => prev - 1);
+      setTimeLeft((prev) => {
+        if (prev !== null && prev <= 1) {
+          clearInterval(timerId);
+          if (!autoSubmitTriggered.current) {
+            autoSubmitTriggered.current = true;
+            handleSubmit(true);
+          }
+          return 0;
+        }
+        return prev ? prev - 1 : 0;
+      });
     }, 1000);
 
     return () => clearInterval(timerId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [timeLeft]);
+  }, [timeLeft, isReady, isSubmitting]);
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (isAutoSubmit = false) => {
     if (isSubmitting) return;
+    if (!isAutoSubmit && !confirm("Are you sure you want to submit the exam? You cannot change your answers after submission.")) {
+      return;
+    }
+    
     setIsSubmitting(true);
 
     try {
+      // Calculate real time taken based on start time
+      const startTimeStr = localStorage.getItem(`lms_exam_${examId}_start`);
+      const startTime = startTimeStr ? parseInt(startTimeStr) : Date.now();
+      const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
+      const timeTaken = Math.min(elapsedSeconds, durationMinutes * 60);
+
       const res = await fetch(`/api/student/exams/${examId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           answers,
-          time_taken_seconds: durationMinutes * 60 - timeLeft
+          time_taken_seconds: timeTaken
         })
       });
 
       const data = await res.json();
       if (res.ok && data.success) {
+        // Cleanup local storage
+        localStorage.removeItem(`lms_exam_${examId}_answers`);
+        localStorage.removeItem(`lms_exam_${examId}_start`);
         router.push(`/student/exams/${examId}/result`);
       } else {
         alert(data.error || "Failed to submit exam");
@@ -72,15 +141,9 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
     }
   };
 
-  const handleOptionSelect = (option: string) => {
-    setAnswers(prev => ({ ...prev, [questions[currentQ].id]: option }));
-  };
-
-  const toggleReview = () => {
-    setMarkedForReview(prev => ({
-      ...prev,
-      [questions[currentQ].id]: !prev[questions[currentQ].id]
-    }));
+  const handleOptionSelect = (qId: number, optionValue: string) => {
+    if (answers[qId]) return; // LOCKING: Cannot change once answered
+    setAnswers(prev => ({ ...prev, [qId]: optionValue }));
   };
 
   const formatTime = (seconds: number) => {
@@ -89,142 +152,122 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  const q = questions[currentQ];
+  if (!isReady || timeLeft === null) return null;
+
+  const attemptedCount = Object.keys(answers).length;
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 max-w-6xl mx-auto h-[calc(100vh-120px)] animate-in fade-in zoom-in-95 duration-500">
-      
-      {/* Left side: Question Area */}
-      <div className="flex-1 flex flex-col bg-white dark:bg-slate-900 rounded-2xl border shadow-sm overflow-hidden">
-        
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b bg-slate-50 dark:bg-slate-950">
+    <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950 pb-28">
+      {/* Top Header */}
+      <div className="bg-white dark:bg-slate-900 border-b sticky top-0 z-10 shadow-sm">
+        <div className="max-w-4xl mx-auto px-4 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h2 className="font-bold text-lg text-slate-900 dark:text-white">{title}</h2>
-            <p className="text-sm text-slate-500">Question {currentQ + 1} of {questions.length}</p>
+            <h1 className="text-xl font-bold text-slate-900 dark:text-white leading-tight">{title}</h1>
+            <p className="text-sm text-slate-500 mt-1">Select an option to lock your answer. You cannot change it later.</p>
           </div>
-          <div className="flex items-center gap-2 bg-red-50 text-red-600 px-4 py-2 rounded-lg font-mono font-bold text-lg border border-red-100">
-            <Clock className="w-5 h-5" />
-            {formatTime(timeLeft)}
-          </div>
-        </div>
-
-        {/* Question Body */}
-        <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-8">
-          <div className="text-xl text-slate-800 dark:text-slate-200 leading-relaxed font-medium">
-            {q.question_text}
-          </div>
-
-          <div className="space-y-3">
-            {["a", "b", "c", "d"].map((opt) => {
-              const optionKey = `option_${opt}` as keyof Question;
-              const isSelected = answers[q.id] === opt;
-              
-              return (
-                <button
-                  key={opt}
-                  onClick={() => handleOptionSelect(opt)}
-                  className={`w-full text-left p-4 rounded-xl border-2 transition-all flex items-center gap-4 ${
-                    isSelected 
-                      ? 'border-primary bg-primary/5 text-primary' 
-                      : 'border-slate-200 hover:border-slate-300 dark:border-slate-700 dark:hover:border-slate-600 text-slate-700 dark:text-slate-300'
-                  }`}
-                >
-                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                    isSelected ? 'border-primary' : 'border-slate-300 dark:border-slate-600'
-                  }`}>
-                    {isSelected && <div className="w-3 h-3 bg-primary rounded-full" />}
-                  </div>
-                  <span className="text-lg">{String(q[optionKey])}</span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Footer Navigation */}
-        <div className="p-4 border-t bg-slate-50 dark:bg-slate-950 flex items-center justify-between">
-          <Button 
-            variant="outline" 
-            onClick={() => setCurrentQ(prev => Math.max(0, prev - 1))}
-            disabled={currentQ === 0}
-            className="gap-2"
-          >
-            <ChevronLeft className="w-4 h-4" /> Previous
-          </Button>
-          
-          <Button 
-            variant="outline"
-            onClick={toggleReview}
-            className={`gap-2 ${markedForReview[q.id] ? 'bg-amber-100 text-amber-700 hover:bg-amber-200 border-amber-200' : ''}`}
-          >
-            <Flag className="w-4 h-4" /> {markedForReview[q.id] ? 'Unmark Review' : 'Mark for Review'}
-          </Button>
-
-          <Button 
-            onClick={() => setCurrentQ(prev => Math.min(questions.length - 1, prev + 1))}
-            disabled={currentQ === questions.length - 1}
-            className="gap-2"
-          >
-            Next <ChevronRight className="w-4 h-4" />
-          </Button>
         </div>
       </div>
 
-      {/* Right side: Nav Panel */}
-      <div className="w-full lg:w-72 flex flex-col bg-white dark:bg-slate-900 rounded-2xl border shadow-sm overflow-hidden shrink-0">
-        <div className="p-4 border-b font-bold text-slate-700 dark:text-slate-200">
-          Question Navigator
-        </div>
-        <div className="flex-1 overflow-y-auto p-4">
-          <div className="grid grid-cols-5 gap-2">
-            {questions.map((question, idx) => {
-              const isAnswered = !!answers[question.id];
-              const isMarked = !!markedForReview[question.id];
-              const isActive = currentQ === idx;
+      {/* Questions Feed */}
+      <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
+        {questions.map((q, index) => {
+          const isAnswered = !!answers[q.id];
+          const selectedValue = answers[q.id];
+          let optionsList: any[] = [];
+          
+          if (Array.isArray(q.options)) {
+            optionsList = q.options;
+          } else if (typeof q.options === 'object' && q.options !== null) {
+            optionsList = Object.values(q.options);
+          }
 
-              return (
-                <button
-                  key={question.id}
-                  onClick={() => setCurrentQ(idx)}
-                  className={`
-                    h-10 rounded-lg flex items-center justify-center font-medium text-sm transition-all border-2
-                    ${isActive ? 'ring-2 ring-primary ring-offset-1 border-transparent' : 'border-slate-200 dark:border-slate-700'}
-                    ${isMarked ? 'bg-amber-100 text-amber-700 border-amber-200' : 
-                      isAnswered ? 'bg-green-100 text-green-700 border-green-200' : 'hover:bg-slate-100 text-slate-600 dark:text-slate-400 dark:hover:bg-slate-800'}
-                  `}
-                >
-                  {idx + 1}
-                </button>
-              );
-            })}
+          return (
+            <div key={q.id} className="bg-white dark:bg-slate-900 rounded-2xl border p-6 shadow-sm">
+              <div className="flex gap-4">
+                <div className="flex-none">
+                  <span className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 font-semibold text-sm">
+                    {index + 1}
+                  </span>
+                </div>
+                <div className="flex-1">
+                  <div className="text-lg text-slate-800 dark:text-slate-200 font-medium mb-6">
+                    {q.question_text}
+                  </div>
+                  
+                  <div className="space-y-3">
+                    {optionsList.map((opt: any, optIdx: number) => {
+                      const optValue = typeof opt === 'string' ? opt : opt.value || opt.text || String(opt);
+                      const isThisSelected = selectedValue === optValue;
+                      const letter = String.fromCharCode(65 + optIdx); // A, B, C, D...
+                      
+                      return (
+                        <button
+                          key={optIdx}
+                          onClick={() => handleOptionSelect(q.id, optValue)}
+                          disabled={isAnswered}
+                          className={`w-full text-left p-4 rounded-xl border-2 transition-all flex items-center gap-4 ${
+                            isThisSelected 
+                              ? 'border-primary bg-primary/5 text-primary shadow-sm' 
+                              : isAnswered
+                                ? 'border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-slate-400 dark:text-slate-600 cursor-not-allowed opacity-60'
+                                : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:hover:border-slate-600 text-slate-700 dark:text-slate-300'
+                          }`}
+                        >
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 font-bold ${
+                            isThisSelected ? 'bg-primary text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
+                          }`}>
+                            {letter}
+                          </div>
+                          <span className="text-base font-medium">{optValue}</span>
+                          {isThisSelected && <CheckCircle2 className="w-5 h-5 ml-auto text-primary" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Sticky Bottom Bar */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-slate-900 border-t shadow-[0_-4px_15px_-5px_rgba(0,0,0,0.1)] p-4 z-50">
+        <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
+          
+          <div className="flex items-center gap-6">
+            <div className={`flex items-center gap-2 px-4 py-2 rounded-lg font-mono font-bold text-xl border ${
+              timeLeft <= 60 ? 'bg-red-50 text-red-600 border-red-200 animate-pulse' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
+            }`}>
+              <Clock className="w-5 h-5" />
+              {formatTime(timeLeft)}
+            </div>
+
+            <div className="hidden sm:flex flex-col">
+              <span className="text-sm font-bold text-slate-700 dark:text-slate-200">
+                Attempted: {attemptedCount} / {questions.length}
+              </span>
+              <span className="text-xs text-slate-500">
+                {questions.length - attemptedCount} remaining
+              </span>
+            </div>
           </div>
-        </div>
-        
-        {/* Legend */}
-        <div className="p-4 border-t space-y-2 text-xs text-slate-500">
-          <div className="flex items-center gap-2"><div className="w-3 h-3 bg-green-100 border-green-200 border rounded" /> Answered</div>
-          <div className="flex items-center gap-2"><div className="w-3 h-3 bg-amber-100 border-amber-200 border rounded" /> Marked for Review</div>
-          <div className="flex items-center gap-2"><div className="w-3 h-3 border-slate-200 border rounded" /> Unanswered</div>
-        </div>
 
-        <div className="p-4 border-t bg-slate-50 dark:bg-slate-950">
           <Button 
-            className="w-full gap-2 font-bold" 
             size="lg"
-            onClick={() => {
-              if (confirm("Are you sure you want to submit the exam?")) {
-                handleSubmit();
-              }
-            }}
+            className="px-8 font-bold text-base shadow-md group"
+            onClick={() => handleSubmit()}
             disabled={isSubmitting}
           >
-            <CheckCircle2 className="w-5 h-5" />
-            {isSubmitting ? "Submitting..." : "Submit Exam"}
+            {isSubmitting ? (
+              <span className="flex items-center gap-2"><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"/> Submitting...</span>
+            ) : (
+              <span className="flex items-center gap-2">Submit Exam <CheckCircle2 className="w-5 h-5 group-hover:scale-110 transition-transform" /></span>
+            )}
           </Button>
+
         </div>
       </div>
-
     </div>
   );
 }
