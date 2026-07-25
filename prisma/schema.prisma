@@ -49,6 +49,7 @@ model Batch {
   end_time     String   @default("12:00 PM")
   status       String   @default("active")
   max_students Int?
+  class_days   Json?
   created_at   DateTime @default(now())
   updated_at   DateTime @updatedAt
 

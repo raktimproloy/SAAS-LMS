@@ -210,6 +210,11 @@ export default function OfflineResultsPage() {
                       <TableCell>{exam.start_time ? new Date(exam.start_time).toLocaleString() : "Not specified"}</TableCell>
                       <TableCell className="text-right print:hidden">
                         <div className="flex items-center justify-end gap-2">
+                          <Link href={`/admin/offline-results/${exam.id}/print`} target="_blank">
+                            <Button variant="outline" size="sm" title="Print Results">
+                              <Printer className="h-4 w-4" />
+                            </Button>
+                          </Link>
                           <Link href={`/admin/offline-results/${exam.id}`}>
                             <Button variant="outline" size="sm">
                               <Pencil className="h-4 w-4 mr-1" /> Edit

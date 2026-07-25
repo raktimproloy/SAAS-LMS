@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Plus, Pencil, Trash2, Power, AlertTriangle, CheckCircle2, User, ChevronDown } from "lucide-react";
+import { Plus, Pencil, Trash2, Power, AlertTriangle, CheckCircle2, User, ChevronDown, Search, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -139,19 +139,22 @@ export default function StudentsPage() {
   const [parentName, setParentName] = useState("");
   const [parentPhone, setParentPhone] = useState("");
   const [address, setAddress] = useState("");
+  
+  // Filters
+  const [filterCourseId, setFilterCourseId] = useState("");
+  const [filterBatchId, setFilterBatchId] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const fetchData = async () => {
+  const fetchStudents = async () => {
     setLoading(true);
     try {
-      const [stuRes, batRes, couRes] = await Promise.all([
-        fetch("/api/admin/students"),
-        fetch("/api/admin/batches"),
-        fetch("/api/admin/courses")
-      ]);
+      const params = new URLSearchParams();
+      if (filterCourseId) params.append("course_id", filterCourseId);
+      if (filterBatchId) params.append("batch_id", filterBatchId);
+      if (searchQuery) params.append("q", searchQuery);
 
-      if (stuRes.ok) setStudents(await stuRes.json());
-      if (batRes.ok) setBatches(await batRes.json());
-      if (couRes.ok) setCourses(await couRes.json());
+      const res = await fetch(`/api/admin/students?${params.toString()}`);
+      if (res.ok) setStudents(await res.json());
     } catch (err) {
       console.error(err);
     } finally {
@@ -159,9 +162,31 @@ export default function StudentsPage() {
     }
   };
 
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const [batRes, couRes] = await Promise.all([
+        fetch("/api/admin/batches"),
+        fetch("/api/admin/courses")
+      ]);
+
+      if (batRes.ok) setBatches(await batRes.json());
+      if (couRes.ok) setCourses(await couRes.json());
+      await fetchStudents();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    // Only fetch students when course or batch filter changes
+    fetchStudents();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterCourseId, filterBatchId]);
 
   const resetForm = () => {
     setStudent_id("");
@@ -232,7 +257,7 @@ export default function StudentsPage() {
 
       setIsDeleteDialogOpen(false);
       setStudentToDelete(null);
-      fetchData();
+      fetchStudents();
     } catch (err: unknown) {
       if (err instanceof Error) {
         alert(err.message || "Failed to delete student");
@@ -251,7 +276,7 @@ export default function StudentsPage() {
         body: JSON.stringify({ status: newStatus }),
       });
       if (!res.ok) throw new Error("Failed to update status");
-      fetchData();
+      fetchStudents();
     } catch (err: unknown) {
       if (err instanceof Error) {
         alert(err.message || "Failed to update status");
@@ -297,7 +322,7 @@ export default function StudentsPage() {
         setIsDialogOpen(false);
       }
 
-      fetchData();
+      fetchStudents();
     } catch (err: unknown) {
       if (err instanceof Error) {
         setFormError(err.message);
@@ -547,6 +572,53 @@ export default function StudentsPage() {
           </DialogContent>
         </Dialog>
       </div>
+
+      {/* Filters and Search */}
+      <Card className="border-none shadow-sm dark:bg-slate-800/50 mb-2">
+        <CardContent className="p-4 flex flex-col md:flex-row gap-4">
+          <div className="flex-1 flex gap-2">
+            <div className="flex-1">
+              <select
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+                value={filterCourseId}
+                onChange={(e) => {
+                  setFilterCourseId(e.target.value);
+                  setFilterBatchId("");
+                }}
+              >
+                <option value="">All Courses</option>
+                {courses.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
+              </select>
+            </div>
+            <div className="flex-1">
+              <select
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background disabled:opacity-50"
+                value={filterBatchId}
+                onChange={(e) => setFilterBatchId(e.target.value)}
+                disabled={!filterCourseId}
+              >
+                <option value="">All Batches</option>
+                {batches.filter(b => b.course?.id?.toString() === filterCourseId).map(b => (
+                  <option key={b.id} value={b.id}>{b.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="flex-1 flex gap-2">
+            <Input 
+              placeholder="Search by ID or Name..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && fetchStudents()}
+              className="flex-1"
+            />
+            <Button onClick={fetchStudents} className="gap-2 shrink-0">
+              <Search className="h-4 w-4" />
+              Search
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card className="border-none shadow-sm dark:bg-slate-800/50">
         <CardHeader>
