@@ -49,20 +49,32 @@ export async function GET() {
       }
     });
 
-    // 3. Fetch upcoming exam
-    const upcomingExam = await prisma.exam.findFirst({
+    // 3. Fetch all active/published exams and find the next valid one
+    const allRelevantExams = await prisma.exam.findMany({
       where: {
         OR: [
           { batch_id: student.batch_id },
           { course_id: student.batch.course_id },
           { is_public: true }
         ],
-        start_time: {
-          gte: currentDate
-        },
-        status: "published"
+        status: { in: ["published", "active"] }
+      },
+      include: {
+        results: {
+          where: { student_id: studentId }
+        }
       },
       orderBy: { start_time: 'asc' }
+    });
+
+    const upcomingExam = allRelevantExams.find(e => {
+      const isAttempted = e.results && e.results.length > 0;
+      if (isAttempted) return false;
+
+      const endTime = e.end_time ? new Date(e.end_time) : null;
+      if (endTime && endTime < currentDate) return false;
+
+      return true;
     });
 
     // 4. Fetch payment status for current month

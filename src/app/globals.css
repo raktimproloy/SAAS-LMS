@@ -84,7 +84,88 @@
     --sidebar-accent-foreground: 210 20% 98%;
     --sidebar-border: 224 15% 18%;
     --sidebar-ring: 243 75% 67%;
+    --sidebar-ring: 243 75% 67%;
   }
+
+  /* Student Portal Scoped Theme */
+  .student-portal {
+    --background: 40 33% 98%; /* Cream off-white */
+    --foreground: 222.2 47.4% 11.2%; 
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 47.4% 11.2%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 47.4% 11.2%;
+    --primary: 210 100% 40%; /* Deep Azure Blue */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 214.3 31.8% 91.4%; 
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 40 20% 92%; 
+    --muted-foreground: 215.4 16.3% 46.9%; 
+    --accent: 40 20% 92%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%; 
+    --destructive-foreground: 0 0% 100%;
+    --border: 40 20% 90%; 
+    --input: 40 20% 90%;
+    --ring: 210 100% 40%;
+    --radius: 1rem;
+    --sidebar: 40 33% 96%; /* Slightly darker cream */
+    --sidebar-foreground: 222.2 47.4% 11.2%;
+    --sidebar-primary: 210 100% 40%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 40 20% 92%;
+    --sidebar-accent-foreground: 222.2 47.4% 11.2%;
+    --sidebar-border: 40 20% 90%;
+    --sidebar-ring: 210 100% 40%;
+  }
+
+  .dark .student-portal {
+    --background: 217 25% 12%; /* Dark grayed blue */
+    --foreground: 210 20% 98%;
+    --card: 217 25% 15%; 
+    --card-foreground: 210 20% 98%;
+    --popover: 217 25% 15%;
+    --popover-foreground: 210 20% 98%;
+    --primary: 200 100% 60%; /* Light Sky/Cyan Blue */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 217 25% 20%;
+    --secondary-foreground: 210 20% 98%;
+    --muted: 217 25% 20%;
+    --muted-foreground: 224 10% 70%;
+    --accent: 217 25% 20%;
+    --accent-foreground: 210 20% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 217 25% 22%; 
+    --input: 217 25% 22%;
+    --ring: 200 100% 60%;
+    --sidebar: 217 25% 10%;
+    --sidebar-foreground: 210 20% 98%;
+    --sidebar-primary: 200 100% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 217 25% 20%;
+    --sidebar-accent-foreground: 210 20% 98%;
+    --sidebar-border: 217 25% 18%;
+    --sidebar-ring: 200 100% 60%;
+  }
+
+  @keyframes blob {
+    0% { transform: translate(0px, 0px) scale(1); }
+    33% { transform: translate(30px, -50px) scale(1.1); }
+    66% { transform: translate(-20px, 20px) scale(0.9); }
+    100% { transform: translate(0px, 0px) scale(1); }
+  }
+
+  .animate-blob {
+    animation: blob 7s infinite;
+  }
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+  .animation-delay-4000 {
+    animation-delay: 4s;
+  }
+
   * {
     @apply border-border;
   }

@@ -27,7 +27,7 @@ export async function POST(request: Request) {
 
     // Generate token
     const expiresIn = rememberMe ? "30d" : "1d";
-    const maxAge = rememberMe ? 30 * 24 * 60 * 60 : 24 * 60 * 60; // 30 days or 1 day
+    const maxAge = rememberMe ? 30 * 24 * 60 * 60 : undefined; // 30 days or session
 
     const token = signToken({
       id: admin.id,
@@ -45,15 +45,19 @@ export async function POST(request: Request) {
       },
     });
 
-    response.cookies.set({
+    const cookieOptions: any = {
       name: "admin_token",
       value: token,
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      maxAge: maxAge,
-      expires: new Date(Date.now() + maxAge * 1000),
       path: "/",
-    });
+    };
+
+    if (maxAge) {
+      cookieOptions.maxAge = maxAge;
+    }
+
+    response.cookies.set(cookieOptions);
 
     return response;
   } catch (error) {

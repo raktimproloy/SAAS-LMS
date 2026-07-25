@@ -3,8 +3,10 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle2, XCircle, AlertCircle, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { CheckCircle2, XCircle, AlertCircle, Clock, ChevronDown, ChevronUp, Medal } from "lucide-react";
 
 export default function StudentExamResultPage() {
   const params = useParams();
@@ -72,12 +74,18 @@ export default function StudentExamResultPage() {
           </p>
         </div>
         
-        <div className="flex gap-8 text-center">
+        <div className="flex gap-8 text-center items-center">
+          <Link href={`/student/exams/${examId}/leaderboard`}>
+            <Button variant="outline" className="h-12 rounded-2xl bg-amber-500/10 border-amber-500/20 hover:bg-amber-500/20 hover:border-amber-500/40 text-amber-500 transition-all backdrop-blur-md shadow-[0_0_15px_rgba(245,158,11,0.15)] font-semibold px-6">
+              <Medal className="w-4 h-4 mr-2 drop-shadow-[0_0_8px_rgba(245,158,11,0.8)]" /> View Leaderboard
+            </Button>
+          </Link>
+          <div className="w-px h-12 bg-border"></div>
           <div>
             <div className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-1">Score</div>
             <div className="text-4xl font-bold text-primary">{result.obtained_marks} <span className="text-lg text-muted-foreground/70">/ {result.total_marks}</span></div>
           </div>
-          <div className="w-px bg-border"></div>
+          <div className="w-px h-12 bg-border"></div>
           <div>
             <div className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-1">Rank</div>
             <div className="text-4xl font-bold text-amber-500">#{result.rank || '-'}</div>

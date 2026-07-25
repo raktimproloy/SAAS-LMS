@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Plus, Pencil, Trash2, Power, AlertTriangle, CheckCircle2, User } from "lucide-react";
+import { Plus, Pencil, Trash2, Power, AlertTriangle, CheckCircle2, User, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -62,6 +62,52 @@ interface Student {
   enrolled_at: string;
 }
 
+// Custom Dropdown that guarantees downward opening
+const CustomDropdown = ({ value, onChange, options, placeholder }: { value: string, onChange: (val: string) => void, options: {value: string, label: string}[], placeholder: string }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (ref.current && !ref.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  return (
+    <div className="relative w-full" ref={ref}>
+      <div 
+        className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background cursor-pointer"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <span className={!value ? "text-muted-foreground" : "text-foreground"}>
+          {options.find(o => o.value === value)?.label || placeholder}
+        </span>
+        <ChevronDown className="h-4 w-4 opacity-50" />
+      </div>
+      {isOpen && (
+        <div className="absolute top-full left-0 mt-1 w-full max-h-60 overflow-y-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md z-[100] custom-scrollbar">
+          {options.map((opt) => (
+            <div
+              key={opt.value}
+              className="relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 px-2 text-sm outline-none hover:bg-accent hover:text-accent-foreground"
+              onClick={() => {
+                onChange(opt.value);
+                setIsOpen(false);
+              }}
+            >
+              {opt.label}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 export default function StudentsPage() {
   const router = useRouter();
   const [students, setStudents] = useState<Student[]>([]);
@@ -82,7 +128,9 @@ export default function StudentsPage() {
   const [student_id, setStudent_id] = useState("");
   const [name, setName] = useState("");
   const [gender, setGender] = useState("");
-  const [dob, setDob] = useState("");
+  const [dobDay, setDobDay] = useState("");
+  const [dobMonth, setDobMonth] = useState("");
+  const [dobYear, setDobYear] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -119,7 +167,9 @@ export default function StudentsPage() {
     setStudent_id("");
     setName("");
     setGender("");
-    setDob("");
+    setDobDay("");
+    setDobMonth("");
+    setDobYear("");
     setPhone("");
     setEmail("");
     setPassword("");
@@ -143,7 +193,17 @@ export default function StudentsPage() {
     setStudent_id(student.student_id || "");
     setName(student.name || "");
     setGender(student.gender || "");
-    setDob(student.dob ? new Date(student.dob).toISOString().split('T')[0] : "");
+    if (student.dob) {
+      const d = new Date(student.dob).toISOString().split('T')[0];
+      const parts = d.split('-');
+      setDobYear(parts[0]);
+      setDobMonth(parts[1]);
+      setDobDay(parts[2]);
+    } else {
+      setDobDay("");
+      setDobMonth("");
+      setDobYear("");
+    }
     setPhone(student.phone || "");
     setEmail(student.email || "");
     setPassword(""); // Leave password blank on edit unless they want to change it
@@ -213,6 +273,7 @@ export default function StudentsPage() {
       const method = editingStudentId ? "PUT" : "POST";
 
       // If editing and password is empty, don't send it
+      const dob = dobYear && dobMonth && dobDay ? `${dobYear}-${dobMonth}-${dobDay}` : undefined;
       const payload: Record<string, string | number | undefined> = {
         student_id, name, gender, dob, phone, email, batch_id: batchId,
         parent_name: parentName, parent_phone: parentPhone, address
@@ -372,8 +433,35 @@ export default function StudentsPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="dob">Date of Birth</Label>
-                  <Input id="dob" type="date" value={dob} onChange={(e) => setDob(e.target.value)} />
+                  <Label>Date of Birth</Label>
+                  <div className="grid grid-cols-3 gap-2">
+                    <CustomDropdown
+                      value={dobDay}
+                      onChange={setDobDay}
+                      placeholder="Day"
+                      options={Array.from({length: 31}, (_, i) => {
+                        const val = (i + 1).toString().padStart(2, '0');
+                        return { value: val, label: val };
+                      })}
+                    />
+                    <CustomDropdown
+                      value={dobMonth}
+                      onChange={setDobMonth}
+                      placeholder="Month"
+                      options={["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"].map((m, i) => ({
+                        value: (i + 1).toString().padStart(2, '0'), label: m
+                      }))}
+                    />
+                    <CustomDropdown
+                      value={dobYear}
+                      onChange={setDobYear}
+                      placeholder="Year"
+                      options={Array.from({length: 50}, (_, i) => {
+                        const y = (new Date().getFullYear() - i).toString();
+                        return { value: y, label: y };
+                      })}
+                    />
+                  </div>
                 </div>
 
                 <div className="space-y-2">

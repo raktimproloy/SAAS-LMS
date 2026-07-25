@@ -22,7 +22,7 @@ export async function GET() {
 
     const exams = await prisma.exam.findMany({
       where: {
-        type: 'online',
+        type: 'online_mcq',
         status: { in: ["active", "published", "completed"] },
         OR: [
           { batch_id: student.batch_id },

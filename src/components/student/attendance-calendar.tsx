@@ -68,9 +68,9 @@ export function AttendanceCalendar({ attendanceData, reports = [], studentId, re
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl border shadow-sm overflow-hidden">
-      <div className="flex items-center justify-between p-4 border-b">
-        <h3 className="font-semibold text-lg">{format(currentDate, "MMMM yyyy")}</h3>
+    <div className="w-full h-full flex flex-col">
+      <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-4">
+        <h3 className="font-semibold text-lg text-foreground/90">{format(currentDate, "MMMM yyyy")}</h3>
         <div className="flex gap-1">
           <Button variant="outline" size="icon" onClick={prevMonth} className="h-8 w-8">
             <ChevronLeft className="h-4 w-4" />
@@ -81,16 +81,16 @@ export function AttendanceCalendar({ attendanceData, reports = [], studentId, re
         </div>
       </div>
 
-      <div className="p-4">
-        <div className="grid grid-cols-7 gap-1 text-center text-xs font-medium text-slate-500 mb-2">
+      <div className="flex-1 flex flex-col min-h-0">
+        <div className="grid grid-cols-7 gap-1 text-center text-xs font-bold text-muted-foreground mb-4 uppercase tracking-wider shrink-0">
           {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(day => (
             <div key={day} className="py-1">{day}</div>
           ))}
         </div>
 
-        <div className="grid grid-cols-7 gap-1">
+        <div className="grid grid-cols-7 gap-1 flex-1 min-h-0 auto-rows-fr">
           {emptyDays.map(empty => (
-            <div key={`empty-${empty}`} className="h-10 rounded-md bg-transparent" />
+            <div key={`empty-${empty}`} className="w-full h-full rounded-md bg-transparent" />
           ))}
 
           {daysInMonth.map((date, i) => {
@@ -111,13 +111,13 @@ export function AttendanceCalendar({ attendanceData, reports = [], studentId, re
                 key={i}
                 onClick={() => handleDayClick(date)}
                 className={cn(
-                  "h-10 rounded-md flex items-center justify-center text-sm transition-all hover:ring-2 hover:ring-slate-300 relative group",
-                  isToday(date) && "font-bold border-2 border-primary",
-                  !isSameMonth(date, currentDate) && "text-slate-300",
-                  record?.status === "present" && "bg-green-100 text-green-700 hover:bg-green-200",
-                  record?.status === "absent" && "bg-red-100 text-red-700 hover:bg-red-200",
-                  record?.status === "late" && "bg-orange-100 text-orange-700 hover:bg-orange-200",
-                  !record && "hover:bg-slate-100 dark:hover:bg-slate-800",
+                  "w-full h-full min-h-0 rounded-xl flex items-center justify-center text-sm font-medium transition-all hover:scale-105 hover:shadow-lg relative group",
+                  isToday(date) && "font-black border-2 border-primary text-primary shadow-sm bg-primary/10",
+                  !isSameMonth(date, currentDate) && "text-muted-foreground/30",
+                  record?.status === "present" && "bg-emerald-500/20 text-emerald-500 hover:bg-emerald-500/30",
+                  record?.status === "absent" && "bg-destructive/20 text-destructive hover:bg-destructive/30",
+                  record?.status === "late" && "bg-amber-500/20 text-amber-500 hover:bg-amber-500/30",
+                  !record && !isToday(date) && "hover:bg-white/10 text-foreground/70",
                   hasReports && "ring-2 ring-amber-400 ring-offset-1 bg-amber-50 text-amber-800"
                 )}
               >

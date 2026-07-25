@@ -19,7 +19,7 @@ export async function GET() {
 
   try {
     const exams = await prisma.exam.findMany({
-      where: { type: 'online' },
+      where: { type: 'online_mcq' },
       include: {
         batch: { include: { course: true } },
         course: true,

@@ -23,9 +23,8 @@ export async function GET(request: Request, { params }: { params: { id: string }
     if (!exam) return NextResponse.json({ error: "Exam not found" }, { status: 404 });
 
     // Fetch leaderboard
-    const leaderboard = await prisma.examResult.findMany({
+    const allResults = await prisma.examResult.findMany({
       where: { exam_id: examId },
-      take: 50,
       orderBy: [
         { obtained_marks: 'desc' },
         { time_taken_seconds: 'asc' }
@@ -39,6 +38,10 @@ export async function GET(request: Request, { params }: { params: { id: string }
         }
       }
     });
+
+    const leaderboard = allResults
+      .filter(r => r.student || r.public_participant)
+      .slice(0, 50);
 
     return NextResponse.json({
       exam,
