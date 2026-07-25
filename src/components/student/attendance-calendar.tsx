@@ -15,11 +15,13 @@ interface AttendanceCalendarProps {
   }>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   reports?: Array<any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  allResults?: Array<any>;
   studentId?: number;
   readOnly?: boolean;
 }
 
-export function AttendanceCalendar({ attendanceData, reports = [], studentId, readOnly = true }: AttendanceCalendarProps) {
+export function AttendanceCalendar({ attendanceData, reports = [], allResults = [], studentId, readOnly = true }: AttendanceCalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<DayDetails | null>(null);
   const router = useRouter();
@@ -55,10 +57,18 @@ export function AttendanceCalendar({ attendanceData, reports = [], studentId, re
       return d === dateStr;
     });
 
+    // Find results for this date
+    const dayResults = allResults.filter(r => {
+      if (!r.exam || !r.exam.start_time) return false;
+      const d = typeof r.exam.start_time === 'string' ? r.exam.start_time.split('T')[0] : format(new Date(r.exam.start_time), "yyyy-MM-dd");
+      return d === dateStr;
+    });
+
     setSelectedDay({
       date,
       attendance: record?.status,
-      reports: dayReports
+      reports: dayReports,
+      results: dayResults
     });
   };
 
@@ -106,6 +116,12 @@ export function AttendanceCalendar({ attendanceData, reports = [], studentId, re
               return d === dateStr;
             });
 
+            const hasResults = allResults.some(r => {
+              if (!r.exam || !r.exam.start_time) return false;
+              const d = typeof r.exam.start_time === 'string' ? r.exam.start_time.split('T')[0] : format(new Date(r.exam.start_time), "yyyy-MM-dd");
+              return d === dateStr;
+            });
+
             return (
               <button
                 key={i}
@@ -118,15 +134,21 @@ export function AttendanceCalendar({ attendanceData, reports = [], studentId, re
                   record?.status === "absent" && "bg-red-100 text-red-700 hover:bg-red-200",
                   record?.status === "late" && "bg-orange-100 text-orange-700 hover:bg-orange-200",
                   !record && "hover:bg-slate-100 dark:hover:bg-slate-800",
-                  hasReports && "ring-2 ring-amber-400 ring-offset-1 bg-amber-50 text-amber-800"
+                  hasReports && "ring-2 ring-amber-400 ring-offset-1 bg-amber-50 text-amber-800",
+                  hasResults && !hasReports && "ring-2 ring-blue-400 ring-offset-1 bg-blue-50 text-blue-800"
                 )}
               >
                 {format(date, "d")}
                 
-                {/* Yellow dot indicator if reports exist */}
-                {hasReports && (
-                  <div className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-amber-500 shadow-sm" />
-                )}
+                {/* Indicators */}
+                <div className="absolute top-1 right-1 flex gap-0.5">
+                  {hasReports && (
+                    <div className="h-1.5 w-1.5 rounded-full bg-amber-500 shadow-sm" />
+                  )}
+                  {hasResults && (
+                    <div className="h-1.5 w-1.5 rounded-full bg-blue-500 shadow-sm" />
+                  )}
+                </div>
               </button>
             );
           })}

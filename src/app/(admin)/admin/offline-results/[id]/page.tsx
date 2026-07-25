@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Save, Loader2, Search } from "lucide-react";
+import Link from "next/link";
+import { ArrowLeft, Save, Loader2, Search, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -228,13 +229,22 @@ export default function EditOfflineResultPage({ params }: { params: { id: string
 
   return (
     <div className="flex flex-col gap-6 w-full pb-12">
-      <div className="flex items-center gap-4">
-        <Button variant="outline" size="icon" onClick={() => router.push("/admin/offline-results")}>
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">{isNew ? "Publish Offline Result" : "Edit Offline Result"}</h1>
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <Button variant="outline" size="icon" onClick={() => router.push("/admin/offline-results")}>
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">{isNew ? "Publish Offline Result" : "Edit Offline Result"}</h1>
+          </div>
         </div>
+        {!isNew && examId && (
+          <Link href={`/admin/offline-results/${examId}/print`} target="_blank">
+            <Button variant="outline">
+              <Printer className="h-4 w-4 mr-2" /> Print Result
+            </Button>
+          </Link>
+        )}
       </div>
 
       <Card>

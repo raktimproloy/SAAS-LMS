@@ -50,6 +50,7 @@ interface Batch {
   start_time: string;
   end_time: string;
   max_students: number | null;
+  class_days?: string[];
   course: Course;
   status: string;
 }
@@ -88,6 +89,7 @@ export default function CoursesBatchesPage() {
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [maxStudents, setMaxStudents] = useState("");
+  const [classDays, setClassDays] = useState<string[]>([]);
 
   // Fetch Data
   const fetchData = async () => {
@@ -149,6 +151,7 @@ export default function CoursesBatchesPage() {
     setStartTime("");
     setEndTime("");
     setMaxStudents("");
+    setClassDays([]);
     setEditMode(false);
     setEditId(null);
     setFormError("");
@@ -182,6 +185,8 @@ export default function CoursesBatchesPage() {
     setStartTime(batch.start_time || "");
     setEndTime(batch.end_time || "");
     setMaxStudents(batch.max_students ? batch.max_students.toString() : "");
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    setClassDays(batch.class_days ? (batch.class_days as any) : []);
     setIsDialogOpen(true);
   };
 
@@ -200,7 +205,7 @@ export default function CoursesBatchesPage() {
       payload = { title, fee, discount_fee: discountFee, start_date: startDate, end_date: endDate, details, thumbnail };
     } else if (activeTab === "batches") {
       endpoint = editMode ? `/api/admin/batches/${editId}` : "/api/admin/batches";
-      payload = { name: title, course_id: courseId, start_time: startTime, end_time: endTime, max_students: maxStudents };
+      payload = { name: title, course_id: courseId, start_time: startTime, end_time: endTime, max_students: maxStudents, class_days: classDays };
     }
 
     try {
@@ -426,6 +431,25 @@ export default function CoursesBatchesPage() {
                       <div className="grid gap-2">
                         <Label htmlFor="max">Max Students</Label>
                         <Input id="max" type="number" value={maxStudents} onChange={(e) => setMaxStudents(e.target.value)} placeholder="Optional (e.g. 50)" />
+                      </div>
+                      <div className="grid gap-2 col-span-2">
+                        <Label>Class Days</Label>
+                        <div className="flex flex-wrap gap-2">
+                          {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(day => (
+                            <label key={day} className="flex items-center gap-1.5 cursor-pointer bg-slate-50 dark:bg-slate-900 border px-3 py-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                              <input 
+                                type="checkbox" 
+                                className="rounded border-slate-300 text-primary focus:ring-primary"
+                                checked={classDays.includes(day)}
+                                onChange={(e) => {
+                                  if (e.target.checked) setClassDays([...classDays, day]);
+                                  else setClassDays(classDays.filter(d => d !== day));
+                                }}
+                              />
+                              <span className="text-sm font-medium">{day}</span>
+                            </label>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </>

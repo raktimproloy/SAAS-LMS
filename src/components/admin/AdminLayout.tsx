@@ -15,7 +15,8 @@ import {
   LogOut,
   Database,
   Video,
-  ClipboardList
+  ClipboardList,
+  CalendarCheck
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -33,6 +34,7 @@ const sidebarLinks = [
   { name: "Courses & Batches", href: "/admin/courses", icon: BookOpen, perm: "courses" },
   { name: "Video Courses", href: "/admin/video-courses", icon: Video, perm: "courses" },
   { name: "Student Management", href: "/admin/students", icon: Users, perm: "students" },
+  { name: "Attendance", href: "/admin/attendance", icon: CalendarCheck, perm: "students" },
   { name: "Student Payment", href: "/admin/payments", icon: CreditCard, perm: "payments" },
   { name: "Online Exams", href: "/admin/exams", icon: FileText, perm: "exams" },
   { name: "Offline Results", href: "/admin/offline-results", icon: ClipboardList, perm: "exams" },
@@ -157,13 +159,13 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[260px_1fr]">
       {/* Desktop Sidebar */}
-      <div className="hidden border-r bg-muted/20 md:block sticky top-0 h-screen">
+      <div className="hidden border-r bg-muted/20 md:block sticky top-0 h-screen print:hidden">
         <SidebarContent />
       </div>
 
       <div className="flex flex-col">
         {/* Header */}
-        <header className="flex h-14 items-center gap-4 border-b bg-muted/20 px-4 lg:h-[60px] lg:px-6 sticky top-0 z-30 backdrop-blur-sm">
+        <header className="flex h-14 items-center gap-4 border-b bg-muted/20 px-4 lg:h-[60px] lg:px-6 sticky top-0 z-30 backdrop-blur-sm print:hidden">
           <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
             {/* @ts-expect-error - Radix UI type mismatch for asChild */}
             <SheetTrigger asChild>
@@ -200,7 +202,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Main Content */}
-        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-slate-50/50 dark:bg-transparent relative">
+        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-slate-50/50 dark:bg-transparent relative print:p-0 print:m-0 print:bg-transparent">
           {!hasAccess ? (
             <div className="flex flex-col items-center justify-center flex-1 h-[60vh]">
               <div className="text-center space-y-4">

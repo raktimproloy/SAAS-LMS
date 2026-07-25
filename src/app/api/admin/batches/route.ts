@@ -36,7 +36,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { name, course_id, start_time, end_time, max_students } = body;
+    const { name, course_id, start_time, end_time, max_students, class_days } = body;
 
     if (!name || !course_id || !start_time || !end_time) {
       return NextResponse.json({ error: "Required fields are missing" }, { status: 400 });
@@ -48,7 +48,8 @@ export async function POST(request: Request) {
         course_id: parseInt(course_id), 
         start_time,
         end_time,
-        max_students: max_students ? parseInt(max_students) : null
+        max_students: max_students ? parseInt(max_students) : null,
+        class_days: class_days || []
       },
     });
 

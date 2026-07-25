@@ -16,12 +16,32 @@ async function checkPermission(permission: string) {
 
 // Helper removed since ID is manually entered
 
-export async function GET() {
+export async function GET(request: Request) {
   const hasPerm = await checkPermission("students");
   if (!hasPerm) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
 
+  const { searchParams } = new URL(request.url);
+  const q = searchParams.get("q");
+  const course_id = searchParams.get("course_id");
+  const batch_id = searchParams.get("batch_id");
+
   try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const whereClause: any = {};
+    if (batch_id) {
+      whereClause.batch_id = parseInt(batch_id);
+    } else if (course_id) {
+      whereClause.batch = { course_id: parseInt(course_id) };
+    }
+    if (q) {
+      whereClause.OR = [
+        { name: { contains: q } },
+        { student_id: { contains: q } }
+      ];
+    }
+
     const students = await prisma.student.findMany({
+      where: whereClause,
       include: {
         batch: {
           include: {

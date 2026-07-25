@@ -18,6 +18,13 @@ export default async function BatchReportsPage({ params }: { params: { courseId:
         include: {
           attendance: true,
           reports: true,
+          exam_results: {
+            include: {
+              exam: {
+                select: { title: true, type: true, start_time: true, total_marks: true }
+              }
+            }
+          },
           reviews: {
             take: 1,
             orderBy: { created_at: "desc" }
@@ -48,7 +55,8 @@ export default async function BatchReportsPage({ params }: { params: { courseId:
       rating,
       reportCount: student.reports.length,
       attendance: student.attendance,
-      reports: student.reports
+      reports: student.reports,
+      allResults: student.exam_results
     };
   });
 

@@ -19,15 +19,16 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
   try {
     const body = await request.json();
-    const { name, course_id, start_time, end_time, max_students, status } = body;
+    const { name, course_id, start_time, end_time, max_students, status, class_days } = body;
 
     const dataToUpdate: Record<string, unknown> = {};
     if (name !== undefined) dataToUpdate.name = name;
-    if (course_id !== undefined) dataToUpdate.course_id = parseInt(course_id);
+    if (course_id !== undefined) dataToUpdate.course = { connect: { id: parseInt(course_id) } };
     if (start_time !== undefined) dataToUpdate.start_time = start_time;
     if (end_time !== undefined) dataToUpdate.end_time = end_time;
     if (max_students !== undefined) dataToUpdate.max_students = max_students ? parseInt(max_students) : null;
     if (status !== undefined) dataToUpdate.status = status;
+    if (class_days !== undefined) dataToUpdate.class_days = class_days;
 
     const updatedBatch = await prisma.batch.update({
       where: { id: parseInt(params.id) },

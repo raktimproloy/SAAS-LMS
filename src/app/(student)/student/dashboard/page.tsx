@@ -16,6 +16,8 @@ type DashboardData = {
   notices: { id: number; title: string; content: string }[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   reports?: any[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  allResults?: any[];
 };
 
 export default function StudentDashboard() {
@@ -77,6 +79,7 @@ export default function StudentDashboard() {
           <AttendanceCalendar 
             attendanceData={data?.attendance || []} 
             reports={data?.reports || []}
+            allResults={data?.allResults || []}
             readOnly={true}
           />
 

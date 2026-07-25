@@ -6,7 +6,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { format } from "date-fns";
-import { CheckCircle2, XCircle, Clock, AlertTriangle, FileText, BarChart, Plus, Loader2 } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, AlertTriangle, FileText, BarChart, Plus, Loader2, Trophy } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,7 +19,8 @@ export type DayDetails = {
   attendance?: "present" | "absent" | "late";
   reports?: Array<any>;
   exam?: { title: string; time: string };
-  result?: { examTitle: string; marks: number; rank?: number; total: number };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  results?: Array<any>;
   notice?: { title: string };
 };
 
@@ -102,6 +103,35 @@ export function DayDetailsModal({ details, isOpen, onClose, readOnly = true, stu
               </p>
             </div>
           </div>
+
+          {/* Results Section */}
+          {details.results && details.results.length > 0 && (
+            <div className="space-y-3">
+              <h4 className="font-semibold text-slate-900 dark:text-slate-100 text-sm">Exam Results ({details.results.length})</h4>
+              {details.results.map((res, idx) => (
+                <div key={idx} className="flex gap-3 p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/50">
+                  <div className="mt-0.5 shrink-0 p-2 bg-blue-100 dark:bg-blue-900/40 rounded-full h-fit">
+                    <Trophy className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div className="flex-1">
+                    <h5 className="font-bold text-blue-900 dark:text-blue-200">{res.exam?.title || "Exam"}</h5>
+                    <div className="mt-2 grid grid-cols-2 gap-2 text-sm text-blue-800 dark:text-blue-300">
+                      <div>
+                        <span className="opacity-70 text-xs uppercase tracking-wider block">Marks</span>
+                        <span className="font-bold text-lg">{res.obtained_marks}</span> <span className="opacity-70 text-xs">/ {res.exam?.total_marks || res.total_marks || "-"}</span>
+                      </div>
+                      {res.grade && (
+                        <div>
+                          <span className="opacity-70 text-xs uppercase tracking-wider block">Grade</span>
+                          <span className="font-bold text-lg">{res.grade}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Reports Section */}
           {details.reports && details.reports.length > 0 && (

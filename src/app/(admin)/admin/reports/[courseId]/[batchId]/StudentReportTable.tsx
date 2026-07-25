@@ -96,6 +96,7 @@ export function StudentReportTable({ students }: { students: any[] }) {
                             <AttendanceCalendar 
                               attendanceData={student.attendance} 
                               reports={student.reports}
+                              allResults={student.allResults}
                               studentId={student.id}
                               readOnly={false}
                             />

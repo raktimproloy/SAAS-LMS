@@ -98,13 +98,32 @@ export async function GET() {
       }
     });
 
+    // 7. Fetch all exam results for the current month to display on calendar
+    const allResults = await prisma.examResult.findMany({
+      where: {
+        student_id: studentId,
+        exam: {
+          start_time: {
+            gte: startOfMonth,
+            lte: endOfMonth,
+          }
+        }
+      },
+      include: {
+        exam: {
+          select: { title: true, type: true, start_time: true, total_marks: true }
+        }
+      }
+    });
+
     return NextResponse.json({
       attendance,
       recentResult,
       upcomingExam,
       paymentStatus: payment ? payment.status : "due",
       notices,
-      reports
+      reports,
+      allResults
     });
   } catch (error) {
     console.error("Student Dashboard API error:", error);
