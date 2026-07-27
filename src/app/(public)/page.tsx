@@ -29,7 +29,6 @@ export default function HomePage() {
       <FeaturesSection />
       <OfflineCoursesSection />
       <GallerySection />
-      {/* <PopularCoursesSection /> */}
       <VideoCourseSection />
       <NoticeBoardSection />
       <ReviewSection />
