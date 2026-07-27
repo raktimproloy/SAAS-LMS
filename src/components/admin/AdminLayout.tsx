@@ -16,7 +16,9 @@ import {
   Database,
   Video,
   ClipboardList,
-  CalendarCheck
+  CalendarCheck,
+  ChevronDown,
+  ChevronRight
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -28,18 +30,39 @@ import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
 
 // Define the permissions mapping for sidebar links
-const sidebarLinks = [
+type SidebarLink = {
+  name: string;
+  href?: string;
+  icon?: any;
+  perm?: string;
+  subItems?: { name: string; href: string; perm?: string }[];
+};
+
+const sidebarLinks: SidebarLink[] = [
   { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard }, // no perm needed
   { name: "Assistants Team", href: "/admin/assistants", icon: Users, perm: "assistants" },
   { name: "Courses & Batches", href: "/admin/courses", icon: BookOpen, perm: "courses" },
   { name: "Video Courses", href: "/admin/video-courses", icon: Video, perm: "courses" },
-  { name: "Student Management", href: "/admin/students", icon: Users, perm: "students" },
-  { name: "Attendance", href: "/admin/attendance", icon: CalendarCheck, perm: "students" },
-  { name: "Student Payment", href: "/admin/payments", icon: CreditCard, perm: "payments" },
-  { name: "Online Exams", href: "/admin/exams", icon: FileText, perm: "exams" },
-  { name: "Offline Results", href: "/admin/offline-results", icon: ClipboardList, perm: "exams" },
-  { name: "Study Materials", href: "/admin/materials", icon: Database, perm: "materials" },
-  { name: "Reports", href: "/admin/reports", icon: ClipboardList, perm: "reports" },
+  {
+    name: "Management",
+    icon: Users,
+    subItems: [
+      { name: "Students", href: "/admin/students", perm: "students" },
+      { name: "Attendance", href: "/admin/attendance", perm: "students" },
+      { name: "Payment", href: "/admin/payments", perm: "payments" },
+      { name: "Study Materials", href: "/admin/materials", perm: "materials" },
+      { name: "Report", href: "/admin/reports", perm: "reports" },
+      { name: "Notices", href: "/admin/notices", perm: "notices" },
+    ]
+  },
+  {
+    name: "Exam",
+    icon: FileText,
+    subItems: [
+      { name: "Online Exam", href: "/admin/exams", perm: "exams" },
+      { name: "Result", href: "/admin/offline-results", perm: "exams" },
+    ]
+  },
   { name: "Website Content", href: "/admin/content", icon: Bell, perm: "content" },
   { name: "Settings", href: "/admin/settings", icon: Settings }, // no perm needed
 ];
@@ -51,6 +74,146 @@ interface AdminUser {
   role: string;
   permissions: string[];
 }
+
+// Extracted Sidebar component to avoid re-mounting and losing state on parent re-renders
+const SidebarContent = ({
+  pathname,
+  user,
+  setIsMobileOpen,
+  handleLogout
+}: {
+  pathname: string;
+  user: AdminUser | null;
+  setIsMobileOpen: (v: boolean) => void;
+  handleLogout: () => void;
+}) => {
+  const [openMenus, setOpenMenus] = useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {};
+    sidebarLinks.forEach(link => {
+      if (link.subItems && link.subItems.some(sub => pathname.startsWith(sub.href))) {
+        initial[link.name] = true;
+      }
+    });
+    return initial;
+  });
+
+  const toggleMenu = (name: string) => {
+    setOpenMenus(prev => ({ ...prev, [name]: !prev[name] }));
+  };
+
+  return (
+    <div className="flex h-full flex-col gap-2">
+      <div className="flex h-14 items-center border-b px-6 lg:h-[60px]">
+        <Link href="/admin/dashboard" className="flex items-center gap-2 font-semibold text-lg tracking-tight">
+          <Database className="h-6 w-6 text-primary" />
+          <span className="">DoctorBiology</span>
+        </Link>
+      </div>
+      <div className="flex-1 overflow-auto py-2">
+        <nav className="grid items-start px-4 text-sm font-medium gap-1">
+          {sidebarLinks.map((link) => {
+            // Check permission for parent link if it has no subItems
+            if (!link.subItems) {
+              const hasPerm = !link.perm || user?.role === "super_admin" || user?.permissions?.includes("all") || user?.permissions?.includes(link.perm);
+              if (!hasPerm) return null;
+            } else {
+              // For group, filter subItems based on permissions
+              const visibleSubItems = link.subItems.filter(sub => {
+                return !sub.perm || user?.role === "super_admin" || user?.permissions?.includes("all") || user?.permissions?.includes(sub.perm);
+              });
+              if (visibleSubItems.length === 0) return null; // Hide group if no subItems are accessible
+            }
+
+            const Icon = link.icon;
+
+            if (link.subItems) {
+              const isOpen = openMenus[link.name];
+              const isActiveGroup = link.subItems.some(sub => pathname === sub.href || pathname.startsWith(`${sub.href}/`));
+
+              const visibleSubItems = link.subItems.filter(sub => {
+                return !sub.perm || user?.role === "super_admin" || user?.permissions?.includes("all") || user?.permissions?.includes(sub.perm);
+              });
+
+              return (
+                <div key={link.name} className="flex flex-col gap-1">
+                  <button
+                    onClick={() => toggleMenu(link.name)}
+                    className={cn(
+                      "flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2.5 transition-colors hover:text-primary",
+                      isActiveGroup
+                        ? "bg-primary/5 text-primary"
+                        : "text-muted-foreground hover:bg-muted"
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      {Icon && <Icon className="h-4 w-4" />}
+                      {link.name}
+                    </div>
+                    <ChevronDown className={cn("h-4 w-4 transition-transform duration-300", isOpen ? "rotate-0" : "-rotate-90")} />
+                  </button>
+
+                  <div
+                    className={cn(
+                      "grid transition-all duration-300 ease-in-out",
+                      isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                    )}
+                  >
+                    <div className="overflow-hidden">
+                      <div className="ml-9 flex flex-col gap-1 border-l pl-2 mt-1 mb-1">
+                        {visibleSubItems.map(sub => {
+                          const isActive = pathname === sub.href || pathname.startsWith(`${sub.href}/`);
+                          return (
+                            <Link
+                              key={sub.name}
+                              href={sub.href}
+                              onClick={() => setIsMobileOpen(false)}
+                              className={cn(
+                                "flex items-center rounded-md px-3 py-2 text-sm transition-colors hover:text-primary",
+                                isActive
+                                  ? "bg-primary/10 text-primary font-medium"
+                                  : "text-muted-foreground hover:bg-muted"
+                              )}
+                            >
+                              {sub.name}
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+
+            const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`);
+            return (
+              <Link
+                key={link.name}
+                href={link.href as string}
+                onClick={() => setIsMobileOpen(false)}
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors hover:text-primary",
+                  isActive
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-muted"
+                )}
+              >
+                {Icon && <Icon className="h-4 w-4" />}
+                {link.name}
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
+      <div className="p-4 mt-auto">
+        <Button variant="outline" className="w-full justify-start gap-2 text-destructive hover:text-destructive hover:bg-destructive/10 transition-colors" onClick={handleLogout}>
+          <LogOut className="h-4 w-4" />
+          Logout
+        </Button>
+      </div>
+    </div>
+  );
+};
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -98,16 +261,10 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading interface...</div>;
   }
 
-  // Filter links based on user permissions
-  const filteredLinks = sidebarLinks.filter(link => {
-    if (!link.perm) return true; // Accessible by all (Dashboard, Settings)
-    if (user?.role === "super_admin") return true;
-    if (user?.permissions?.includes("all")) return true;
-    return user?.permissions?.includes(link.perm);
-  });
-
   // Client-side route protection
-  const currentLink = sidebarLinks.find(link => pathname.startsWith(link.href));
+  const flattenedLinks = sidebarLinks.flatMap(link => link.subItems ? link.subItems : [{ name: link.name, href: link.href || "", perm: link.perm }]);
+  const currentLink = flattenedLinks.find(link => link.href && pathname.startsWith(link.href));
+
   const hasAccess = (() => {
     if (!currentLink || !currentLink.perm) return true;
     if (user?.role === "super_admin") return true;
@@ -115,52 +272,16 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     return user?.permissions?.includes(currentLink.perm);
   })();
 
-  const SidebarContent = () => (
-    <div className="flex h-full flex-col gap-2">
-      <div className="flex h-14 items-center border-b px-6 lg:h-[60px]">
-        <Link href="/admin/dashboard" className="flex items-center gap-2 font-semibold text-lg tracking-tight">
-          <Database className="h-6 w-6 text-primary" />
-          <span className="">DoctorBiology</span>
-        </Link>
-      </div>
-      <div className="flex-1 overflow-auto py-2">
-        <nav className="grid items-start px-4 text-sm font-medium gap-1">
-          {filteredLinks.map((link) => {
-            const Icon = link.icon;
-            const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`);
-            return (
-              <Link
-                key={link.name}
-                href={link.href}
-                onClick={() => setIsMobileOpen(false)}
-                className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all hover:text-primary",
-                  isActive
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted"
-                )}
-              >
-                <Icon className="h-4 w-4" />
-                {link.name}
-              </Link>
-            );
-          })}
-        </nav>
-      </div>
-      <div className="p-4 mt-auto">
-        <Button variant="outline" className="w-full justify-start gap-2 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={handleLogout}>
-          <LogOut className="h-4 w-4" />
-          Logout
-        </Button>
-      </div>
-    </div>
-  );
-
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[260px_1fr]">
       {/* Desktop Sidebar */}
       <div className="hidden border-r bg-muted/20 md:block sticky top-0 h-screen print:hidden">
-        <SidebarContent />
+        <SidebarContent
+          pathname={pathname}
+          user={user}
+          setIsMobileOpen={setIsMobileOpen}
+          handleLogout={handleLogout}
+        />
       </div>
 
       <div className="flex flex-col">
@@ -175,7 +296,12 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-[280px] p-0">
-              <SidebarContent />
+              <SidebarContent
+                pathname={pathname}
+                user={user}
+                setIsMobileOpen={setIsMobileOpen}
+                handleLogout={handleLogout}
+              />
             </SheetContent>
           </Sheet>
 

@@ -16,8 +16,12 @@ export async function middleware(request: NextRequest) {
 
   // Handle Admin routes protection
   if (pathname.startsWith('/admin') || pathname.startsWith('/api/admin')) {
-    // If it's the login page itself, let it pass
+    // If it's the login page itself
     if (pathname === '/admin/login') {
+      const token = request.cookies.get('admin_token')?.value;
+      if (token) {
+        return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+      }
       return NextResponse.next();
     }
     
@@ -28,14 +32,20 @@ export async function middleware(request: NextRequest) {
       }
       return NextResponse.redirect(new URL('/admin/login', request.url));
     }
-    // We ideally verify the token here, but edge runtime doesn't support jsonwebtoken
-    // So we just check if it exists, and the API/Server Actions will do the real verify
+
+    if (pathname === '/admin') {
+      return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+    }
   }
 
   // Handle Student routes protection
   if (pathname.startsWith('/student') || pathname.startsWith('/api/student')) {
-    // If it's the login page itself, let it pass
+    // If it's the login page itself
     if (pathname === '/student/login') {
+      const token = request.cookies.get('student_token')?.value;
+      if (token) {
+        return NextResponse.redirect(new URL('/student/dashboard', request.url));
+      }
       return NextResponse.next();
     }
     
@@ -46,11 +56,15 @@ export async function middleware(request: NextRequest) {
       }
       return NextResponse.redirect(new URL('/student/login', request.url));
     }
+
+    if (pathname === '/student') {
+      return NextResponse.redirect(new URL('/student/dashboard', request.url));
+    }
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/student/:path*', '/api/admin/:path*', '/api/student/:path*'],
+  matcher: ['/admin', '/admin/:path*', '/student', '/student/:path*', '/api/admin/:path*', '/api/student/:path*'],
 };

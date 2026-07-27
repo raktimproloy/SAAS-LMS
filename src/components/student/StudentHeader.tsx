@@ -39,11 +39,13 @@ export function StudentHeader() {
             <div className="relative w-full h-full">
               <StudentSidebar onLinkClick={() => setIsSheetOpen(false)} LinkWrapper={SheetClose} />
               
-              <SheetClose asChild>
-                <Button variant="ghost" size="icon" className="absolute top-5 right-4 lg:hidden h-10 w-10 text-muted-foreground hover:text-foreground shrink-0 z-50 bg-background/20 hover:bg-background/40 backdrop-blur-md rounded-xl border border-white/10">
-                  <X className="h-5 w-5" />
-                </Button>
-              </SheetClose>
+              <SheetClose 
+                render={
+                  <Button variant="ghost" size="icon" className="absolute top-5 right-4 lg:hidden h-10 w-10 text-muted-foreground hover:text-foreground shrink-0 z-50 bg-background/20 hover:bg-background/40 backdrop-blur-md rounded-xl border border-white/10">
+                    <X className="h-5 w-5" />
+                  </Button>
+                }
+              />
             </div>
           </SheetContent>
         </Sheet>
