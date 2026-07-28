@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Megaphone, Layout, Settings, Image as ImageIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { GalleryManager } from "@/components/admin/GalleryManager";
 import {
   Table,
   TableBody,
@@ -23,7 +25,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Types
 interface Notice {
@@ -129,18 +130,82 @@ export default function ContentManagementPage() {
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col gap-8 pb-10">
+      {/* Header & Tabs Area */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Website Content</h1>
-          <p className="text-muted-foreground mt-1">Manage notices, banners, and public pages.</p>
+          <h1 className="text-3xl font-bold tracking-tight mb-2">Website Content</h1>
+          <p className="text-muted-foreground">Manage notices, banners, and public pages.</p>
         </div>
 
-        {activeTab === "notices" && (
-          <Dialog open={isNoticeDialogOpen} onOpenChange={setIsNoticeDialogOpen}>
+        {/* Custom Tab Switcher */}
+        <div className="flex p-1 bg-slate-200/50 dark:bg-slate-800/50 rounded-lg max-w-xl w-full flex-wrap md:flex-nowrap gap-1 overflow-x-auto hide-scrollbar">
+          <button
+            onClick={() => setActiveTab("notices")}
+            className={cn(
+              "flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 whitespace-nowrap",
+              activeTab === "notices" ? "bg-white dark:bg-slate-950 shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Megaphone className="w-4 h-4 hidden sm:block" />
+            Notices
+          </button>
+          <button
+            onClick={() => setActiveTab("hero")}
+            className={cn(
+              "flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 whitespace-nowrap",
+              activeTab === "hero" ? "bg-white dark:bg-slate-950 shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Layout className="w-4 h-4 hidden sm:block" />
+            Hero Banner
+          </button>
+          <button
+            onClick={() => setActiveTab("site-settings")}
+            className={cn(
+              "flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 whitespace-nowrap",
+              activeTab === "site-settings" ? "bg-white dark:bg-slate-950 shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Settings className="w-4 h-4 hidden sm:block" />
+            Site Config
+          </button>
+          <button
+            onClick={() => setActiveTab("gallery")}
+            className={cn(
+              "flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 whitespace-nowrap",
+              activeTab === "gallery" ? "bg-white dark:bg-slate-950 shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <ImageIcon className="w-4 h-4 hidden sm:block" />
+            Gallery
+          </button>
+        </div>
+      </div>
+
+      {/* Main Content Area */}
+      <Card className="border-none shadow-xl shadow-slate-200/40 dark:shadow-none dark:bg-slate-900/50">
+        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b pb-4 border-slate-100 dark:border-slate-800 gap-4">
+          <div>
+            <CardTitle className="text-xl text-slate-800 dark:text-slate-100">
+              {activeTab === "notices" && "All Notices"}
+              {activeTab === "hero" && "Homepage Hero Section"}
+              {activeTab === "site-settings" && "Site Configuration"}
+              {activeTab === "gallery" && "Gallery"}
+            </CardTitle>
+            <CardDescription className="mt-1">
+              {activeTab === "notices" && "Manage your notice board."}
+              {activeTab === "hero" && "Update the main banner shown to public visitors."}
+              {activeTab === "site-settings" && "Manage contact information, social links, and map location."}
+              {activeTab === "gallery" && "Manage public gallery."}
+            </CardDescription>
+          </div>
+          
+          {activeTab === "notices" && (
+            <Dialog open={isNoticeDialogOpen} onOpenChange={setIsNoticeDialogOpen}>
             {/* @ts-expect-error - Radix UI type mismatch for asChild */}
             <DialogTrigger asChild>
-              <Button className="gap-2">
+              <Button className="gap-2 bg-primary hover:bg-primary/90 shadow-md">
                 <Plus className="h-4 w-4" />
                 Add Notice
               </Button>
@@ -198,22 +263,13 @@ export default function ContentManagementPage() {
               </form>
             </DialogContent>
           </Dialog>
-        )}
-      </div>
+          )}
+        </CardHeader>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-6 max-w-[400px]">
-          <TabsTrigger value="notices">Notice Board</TabsTrigger>
-          <TabsTrigger value="hero">Hero Banner</TabsTrigger>
-          <TabsTrigger value="gallery">Gallery (WIP)</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="notices">
-          <Card className="border-none shadow-sm dark:bg-slate-800/50">
-            <CardHeader>
-              <CardTitle>All Notices</CardTitle>
-            </CardHeader>
-            <CardContent>
+        <CardContent className="p-0">
+          {activeTab === "notices" && (
+            <div className="p-6">
+              
               {loading ? (
                 <p className="text-sm text-muted-foreground">Loading notices...</p>
               ) : (
@@ -261,17 +317,13 @@ export default function ContentManagementPage() {
                   </Table>
                 </div>
               )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+            
+            </div>
+          )}
 
-        <TabsContent value="hero">
-          <Card className="border-none shadow-sm dark:bg-slate-800/50 max-w-2xl">
-            <CardHeader>
-              <CardTitle>Homepage Hero Section</CardTitle>
-              <CardDescription>Update the main banner shown to public visitors.</CardDescription>
-            </CardHeader>
-            <CardContent>
+          {activeTab === "hero" && (
+            <div className="p-6 max-w-2xl">
+              
               <form onSubmit={handleHeroSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <Label>Main Description Text</Label>
@@ -306,18 +358,80 @@ export default function ContentManagementPage() {
                   <Button type="submit">Save Changes</Button>
                 </div>
               </form>
-            </CardContent>
-          </Card>
-        </TabsContent>
+            
+            </div>
+          )}
 
-        <TabsContent value="gallery">
-          <Card className="border-none shadow-sm dark:bg-slate-800/50">
-            <CardContent className="py-12 text-center text-muted-foreground">
-              Gallery management will be implemented in a future update.
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+          {activeTab === "site-settings" && (
+            <div className="p-6">
+              
+              <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); alert("Site settings UI only! API not connected yet."); }}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {/* Contact Info */}
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-lg border-b pb-2 border-border/50 text-primary">Contact Information</h3>
+                    <div className="space-y-2">
+                      <Label>Phone Number</Label>
+                      <Input placeholder="+880 1XXXXXXXXX" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Email Address</Label>
+                      <Input type="email" placeholder="info@doctorbiology.com" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>WhatsApp Number</Label>
+                      <Input placeholder="8801XXXXXXXXX" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Physical Address</Label>
+                      <Textarea placeholder="Farmgate, Dhaka, Bangladesh" rows={3} />
+                    </div>
+                  </div>
+
+                  {/* Social Links */}
+                  <div className="space-y-4">
+                    <h3 className="font-semibold text-lg border-b pb-2 border-border/50 text-primary">Social Media Links</h3>
+                    <div className="space-y-2">
+                      <Label>Facebook Page URL</Label>
+                      <Input placeholder="https://facebook.com/doctorbiology" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>YouTube Channel URL</Label>
+                      <Input placeholder="https://youtube.com/@doctorbiology" />
+                    </div>
+                  </div>
+
+                  {/* Map Config */}
+                  <div className="space-y-4 md:col-span-2">
+                    <h3 className="font-semibold text-lg border-b pb-2 border-border/50 text-primary">Google Map Integration</h3>
+                    <div className="space-y-2">
+                      <Label>Google Maps Embed URL (src attribute)</Label>
+                      <Textarea 
+                        placeholder="https://www.google.com/maps/embed?pb=..." 
+                        rows={3} 
+                      />
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Go to Google Maps, click Share &gt; Embed a map, and copy the link inside the <code>src="..."</code> attribute.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-border mt-6 flex justify-end">
+                  <Button type="submit">Save Configuration</Button>
+                </div>
+              </form>
+            
+            </div>
+          )}
+
+          {activeTab === "gallery" && (
+            <div className="p-6">
+              <GalleryManager />
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

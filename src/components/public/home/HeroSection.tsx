@@ -90,14 +90,6 @@ export function HeroSection() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center pb-12 lg:pb-0">
           {/* Left Column: Text & CTA */}
           <div className="text-left pt-12 lg:pt-0">
-            {/* Badge */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-white/80 text-sm font-medium mb-6"
-            >
-              <Star className="h-3.5 w-3.5 fill-current text-amber-400" />
-              বাংলাদেশের #১ মেডিকেল এডুকেশন প্ল্যাটফর্ম
-            </motion.div>
 
             {/* Headline */}
             <motion.h1
@@ -132,23 +124,6 @@ export function HeroSection() {
                 className="px-8 py-4 rounded-2xl border border-white/25 text-white font-semibold text-base hover:bg-white/10 transition-all duration-300 backdrop-blur-sm flex justify-center w-full sm:w-auto">
                 কোর্স দেখুন
               </Link>
-            </motion.div>
-
-            {/* Stats */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.5 }}
-              className="mt-16 grid grid-cols-2 sm:grid-cols-4 gap-4"
-            >
-              {stats.map((stat) => {
-                const Icon = stat.icon;
-                return (
-                  <div key={stat.label} className="rounded-2xl bg-white/8 border border-white/10 backdrop-blur-sm p-4 text-center">
-                    <Icon className="h-5 w-5 text-sky-300 mx-auto mb-2" />
-                    <div className="text-2xl font-bold text-white">{stat.value}</div>
-                    <div className="text-xs text-white/60 mt-1">{stat.label}</div>
-                  </div>
-                );
-              })}
             </motion.div>
           </div>
 

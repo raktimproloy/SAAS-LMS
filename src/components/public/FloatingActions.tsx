@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Phone, MessageCircle, GripHorizontal } from "lucide-react";
+import { Phone, GripHorizontal } from "lucide-react";
+import { WhatsAppIcon } from "@/components/icons/svg";
 
 const PHONE_NUMBER = "8801987654321";
 const WHATSAPP_MESSAGE = encodeURIComponent("হ্যালো! DoctorBiology সম্পর্কে জানতে চাই।");
@@ -124,7 +125,7 @@ export function FloatingActions() {
         onPointerDown={(e) => e.stopPropagation()}
         title="WhatsApp"
       >
-        <MessageCircle className="w-6 h-6" />
+        <WhatsAppIcon className="w-7 h-7" />
       </a>
 
       {/* Phone Button */}

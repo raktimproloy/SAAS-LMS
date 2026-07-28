@@ -18,17 +18,11 @@ const navLinks = [
 
 type LoginState = "none" | "student" | "admin";
 
-function getCookieValue(name: string): string | null {
-  if (typeof document === "undefined") return null;
-  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
-  return match ? match[2] : null;
-}
-
-export function Navbar() {
+export function Navbar({ initialLoginState = "none" }: { initialLoginState?: LoginState }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [loginState, setLoginState] = useState<LoginState>("none");
+  const [loginState, setLoginState] = useState<LoginState>(initialLoginState);
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
   const navRefs = useRef<(HTMLAnchorElement | null)[]>([]);
 
@@ -39,12 +33,8 @@ export function Navbar() {
   }, []);
 
   useEffect(() => {
-    const adminToken = getCookieValue("admin_token");
-    const studentToken = getCookieValue("student_token");
-    if (adminToken) setLoginState("admin");
-    else if (studentToken) setLoginState("student");
-    else setLoginState("none");
-  }, []);
+    setLoginState(initialLoginState);
+  }, [initialLoginState]);
 
   useEffect(() => {
     const activeIdx = navLinks.findIndex(
@@ -61,7 +51,7 @@ export function Navbar() {
   }, [pathname]);
 
   const dashboardHref = loginState === "admin" ? "/admin/dashboard" : "/student/dashboard";
-  const dashboardLabel = loginState === "admin" ? "Admin Dashboard" : "Student Dashboard";
+  const dashboardLabel = loginState === "admin" ? "Admin Dashboard" : "Dashboard";
 
   return (
     <>

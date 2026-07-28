@@ -16,7 +16,7 @@ export default function ContactPage() {
 
   return (
     <div className="bg-background">
-      
+
       {/* Contact Page Hero Section */}
       <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-28 px-4 sm:px-6 lg:px-8 bg-[#0B0F19] overflow-hidden">
         {/* Decorative Gradients */}
@@ -25,10 +25,6 @@ export default function ContactPage() {
 
         <div className="max-w-7xl mx-auto relative z-10 text-center">
           <div data-aos="fade-down">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-white/80 text-sm font-semibold mb-6 shadow-xl backdrop-blur-md">
-              <Headphones className="w-4 h-4 text-rose-400" />
-              যোগাযোগ করুন
-            </div>
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-white mb-6 tracking-tight leading-tight">
               আমরা আছি আপনার <br className="hidden sm:block" />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 to-orange-400">যেকোনো প্রয়োজনে</span>

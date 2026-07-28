@@ -19,26 +19,22 @@ export function ReviewSection() {
 
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }).map((_, i) => (
-      <Star 
-        key={i} 
-        className={`w-4 h-4 ${i < rating ? 'fill-yellow-400 text-yellow-400' : 'fill-white/10 text-white/20'}`} 
+      <Star
+        key={i}
+        className={`w-4 h-4 ${i < rating ? 'fill-yellow-400 text-yellow-400' : 'fill-white/10 text-white/20'}`}
       />
     ));
   };
 
   return (
-    <section className="py-24 overflow-hidden bg-background relative border-t border-white/5">
-      
+    <section className="py-24 overflow-hidden bg-muted/40 relative border-t border-border">
+
       {/* Decorative Elements */}
       <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-indigo-500/5 rounded-full blur-[100px] pointer-events-none -translate-y-1/2" />
       <div className="absolute top-1/2 right-0 w-[400px] h-[400px] bg-emerald-500/5 rounded-full blur-[100px] pointer-events-none -translate-y-1/2" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 mb-16">
         <div className="text-center" data-aos="fade-up">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-rose-500/10 text-rose-400 text-sm font-semibold mb-4 border border-rose-500/20">
-            <Heart className="w-4 h-4" />
-            শিক্ষার্থীদের ভালোবাসা
-          </div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-6">
             তারা কী বলছে আমাদের সম্পর্কে?
           </h2>
@@ -50,27 +46,27 @@ export function ReviewSection() {
 
       {/* Marquee Container */}
       <div className="w-full relative flex flex-col gap-6 sm:gap-8">
-        
+
         {/* Row 1 (Moves Left) */}
         <div className="flex overflow-hidden group">
           <div className="flex animate-marquee-left whitespace-nowrap group-hover:[animation-play-state:paused]">
             {[...row1, ...row1, ...row1].map((review, idx) => (
-              <div 
-                key={`${review.id}-${idx}`} 
-                className="w-[320px] sm:w-[400px] mx-3 sm:mx-4 shrink-0 bg-card/40 backdrop-blur-md border border-white/10 rounded-3xl p-6 sm:p-8 hover:bg-card/60 transition-colors duration-300"
+              <div
+                key={`${review.id}-${idx}`}
+                className="w-[320px] sm:w-[400px] mx-3 sm:mx-4 shrink-0 bg-card/40 backdrop-blur-md border border-border rounded-3xl p-6 sm:p-8 hover:bg-card/60 transition-colors duration-300"
               >
-                <Quote className="w-10 h-10 text-white/5 mb-4" />
-                <p className="text-white/80 text-sm sm:text-base whitespace-normal leading-relaxed mb-6 line-clamp-3">
+                <Quote className="w-10 h-10 text-foreground/5 mb-4" />
+                <p className="text-foreground/80 text-sm sm:text-base whitespace-normal leading-relaxed mb-6 line-clamp-3">
                   "{review.text}"
                 </p>
-                <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/5">
+                <div className="flex items-center justify-between mt-auto pt-4 border-t border-border">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center font-bold text-lg">
+                    <div className="w-10 h-10 rounded-full bg-muted border border-border flex items-center justify-center font-bold text-lg">
                       <span className={review.color}>{review.name.charAt(0)}</span>
                     </div>
                     <div>
-                      <h4 className="text-white font-semibold text-sm">{review.name}</h4>
-                      <p className="text-white/40 text-xs truncate max-w-[150px]">{review.college}</p>
+                      <h4 className="text-foreground font-semibold text-sm">{review.name}</h4>
+                      <p className="text-muted-foreground text-xs truncate max-w-[150px]">{review.college}</p>
                     </div>
                   </div>
                   <div className="flex gap-0.5">
@@ -86,8 +82,8 @@ export function ReviewSection() {
         <div className="flex overflow-hidden group">
           <div className="flex animate-marquee-right whitespace-nowrap group-hover:[animation-play-state:paused]">
             {[...row2, ...row2, ...row2].map((review, idx) => (
-              <div 
-                key={`${review.id}-${idx}`} 
+              <div
+                key={`${review.id}-${idx}`}
                 className="w-[320px] sm:w-[400px] mx-3 sm:mx-4 shrink-0 bg-card/40 backdrop-blur-md border border-white/10 rounded-3xl p-6 sm:p-8 hover:bg-card/60 transition-colors duration-300"
               >
                 <Quote className="w-10 h-10 text-white/5 mb-4" />
@@ -112,13 +108,14 @@ export function ReviewSection() {
             ))}
           </div>
         </div>
-        
+
         {/* Gradient fades for edges */}
         <div className="absolute top-0 left-0 bottom-0 w-16 sm:w-32 bg-gradient-to-r from-background to-transparent pointer-events-none" />
         <div className="absolute top-0 right-0 bottom-0 w-16 sm:w-32 bg-gradient-to-l from-background to-transparent pointer-events-none" />
       </div>
 
-      <style dangerouslySetInnerHTML={{__html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         @keyframes marqueeLeft {
           0% { transform: translateX(0); }
           100% { transform: translateX(calc(-100% / 3)); }

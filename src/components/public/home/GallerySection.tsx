@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Swiper, SwiperSlide } from 'swiper/react';
 import type { Swiper as SwiperClass } from 'swiper';
 import { Autoplay, EffectCoverflow } from 'swiper/modules';
@@ -11,7 +11,7 @@ import { ImageIcon, Sparkles } from "lucide-react";
 import 'swiper/css';
 import 'swiper/css/effect-coverflow';
 
-const galleryImages = [
+const fallbackImages = [
   { id: 1, src: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=1200", title: "ইন্টারেক্টিভ ক্লাসরুম" },
   { id: 2, src: "https://images.unsplash.com/photo-1516321497487-e288fb19713f?w=1200", title: "প্র্যাকটিক্যাল ল্যাব ও এক্সপেরিমেন্ট" },
   { id: 3, src: "https://images.unsplash.com/photo-1577896851231-70ef18881754?w=1200", title: "মডেল টেস্ট ও এক্সাম হল" },
@@ -22,22 +22,52 @@ const galleryImages = [
 
 export function GallerySection() {
   const [activeIndex, setActiveIndex] = useState(0);
-  const activeImage = galleryImages[activeIndex % galleryImages.length];
+  const [images, setImages] = useState<{id: number, src: string, title: string}[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchGallery = async () => {
+      try {
+        const res = await fetch("/api/admin/content/gallery");
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.length > 0) {
+            // Map the database fields to the UI fields
+            const mappedImages = data.map((img: any) => ({
+              id: img.id,
+              src: img.image_path,
+              title: img.caption || "Gallery Image"
+            }));
+            setImages(mappedImages);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch gallery:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchGallery();
+  }, []);
+
+  const displayImages = images.length > 0 ? images : fallbackImages;
+  const activeImage = displayImages[activeIndex % displayImages.length];
+
+  if (loading) {
+    return null; // or a skeleton loader
+  }
+
 
   return (
     <section className="py-24 px-4 sm:px-6 lg:px-8 bg-background relative overflow-hidden">
       {/* Decorative Background */}
       <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-sky-500/5 rounded-full blur-[100px] pointer-events-none" />
-      
+
       <div className="max-w-7xl mx-auto relative z-10">
-        
+
         {/* Section Header */}
         <div className="text-center mb-16" data-aos="fade-up">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-4 border border-primary/20">
-            <Sparkles className="w-4 h-4" />
-            গ্যালারি
-          </div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-6">
             সেরা শিক্ষার অভিজ্ঞতা
           </h2>
@@ -48,7 +78,7 @@ export function GallerySection() {
 
         {/* Gallery Container */}
         <div className="max-w-5xl mx-auto flex flex-col items-center">
-          
+
           {/* Main Large Image */}
           <div className="w-full aspect-[4/3] sm:aspect-[16/8] lg:aspect-[21/9] relative rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.3)] bg-black/20 border border-white/5 group">
             <AnimatePresence mode="wait">
@@ -60,16 +90,16 @@ export function GallerySection() {
                 transition={{ duration: 0.6, ease: "easeInOut" }}
                 className="absolute inset-0"
               >
-                <div 
+                <div
                   className="absolute inset-0 bg-cover bg-center"
                   style={{ backgroundImage: `url(${activeImage.src})` }}
                 />
-                
+
                 {/* Gradient Overlay for Text */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                
+
                 {/* Title Overlay */}
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.2 }}
@@ -113,10 +143,10 @@ export function GallerySection() {
               className="gallery-thumbs-slider !pb-8 !pt-4"
             >
               {/* Duplicate array for smooth infinite loop if needed, but 6 is usually enough for auto slides */}
-              {[...galleryImages, ...galleryImages].map((img, idx) => (
+              {[...displayImages, ...displayImages].map((img, idx) => (
                 <SwiperSlide key={`${img.id}-${idx}`} className="!w-[140px] sm:!w-[200px]">
                   <div className="thumbnail-wrapper relative aspect-video rounded-xl overflow-hidden cursor-pointer border-2 transition-all duration-500">
-                    <div 
+                    <div
                       className="absolute inset-0 bg-cover bg-center"
                       style={{ backgroundImage: `url(${img.src})` }}
                     />
@@ -131,7 +161,8 @@ export function GallerySection() {
         </div>
       </div>
 
-      <style dangerouslySetInnerHTML={{__html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         .gallery-thumbs-slider .swiper-slide {
           transition: all 0.5s ease;
           opacity: 0.6;

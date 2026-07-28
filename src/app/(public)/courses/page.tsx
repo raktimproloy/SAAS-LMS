@@ -82,10 +82,6 @@ export default function CoursesPage() {
 
         <div className="max-w-7xl mx-auto relative z-10 text-center">
           <div data-aos="fade-down">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-white/80 text-sm font-semibold mb-6 shadow-xl backdrop-blur-md">
-              <GraduationCap className="w-4 h-4 text-sky-400" />
-              আমাদের কোর্সসমূহ
-            </div>
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-white mb-6 tracking-tight leading-tight">
               ক্যারিয়ার গড়ার <br className="hidden sm:block" />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-indigo-400">সঠিক গাইডলাইন</span>
