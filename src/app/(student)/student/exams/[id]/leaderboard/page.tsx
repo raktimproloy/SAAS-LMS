@@ -48,7 +48,7 @@ export default function StudentExamLeaderboardPage() {
   if (!data) return null;
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto animate-in fade-in duration-500 pb-20">
+    <div className="space-y-6 max-w-4xl mx-auto pb-20">
       
       <div className="flex items-center gap-4 mb-4">
         <Link href="/student/exams">

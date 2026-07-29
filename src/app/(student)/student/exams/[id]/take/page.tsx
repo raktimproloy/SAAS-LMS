@@ -40,8 +40,25 @@ export default function StudentTakeExamPage() {
       e.preventDefault();
       e.returnValue = '';
     };
+
+    // Prevent back navigation
+    const handlePopState = (e: PopStateEvent) => {
+      const confirmLeave = window.confirm("You have an ongoing exam. Are you sure you want to leave?");
+      if (!confirmLeave) {
+        window.history.pushState(null, "", window.location.href);
+      } else {
+        window.history.back(); // Proceed with going back
+      }
+    };
+
+    window.history.pushState(null, "", window.location.href);
     window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('popstate', handlePopState);
+    };
   }, [examId]);
 
   if (loading) {

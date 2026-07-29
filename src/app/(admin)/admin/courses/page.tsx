@@ -324,8 +324,8 @@ export default function CoursesBatchesPage() {
       </div>
 
       {/* Main Content Area */}
-      <Card className="border-none shadow-xl shadow-slate-200/40 dark:shadow-none dark:bg-slate-900/50">
-        <CardHeader className="flex flex-row items-center justify-between border-b pb-4 border-slate-100 dark:border-slate-800">
+      <Card className="border-none shadow-xl shadow-slate-200/40 dark:shadow-none dark:bg-slate-900/50 overflow-hidden">
+        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b pb-4 border-slate-100 dark:border-slate-800">
           <div>
             <CardTitle className="text-xl text-slate-800 dark:text-slate-100">
               {activeTab === "courses" ? "Course Directory" : "Batch Management"}

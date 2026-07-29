@@ -109,12 +109,15 @@ export default function StudentResultsPage() {
     <div className="space-y-8 max-w-7xl mx-auto pb-12">
       {/* Header Banner */}
       <div 
-        className="relative overflow-hidden bg-card/40 backdrop-blur-3xl p-8 md:p-10 rounded-[2.5rem] shadow-2xl flex flex-col justify-center items-start border border-white/10 animate-in fade-in slide-in-from-top-4 duration-700"
+        className="relative bg-card/40 backdrop-blur-3xl p-8 md:p-10 rounded-[2.5rem] shadow-2xl flex flex-col justify-center items-start border border-white/10"
+        data-aos="fade-down"
       >
-        <div className="absolute -top-12 -right-12 w-64 h-64 bg-primary/20 rounded-full blur-3xl animate-[pulse_6s_ease-in-out_infinite] pointer-events-none" />
-        <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none" />
-        <div className="absolute bottom-0 right-10 opacity-[0.03]">
-          <Trophy className="w-40 h-40" />
+        <div className="absolute inset-0 overflow-hidden rounded-[2.5rem] pointer-events-none">
+          <div className="absolute -top-12 -right-12 w-64 h-64 bg-primary/20 rounded-full blur-3xl transform-gpu pointer-events-none" />
+          <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none transform-gpu" />
+          <div className="absolute bottom-0 right-10 opacity-[0.03]">
+            <Trophy className="w-40 h-40" />
+          </div>
         </div>
 
         <div className="relative z-10">
@@ -133,7 +136,7 @@ export default function StudentResultsPage() {
       {/* Grid List */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {results.length === 0 ? (
-          <div className="col-span-full py-20 text-center bg-card/40 backdrop-blur-3xl rounded-[2.5rem] border border-white/10 shadow-lg relative overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="col-span-full py-20 text-center bg-card/40 backdrop-blur-3xl rounded-[2.5rem] border border-white/10 shadow-lg relative overflow-hidden" data-aos="fade-up">
             <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent opacity-50" />
             <FileText className="h-20 w-20 mx-auto mb-6 text-muted-foreground/30 relative z-10" />
             <p className="text-xl font-bold text-foreground mb-2 relative z-10">No results found.</p>
@@ -146,8 +149,8 @@ export default function StudentResultsPage() {
             return (
               <div 
                 key={result.id} 
-                className="group relative bg-card/40 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 md:p-8 flex flex-col shadow-xl transition-all duration-500 hover:-translate-y-2 hover:shadow-primary/20 hover:bg-card/60 overflow-hidden animate-in fade-in slide-in-from-bottom-4 fill-mode-both"
-                style={{ animationDelay: `${index * 100}ms` }}
+                className="group relative bg-card/40 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 md:p-8 flex flex-col shadow-xl transition-all duration-500 hover:-translate-y-2 hover:shadow-primary/20 hover:bg-card/60 overflow-hidden"
+                data-aos="fade-up"
               >
                 {/* Background Decor */}
                 <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/10 rounded-full blur-2xl pointer-events-none group-hover:bg-primary/20 group-hover:scale-150 transition-all duration-700" />
@@ -202,7 +205,7 @@ export default function StudentResultsPage() {
                   
                   <div className="mt-auto flex items-center justify-between text-sm text-muted-foreground font-medium pt-4 border-t border-white/5">
                     <span className="flex items-center gap-1">
-                      <span className="w-2 h-2 rounded-full bg-primary/50 animate-pulse" />
+                      <span className="w-2 h-2 rounded-full bg-primary/50" />
                       Held: {result.exam.start_time ? new Date(result.exam.start_time).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}
                     </span>
                     <Link 

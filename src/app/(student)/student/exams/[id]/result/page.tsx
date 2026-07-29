@@ -63,7 +63,7 @@ export default function StudentExamResultPage() {
   };
 
   return (
-    <div className="space-y-8 max-w-6xl mx-auto animate-in fade-in duration-500 pb-20">
+    <div className="space-y-8 max-w-6xl mx-auto pb-20">
       
       {/* Header Summary */}
       <div className="bg-card/80 backdrop-blur-xl p-8 rounded-2xl border border-border shadow-sm flex flex-col md:flex-row items-center justify-between gap-8">
@@ -74,21 +74,23 @@ export default function StudentExamResultPage() {
           </p>
         </div>
         
-        <div className="flex gap-8 text-center items-center">
-          <Link href={`/student/exams/${examId}/leaderboard`}>
-            <Button variant="outline" className="h-12 rounded-2xl bg-amber-500/10 border-amber-500/20 hover:bg-amber-500/20 hover:border-amber-500/40 text-amber-500 transition-all backdrop-blur-md shadow-[0_0_15px_rgba(245,158,11,0.15)] font-semibold px-6">
+        <div className="flex flex-col sm:flex-row gap-6 sm:gap-8 text-center items-center w-full md:w-auto mt-2 md:mt-0">
+          <Link href={`/student/exams/${examId}/leaderboard`} className="w-full sm:w-auto order-last sm:order-first">
+            <Button variant="outline" className="w-full sm:w-auto h-12 rounded-2xl bg-amber-500/10 border-amber-500/20 hover:bg-amber-500/20 hover:border-amber-500/40 text-amber-500 transition-all backdrop-blur-md shadow-[0_0_15px_rgba(245,158,11,0.15)] font-semibold px-6">
               <Medal className="w-4 h-4 mr-2 drop-shadow-[0_0_8px_rgba(245,158,11,0.8)]" /> View Leaderboard
             </Button>
           </Link>
-          <div className="w-px h-12 bg-border"></div>
-          <div>
-            <div className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-1">Score</div>
-            <div className="text-4xl font-bold text-primary">{result.obtained_marks} <span className="text-lg text-muted-foreground/70">/ {result.total_marks}</span></div>
-          </div>
-          <div className="w-px h-12 bg-border"></div>
-          <div>
-            <div className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-1">Rank</div>
-            <div className="text-4xl font-bold text-amber-500">#{result.rank || '-'}</div>
+          <div className="hidden sm:block w-px h-12 bg-border"></div>
+          <div className="flex gap-6 sm:gap-8 items-center justify-center w-full sm:w-auto">
+            <div>
+              <div className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-1">Score</div>
+              <div className="text-4xl font-bold text-primary">{result.obtained_marks} <span className="text-lg text-muted-foreground/70">/ {result.total_marks}</span></div>
+            </div>
+            <div className="w-px h-12 bg-border"></div>
+            <div>
+              <div className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-1">Rank</div>
+              <div className="text-4xl font-bold text-amber-500">#{result.rank || '-'}</div>
+            </div>
           </div>
         </div>
       </div>
@@ -154,7 +156,7 @@ export default function StudentExamResultPage() {
                   }
 
                   return (
-                    <div key={q.id} className={`rounded-xl border shadow-sm transition-all overflow-hidden bg-card ${
+                    <div key={q.id} data-aos="fade-up" className={`rounded-xl border shadow-sm transition-all overflow-hidden bg-card ${
                       isCorrect ? 'border-green-200 dark:border-green-900/50' : isSkipped ? 'border-amber-200 dark:border-amber-900/50' : 'border-red-200 dark:border-red-900/50'
                     } ${isChild ? 'mb-4' : ''}`}>
                       {/* Question Header */}
@@ -278,7 +280,7 @@ export default function StudentExamResultPage() {
                   if (q.type === 'passage') {
                     const childQuestions = childrenMap[q.id] || [];
                     return (
-                      <div key={q.id} className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden mb-8">
+                      <div key={q.id} data-aos="fade-up" className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden mb-8">
                         <div className="p-6 bg-muted/40 border-b border-border">
                           <div className="flex items-center gap-2 mb-3">
                             <span className="px-3 py-1 bg-primary/10 text-primary dark:bg-primary/20 text-xs font-bold rounded-full uppercase tracking-wider">

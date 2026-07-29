@@ -620,7 +620,7 @@ export default function StudentsPage() {
         </CardContent>
       </Card>
 
-      <Card className="border-none shadow-sm dark:bg-slate-800/50">
+      <Card className="border-none shadow-sm dark:bg-slate-800/50 overflow-hidden">
         <CardHeader>
           <CardTitle>Enrolled Students</CardTitle>
         </CardHeader>

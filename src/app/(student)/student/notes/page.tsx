@@ -42,7 +42,7 @@ export default function StudentNotesPage() {
   }
 
   return (
-    <div className="flex flex-col gap-8 pb-10 w-full animate-in fade-in duration-500">
+    <div className="flex flex-col gap-8 pb-10 w-full">
       
       {/* Header */}
       <div className="mb-2">
@@ -77,7 +77,7 @@ export default function StudentNotesPage() {
               } catch { }
 
               return (
-              <Card key={note.id} className="group overflow-hidden hover:shadow-lg dark:hover:shadow-primary/5 transition-all duration-300 border-border bg-card">
+              <Card key={note.id} className="group overflow-hidden hover:shadow-lg dark:hover:shadow-primary/5 transition-all duration-300 border-border bg-card" data-aos="fade-up">
                 <CardContent className="p-6 relative">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -z-10 group-hover:scale-110 transition-transform duration-500" />
                   

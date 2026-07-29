@@ -632,7 +632,7 @@ export default function PaymentsPage() {
           </Dialog>
         </div>
 
-        <Card className="border-none shadow-sm dark:bg-slate-800/50">
+        <Card className="border-none shadow-sm dark:bg-slate-800/50 overflow-hidden">
           <CardHeader className="pb-4">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <CardTitle>Recent Payments</CardTitle>

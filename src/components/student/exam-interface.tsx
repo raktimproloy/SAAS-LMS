@@ -7,6 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Clock, CheckCircle2, XCircle, AlertCircle, ChevronDown, ChevronUp } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { StudentBottomNav } from "@/components/student/StudentBottomNav";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 interface Question {
   id: number;
@@ -72,6 +75,13 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
     }
     
     setIsReady(true);
+    
+    AOS.init({
+      duration: 400,
+      once: true,
+      easing: "ease-out-cubic",
+      offset: 0,
+    });
   }, [examId, durationMinutes]);
 
   // Save answers whenever they change (Auto-save)
@@ -140,7 +150,7 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
         if (data.is_practice && data.practice_result) {
           setPracticeResultData(data.practice_result);
           setTimeout(() => {
-            document.getElementById('student-main-scroll')?.scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
           }, 100);
         } else {
           router.push(`/student/exams/${examId}/result`);
@@ -385,6 +395,7 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
             </Button>
           </div>
         </div>
+        <StudentBottomNav />
       </div>
     );
   }
@@ -430,7 +441,7 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
             }
 
             return (
-              <div key={q.id} className={`rounded-xl border border-border shadow-sm transition-all overflow-hidden bg-card ${isChild ? 'mb-4' : ''}`}>
+              <div key={q.id} data-aos="fade-up" className={`rounded-xl border border-border shadow-sm transition-all overflow-hidden bg-card ${isChild ? 'mb-4' : ''}`}>
                 <div className="p-5 flex gap-4 bg-muted/30">
                   <div className="flex-none pt-1">
                     <div className="flex items-center justify-center w-8 h-8 rounded-full bg-muted text-muted-foreground font-bold text-sm shadow-inner">
@@ -511,7 +522,7 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
             if (q.type === 'passage') {
               const childQuestions = childrenMap[q.id] || [];
               return (
-                <div key={q.id} className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
+                <div key={q.id} data-aos="fade-up" className="rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
                   <div className="p-6 bg-muted/40 border-b border-border">
                     <div className="flex items-center gap-2 mb-3">
                       <span className="px-3 py-1 bg-primary/10 text-primary dark:bg-primary/20 text-xs font-bold rounded-full uppercase tracking-wider">

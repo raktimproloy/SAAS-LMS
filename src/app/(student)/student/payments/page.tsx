@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Receipt, CheckCircle2, Clock, Download } from "lucide-react";
+import { Receipt, CheckCircle2, Clock, Download, CreditCard } from "lucide-react";
 import { format } from "date-fns";
 
 export default function StudentPaymentsPage() {
@@ -22,11 +22,10 @@ export default function StudentPaymentsPage() {
   }, []);
 
   if (loading) {
-    return <div className="p-8 flex justify-center"><div className="animate-pulse h-8 w-32 bg-slate-200 rounded"></div></div>;
+    return <div className="p-8 flex justify-center h-[50vh] items-center"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div></div>;
   }
 
   const handleDownloadReceipt = (payment: { id: number; status: string; month: string; year: string; amount: number; created_at: string | Date; payment_method: string | null }) => {
-    // Generate a simple printable receipt window
     const receiptHtml = `
       <html>
         <head>
@@ -70,40 +69,71 @@ export default function StudentPaymentsPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto animate-in fade-in duration-500">
-      <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Payment History</h1>
+    <div className="space-y-8 max-w-5xl mx-auto pb-12">
+      {/* Header Banner */}
+      <div 
+        className="relative bg-card/40 backdrop-blur-3xl p-8 md:p-10 rounded-3xl shadow-2xl flex flex-col justify-center items-start border border-white/10"
+        data-aos="fade-down" 
+        data-aos-duration="600"
+      >
+        {/* Background Decor Layer - separated so overflow-hidden doesn't glitch during animation */}
+        <div className="absolute inset-0 overflow-hidden rounded-3xl pointer-events-none">
+          <div className="absolute -top-12 -right-12 w-64 h-64 bg-primary/20 rounded-full blur-3xl transform-gpu" />
+          <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-emerald-500/10 rounded-full blur-2xl transform-gpu" />
+          <div className="absolute bottom-0 right-10 opacity-[0.03]">
+            <CreditCard className="w-40 h-40" />
+          </div>
+        </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Receipt className="w-5 h-5 text-slate-400" />
+        <div className="relative z-10">
+          <h1 className="text-3xl md:text-5xl font-black tracking-tight mb-2 flex items-center gap-4 text-foreground">
+            <div className="p-3 bg-background/50 backdrop-blur-md rounded-2xl border border-white/10 shadow-sm">
+              <Receipt className="h-8 w-8 text-primary drop-shadow-[0_0_8px_rgba(var(--primary),0.5)]" />
+            </div>
+            Payment History
+          </h1>
+          <p className="text-muted-foreground text-lg max-w-lg mt-4 font-medium">
+            View and manage your academic billing records and payment receipts securely.
+          </p>
+        </div>
+      </div>
+
+      <Card 
+        className="bg-card/40 backdrop-blur-2xl border border-white/10 shadow-xl rounded-2xl relative"
+        data-aos="fade-up" 
+        data-aos-delay="200"
+      >
+        <CardHeader className="bg-background/20 border-b border-white/5 pb-4 rounded-t-2xl">
+          <CardTitle className="flex items-center gap-2 text-foreground/90">
+            <Receipt className="w-5 h-5 text-primary" />
             Billing Records
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           {payments.length === 0 ? (
-            <div className="p-12 text-center text-slate-500">
-              No payment records found.
+            <div className="p-16 text-center text-muted-foreground flex flex-col items-center justify-center">
+              <CreditCard className="w-16 h-16 mb-4 opacity-20" />
+              <p className="text-lg font-medium">No payment records found.</p>
             </div>
           ) : (
-            <div className="divide-y">
+            <div className="divide-y divide-white/5">
               {payments.map(payment => (
-                <div key={payment.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors gap-4">
+                <div key={payment.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 hover:bg-background/40 transition-colors gap-4 group">
                   
                   <div className="flex items-start gap-4">
-                    <div className={`p-3 rounded-full shrink-0 ${
-                      payment.status === 'paid' ? 'bg-green-100 text-green-600' :
-                      payment.status === 'partial' ? 'bg-blue-100 text-blue-600' :
-                      'bg-red-100 text-red-600'
+                    <div className={`p-3 rounded-2xl shrink-0 shadow-sm transition-transform group-hover:scale-105 ${
+                      payment.status === 'paid' ? 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/20' :
+                      payment.status === 'partial' ? 'bg-blue-500/20 text-blue-500 border border-blue-500/20' :
+                      'bg-destructive/20 text-destructive border border-destructive/20'
                     }`}>
                       {payment.status === 'paid' ? <CheckCircle2 className="w-6 h-6" /> : <Clock className="w-6 h-6" />}
                     </div>
                     
                     <div>
-                      <h4 className="font-bold text-lg text-slate-900 dark:text-white capitalize">{payment.month} {payment.year}</h4>
-                      <p className="text-sm text-slate-500 flex items-center gap-2">
+                      <h4 className="font-bold text-lg text-foreground capitalize">{payment.month} {payment.year}</h4>
+                      <p className="text-sm text-muted-foreground flex items-center gap-2 font-medium">
                         {format(new Date(payment.created_at), "MMM d, yyyy")}
-                        <span className="w-1 h-1 bg-slate-300 rounded-full"></span>
+                        <span className="w-1.5 h-1.5 bg-primary/40 rounded-full"></span>
                         <span className="capitalize">{payment.payment_method || 'Cash'}</span>
                       </p>
                     </div>
@@ -111,19 +141,19 @@ export default function StudentPaymentsPage() {
 
                   <div className="flex items-center gap-6 w-full sm:w-auto justify-between sm:justify-end">
                     <div className="text-left sm:text-right">
-                      <div className="font-bold text-xl text-slate-900 dark:text-white">৳ {payment.amount}</div>
-                      <Badge variant="outline" className={`capitalize mt-1
-                        ${payment.status === 'paid' ? 'bg-green-50 text-green-700 border-green-200' : ''}
-                        ${payment.status === 'due' ? 'bg-red-50 text-red-700 border-red-200' : ''}
-                        ${payment.status === 'partial' ? 'bg-blue-50 text-blue-700 border-blue-200' : ''}
+                      <div className="font-black text-2xl text-foreground tracking-tight">৳ {payment.amount}</div>
+                      <Badge variant="outline" className={`capitalize mt-1 shadow-sm backdrop-blur-md px-3 py-0.5
+                        ${payment.status === 'paid' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : ''}
+                        ${payment.status === 'due' ? 'bg-destructive/10 text-destructive border-destructive/20' : ''}
+                        ${payment.status === 'partial' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : ''}
                       `}>
                         {payment.status}
                       </Badge>
                     </div>
 
                     {(payment.status === 'paid' || payment.status === 'partial') && (
-                      <Button variant="outline" size="icon" onClick={() => handleDownloadReceipt(payment)} title="Download Receipt">
-                        <Download className="w-4 h-4" />
+                      <Button variant="outline" size="icon" onClick={() => handleDownloadReceipt(payment)} title="Download Receipt" className="rounded-xl border-white/10 bg-background/50 hover:bg-primary/20 hover:text-primary transition-all hover:scale-105 shadow-sm h-12 w-12">
+                        <Download className="w-5 h-5" />
                       </Button>
                     )}
                   </div>

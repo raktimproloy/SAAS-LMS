@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { User, Phone, MapPin, Mail, Calendar, Users, Camera, Shield } from "lucide-react";
+import { User, Phone, MapPin, Mail, Calendar, Users, Camera, Shield, LogOut } from "lucide-react";
 import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 
 export default function StudentProfile() {
   const [student, setStudent] = useState<{
@@ -21,6 +22,15 @@ export default function StudentProfile() {
     parent_phone: string | null;
   } | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/student/auth/logout', { method: 'POST' });
+      window.location.href = '/student/login';
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   useEffect(() => {
     fetch('/api/student/me')
@@ -96,11 +106,14 @@ export default function StudentProfile() {
       
       {/* Top Banner Section */}
       <div 
-        className="relative overflow-hidden bg-card/40 backdrop-blur-3xl p-8 md:p-12 rounded-[2.5rem] shadow-2xl flex flex-col md:flex-row items-center md:items-start gap-8 border border-white/10 group animate-in fade-in slide-in-from-top-4 duration-700"
+        className="relative bg-card/40 backdrop-blur-3xl p-8 md:p-12 rounded-[2.5rem] shadow-2xl flex flex-col md:flex-row items-center md:items-start gap-8 border border-white/10 group"
+        data-aos="fade-down"
       >
-        {/* Decorative Animated Orbs */}
-        <div className="absolute -top-20 -left-20 w-64 h-64 bg-primary/20 rounded-full blur-[80px] animate-[pulse_6s_ease-in-out_infinite] pointer-events-none group-hover:scale-125 transition-transform duration-700" />
-        <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-cyan-500/20 rounded-full blur-[80px] animate-[pulse_8s_ease-in-out_infinite_reverse] pointer-events-none group-hover:scale-125 transition-transform duration-700" />
+        {/* Decorative Animated Orbs - Isolated layer to prevent overflow-hidden border-radius animation glitch */}
+        <div className="absolute inset-0 overflow-hidden rounded-[2.5rem] pointer-events-none">
+          <div className="absolute -top-20 -left-20 w-64 h-64 bg-primary/20 rounded-full blur-[80px] pointer-events-none group-hover:scale-125 transition-transform duration-700 transform-gpu" />
+          <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-cyan-500/20 rounded-full blur-[80px] pointer-events-none group-hover:scale-125 transition-transform duration-700 transform-gpu" />
+        </div>
 
         {/* Avatar */}
         <div className="relative z-10 shrink-0">
@@ -152,9 +165,10 @@ export default function StudentProfile() {
         
         {/* Personal Info Card */}
         <div 
-          className="bg-card/40 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 shadow-xl relative overflow-hidden group hover:bg-card/60 transition-colors animate-in fade-in slide-in-from-bottom-4 duration-700"
+          className="bg-card/40 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 shadow-xl relative overflow-hidden group hover:bg-card/60 transition-colors"
+          data-aos="fade-up"
         >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-[40px] pointer-events-none group-hover:bg-primary/20 transition-all duration-500" />
+          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-[40px] pointer-events-none group-hover:bg-primary/20 transition-all duration-300" />
           
           <h2 className="text-xl font-bold mb-6 flex items-center gap-3 text-foreground/90 relative z-10">
             <div className="p-2 rounded-xl bg-primary/10 text-primary border border-primary/20">
@@ -181,9 +195,10 @@ export default function StudentProfile() {
 
         {/* Guardian Info Card */}
         <div 
-          className="bg-card/40 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 shadow-xl relative overflow-hidden group hover:bg-card/60 transition-colors animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both delay-150"
+          className="bg-card/40 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 shadow-xl relative overflow-hidden group hover:bg-card/60 transition-colors"
+          data-aos="fade-up"
         >
-          <div className="absolute bottom-0 left-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-[40px] pointer-events-none group-hover:bg-cyan-500/20 transition-all duration-500" />
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-[40px] pointer-events-none group-hover:bg-cyan-500/20 transition-all duration-300" />
           
           <h2 className="text-xl font-bold mb-6 flex items-center gap-3 text-foreground/90 relative z-10">
             <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-500 border border-cyan-500/20">
@@ -208,6 +223,19 @@ export default function StudentProfile() {
           </div>
         </div>
 
+      </div>
+
+      {/* Mobile Logout Button */}
+      <div className="lg:hidden flex justify-center mt-8" data-aos="fade-up">
+        <Button 
+          variant="outline" 
+          size="lg" 
+          className="w-full sm:w-auto rounded-2xl gap-2 font-bold py-6 bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500/20 hover:text-red-400 transition-all shadow-[0_0_20px_rgba(239,68,68,0.15)] group" 
+          onClick={handleLogout}
+        >
+          <LogOut className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+          Log Out
+        </Button>
       </div>
     </div>
   );

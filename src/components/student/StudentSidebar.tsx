@@ -21,8 +21,8 @@ import { useRouter } from "next/navigation";
 const navItems = [
   { title: "Dashboard", href: "/student/dashboard", icon: LayoutDashboard },
   { title: "Profile", href: "/student/profile", icon: User },
-  { title: "Online Exams", href: "/student/exams", icon: GraduationCap },
   { title: "Results", href: "/student/results", icon: FileText },
+  { title: "Online Exams", href: "/student/exams", icon: GraduationCap },
   { title: "Study Materials", href: "/student/notes", icon: BookOpen },
   { title: "Payments", href: "/student/payments", icon: CreditCard },
   { title: "Notices", href: "/student/notices", icon: Bell },

@@ -379,7 +379,7 @@ export default function ExamsPage() {
         </Dialog>
       </div>
 
-      <Card className="border-none shadow-sm dark:bg-slate-800/50">
+      <Card className="border-none shadow-sm dark:bg-slate-800/50 overflow-hidden">
         <CardHeader>
           <CardTitle>All Exams</CardTitle>
         </CardHeader>

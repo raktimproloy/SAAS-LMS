@@ -225,8 +225,8 @@ export default function AttendancePage() {
           
           {/* Main Attendance List */}
           <div className="lg:col-span-2 space-y-6">
-            <Card className="border-none shadow-md">
-              <CardHeader className="flex flex-row items-center justify-between border-b pb-4">
+            <Card className="border-none shadow-md overflow-hidden">
+              <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b pb-4">
                 <div>
                   <CardTitle>Class Roster</CardTitle>
                   <p className="text-sm text-muted-foreground mt-1">

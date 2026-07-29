@@ -24,7 +24,7 @@ export default function StudentNoticesPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto animate-in fade-in duration-500">
+    <div className="space-y-6 max-w-4xl mx-auto pb-20">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-foreground">Notice Board</h1>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -39,7 +39,7 @@ export default function StudentNoticesPage() {
           </Card>
         ) : (
           notices.map(notice => (
-            <Card key={notice.id} className="hover:shadow-md transition-shadow group overflow-hidden">
+            <Card key={notice.id} className="hover:shadow-md transition-shadow group overflow-hidden" data-aos="fade-up">
               <div className="flex flex-col md:flex-row">
                 <div className="bg-muted/50 p-6 flex md:flex-col items-center md:justify-center border-b md:border-b-0 md:border-r min-w-[140px] gap-3 border-border">
                   <Calendar className="w-6 h-6 text-primary/60" />

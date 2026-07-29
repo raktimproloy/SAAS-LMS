@@ -76,7 +76,6 @@ export default function StudentExamsPage() {
                   status === 'active' ? 'ring-1 ring-primary/50 shadow-primary/20' : ''
                 }`}
                 data-aos="fade-up" 
-                data-aos-delay={100 + (index * 100)}
               >
                 {/* Background Decor */}
                 <div className={`absolute -top-10 -right-10 w-32 h-32 rounded-full blur-2xl pointer-events-none group-hover:scale-150 transition-transform duration-700 ${status === 'active' ? 'bg-primary/30' : 'bg-white/10'}`} />

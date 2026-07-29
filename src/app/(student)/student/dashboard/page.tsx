@@ -87,9 +87,9 @@ export default function StudentDashboard() {
   const strokeDashoffset = strokeDasharray - (strokeDasharray * performancePercentage) / 100;
 
   return (
-    <div className="flex flex-col gap-4 h-[calc(100vh-160px)] overflow-hidden">
+    <div className="flex flex-col gap-6 w-full animate-in fade-in duration-300">
       {/* Welcome Section */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-aos="fade-down" data-aos-duration="800">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-aos="fade-down">
         <div className="space-y-1">
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
             Welcome back, {student?.name}!
@@ -114,13 +114,13 @@ export default function StudentDashboard() {
       </div>
 
       {/* Main Content Grid - Naturally Scales */}
-      <div className="flex flex-col gap-4 mt-1 flex-1 min-h-0">
+      <div className="flex flex-col gap-6">
         
         {/* Top Row: Course & Next Exam */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:shrink-0">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           
           {/* Enrolled Courses / Batches */}
-          <div className="bg-card/40 backdrop-blur-3xl border border-white/10 rounded-2xl p-4 shadow-xl relative overflow-hidden flex flex-col h-full" data-aos="fade-up" data-aos-delay="100">
+          <div className="bg-card/40 backdrop-blur-3xl border border-white/10 rounded-2xl p-4 shadow-xl relative overflow-hidden flex flex-col" data-aos="fade-up">
             <h3 className="text-base font-semibold text-foreground/90 mb-2 flex items-center gap-2 shrink-0">
               <GraduationCap className="w-4 h-4 text-primary" />
               My Course & Batch
@@ -140,10 +140,10 @@ export default function StudentDashboard() {
           </div>
 
           {/* Upcoming Exam Card */}
-          <div className="bg-card/40 backdrop-blur-3xl border border-white/10 rounded-2xl p-4 shadow-xl relative overflow-hidden group flex flex-col h-full" data-aos="fade-up" data-aos-delay="200">
+          <div className="bg-card/40 backdrop-blur-3xl border border-white/10 rounded-2xl p-4 shadow-xl relative overflow-hidden group flex flex-col" data-aos="fade-up">
             {/* Decorative Glowing Circle */}
             <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/20 rounded-full blur-2xl pointer-events-none group-hover:scale-150 transition-transform duration-700" />
-            <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none animate-pulse" />
+            <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none transform-gpu" />
             
             <div className="absolute top-6 right-6 w-14 h-14 bg-background/50 rounded-full backdrop-blur-md border border-white/5 flex items-center justify-center shadow-sm">
               <CalendarClock className="w-6 h-6 text-primary/80" />
@@ -185,13 +185,13 @@ export default function StudentDashboard() {
         </div>
 
         {/* Bottom Row: Performance + Notices (Left) & Calendar (Right) */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 flex-1 min-h-0">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           
           {/* Left Side: Split into Performance & Notices */}
-          <div className="flex flex-col gap-4 h-full min-h-0">
+          <div className="flex flex-col gap-6">
             
             {/* Recent Performance Card */}
-            <div className="flex-1 bg-card/40 backdrop-blur-2xl border border-white/10 rounded-2xl p-4 shadow-xl relative overflow-hidden group flex flex-col min-h-0" data-aos="fade-up" data-aos-delay="300">
+            <div className="bg-card/40 backdrop-blur-2xl border border-white/10 rounded-2xl p-4 shadow-xl relative overflow-hidden group flex flex-col" data-aos="fade-up">
               <div className="absolute bottom-0 left-0 w-32 h-32 bg-primary/10 rounded-full blur-[40px] pointer-events-none group-hover:bg-primary/20 transition-colors duration-500" />
               
               <div className="flex justify-between items-center mb-2 relative z-10 shrink-0">
@@ -251,7 +251,7 @@ export default function StudentDashboard() {
             </div>
 
             {/* Notices Section */}
-            <div className="flex-1 bg-card/40 backdrop-blur-2xl border border-white/10 rounded-2xl p-4 shadow-lg relative overflow-hidden flex flex-col min-h-0" data-aos="fade-up" data-aos-delay="400">
+            <div className="bg-card/40 backdrop-blur-2xl border border-white/10 rounded-2xl p-4 shadow-lg relative overflow-hidden flex flex-col" data-aos="fade-up">
               <div className="flex justify-between items-center mb-2 relative z-10 shrink-0">
                 <h3 className="text-base font-semibold text-foreground/90 flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4 text-amber-500 drop-shadow-sm" />
@@ -284,7 +284,7 @@ export default function StudentDashboard() {
           </div>
 
           {/* Right Side: Calendar */}
-          <div className="h-full min-h-0 bg-card/40 backdrop-blur-3xl border border-white/10 rounded-2xl p-4 shadow-xl relative overflow-hidden flex flex-col" data-aos="fade-up" data-aos-delay="400">
+          <div className="bg-card/40 backdrop-blur-3xl border border-white/10 rounded-2xl p-4 shadow-xl relative overflow-hidden flex flex-col" data-aos="fade-up">
             <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[80px] -mr-20 -mt-20 pointer-events-none" />
             <h2 className="text-base font-bold mb-2 text-foreground/90 flex items-center gap-2 shrink-0">
               <CalendarClock className="w-4 h-4 text-primary" />
