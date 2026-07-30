@@ -190,7 +190,7 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
     const result = practiceResultData;
     return (
       <div className="min-h-screen bg-background pb-20 animate-in fade-in duration-500">
-        <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
+        <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
           
           <div className="bg-card/80 backdrop-blur-xl p-8 rounded-2xl border border-border shadow-sm flex flex-col md:flex-row items-center justify-between gap-8">
             <div>
@@ -406,7 +406,7 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
     <div className="min-h-screen bg-background pb-28">
       {/* Top Header */}
       <div className="bg-card/80 backdrop-blur-xl border-b border-border shadow-sm dark:shadow-none">
-        <div className="max-w-4xl mx-auto px-4 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h1 className="text-xl font-bold text-foreground leading-tight">{title}</h1>
             <p className="text-sm text-muted-foreground mt-1">Select an option to lock your answer. You cannot change it later.</p>
@@ -415,7 +415,7 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
       </div>
 
       {/* Questions Feed */}
-      <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
+      <div className="max-w-6xl mx-auto px-4 py-8 space-y-8">
         {(() => {
           let globalQuestionCounter = 1;
           const rootQuestions = questions.filter(q => !q.parent_id);
@@ -563,14 +563,14 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
       </div>
 
       {/* Sticky Bottom Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-card/90 backdrop-blur-xl border-t border-border shadow-sm p-4 z-50">
-        <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
+      <div className="fixed bottom-0 left-0 right-0 bg-card/90 backdrop-blur-xl border-t border-border shadow-sm p-3 sm:p-4 z-50">
+        <div className="max-w-6xl mx-auto flex items-center justify-between gap-2">
           
-          <div className="flex items-center gap-6">
-            <div className={`flex items-center gap-2 px-4 py-2 rounded-lg font-mono font-bold text-xl border shadow-sm ${
+          <div className="flex items-center gap-2 sm:gap-6">
+            <div className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg font-mono font-bold text-base sm:text-xl border shadow-sm ${
               timeLeft <= 60 ? 'bg-destructive/10 text-destructive border-destructive/20 animate-pulse' : 'bg-muted text-foreground border-border'
             }`}>
-              <Clock className="w-5 h-5" />
+              <Clock className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
               {formatTime(timeLeft)}
             </div>
 
@@ -584,18 +584,24 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
             </div>
           </div>
 
-          <Button 
-            size="lg"
-            className="px-8 font-bold text-base shadow-md group"
-            onClick={() => setShowConfirmDialog(true)}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (
-              <span className="flex items-center gap-2"><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"/> Submitting...</span>
-            ) : (
-              <span className="flex items-center gap-2">Submit Exam <CheckCircle2 className="w-5 h-5 group-hover:scale-110 transition-transform" /></span>
-            )}
-          </Button>
+          <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+            <div className="sm:hidden flex items-center justify-center font-bold text-sm bg-primary/10 text-primary border border-primary/20 px-2 py-1.5 rounded-lg shadow-sm whitespace-nowrap">
+              {attemptedCount}/{questions.filter(q => q.type !== 'passage').length}
+            </div>
+
+            <Button 
+              size="lg"
+              className="px-4 sm:px-8 font-bold text-sm sm:text-base shadow-md group h-10 sm:h-11"
+              onClick={() => setShowConfirmDialog(true)}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <span className="flex items-center gap-2"><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"/> Submit</span>
+              ) : (
+                <span className="flex items-center gap-1.5 sm:gap-2">Submit <span className="hidden sm:inline">Exam</span> <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform" /></span>
+              )}
+            </Button>
+          </div>
 
         </div>
       </div>

@@ -48,17 +48,17 @@ export default function StudentExamLeaderboardPage() {
   if (!data) return null;
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto pb-20">
+    <div className="space-y-4 sm:space-y-6 max-w-4xl mx-auto pb-20 w-full">
       
       <div className="flex items-center gap-4 mb-4">
-        <Link href="/student/exams">
+        <Link href="/student/exams" className="shrink-0">
           <Button variant="outline" size="icon" className="rounded-full shadow-sm">
             <ArrowLeft className="w-4 h-4" />
           </Button>
         </Link>
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Exam Leaderboard</h1>
-          <p className="text-slate-500">{data.exam.title}</p>
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white truncate">Exam Leaderboard</h1>
+          <p className="text-sm text-slate-500 truncate">{data.exam.title}</p>
         </div>
       </div>
 

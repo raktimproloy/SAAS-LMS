@@ -87,15 +87,15 @@ export function Leaderboard({ entries, currentStudentId }: LeaderboardProps) {
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-cyan-600/10 rounded-full blur-[80px] -ml-20 -mb-20 pointer-events-none transform-gpu" />
       </div>
       <div className="bg-card/60 backdrop-blur-3xl rounded-3xl border border-white/10 shadow-lg shadow-primary/20 ring-1 ring-primary/50 overflow-hidden relative" data-aos="fade-down">
-      <div className="p-6 border-b border-white/10 flex items-center gap-4 relative z-10">
-        <div className="p-3 bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl shadow-[0_0_15px_rgba(251,191,36,0.3)] border border-amber-300/30">
-          <Trophy className="w-6 h-6 text-amber-950" />
+        <div className="p-4 sm:p-6 border-b border-white/10 flex items-center gap-3 sm:gap-4 relative z-10">
+          <div className="p-2 sm:p-3 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl sm:rounded-2xl shadow-[0_0_15px_rgba(251,191,36,0.3)] border border-amber-300/30 shrink-0">
+            <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-amber-950" />
+          </div>
+          <div className="min-w-0">
+            <h3 className="font-bold text-lg sm:text-2xl text-foreground tracking-tight truncate">Top 10 Leaderboard</h3>
+            <p className="text-xs sm:text-sm text-muted-foreground font-medium truncate">Ranking based on score and time.</p>
+          </div>
         </div>
-        <div>
-          <h3 className="font-bold text-2xl text-foreground tracking-tight">Top 10 Leaderboard</h3>
-          <p className="text-sm text-muted-foreground font-medium">Ranking based on score and time.</p>
-        </div>
-      </div>
       
       <div className="divide-y divide-white/5 relative z-10">
         {entries.map((entry, index) => {
@@ -141,9 +141,11 @@ export function Leaderboard({ entries, currentStudentId }: LeaderboardProps) {
                 <div className="font-black text-lg sm:text-xl text-foreground leading-tight whitespace-nowrap">
                   {entry.obtained_marks} <span className="text-[10px] sm:text-xs font-semibold text-muted-foreground">pts</span>
                 </div>
-                <div className="text-[10px] sm:text-xs font-medium text-muted-foreground whitespace-nowrap">
-                  {formatTime(entry.time_taken_seconds)}
-                </div>
+                {entry.time_taken_seconds != null && (
+                  <div className="text-[10px] sm:text-xs font-medium text-muted-foreground whitespace-nowrap">
+                    {formatTime(entry.time_taken_seconds)}
+                  </div>
+                )}
               </div>
             </div>
           );

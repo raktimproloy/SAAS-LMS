@@ -49,7 +49,7 @@ export default function StudentExamsPage() {
   };
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto pb-10">
+    <div className="space-y-8 w-full max-w-[1920px] mx-auto pb-10">
       <div className="flex flex-col gap-2 relative z-10" data-aos="fade-down" data-aos-duration="800">
         <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">My Exams</h1>
         <p className="text-muted-foreground text-lg">View and take your assigned exams below.</p>
@@ -63,7 +63,7 @@ export default function StudentExamsPage() {
           <p className="text-md relative z-10">There are currently no exams assigned to your batch.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 md:gap-8">
           {exams.map((exam, index) => {
             const status = getStatus(exam);
             const isAttempted = exam.results && exam.results.length > 0;
@@ -84,41 +84,41 @@ export default function StudentExamsPage() {
                 <CardHeader className="p-6 pb-4 border-b border-white/10 relative z-10">
                   <div className="flex justify-between items-start mb-4">
                     <Badge variant="outline" className={`capitalize px-3 py-1 text-xs font-bold rounded-full shadow-sm backdrop-blur-md
-                      ${status === 'completed' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : ''}
-                      ${status === 'active' ? 'bg-primary/20 text-primary border-primary/40' : ''}
-                      ${status === 'missed' ? 'bg-destructive/20 text-destructive border-destructive/30' : ''}
-                      ${status === 'upcoming' ? 'bg-amber-500/20 text-amber-500 border-amber-500/30' : ''}
-                      ${status !== 'active' && status !== 'completed' && status !== 'missed' && status !== 'upcoming' ? 'bg-background/50 text-foreground border-white/10' : ''}
+                      ${status === 'completed' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : ''}
+                      ${status === 'active' ? 'bg-primary/20 text-blue-300 border-primary/40' : ''}
+                      ${status === 'missed' ? 'bg-destructive/20 text-red-300 border-destructive/30' : ''}
+                      ${status === 'upcoming' ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' : ''}
+                      ${status !== 'active' && status !== 'completed' && status !== 'missed' && status !== 'upcoming' ? 'bg-background/50 text-white border-white/10' : ''}
                     `}>
                       {status}
                     </Badge>
-                    <span className="text-xs font-bold px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 backdrop-blur-md shadow-sm">
+                    <span className="text-xs font-bold px-3 py-1 rounded-full bg-primary/10 text-blue-300 border border-primary/20 backdrop-blur-md shadow-sm">
                       {exam.total_marks} Marks
                     </span>
                   </div>
-                  <CardTitle className="text-xl line-clamp-2 leading-snug font-bold text-foreground">
+                  <CardTitle className="text-xl line-clamp-2 leading-snug font-bold text-white">
                     {exam.title}
                   </CardTitle>
                 </CardHeader>
 
                 <CardContent className="p-6 flex-1 space-y-6 relative z-10">
-                  <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm font-medium text-foreground/80">
+                  <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm font-medium text-white">
                     <div className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4 shrink-0 text-primary" />
-                      <span className="truncate">{exam.start_time ? format(new Date(exam.start_time), "MMM d, h:mm a") : 'No Start Time'}</span>
+                      <Calendar className="w-4 h-4 shrink-0 text-blue-300" />
+                      <span className="truncate text-white">{exam.start_time ? format(new Date(exam.start_time), "MMM d, h:mm a") : 'No Start Time'}</span>
+                    </div>
+                    <div className="flex items-center justify-end gap-2 text-right">
+                      <span className="text-white font-semibold">{exam.duration_minutes} Mins</span>
+                      <Clock className="w-4 h-4 shrink-0 text-blue-300" />
                     </div>
                     <div className="flex items-center gap-2">
-                      <Clock className="w-4 h-4 shrink-0 text-primary" />
-                      <span className="text-foreground font-semibold">{exam.duration_minutes} Mins</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <FileQuestion className="w-4 h-4 shrink-0 text-primary" />
-                      <span className="text-foreground font-semibold">{exam._count?.questions || 0} Qs</span>
+                      <FileQuestion className="w-4 h-4 shrink-0 text-blue-300" />
+                      <span className="text-white font-semibold">{exam._count?.questions || 0} Qs</span>
                     </div>
                     {exam.negative_marking > 0 && (
-                      <div className="flex items-center gap-2 text-red-400 font-bold bg-red-500/10 px-2 py-1 rounded-lg border border-red-500/20 w-fit">
-                        <Target className="w-4 h-4 shrink-0" />
+                      <div className="flex items-center justify-end gap-2 text-red-300 font-bold bg-red-500/10 px-2 py-1 rounded-lg border border-red-500/20 w-fit ml-auto">
                         <span>-{exam.negative_marking} / wrong</span>
+                        <Target className="w-4 h-4 shrink-0" />
                       </div>
                     )}
                   </div>
@@ -128,13 +128,13 @@ export default function StudentExamsPage() {
                       <div className="flex justify-between items-end">
                         <div>
                           <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider mb-1">Score</p>
-                          <p className="text-2xl font-black text-foreground leading-none">
+                          <p className="text-2xl font-black text-white leading-none">
                             {result.obtained_marks} <span className="text-sm font-bold text-muted-foreground">/ {result.total_marks}</span>
                           </p>
                         </div>
                         <div className="text-right">
                           <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider mb-1">Accuracy</p>
-                          <p className="text-lg font-black text-emerald-500 leading-none">
+                          <p className="text-lg font-black text-emerald-300 leading-none">
                             {result.correct_count + result.wrong_count > 0 
                               ? Math.round((result.correct_count / (result.correct_count + result.wrong_count)) * 100) 
                               : 0}%
@@ -144,8 +144,8 @@ export default function StudentExamsPage() {
                       <div className="flex justify-between items-center text-xs pt-3 border-t border-white/10 text-muted-foreground font-medium">
                         <span>Time: {formatTime(result.time_taken_seconds || 0)}</span>
                         <span className="flex gap-3">
-                          <span className="text-emerald-500 flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> {result.correct_count}</span>
-                          <span className="text-destructive flex items-center gap-1"><XCircle className="w-3 h-3" /> {result.wrong_count}</span>
+                          <span className="text-emerald-300 flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> {result.correct_count}</span>
+                          <span className="text-red-300 flex items-center gap-1"><XCircle className="w-3 h-3" /> {result.wrong_count}</span>
                         </span>
                       </div>
                     </div>
@@ -156,22 +156,22 @@ export default function StudentExamsPage() {
                   {status === 'completed' && (
                     <div className="grid grid-cols-2 gap-3 w-full">
                       <Link href={`/student/exams/${exam.id}/questions`}>
-                        <Button variant="outline" className="w-full h-11 rounded-xl bg-background/50 border-white/10 hover:bg-primary/10 hover:text-primary transition-colors">
+                        <Button variant="outline" className="w-full h-11 rounded-xl bg-background/50 border-white/10 hover:bg-primary/10 hover:text-blue-300 text-white transition-colors">
                           <FileQuestion className="w-4 h-4 mr-2" /> Questions
                         </Button>
                       </Link>
                       <Link href={`/student/exams/${exam.id}/take`}>
-                        <Button variant="outline" className="w-full h-11 rounded-xl bg-background/50 border-white/10 hover:bg-primary/10 hover:text-primary transition-colors">
+                        <Button variant="outline" className="w-full h-11 rounded-xl bg-background/50 border-white/10 hover:bg-primary/10 hover:text-blue-300 text-white transition-colors">
                           <Play className="w-4 h-4 mr-2" /> Retake
                         </Button>
                       </Link>
                       <Link href={`/student/exams/${exam.id}/result`}>
-                        <Button variant="outline" className="w-full h-11 rounded-xl bg-emerald-500/10 border-emerald-500/20 text-emerald-600 hover:bg-emerald-500/20 transition-colors">
+                        <Button variant="outline" className="w-full h-11 rounded-xl bg-emerald-500/10 border-emerald-500/20 text-emerald-300 hover:bg-emerald-500/20 hover:text-emerald-200 transition-colors">
                           <Eye className="w-4 h-4 mr-2" /> Result
                         </Button>
                       </Link>
                       <Link href={`/student/exams/${exam.id}/leaderboard`}>
-                        <Button variant="outline" className="w-full h-11 rounded-xl bg-amber-500/10 border-amber-500/20 hover:bg-amber-500/20 hover:border-amber-500/40 text-amber-500 transition-all font-semibold shadow-[0_0_10px_rgba(245,158,11,0.1)]">
+                        <Button variant="outline" className="w-full h-11 rounded-xl bg-amber-500/10 border-amber-500/20 hover:bg-amber-500/20 hover:border-amber-500/40 text-amber-300 hover:text-amber-200 transition-all font-semibold shadow-[0_0_10px_rgba(245,158,11,0.1)]">
                           <Medal className="w-4 h-4 mr-2 drop-shadow-[0_0_8px_rgba(245,158,11,0.8)]" /> Rank
                         </Button>
                       </Link>
@@ -187,7 +187,7 @@ export default function StudentExamsPage() {
                         </Button>
                       </Link>
                       <Link href={`/student/exams/${exam.id}/leaderboard`} className="w-full">
-                        <Button variant="outline" className="w-full h-12 rounded-2xl bg-amber-500/10 border-amber-500/20 hover:bg-amber-500/20 hover:border-amber-500/40 text-amber-500 transition-all backdrop-blur-md shadow-[0_0_15px_rgba(245,158,11,0.15)] font-semibold">
+                        <Button variant="outline" className="w-full h-12 rounded-2xl bg-amber-500/10 border-amber-500/20 hover:bg-amber-500/20 hover:border-amber-500/40 text-amber-300 hover:text-amber-200 transition-all backdrop-blur-md shadow-[0_0_15px_rgba(245,158,11,0.15)] font-semibold">
                           <Medal className="w-4 h-4 mr-2 drop-shadow-[0_0_8px_rgba(245,158,11,0.8)]" /> View Leaderboard
                         </Button>
                       </Link>
@@ -195,7 +195,7 @@ export default function StudentExamsPage() {
                   )}
 
                   {status === 'missed' && (
-                    <Button variant="secondary" className="w-full h-12 rounded-xl bg-destructive/10 text-destructive hover:bg-destructive/10 cursor-not-allowed border border-destructive/20" disabled>
+                    <Button variant="secondary" className="w-full h-12 rounded-xl bg-destructive/10 text-red-300 hover:bg-destructive/10 cursor-not-allowed border border-destructive/20" disabled>
                       Missed Time Limit
                     </Button>
                   )}

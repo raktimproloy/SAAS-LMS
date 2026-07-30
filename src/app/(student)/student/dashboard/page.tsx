@@ -87,11 +87,11 @@ export default function StudentDashboard() {
   const strokeDashoffset = strokeDasharray - (strokeDasharray * performancePercentage) / 100;
 
   return (
-    <div className="flex flex-col gap-6 w-full animate-in fade-in duration-300">
+    <div className="flex flex-col gap-4 w-full lg:h-[calc(100vh-150px)] lg:overflow-hidden animate-in fade-in duration-300">
       {/* Welcome Section */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4" data-aos="fade-down">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0" data-aos="fade-down">
         <div className="space-y-1">
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
+          <h1 className="text-xl md:text-2xl font-bold tracking-tight text-foreground">
             Welcome back, {student?.name}!
           </h1>
           <p className="text-muted-foreground text-sm flex items-center gap-2">
@@ -102,7 +102,7 @@ export default function StudentDashboard() {
 
         <div className="flex shrink-0">
           <Link href="/student/payments">
-            <Button size="lg" className={`rounded-full px-8 shadow-lg shadow-primary/20 bg-gradient-to-r from-primary to-primary/80 text-white border-0 transition-transform hover:scale-105 hover:shadow-primary/40 ${data?.paymentStatus === 'paid' ? 'from-emerald-500 to-emerald-400 shadow-emerald-500/20 hover:shadow-emerald-500/40' : ''}`}>
+            <Button size="default" className={`rounded-full px-6 shadow-lg text-white border-0 transition-transform hover:scale-105 ${data?.paymentStatus === 'paid' ? 'bg-gradient-to-r from-emerald-500 to-emerald-400 shadow-emerald-500/20 hover:shadow-emerald-500/40' : 'bg-gradient-to-r from-rose-500 to-rose-400 shadow-rose-500/20 hover:shadow-rose-500/40'}`}>
               {data?.paymentStatus === 'paid' ? (
                 <><CheckCircle2 className="w-5 h-5 mr-2" /> Fees Paid</>
               ) : (
@@ -114,15 +114,15 @@ export default function StudentDashboard() {
       </div>
 
       {/* Main Content Grid - Naturally Scales */}
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-4 lg:flex-1 lg:min-h-0">
         
         {/* Top Row: Course & Next Exam */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:shrink-0">
           
           {/* Enrolled Courses / Batches */}
-          <div className="bg-card/40 backdrop-blur-3xl border border-white/10 rounded-2xl p-4 shadow-xl relative overflow-hidden flex flex-col" data-aos="fade-up">
-            <h3 className="text-base font-semibold text-foreground/90 mb-2 flex items-center gap-2 shrink-0">
-              <GraduationCap className="w-4 h-4 text-primary" />
+          <div className="bg-card/40 backdrop-blur-3xl border border-white/10 rounded-2xl p-4 md:p-5 shadow-xl relative overflow-hidden flex flex-col" data-aos="fade-up">
+            <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2 shrink-0">
+              <GraduationCap className="w-5 h-5 text-primary" />
               My Course & Batch
             </h3>
             <div className="flex flex-col gap-2 relative z-10">
@@ -131,8 +131,8 @@ export default function StudentDashboard() {
                   <GraduationCap className="w-6 h-6" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h4 className="font-bold text-lg text-foreground truncate">{student?.batch?.course?.title}</h4>
-                  <p className="text-muted-foreground text-sm truncate">{student?.batch?.name}</p>
+                  <h4 className="font-bold text-base md:text-lg text-foreground truncate">{student?.batch?.course?.title}</h4>
+                  <p className="text-muted-foreground text-xs md:text-sm truncate">{student?.batch?.name}</p>
                 </div>
               </div>
             </div>
@@ -140,35 +140,37 @@ export default function StudentDashboard() {
           </div>
 
           {/* Upcoming Exam Card */}
-          <div className="bg-card/40 backdrop-blur-3xl border border-white/10 rounded-2xl p-4 shadow-xl relative overflow-hidden group flex flex-col" data-aos="fade-up">
+          <div className="bg-card/40 backdrop-blur-3xl border border-white/10 rounded-2xl p-4 md:p-5 shadow-xl relative overflow-hidden group flex flex-col" data-aos="fade-up">
             {/* Decorative Glowing Circle */}
             <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/20 rounded-full blur-2xl pointer-events-none group-hover:scale-150 transition-transform duration-700" />
             <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none transform-gpu" />
-            
-            <div className="absolute top-6 right-6 w-14 h-14 bg-background/50 rounded-full backdrop-blur-md border border-white/5 flex items-center justify-center shadow-sm">
-              <CalendarClock className="w-6 h-6 text-primary/80" />
-            </div>
 
             <div className="relative z-10 flex-1 flex flex-col min-h-0">
-              <p className="text-muted-foreground font-bold mb-1 uppercase tracking-wider text-xs shrink-0">Next Exam</p>
-              <h3 className="text-xl font-bold mb-3 text-foreground truncate shrink-0">{data?.upcomingExam ? data.upcomingExam.title : "No Exams Scheduled"}</h3>
+              <p className="text-muted-foreground font-bold mb-1 uppercase tracking-wider text-sm shrink-0">Next Exam</p>
+              <h3 className="text-lg font-bold mb-3 text-foreground truncate shrink-0">{data?.upcomingExam ? data.upcomingExam.title : "No Exams Scheduled"}</h3>
               
               {data?.upcomingExam ? (
-                <div className="flex-1 flex flex-col justify-end min-h-0 overflow-y-auto overflow-x-hidden custom-scrollbar">
-                  <div className="space-y-1 mb-3 text-muted-foreground text-xs bg-background/50 p-3 rounded-xl backdrop-blur-sm border border-white/5 w-max max-w-full shrink-0">
-                    <div className="flex items-center gap-2 font-medium truncate">
-                      <CalendarClock className="w-4 h-4 text-primary/70 shrink-0" />
-                      {new Date(data.upcomingExam.start_time).toLocaleString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                <div className="flex-1 flex flex-col justify-end min-h-0">
+                  <div className="space-y-1 mb-3 text-white text-xs bg-background/50 p-3 rounded-xl backdrop-blur-sm border border-white/5 w-full shrink-0">
+                    <div className="flex items-center gap-3 font-medium">
+                      <div className="p-2 bg-primary/10 rounded-lg text-primary">
+                        <CalendarClock className="w-4 h-4 shrink-0" />
+                      </div>
+                      <span className="truncate">{new Date(data.upcomingExam.start_time).toLocaleString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
-                    <div className="flex items-center gap-2 font-medium truncate">
-                      <CheckCircle2 className="w-4 h-4 text-primary/70 shrink-0" />
-                      {data.upcomingExam.duration_minutes} Mins • {data.upcomingExam.total_marks} Marks
+                    <div className="flex items-center gap-3 font-medium">
+                      <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-500">
+                        <CheckCircle2 className="w-4 h-4 shrink-0" />
+                      </div>
+                      <span className="truncate">{data.upcomingExam.duration_minutes} Mins • {data.upcomingExam.total_marks} Marks</span>
                     </div>
                   </div>
                   <Link href={`/student/exams/${data.upcomingExam.id}/take`} className="block shrink-0">
-                    <Button className="w-full h-10 rounded-xl bg-gradient-to-r from-blue-500 via-cyan-500 to-blue-500 bg-[length:200%_auto] animate-gradient text-white hover:scale-[1.02] transition-all font-bold shadow-[0_0_15px_rgba(6,182,212,0.4)] text-sm border-0">
-                      <Play className="w-4 h-4 mr-2 fill-current" />
-                      Start Exam
+                    <Button className="w-full h-9 rounded-xl animated-premium-glass hover:scale-[1.02] transition-all font-bold shadow-md shadow-primary/20 text-sm border-0">
+                      <div className="flex items-center">
+                        <Play className="w-4 h-4 mr-2 fill-current" />
+                        <span>Start Exam</span>
+                      </div>
                     </Button>
                   </Link>
                 </div>
@@ -185,18 +187,18 @@ export default function StudentDashboard() {
         </div>
 
         {/* Bottom Row: Performance + Notices (Left) & Calendar (Right) */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:flex-1 lg:min-h-0">
           
           {/* Left Side: Split into Performance & Notices */}
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-4 lg:flex-1 lg:min-h-0 order-2 lg:order-1">
             
             {/* Recent Performance Card */}
-            <div className="bg-card/40 backdrop-blur-2xl border border-white/10 rounded-2xl p-4 shadow-xl relative overflow-hidden group flex flex-col" data-aos="fade-up">
+            <div className="bg-card/40 backdrop-blur-2xl border border-white/10 rounded-2xl p-4 md:p-5 shadow-xl relative overflow-hidden group flex flex-col lg:flex-1 lg:min-h-0 min-h-[200px]" data-aos="fade-up">
               <div className="absolute bottom-0 left-0 w-32 h-32 bg-primary/10 rounded-full blur-[40px] pointer-events-none group-hover:bg-primary/20 transition-colors duration-500" />
               
               <div className="flex justify-between items-center mb-2 relative z-10 shrink-0">
-                <h3 className="text-base font-semibold text-foreground/90 flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-primary" />
+                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-primary" />
                   Recent Performance
                 </h3>
               </div>
@@ -205,7 +207,7 @@ export default function StudentDashboard() {
                 {data?.recentResult ? (
                   <div className="flex flex-col sm:flex-row items-center justify-around gap-4 w-full h-full">
                     {/* SVG Ring Chart */}
-                    <div className="relative w-24 h-24 shrink-0 hover:scale-105 transition-transform duration-500">
+                    <div className="relative w-20 h-20 shrink-0 hover:scale-105 transition-transform duration-500">
                       <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
                         <circle cx="50" cy="50" r="45" fill="none" className="stroke-muted/50" strokeWidth="8" />
                         <circle 
@@ -221,20 +223,27 @@ export default function StudentDashboard() {
                           style={{ transition: 'stroke-dashoffset 1.5s ease-out' }}
                         />
                       </svg>
-                      <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <div className="text-2xl font-black text-foreground drop-shadow-md">{data.recentResult.obtained_marks}</div>
-                        <div className="text-xs font-medium text-muted-foreground border-t border-border/50 pt-1 mt-1 px-2">/ {data.recentResult.total_marks}</div>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center pt-1">
+                        <div className="text-2xl font-black text-foreground drop-shadow-md leading-none h-7 flex items-center justify-center">{data.recentResult.obtained_marks}</div>
+                        <div className="text-[10px] font-bold text-muted-foreground border-t border-border/50 pt-1 mt-1 px-2 leading-none flex items-center justify-center">/ {data.recentResult.total_marks}</div>
                       </div>
                     </div>
 
-                    <div className="flex flex-col gap-3 text-center sm:text-left min-w-0">
-                      <p className="font-medium text-foreground text-sm bg-background/50 px-3 py-1.5 rounded-xl border border-white/5 shadow-sm truncate">
-                        {data.recentResult.exam.title}
-                      </p>
+                    <div className="flex flex-col gap-3 text-center sm:text-left min-w-0 w-full sm:w-auto flex-1">
+                      <div className="bg-background/40 p-3 rounded-xl border border-white/5 shadow-inner">
+                        <p className="text-xs font-bold text-primary uppercase tracking-wider mb-1">
+                          {data.recentResult.exam.type || 'EXAM'}
+                        </p>
+                        <p className="font-bold text-foreground text-sm line-clamp-2 leading-tight">
+                          {data.recentResult.exam.title}
+                        </p>
+                      </div>
                       <Link href="/student/results">
-                        <Button variant="ghost" className="w-full rounded-xl hover:bg-primary/10 text-primary hover:text-primary flex items-center justify-between group-hover:px-4 transition-all duration-300 border border-transparent text-sm h-8">
-                          View All Results
-                          <ChevronRight className="w-4 h-4 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                        <Button variant="default" className="w-full rounded-xl animated-premium-glass flex items-center justify-center group transition-all duration-300 shadow-md shadow-primary/20 h-9 text-xs font-bold border-0">
+                          <div className="flex items-center justify-center">
+                            <span>View All Results</span>
+                            <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                          </div>
                         </Button>
                       </Link>
                     </div>
@@ -251,10 +260,10 @@ export default function StudentDashboard() {
             </div>
 
             {/* Notices Section */}
-            <div className="bg-card/40 backdrop-blur-2xl border border-white/10 rounded-2xl p-4 shadow-lg relative overflow-hidden flex flex-col" data-aos="fade-up">
+            <div className="bg-card/40 backdrop-blur-2xl border border-white/10 rounded-2xl p-4 md:p-5 shadow-lg relative overflow-hidden flex flex-col lg:flex-1 lg:min-h-0 min-h-[250px]" data-aos="fade-up">
               <div className="flex justify-between items-center mb-2 relative z-10 shrink-0">
-                <h3 className="text-base font-semibold text-foreground/90 flex items-center gap-2">
-                  <AlertTriangle className="w-4 h-4 text-amber-500 drop-shadow-sm" />
+                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <AlertTriangle className="w-5 h-5 text-amber-500 drop-shadow-sm" />
                   Recent Notices
                 </h3>
                 <Link href="/student/notices">
@@ -269,8 +278,8 @@ export default function StudentDashboard() {
                 {data?.notices && data.notices.length > 0 ? (
                   data.notices.map((notice, i) => (
                     <div key={notice.id} className="p-3 rounded-xl bg-background/50 border border-white/5 hover:bg-background/80 hover:shadow-md transition-all shrink-0">
-                      <h4 className="font-semibold text-foreground mb-1 truncate text-sm">{notice.title}</h4>
-                      <p className="text-xs text-muted-foreground line-clamp-2">{notice.content}</p>
+                      <h4 className="font-bold text-foreground mb-1 truncate text-base">{notice.title}</h4>
+                      <p className="text-sm text-muted-foreground line-clamp-2">{notice.content}</p>
                     </div>
                   ))
                 ) : (
@@ -284,9 +293,9 @@ export default function StudentDashboard() {
           </div>
 
           {/* Right Side: Calendar */}
-          <div className="bg-card/40 backdrop-blur-3xl border border-white/10 rounded-2xl p-4 shadow-xl relative overflow-hidden flex flex-col" data-aos="fade-up">
+          <div className="bg-card/40 backdrop-blur-3xl border border-white/10 rounded-2xl p-4 md:p-5 shadow-xl relative overflow-hidden flex flex-col lg:flex-1 lg:min-h-0 min-h-[400px] order-1 lg:order-2" data-aos="fade-up">
             <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[80px] -mr-20 -mt-20 pointer-events-none" />
-            <h2 className="text-base font-bold mb-2 text-foreground/90 flex items-center gap-2 shrink-0">
+            <h2 className="text-sm md:text-base font-bold mb-2 text-white flex items-center gap-2 shrink-0">
               <CalendarClock className="w-4 h-4 text-primary" />
               Attendance & Schedule
             </h2>

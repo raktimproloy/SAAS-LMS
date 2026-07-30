@@ -80,7 +80,7 @@ export function AttendanceCalendar({ attendanceData, reports = [], allResults = 
   return (
     <div className="w-full h-full flex flex-col">
       <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-4">
-        <h3 className="font-semibold text-lg text-foreground/90">{format(currentDate, "MMMM yyyy")}</h3>
+        <h3 className="font-semibold text-lg text-white">{format(currentDate, "MMMM yyyy")}</h3>
         <div className="flex gap-1">
           <Button variant="outline" size="icon" onClick={prevMonth} className="h-8 w-8">
             <ChevronLeft className="h-4 w-4" />
@@ -92,13 +92,13 @@ export function AttendanceCalendar({ attendanceData, reports = [], allResults = 
       </div>
 
       <div className="flex-1 flex flex-col min-h-0">
-        <div className="grid grid-cols-7 gap-1 text-center text-xs font-bold text-muted-foreground mb-4 uppercase tracking-wider shrink-0">
+        <div className="grid grid-cols-7 gap-1 text-center text-xs font-bold text-white mb-4 uppercase tracking-wider shrink-0">
           {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map(day => (
             <div key={day} className="py-1">{day}</div>
           ))}
         </div>
 
-        <div className="grid grid-cols-7 gap-1 flex-1 min-h-0 auto-rows-fr">
+        <div className="grid grid-cols-7 gap-4 flex-1 min-h-0 auto-rows-fr">
           {emptyDays.map(empty => (
             <div key={`empty-${empty}`} className="w-full h-full rounded-md bg-transparent" />
           ))}
@@ -128,14 +128,14 @@ export function AttendanceCalendar({ attendanceData, reports = [], allResults = 
                 onClick={() => handleDayClick(date)}
                 className={cn(
                   "w-full h-full min-h-0 rounded-xl flex items-center justify-center text-sm font-medium transition-all hover:scale-105 hover:shadow-lg relative group",
-                  isToday(date) && "font-black border-2 border-primary text-primary shadow-sm bg-primary/10",
+                  isToday(date) && "font-black border-2 border-primary text-blue-300 shadow-sm bg-primary/10",
                   !isSameMonth(date, currentDate) && "text-muted-foreground/30",
-                  record?.status === "present" && "bg-emerald-500/20 text-emerald-500 hover:bg-emerald-500/30",
-                  record?.status === "absent" && "bg-destructive/20 text-destructive hover:bg-destructive/30",
-                  record?.status === "late" && "bg-amber-500/20 text-amber-500 hover:bg-amber-500/30",
-                  !record && !isToday(date) && "hover:bg-white/10 text-foreground/70",
-                  hasReports && "ring-1 ring-amber-500/50 bg-amber-500/10 text-amber-400 shadow-[inset_0_0_10px_rgba(245,158,11,0.2)]",
-                  hasResults && !hasReports && "ring-1 ring-blue-500/50 bg-blue-500/10 text-blue-400 shadow-[inset_0_0_10px_rgba(59,130,246,0.2)]"
+                  record?.status === "present" && "bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30",
+                  record?.status === "absent" && "bg-destructive/20 text-red-300 hover:bg-destructive/30",
+                  record?.status === "late" && "bg-amber-500/20 text-amber-300 hover:bg-amber-500/30",
+                  !record && !isToday(date) && "hover:bg-white/10 text-white",
+                  hasReports && "ring-1 ring-amber-500/50 bg-amber-500/10 text-amber-300 shadow-[inset_0_0_10px_rgba(245,158,11,0.2)]",
+                  hasResults && !hasReports && "ring-1 ring-blue-500/50 bg-blue-500/10 text-blue-300 shadow-[inset_0_0_10px_rgba(59,130,246,0.2)]"
                 )}
               >
                 {format(date, "d")}

@@ -49,7 +49,7 @@ export default function StudentProfile() {
 
   if (loading) {
     return (
-      <div className="space-y-8 max-w-5xl mx-auto pb-12 animate-in fade-in duration-500">
+      <div className="space-y-8 w-full max-w-[1920px] mx-auto pb-12 animate-in fade-in duration-500">
         {/* Banner Skeleton */}
         <div className="relative overflow-hidden bg-card/20 backdrop-blur-3xl p-8 md:p-12 rounded-[2.5rem] shadow-2xl flex flex-col md:flex-row items-center md:items-start gap-8 border border-white/5 h-[300px] md:h-[260px] w-full">
           <Skeleton className="w-32 h-32 md:w-40 md:h-40 rounded-[2rem] bg-white/10 shrink-0" />
@@ -102,7 +102,7 @@ export default function StudentProfile() {
   if (!student) return <div className="p-8 text-center text-muted-foreground">Error loading profile.</div>;
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto pb-12">
+    <div className="space-y-8 w-full max-w-[1920px] mx-auto pb-12">
       
       {/* Top Banner Section */}
       <div 
@@ -170,7 +170,7 @@ export default function StudentProfile() {
         >
           <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-[40px] pointer-events-none group-hover:bg-primary/20 transition-all duration-300" />
           
-          <h2 className="text-xl font-bold mb-6 flex items-center gap-3 text-foreground/90 relative z-10">
+          <h2 className="text-xl font-bold mb-6 flex items-center gap-3 text-white relative z-10">
             <div className="p-2 rounded-xl bg-primary/10 text-primary border border-primary/20">
               <User className="w-5 h-5" />
             </div>
@@ -200,7 +200,7 @@ export default function StudentProfile() {
         >
           <div className="absolute bottom-0 left-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-[40px] pointer-events-none group-hover:bg-cyan-500/20 transition-all duration-300" />
           
-          <h2 className="text-xl font-bold mb-6 flex items-center gap-3 text-foreground/90 relative z-10">
+          <h2 className="text-xl font-bold mb-6 flex items-center gap-3 text-white relative z-10">
             <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-500 border border-cyan-500/20">
               <Users className="w-5 h-5" />
             </div>

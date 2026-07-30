@@ -53,16 +53,19 @@ export function StudentHeader() {
   return (
     <header 
       className={cn(
-        "flex h-16 md:h-20 items-center justify-between border-b border-white/10 bg-background/60 backdrop-blur-2xl px-4 md:px-8 w-full text-foreground fixed top-0 z-50 transition-transform duration-300 ease-in-out shadow-sm",
-        isVisible ? "translate-y-0" : "-translate-y-full"
+        "flex h-16 md:h-20 items-center justify-between w-full text-foreground z-40 transition-transform duration-300 ease-in-out",
+        "fixed lg:relative top-0",
+        "bg-background",
+        "px-4 md:px-8",
+        isVisible ? "translate-y-0" : "-translate-y-full lg:translate-y-0"
       )}
     >
-      <div className="flex items-center gap-3 md:gap-4">
+      <div className="flex items-center gap-3 md:gap-4 lg:hidden">
         {/* Mobile Back Button */}
         <Button 
           variant="ghost" 
           size="icon" 
-          className="lg:hidden shrink-0 bg-white/5 hover:bg-white/10 rounded-full h-10 w-10 border border-white/10" 
+          className="shrink-0 bg-white/5 hover:bg-white/10 rounded-full h-10 w-10 border border-white/10" 
           onClick={() => router.back()}
         >
           <ArrowLeft className="h-5 w-5" />
@@ -79,6 +82,9 @@ export function StudentHeader() {
           </span>
         </div>
       </div>
+
+      {/* Desktop spacer to push right items */}
+      <div className="hidden lg:block flex-1" />
 
       <div className="flex items-center justify-end gap-2 md:gap-4">
         <ThemeToggle />

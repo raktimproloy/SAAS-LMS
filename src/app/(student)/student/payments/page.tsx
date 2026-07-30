@@ -69,7 +69,7 @@ export default function StudentPaymentsPage() {
   };
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto pb-12">
+    <div className="space-y-8 w-full max-w-[1920px] mx-auto pb-12">
       {/* Header Banner */}
       <div 
         className="relative bg-card/40 backdrop-blur-3xl p-8 md:p-10 rounded-3xl shadow-2xl flex flex-col justify-center items-start border border-white/10"
@@ -104,7 +104,7 @@ export default function StudentPaymentsPage() {
         data-aos-delay="200"
       >
         <CardHeader className="bg-background/20 border-b border-white/5 pb-4 rounded-t-2xl">
-          <CardTitle className="flex items-center gap-2 text-foreground/90">
+          <CardTitle className="flex items-center gap-2 text-white">
             <Receipt className="w-5 h-5 text-primary" />
             Billing Records
           </CardTitle>
@@ -116,12 +116,11 @@ export default function StudentPaymentsPage() {
               <p className="text-lg font-medium">No payment records found.</p>
             </div>
           ) : (
-            <div className="divide-y divide-white/5">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 p-6">
               {payments.map(payment => (
-                <div key={payment.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 hover:bg-background/40 transition-colors gap-4 group">
-                  
-                  <div className="flex items-start gap-4">
-                    <div className={`p-3 rounded-2xl shrink-0 shadow-sm transition-transform group-hover:scale-105 ${
+                <div key={payment.id} className="flex flex-col p-6 rounded-3xl border border-white/5 bg-background/40 hover:bg-background/60 hover:border-white/10 transition-colors shadow-lg gap-6 group hover:-translate-y-1">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className={`p-4 rounded-2xl shrink-0 shadow-sm transition-transform group-hover:scale-105 ${
                       payment.status === 'paid' ? 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/20' :
                       payment.status === 'partial' ? 'bg-blue-500/20 text-blue-500 border border-blue-500/20' :
                       'bg-destructive/20 text-destructive border border-destructive/20'
@@ -129,33 +128,34 @@ export default function StudentPaymentsPage() {
                       {payment.status === 'paid' ? <CheckCircle2 className="w-6 h-6" /> : <Clock className="w-6 h-6" />}
                     </div>
                     
-                    <div>
-                      <h4 className="font-bold text-lg text-foreground capitalize">{payment.month} {payment.year}</h4>
-                      <p className="text-sm text-muted-foreground flex items-center gap-2 font-medium">
-                        {format(new Date(payment.created_at), "MMM d, yyyy")}
-                        <span className="w-1.5 h-1.5 bg-primary/40 rounded-full"></span>
-                        <span className="capitalize">{payment.payment_method || 'Cash'}</span>
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-6 w-full sm:w-auto justify-between sm:justify-end">
-                    <div className="text-left sm:text-right">
-                      <div className="font-black text-2xl text-foreground tracking-tight">৳ {payment.amount}</div>
-                      <Badge variant="outline" className={`capitalize mt-1 shadow-sm backdrop-blur-md px-3 py-0.5
-                        ${payment.status === 'paid' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : ''}
-                        ${payment.status === 'due' ? 'bg-destructive/10 text-destructive border-destructive/20' : ''}
-                        ${payment.status === 'partial' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : ''}
-                      `}>
-                        {payment.status}
-                      </Badge>
-                    </div>
-
                     {(payment.status === 'paid' || payment.status === 'partial') && (
-                      <Button variant="outline" size="icon" onClick={() => handleDownloadReceipt(payment)} title="Download Receipt" className="rounded-xl border-white/10 bg-background/50 hover:bg-primary/20 hover:text-primary transition-all hover:scale-105 shadow-sm h-12 w-12">
-                        <Download className="w-5 h-5" />
+                      <Button variant="ghost" size="icon" onClick={() => handleDownloadReceipt(payment)} title="Download Receipt" className="rounded-xl bg-white/5 hover:bg-primary/20 hover:text-primary transition-all shadow-sm h-10 w-10 shrink-0">
+                        <Download className="w-4 h-4" />
                       </Button>
                     )}
+                  </div>
+                  
+                  <div>
+                    <h4 className="font-black text-2xl text-foreground capitalize tracking-tight mb-2">{payment.month} {payment.year}</h4>
+                    <p className="text-sm text-muted-foreground flex flex-wrap items-center gap-2 font-medium">
+                      {format(new Date(payment.created_at), "MMM d, yyyy")}
+                      <span className="w-1.5 h-1.5 bg-primary/40 rounded-full"></span>
+                      <span className="capitalize">{payment.payment_method || 'Cash'}</span>
+                    </p>
+                  </div>
+
+                  <div className="flex items-end justify-between pt-4 border-t border-white/5 mt-auto">
+                    <div>
+                      <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">Amount</div>
+                      <div className="font-black text-3xl text-foreground tracking-tight">৳ {payment.amount}</div>
+                    </div>
+                    <Badge variant="outline" className={`capitalize shadow-sm backdrop-blur-md px-3 py-1 text-sm font-bold
+                      ${payment.status === 'paid' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : ''}
+                      ${payment.status === 'due' ? 'bg-destructive/10 text-destructive border-destructive/20' : ''}
+                      ${payment.status === 'partial' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : ''}
+                    `}>
+                      {payment.status}
+                    </Badge>
                   </div>
                 </div>
               ))}

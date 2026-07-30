@@ -42,12 +42,32 @@ export default function StudentNotesPage() {
   }
 
   return (
-    <div className="flex flex-col gap-8 pb-10 w-full">
+    <div className="flex flex-col gap-8 pb-10 w-full max-w-[1920px] mx-auto">
       
-      {/* Header */}
-      <div className="mb-2">
-        <h1 className="text-3xl font-bold tracking-tight mb-2 text-foreground">Study Materials</h1>
-        <p className="text-muted-foreground">Access your PDF notes and books.</p>
+      {/* Header Banner */}
+      <div 
+        className="relative bg-card/40 backdrop-blur-3xl p-8 md:p-10 rounded-[2.5rem] shadow-2xl flex flex-col justify-center items-start border border-white/10 mb-2 w-full"
+        data-aos="fade-down"
+      >
+        <div className="absolute inset-0 overflow-hidden rounded-[2.5rem] pointer-events-none">
+          <div className="absolute -top-12 -right-12 w-64 h-64 bg-primary/20 rounded-full blur-3xl transform-gpu pointer-events-none" />
+          <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none transform-gpu" />
+          <div className="absolute bottom-0 right-10 opacity-[0.03]">
+            <FileText className="w-40 h-40" />
+          </div>
+        </div>
+
+        <div className="relative z-10">
+          <h1 className="text-3xl md:text-5xl font-black tracking-tight mb-2 flex items-center gap-4 text-foreground">
+            <div className="p-3 bg-background/50 backdrop-blur-md rounded-2xl border border-white/10 shadow-sm">
+              <FileText className="h-8 w-8 text-primary drop-shadow-[0_0_8px_rgba(var(--primary),0.5)]" />
+            </div>
+            Study Materials
+          </h1>
+          <p className="text-muted-foreground text-lg max-w-lg mt-4 font-medium">
+            Access your PDF notes, books, and class materials securely.
+          </p>
+        </div>
       </div>
       
       <div className="w-full">
@@ -62,7 +82,7 @@ export default function StudentNotesPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
             {notes.map(note => {
               let isGallery = false;
               let imageUrls: string[] = [];

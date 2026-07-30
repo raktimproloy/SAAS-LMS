@@ -21,8 +21,8 @@ import { useRouter } from "next/navigation";
 const navItems = [
   { title: "Dashboard", href: "/student/dashboard", icon: LayoutDashboard },
   { title: "Profile", href: "/student/profile", icon: User },
-  { title: "Results", href: "/student/results", icon: FileText },
   { title: "Online Exams", href: "/student/exams", icon: GraduationCap },
+  { title: "Results", href: "/student/results", icon: FileText },
   { title: "Study Materials", href: "/student/notes", icon: BookOpen },
   { title: "Payments", href: "/student/payments", icon: CreditCard },
   { title: "Notices", href: "/student/notices", icon: Bell },
@@ -46,56 +46,74 @@ export function StudentSidebar({ onLinkClick, LinkWrapper }: StudentSidebarProps
   };
 
   return (
-    <div className="flex h-full w-64 flex-col border-r border-white/5 bg-transparent backdrop-blur-[40px] text-foreground relative z-20 shadow-[4px_0_24px_rgba(0,0,0,0.2)]">
-      <div className="flex h-20 shrink-0 items-center justify-between px-6 border-b border-border/40">
-        <h2 className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/60">Student Portal</h2>
+    <div className="flex h-full w-64 flex-col border-r border-sidebar-border bg-sidebar/90 backdrop-blur-2xl text-foreground relative z-20 overflow-hidden">
+      {/* Ambient Floating Gradients */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-80 mix-blend-screen">
+        <div className="absolute -top-[5%] -left-[20%] w-[140%] h-[40%] bg-[hsl(var(--gradient-1))]/40 rounded-full blur-[60px] animate-blob-y" />
+        <div className="absolute top-[35%] -right-[30%] w-[120%] h-[30%] bg-[hsl(var(--gradient-2))]/35 rounded-full blur-[60px] animate-blob-y animation-delay-2000" />
+        <div className="absolute -bottom-[5%] -left-[10%] w-[100%] h-[40%] bg-[hsl(var(--gradient-3))]/35 rounded-full blur-[60px] animate-blob-y animation-delay-4000" />
       </div>
-      <div className="flex-1 overflow-auto py-6">
-        <nav className="grid gap-2 px-4">
-          {navItems.map((item, index) => {
-            const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
-            return (
-              <Wrapper key={item.title} {...(LinkWrapper ? { asChild: true } : {})}>
-                <Link 
-                  href={item.href} 
-                  onClick={(e) => {
-                    if (onLinkClick) onLinkClick();
-                    if (LinkWrapper) {
-                      e.preventDefault();
-                      setTimeout(() => {
-                        router.push(item.href);
-                      }, 300);
-                    }
-                  }}
-                  className={cn(
-                    "flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-300",
-                    isActive
-                      ? "bg-gradient-to-r from-blue-500 via-cyan-500 to-blue-500 bg-[length:200%_auto] animate-gradient text-white shadow-[0_0_15px_rgba(6,182,212,0.4)] translate-x-2 border-0"
-                      : "text-foreground/70 hover:bg-white/5 hover:text-foreground hover:translate-x-1 border border-transparent"
-                  )}
-                >
-                  <item.icon className="h-4 w-4" />
-                  {item.title}
-                </Link>
-              </Wrapper>
-            );
-          })}
-        </nav>
-      </div>
-      <div className="p-4 mt-auto border-t border-border/40">
-        <Wrapper {...(LinkWrapper ? { asChild: true } : {})}>
-          <Button 
-            variant="outline" 
-            className="w-full justify-start gap-3 border-border/50 bg-background/30 hover:bg-destructive hover:text-destructive-foreground hover:border-destructive transition-colors rounded-xl" 
-            onClick={() => {
-              if (onLinkClick) onLinkClick();
-              handleLogout();
-            }}
-          >
-            <LogOut className="h-4 w-4" />
-            Logout
-          </Button>
-        </Wrapper>
+      
+      <div className="relative z-10 flex flex-col h-full">
+        <div className="flex h-20 shrink-0 items-center justify-between px-6 border-b border-sidebar-border/50 bg-sidebar/40">
+          <h2 className="text-3xl font-bold tracking-tight text-white">Student Portal</h2>
+        </div>
+        <div className="flex-1 overflow-auto py-6">
+          <nav className="grid gap-2 px-4">
+            {navItems.map((item, index) => {
+              const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+              return (
+                <Wrapper key={item.title} {...(LinkWrapper ? { asChild: true } : {})}>
+                  <Link 
+                    href={item.href} 
+                    onClick={(e) => {
+                      if (onLinkClick) onLinkClick();
+                      if (LinkWrapper) {
+                        e.preventDefault();
+                        setTimeout(() => {
+                          router.push(item.href);
+                        }, 300);
+                      }
+                    }}
+                    className={cn(
+                      "flex items-center rounded-full px-4 py-3 text-base transition-all duration-300",
+                      isActive
+                        ? "animated-premium-glass text-white font-bold shadow-lg shadow-primary/20"
+                        : "text-foreground/70 hover:bg-sidebar-accent hover:text-foreground border border-transparent font-medium gap-3"
+                    )}
+                  >
+                    {isActive ? (
+                      <div className="flex items-center gap-3 w-full">
+                        <item.icon className="h-4 w-4" />
+                        <span>{item.title}</span>
+                      </div>
+                    ) : (
+                      <>
+                        <item.icon className="h-4 w-4" />
+                        {item.title}
+                      </>
+                    )}
+                  </Link>
+                </Wrapper>
+              );
+            })}
+          </nav>
+        </div>
+        <div className="p-4 mt-auto border-t border-sidebar-border/50 bg-sidebar/40">
+          <Wrapper {...(LinkWrapper ? { asChild: true } : {})}>
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start gap-3 text-muted-foreground hover:bg-sidebar-accent hover:text-foreground transition-colors rounded-xl" 
+              onClick={() => {
+                if (onLinkClick) onLinkClick();
+                handleLogout();
+              }}
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </Button>
+          </Wrapper>
+        </div>
       </div>
     </div>
   );

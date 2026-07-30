@@ -19,13 +19,34 @@ export async function GET() {
       include: {
         exam: {
           include: {
-            course: true
+            course: true,
+            batch: true
           }
         }
       }
     });
 
-    return NextResponse.json(results);
+    // Compute rank dynamically if it's null in the database
+    const resultsWithRanks = await Promise.all(results.map(async (r) => {
+      if (r.rank == null) {
+        const higherScoring = await prisma.examResult.count({
+          where: {
+            exam_id: r.exam_id,
+            OR: [
+              { obtained_marks: { gt: r.obtained_marks } },
+              { 
+                obtained_marks: r.obtained_marks, 
+                time_taken_seconds: { lt: r.time_taken_seconds ?? 999999 } 
+              }
+            ]
+          }
+        });
+        return { ...r, rank: higherScoring + 1 };
+      }
+      return r;
+    }));
+
+    return NextResponse.json(resultsWithRanks);
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: "Failed to fetch results" }, { status: 500 });
