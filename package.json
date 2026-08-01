@@ -15,7 +15,7 @@
     "@hookform/resolvers": "^5.4.0",
     "@prisma/client": "^6.19.3",
     "aos": "^2.3.4",
-    "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
@@ -42,7 +42,7 @@
   },
   "devDependencies": {
     "@types/aos": "^3.0.8",
-    "@types/bcrypt": "^6.0.0",
+    "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.2.0",
     "@types/node": "^20",
