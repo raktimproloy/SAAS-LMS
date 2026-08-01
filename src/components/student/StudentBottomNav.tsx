@@ -24,6 +24,11 @@ export function StudentBottomNav() {
   const pathname = usePathname();
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [optimisticPath, setOptimisticPath] = useState<string | null>(null);
+
+  useEffect(() => {
+    setOptimisticPath(null);
+  }, [pathname]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -62,11 +67,13 @@ export function StudentBottomNav() {
         </div>
         <div className="flex items-center justify-between relative z-10">
           {navItems.map((item) => {
-            const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+            const currentPath = optimisticPath || pathname;
+            const isActive = currentPath === item.href || currentPath.startsWith(`${item.href}/`);
             return (
               <Link
                 key={item.href}
                 href={item.href}
+                onClick={() => setOptimisticPath(item.href)}
                 className="flex-1 flex flex-col items-center justify-center gap-1 py-1 relative group"
               >
                 <div

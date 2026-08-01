@@ -49,7 +49,7 @@ export default function StudentProfile() {
 
   if (loading) {
     return (
-      <div className="space-y-8 w-full max-w-[1920px] mx-auto pb-12 animate-in fade-in duration-500">
+      <div className="space-y-8 w-full max-w-[1920px] mx-auto pb-12">
         {/* Banner Skeleton */}
         <div className="relative overflow-hidden bg-card/20 backdrop-blur-3xl p-8 md:p-12 rounded-[2.5rem] shadow-2xl flex flex-col md:flex-row items-center md:items-start gap-8 border border-white/5 h-[300px] md:h-[260px] w-full">
           <Skeleton className="w-32 h-32 md:w-40 md:h-40 rounded-[2rem] bg-white/10 shrink-0" />

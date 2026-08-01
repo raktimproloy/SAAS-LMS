@@ -13,6 +13,7 @@ export function StudentHeader() {
   const [student, setStudent] = useState<{name: string, photo: string | null} | null>(null);
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [clickedPath, setClickedPath] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -25,6 +26,18 @@ export function StudentHeader() {
       })
       .catch(console.error);
   }, []);
+
+  // Clear clicked state when navigation completes (using an approximation, or just let unmount handle it)
+  // But wait, the header doesn't unmount! So we clear it after a short delay or when pathname changes.
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    if (clickedPath) {
+      timeoutId = setTimeout(() => {
+        setClickedPath(null);
+      }, 1000); // safety fallback
+    }
+    return () => clearTimeout(timeoutId);
+  }, [clickedPath]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -89,7 +102,14 @@ export function StudentHeader() {
       <div className="flex items-center justify-end gap-2 md:gap-4">
         <ThemeToggle />
         
-        <Link href="/student/notices">
+        <Link 
+          href="/student/notices" 
+          onClick={() => setClickedPath('/student/notices')}
+          className={cn(
+            "transition-all duration-200",
+            clickedPath === '/student/notices' ? "scale-90 opacity-70" : "scale-100 opacity-100"
+          )}
+        >
           <Button variant="ghost" size="icon" className="relative bg-white/5 hover:bg-white/10 rounded-full h-10 w-10 border border-white/10">
             <Bell className="h-5 w-5" />
             <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-destructive shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
@@ -97,7 +117,14 @@ export function StudentHeader() {
         </Link>
 
         {student && (
-          <Link href="/student/profile" className="flex items-center gap-3 ml-1">
+          <Link 
+            href="/student/profile" 
+            onClick={() => setClickedPath('/student/profile')}
+            className={cn(
+              "flex items-center gap-3 ml-1 transition-all duration-200",
+              clickedPath === '/student/profile' ? "scale-95 opacity-70" : "scale-100 opacity-100"
+            )}
+          >
             <div className="hidden text-right md:block">
               <p className="text-sm font-medium leading-none">{student.name}</p>
               <p className="text-xs text-muted-foreground mt-1">Student</p>

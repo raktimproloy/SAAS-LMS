@@ -1,13 +1,40 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Clock, Calendar, Play, FileQuestion, Target, Trophy, Eye, CheckCircle2, XCircle, Medal } from "lucide-react";
 import { format } from "date-fns";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+
+const ScrollReveal = ({ children, delay = 0, className = "" }: { children: React.ReactNode, delay?: number, className?: string }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => setIsVisible(true), delay);
+        observer.disconnect();
+      }
+    }, { threshold: 0.1 });
+    
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [delay]);
+
+  return (
+    <div 
+      ref={ref} 
+      className={`transition-all duration-700 ease-out fill-mode-both ${isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'} ${className}`}
+    >
+      {children}
+    </div>
+  );
+};
 
 export default function StudentExamsPage() {
   const [exams, setExams] = useState<any[]>([]);
@@ -25,8 +52,50 @@ export default function StudentExamsPage() {
 
   if (loading) {
     return (
-      <div className="p-8 flex justify-center items-center h-[50vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      <div className="space-y-8 w-full max-w-[1920px] mx-auto pb-10">
+        <div className="flex flex-col gap-2 relative z-10">
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">My Exams</h1>
+          <p className="text-muted-foreground text-lg">View and take your assigned exams below.</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 md:gap-8">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="flex flex-col relative rounded-3xl overflow-hidden bg-card/60 backdrop-blur-3xl border border-white/10 shadow-lg">
+              <div className="p-6 pb-4 border-b border-white/10">
+                <div className="flex justify-between items-start mb-4">
+                  <Skeleton className="h-6 w-20 rounded-full bg-white/10" />
+                  <Skeleton className="h-6 w-24 rounded-full bg-white/10" />
+                </div>
+                <Skeleton className="h-7 w-3/4 mb-1 bg-white/10 rounded-lg" />
+              </div>
+
+              <div className="p-6 flex-1 space-y-6">
+                <div className="grid grid-cols-2 gap-y-4 gap-x-2">
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="w-4 h-4 rounded bg-white/10 shrink-0" />
+                    <Skeleton className="h-4 w-24 bg-white/5 rounded-md" />
+                  </div>
+                  <div className="flex items-center justify-end gap-2 text-right">
+                    <Skeleton className="h-4 w-20 bg-white/5 rounded-md" />
+                    <Skeleton className="w-4 h-4 rounded bg-white/10 shrink-0" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="w-4 h-4 rounded bg-white/10 shrink-0" />
+                    <Skeleton className="h-4 w-16 bg-white/5 rounded-md" />
+                  </div>
+                  <div className="flex items-center justify-end gap-2 text-right">
+                    <Skeleton className="h-6 w-28 bg-white/10 rounded-lg ml-auto" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-6 pt-0 mt-auto flex flex-col gap-3">
+                <Skeleton className="w-full h-14 rounded-2xl bg-white/10" />
+                <Skeleton className="w-full h-12 rounded-2xl bg-white/5" />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -50,18 +119,18 @@ export default function StudentExamsPage() {
 
   return (
     <div className="space-y-8 w-full max-w-[1920px] mx-auto pb-10">
-      <div className="flex flex-col gap-2 relative z-10" data-aos="fade-down" data-aos-duration="800">
+      <ScrollReveal className="flex flex-col gap-2 relative z-10">
         <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">My Exams</h1>
         <p className="text-muted-foreground text-lg">View and take your assigned exams below.</p>
-      </div>
+      </ScrollReveal>
 
       {exams.length === 0 ? (
-        <div className="bg-card/40 backdrop-blur-2xl border border-white/10 rounded-3xl p-16 text-center text-muted-foreground shadow-lg relative overflow-hidden" data-aos="fade-up">
+        <ScrollReveal className="bg-card/40 backdrop-blur-2xl border border-white/10 rounded-3xl p-16 text-center text-muted-foreground shadow-lg relative overflow-hidden">
            <div className="absolute top-0 left-0 w-64 h-64 bg-primary/10 rounded-full blur-[80px] -ml-20 -mt-20 pointer-events-none" />
           <FileQuestion className="w-16 h-16 mx-auto text-muted-foreground/30 mb-6 relative z-10" />
           <p className="text-xl font-bold text-foreground mb-2 relative z-10">No Exams Available</p>
           <p className="text-md relative z-10">There are currently no exams assigned to your batch.</p>
-        </div>
+        </ScrollReveal>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 md:gap-8">
           {exams.map((exam, index) => {
@@ -70,12 +139,12 @@ export default function StudentExamsPage() {
             const result = isAttempted ? exam.results[0] : null;
 
             return (
-              <div 
+              <ScrollReveal 
                 key={exam.id} 
+                delay={(index % 6) * 100}
                 className={`group flex flex-col relative rounded-3xl overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl bg-card/60 backdrop-blur-3xl border border-white/10 shadow-lg ${
                   status === 'active' ? 'ring-1 ring-primary/50 shadow-primary/20' : ''
                 }`}
-                data-aos="fade-up" 
               >
                 {/* Background Decor */}
                 <div className={`absolute -top-10 -right-10 w-32 h-32 rounded-full blur-2xl pointer-events-none group-hover:scale-150 transition-transform duration-700 ${status === 'active' ? 'bg-primary/30' : 'bg-white/10'}`} />
@@ -135,8 +204,8 @@ export default function StudentExamsPage() {
                         <div className="text-right">
                           <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider mb-1">Accuracy</p>
                           <p className="text-lg font-black text-emerald-300 leading-none">
-                            {result.correct_count + result.wrong_count > 0 
-                              ? Math.round((result.correct_count / (result.correct_count + result.wrong_count)) * 100) 
+                            {result.correct_count + result.wrong_count > 0
+                              ? Math.round((result.correct_count / (result.correct_count + result.wrong_count)) * 100)
                               : 0}%
                           </p>
                         </div>
@@ -177,12 +246,12 @@ export default function StudentExamsPage() {
                       </Link>
                     </div>
                   )}
-                  
+
                   {status === 'active' && (
                     <>
                       <Link href={`/student/exams/${exam.id}/take`} className="w-full">
                         <Button className="w-full h-14 rounded-2xl bg-gradient-to-r from-blue-500 via-cyan-500 to-blue-500 bg-[length:200%_auto] animate-gradient text-white hover:scale-[1.02] transition-all font-bold shadow-[0_0_20px_rgba(6,182,212,0.4)] text-lg border-0 group-hover:shadow-[0_0_30px_rgba(6,182,212,0.6)]">
-                          {isAttempted ? "Take Exam Again" : "Start Exam"} 
+                          {isAttempted ? "Take Exam Again" : "Start Exam"}
                           <Play className="w-5 h-5 ml-2 fill-current" />
                         </Button>
                       </Link>
@@ -205,7 +274,7 @@ export default function StudentExamsPage() {
                     </Button>
                   )}
                 </CardFooter>
-              </div>
+              </ScrollReveal>
             );
           })}
         </div>

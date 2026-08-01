@@ -1,10 +1,37 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FileText, Trophy, ArrowRight, BookOpen, Star, LayoutGrid, List, ChevronUp } from "lucide-react";
+
+const ScrollReveal = ({ children, delay = 0, className = "", onClick }: { children: React.ReactNode, delay?: number, className?: string, onClick?: () => void }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => setIsVisible(true), delay);
+        observer.disconnect();
+      }
+    }, { threshold: 0.1 });
+    
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [delay]);
+
+  return (
+    <div 
+      ref={ref} 
+      onClick={onClick}
+      className={`transition-all duration-700 ease-out fill-mode-both ${isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'} ${className}`}
+    >
+      {children}
+    </div>
+  );
+};
 
 interface ExamResult {
   id: number;
@@ -83,16 +110,17 @@ const RankMedal = ({ rank }: { rank: number | null }) => {
 export default function StudentResultsPage() {
   const [results, setResults] = useState<ExamResult[]>([]);
   const [loading, setLoading] = useState(true);
-  const [layout, setLayout] = useState<'grid' | 'list'>('grid');
+  const [layout, setLayout] = useState<'grid' | 'list'>(() => {
+    if (typeof window !== 'undefined') {
+      const savedLayout = localStorage.getItem('student_results_layout');
+      if (savedLayout === 'list' || savedLayout === 'grid') {
+        return savedLayout;
+      }
+    }
+    return 'grid';
+  });
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [filter, setFilter] = useState<'all' | 'online' | 'offline'>('all');
-
-  useEffect(() => {
-    const savedLayout = localStorage.getItem('student_results_layout');
-    if (savedLayout === 'list' || savedLayout === 'grid') {
-      setLayout(savedLayout);
-    }
-  }, []);
 
   const calculateGrade = (marks: number, total: number) => {
     const p = (marks / total) * 100;
@@ -134,39 +162,112 @@ export default function StudentResultsPage() {
   if (loading) {
     return (
       <div className="space-y-8 w-full max-w-[1920px] mx-auto pb-12">
-        {/* Header Skeleton */}
-        <div className="relative overflow-hidden bg-card/20 backdrop-blur-3xl p-8 md:p-10 rounded-[2.5rem] shadow-2xl flex flex-col justify-center items-start border border-white/5 h-[200px] w-full">
-          <Skeleton className="h-12 w-64 mb-4 bg-white/10 rounded-2xl" />
-          <Skeleton className="h-6 w-96 max-w-full bg-white/5 rounded-xl" />
+        {/* Header Banner */}
+        <div className="relative bg-card/40 backdrop-blur-3xl p-8 md:p-10 rounded-[2.5rem] shadow-2xl flex flex-col justify-center items-start border border-white/10">
+          <div className="absolute inset-0 overflow-hidden rounded-[2.5rem] pointer-events-none">
+            <div className="absolute -top-12 -right-12 w-64 h-64 bg-primary/20 rounded-full blur-3xl transform-gpu pointer-events-none" />
+            <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none transform-gpu" />
+            <div className="absolute bottom-0 right-10 opacity-[0.03]">
+              <Trophy className="w-40 h-40" />
+            </div>
+          </div>
+          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6 w-full">
+            <div>
+              <h1 className="text-3xl md:text-5xl font-black tracking-tight mb-2 flex items-center gap-4 text-white">
+                <div className="p-3 bg-background/50 backdrop-blur-md rounded-2xl border border-white/10 shadow-sm">
+                  <Trophy className="h-8 w-8 text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
+                </div>
+                My Results
+              </h1>
+              <p className="text-muted-foreground text-lg max-w-lg mt-4 font-medium">
+                Track your academic excellence and view detailed insights of your past performances.
+              </p>
+            </div>
+          </div>
         </div>
 
-        {/* Grid Skeletons */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="bg-card/20 backdrop-blur-2xl border border-white/5 rounded-3xl p-6 md:p-8 flex flex-col h-[280px]">
-              <Skeleton className="h-6 w-28 mb-3 bg-white/10 rounded-full" />
-              <Skeleton className="h-7 w-3/4 mb-4 bg-white/10 rounded-xl" />
-              <Skeleton className="h-4 w-1/2 mb-8 bg-white/5 rounded-lg" />
-              
-              <div className="flex justify-between items-end mt-auto">
-                <div className="flex flex-col gap-2">
-                  <Skeleton className="h-3 w-12 bg-white/5 rounded-md" />
-                  <Skeleton className="h-10 w-24 bg-white/10 rounded-xl" />
+        {/* Toolbar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center bg-card/40 backdrop-blur-3xl p-1.5 rounded-2xl border border-white/10 shadow-sm overflow-x-auto w-full sm:w-auto">
+            {['all', 'online', 'offline'].map((f) => (
+              <button key={f} className={`px-5 py-2 rounded-xl transition-all font-bold capitalize whitespace-nowrap flex-1 sm:flex-none ${filter === f ? 'bg-primary text-primary-foreground shadow-lg' : 'text-muted-foreground hover:text-white hover:bg-white/5'}`}>
+                {f}
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center bg-card/40 backdrop-blur-3xl p-1.5 rounded-2xl border border-white/10 shadow-sm shrink-0">
+            <button className={`p-2.5 rounded-xl transition-all flex items-center gap-2 font-bold ${layout === 'grid' ? 'bg-primary text-primary-foreground shadow-lg' : 'text-muted-foreground hover:text-white hover:bg-white/5'}`}>
+              <LayoutGrid className="w-5 h-5" />
+              <span className="hidden sm:inline">Grid</span>
+            </button>
+            <button className={`p-2.5 rounded-xl transition-all flex items-center gap-2 font-bold ${layout === 'list' ? 'bg-primary text-primary-foreground shadow-lg' : 'text-muted-foreground hover:text-white hover:bg-white/5'}`}>
+              <List className="w-5 h-5" />
+              <span className="hidden sm:inline">List</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Dynamic Skeleton Content based on Layout */}
+        {layout === 'grid' ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="bg-card/40 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 md:p-8 flex flex-col shadow-xl overflow-hidden">
+                <div className="flex justify-between items-start gap-4 border-b border-white/5 mb-4 pb-4">
+                  <div className="flex-1 min-w-0">
+                    <Skeleton className="h-6 w-24 mb-3 bg-white/10 rounded-full" />
+                    <Skeleton className="h-7 w-3/4 bg-white/10 rounded-md" />
+                    <Skeleton className="h-4 w-1/2 mt-2 bg-white/5 rounded-md" />
+                  </div>
+                  <div className="flex flex-col items-end gap-3 shrink-0">
+                    <div className="flex flex-col items-end bg-background/40 px-3 py-2 rounded-xl border border-white/5">
+                      <Skeleton className="h-2 w-10 mb-1 bg-white/10 rounded-full" />
+                      <Skeleton className="h-4 w-16 bg-white/5 rounded-md" />
+                    </div>
+                  </div>
                 </div>
-                <div className="flex gap-4">
-                  <div className="flex flex-col gap-2 items-center">
-                    <Skeleton className="h-3 w-10 bg-white/5 rounded-md" />
-                    <Skeleton className="h-8 w-12 bg-white/10 rounded-lg" />
+                <div className="flex items-center justify-between mb-8 mt-2">
+                  <div className="flex flex-col">
+                    <Skeleton className="h-3 w-12 mb-2 bg-white/5 rounded-md" />
+                    <Skeleton className="h-10 w-24 bg-white/10 rounded-xl" />
                   </div>
-                  <div className="flex flex-col gap-2 items-center">
-                    <Skeleton className="h-3 w-12 bg-white/5 rounded-md" />
-                    <Skeleton className="h-8 w-16 bg-white/10 rounded-xl" />
+                  <div className="flex items-center gap-6">
+                    <div className="flex flex-col items-center mr-2">
+                      <Skeleton className="h-3 w-10 mb-2 bg-white/5 rounded-md" />
+                      <Skeleton className="h-10 w-8 bg-white/10 rounded-xl" />
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <Skeleton className="h-3 w-12 mb-2 bg-white/5 rounded-md" />
+                      <Skeleton className="h-10 w-16 bg-white/10 rounded-2xl" />
+                    </div>
                   </div>
+                </div>
+                <div className="mt-auto pt-4 border-t border-white/5">
+                  <Skeleton className="w-full h-12 bg-white/10 rounded-xl" />
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col gap-4 w-full">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="flex items-center justify-between p-5 sm:p-6 sm:px-8 bg-card/40 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-lg gap-4">
+                <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                  <Skeleton className="w-10 h-10 sm:w-11 sm:h-11 bg-white/10 rounded-xl shrink-0" />
+                  <div className="min-w-0">
+                    <Skeleton className="h-4 w-16 mb-2 bg-white/10 rounded-md" />
+                    <Skeleton className="h-5 w-40 sm:w-64 mb-1.5 bg-white/10 rounded-md" />
+                    <Skeleton className="h-3 w-32 bg-white/5 rounded-md" />
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 sm:gap-6 shrink-0">
+                  <Skeleton className="h-8 w-16 sm:w-20 bg-white/10 rounded-lg hidden sm:block" />
+                  <Skeleton className="h-10 w-8 sm:w-10 bg-white/10 rounded-xl" />
+                  <Skeleton className="h-8 w-16 bg-white/10 rounded-xl" />
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     );
   }
@@ -254,12 +355,12 @@ export default function StudentResultsPage() {
           const filteredResults = results.filter(r => filter === 'all' || r.exam.type?.toLowerCase().includes(filter));
           if (filteredResults.length === 0) {
             return (
-              <div className="col-span-full py-20 text-center bg-card/40 backdrop-blur-3xl rounded-[2.5rem] border border-white/10 shadow-lg relative overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <ScrollReveal className="col-span-full py-20 text-center bg-card/40 backdrop-blur-3xl rounded-[2.5rem] border border-white/10 shadow-lg relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent opacity-50" />
                 <FileText className="h-20 w-20 mx-auto mb-6 text-muted-foreground/30 relative z-10" />
                 <p className="text-xl font-bold text-white mb-2 relative z-10">No results found.</p>
                 <p className="text-muted-foreground relative z-10">You haven't completed any {filter !== 'all' ? filter : ''} exams yet.</p>
-              </div>
+              </ScrollReveal>
             );
           }
           return filteredResults.map((result, index) => {
@@ -267,10 +368,11 @@ export default function StudentResultsPage() {
             
             if (layout === 'list' && expandedId !== result.id) {
               return (
-                <div 
+                <ScrollReveal 
                   key={result.id}
+                  delay={(index % 8) * 100}
                   onClick={() => setExpandedId(result.id)}
-                  className="flex items-center justify-between p-5 sm:p-6 sm:px-8 bg-card/40 backdrop-blur-2xl border border-white/10 rounded-2xl cursor-pointer hover:bg-card/60 hover:border-primary/30 transition-all group shadow-lg animate-in fade-in slide-in-from-bottom-4 duration-500 gap-4"
+                  className="flex items-center justify-between p-5 sm:p-6 sm:px-8 bg-card/40 backdrop-blur-2xl border border-white/10 rounded-2xl cursor-pointer hover:bg-card/60 hover:border-primary/30 transition-all group shadow-lg gap-4"
                 >
                   <div className="flex items-center gap-3 sm:gap-4 min-w-0">
                     <div className="p-2.5 sm:p-3 bg-primary/10 rounded-xl text-primary group-hover:scale-110 transition-transform shadow-sm shrink-0">
@@ -316,14 +418,15 @@ export default function StudentResultsPage() {
                       )}
                     </div>
                   )}
-                </div>
+                </ScrollReveal>
               );
             }
 
             return (
-              <div 
+              <ScrollReveal 
                 key={result.id} 
-                className="group relative bg-card/40 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 md:p-8 flex flex-col shadow-xl transition-all duration-500 hover:shadow-primary/20 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500"
+                delay={(index % 5) * 100}
+                className="group relative bg-card/40 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 md:p-8 flex flex-col shadow-xl transition-all duration-500 hover:shadow-primary/20 overflow-hidden"
               >
                 {/* Background Decor */}
                 <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/10 rounded-full blur-2xl pointer-events-none group-hover:bg-primary/20 group-hover:scale-150 transition-all duration-700" />
@@ -409,7 +512,7 @@ export default function StudentResultsPage() {
                     </Link>
                   </div>
                 </div>
-              </div>
+              </ScrollReveal>
             );
           })
         })()}
