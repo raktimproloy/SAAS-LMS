@@ -57,6 +57,7 @@ interface Student {
   parent_name?: string;
   parent_phone?: string;
   address?: string;
+  photo?: string | null;
   batch: Batch;
   status: string;
   enrolled_at: string;
@@ -139,7 +140,9 @@ export default function StudentsPage() {
   const [parentName, setParentName] = useState("");
   const [parentPhone, setParentPhone] = useState("");
   const [address, setAddress] = useState("");
-  
+  const [photo, setPhoto] = useState("");
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+
   // Filters
   const [filterCourseId, setFilterCourseId] = useState("");
   const [filterBatchId, setFilterBatchId] = useState("");
@@ -203,6 +206,7 @@ export default function StudentsPage() {
     setParentName("");
     setParentPhone("");
     setAddress("");
+    setPhoto("");
     setEditingStudentId(null);
     setFormError("");
   };
@@ -237,8 +241,32 @@ export default function StudentsPage() {
     setParentName(student.parent_name || "");
     setParentPhone(student.parent_phone || "");
     setAddress(student.address || "");
+    setPhoto(student.photo || "");
 
     setIsDialogOpen(true);
+  };
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingPhoto(true);
+    setFormError("");
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to upload photo");
+      setPhoto(data.url);
+    } catch (err: unknown) {
+      setFormError(err instanceof Error ? err.message : "Photo upload failed");
+    } finally {
+      setIsUploadingPhoto(false);
+      e.target.value = "";
+    }
   };
 
   const handleDeleteClick = (id: number) => {
@@ -301,7 +329,7 @@ export default function StudentsPage() {
       const dob = dobYear && dobMonth && dobDay ? `${dobYear}-${dobMonth}-${dobDay}` : undefined;
       const payload: Record<string, string | number | undefined> = {
         student_id, name, gender, dob, phone, email, batch_id: batchId,
-        parent_name: parentName, parent_phone: parentPhone, address
+        parent_name: parentName, parent_phone: parentPhone, address, photo
       };
       if (password) payload.password = password;
 
@@ -381,6 +409,23 @@ export default function StudentsPage() {
                   {formError}
                 </div>
               )}
+
+              <div className="flex flex-col items-center gap-2">
+                <div className="w-20 h-20 rounded-full overflow-hidden border bg-muted flex items-center justify-center relative shrink-0">
+                  {photo ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={photo} alt="Student photo" className="w-full h-full object-cover" />
+                  ) : (
+                    <User className="w-8 h-8 text-muted-foreground" />
+                  )}
+                </div>
+                <label className="cursor-pointer">
+                  <span className="text-sm font-medium text-primary hover:underline">
+                    {isUploadingPhoto ? "Uploading..." : photo ? "Change Photo" : "Upload Photo"}
+                  </span>
+                  <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} disabled={isUploadingPhoto} />
+                </label>
+              </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -511,7 +556,7 @@ export default function StudentsPage() {
               </div>
 
               <div className="flex justify-end pt-4 border-t">
-                <Button type="submit" disabled={isSubmitting}>
+                <Button type="submit" disabled={isSubmitting || isUploadingPhoto}>
                   {isSubmitting ? "Enrolling..." : "Enroll Student"}
                 </Button>
               </div>
@@ -646,13 +691,25 @@ export default function StudentsPage() {
                       <TableRow key={student.id}>
                         <TableCell className="font-medium">{student.student_id}</TableCell>
                         <TableCell>
-                          <div className="flex flex-col">
-                            <Link href={`/admin/students/${student.id}`} className="font-semibold text-primary hover:underline">
-                              {student.name}
-                            </Link>
-                            <span className="text-xs text-muted-foreground">
-                              {new Date(student.enrolled_at).toLocaleDateString()}
-                            </span>
+                          <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-full overflow-hidden border bg-muted flex items-center justify-center shrink-0">
+                              {student.photo ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={student.photo} alt={student.name} className="w-full h-full object-cover" />
+                              ) : (
+                                <span className="text-xs font-bold text-muted-foreground">
+                                  {student.name?.substring(0, 2).toUpperCase()}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex flex-col">
+                              <Link href={`/admin/students/${student.id}`} className="font-semibold text-primary hover:underline">
+                                {student.name}
+                              </Link>
+                              <span className="text-xs text-muted-foreground">
+                                {new Date(student.enrolled_at).toLocaleDateString()}
+                              </span>
+                            </div>
                           </div>
                         </TableCell>
                         <TableCell>

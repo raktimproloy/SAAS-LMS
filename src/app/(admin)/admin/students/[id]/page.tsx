@@ -189,8 +189,13 @@ export default function StudentProfilePage() {
         <div className="md:col-span-1 space-y-6">
           <Card className="border-none shadow-sm dark:bg-slate-800/50">
             <CardHeader className="text-center pb-2">
-              <div className="mx-auto w-24 h-24 bg-primary/10 text-primary rounded-full flex items-center justify-center mb-4">
-                <User className="w-12 h-12" />
+              <div className="mx-auto w-24 h-24 bg-primary/10 text-primary rounded-full flex items-center justify-center mb-4 overflow-hidden border">
+                {student.photo ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={student.photo} alt={student.name} className="w-full h-full object-cover" />
+                ) : (
+                  <User className="w-12 h-12" />
+                )}
               </div>
               <CardTitle className="text-2xl">{student.name}</CardTitle>
               <CardDescription className="text-base font-medium text-primary">ID: {student.student_id}</CardDescription>

@@ -518,17 +518,31 @@ export default function MaterialsPage() {
                                   const urls = JSON.parse(note.file_path);
                                   if (Array.isArray(urls)) {
                                     return (
-                                      <span className="text-sm font-medium text-blue-600">
-                                        {urls.length} Images Uploaded
-                                      </span>
+                                      <div className="flex flex-col gap-2">
+                                        {urls.map((u: string, idx: number) => (
+                                          <div key={idx} className="flex items-center gap-3">
+                                            <a href={u} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-blue-600 hover:underline">
+                                              View {idx + 1}
+                                            </a>
+                                            <a href={`/api/download?url=${encodeURIComponent(u)}`} target="_blank" rel="noopener noreferrer" className="text-xs font-medium text-indigo-600 hover:underline border border-indigo-200 px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-900/30 dark:border-indigo-800">
+                                              Download
+                                            </a>
+                                          </div>
+                                        ))}
+                                      </div>
                                     );
                                   }
                                 }
                               } catch { }
                               return (
-                                <a href={note.file_path} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-blue-600 hover:underline">
-                                  View File
-                                </a>
+                                <div className="flex items-center gap-3">
+                                  <a href={note.file_path} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-blue-600 hover:underline">
+                                    View
+                                  </a>
+                                  <a href={`/api/download?url=${encodeURIComponent(note.file_path)}`} target="_blank" rel="noopener noreferrer" className="text-xs font-medium text-indigo-600 hover:underline border border-indigo-200 px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-900/30 dark:border-indigo-800">
+                                    Download
+                                  </a>
+                                </div>
                               );
                             })()}
                           </TableCell>

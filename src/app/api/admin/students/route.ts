@@ -71,7 +71,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const {
       student_id, name, gender, dob, phone, email, password, batch_id,
-      parent_name, parent_phone, address
+      parent_name, parent_phone, address, photo
     } = body;
 
     if (!student_id || !name || !gender || !phone || !password || !batch_id) {
@@ -112,6 +112,7 @@ export async function POST(request: Request) {
         parent_name,
         parent_phone,
         address,
+        photo,
       }
     });
 
