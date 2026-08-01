@@ -1,7 +1,10 @@
 version: '3.8'
 services:
   lms-app:
-    build: .
+    build:
+      context: .
+      args:
+        - DATABASE_URL=${DATABASE_URL}
     container_name: instituteweb-lms
     restart: always
     ports:
