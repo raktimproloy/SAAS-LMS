@@ -1,10 +1,10 @@
 const mariadb = require('mariadb');
 const pool = mariadb.createPool({
-  host: 'localhost',
+  host: 'sql12.freesqldatabase.com',
   port: 3306,
-  user: 'root',
-  password: '',
-  database: 'doctorbiology',
+  user: 'sql12834288',
+  password: 'IQ7hqEekQl',
+  database: 'sql12834288',
   connectionLimit: 5
 });
 
