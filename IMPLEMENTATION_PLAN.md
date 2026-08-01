@@ -1,4 +1,4 @@
-# DoctorBiology LMS — Full Implementation Plan (v2)
+# Institute Web LMS — Full Implementation Plan (v2)
 
 > **Project**: Educational LMS Platform (SaaS-Ready)
 > **Tech Stack**: Next.js 14 (App Router), TypeScript, Tailwind CSS, shadcn/ui, Next API Routes, MySQL (Prisma ORM), cPanel Deployment
@@ -97,7 +97,7 @@ graph TD
 **`site.config.ts` Example:**
 ```typescript
 export const siteConfig = {
-  instituteName: "DoctorBiology",
+  instituteName: "Institute Web",
   tagline: "Your Gateway to Medical Success",
   logo: "/assets/logo.png",
   theme: {
@@ -107,7 +107,7 @@ export const siteConfig = {
   },
   contact: {
     phone: "+880-XXXX-XXXXXX",
-    email: "info@doctorbiology.com",
+    email: "info@instituteweb.com",
     whatsapp: "+880XXXXXXXXXX",
     address: "Dhaka, Bangladesh",
   },
@@ -120,7 +120,7 @@ export const siteConfig = {
     defaultLanguage: "bn",     // "bn" or "en"
   },
   seo: {
-    defaultTitle: "DoctorBiology - Best Medical Coaching",
+    defaultTitle: "Institute Web - Best Medical Coaching",
     defaultDescription: "...",
   }
 }
@@ -216,7 +216,7 @@ erDiagram
 
 **Folder Structure:**
 ```
-DoctorBiology/
+Institute Web/
 ├── prisma/
 │   ├── schema.prisma
 │   └── seed.ts
@@ -362,7 +362,7 @@ DoctorBiology/
 
 **Functionality:**
 - ✅ All tables created with proper indexes and foreign keys
-- ✅ Seed script creates super admin (email: admin@doctorbiology.com)
+- ✅ Seed script creates super admin (email: admin@instituteweb.com)
 - ✅ Seed script creates 3 segments (SSC, HSC, Medical Admission)
 - ✅ All Prisma types auto-generated for TypeScript
 

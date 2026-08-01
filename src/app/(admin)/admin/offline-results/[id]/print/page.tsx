@@ -81,7 +81,7 @@ export default function PrintExamResultPage({ params }: { params: { id: string }
       <div className="p-8 max-w-[210mm] mx-auto bg-white text-black print:p-0 print:max-w-none">
         {/* Header */}
         <div className="text-center mb-8 border-b-2 border-black pb-4">
-          <h1 className="text-3xl font-bold uppercase mb-1">Doctor Biology</h1>
+          <h1 className="text-3xl font-bold uppercase mb-1">Institute Web</h1>
           <h2 className="text-xl font-semibold text-gray-800">Exam Result Sheet</h2>
         </div>
 

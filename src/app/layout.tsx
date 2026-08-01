@@ -8,23 +8,23 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
   title: {
-    default: "DoctorBiology LMS",
-    template: "%s | DoctorBiology",
+    default: "Institute Web LMS",
+    template: "%s | Institute Web",
   },
   description: "Medical Admission & Academic Care — Best Online Platform for Biology & Medical Admission Preparation",
-  keywords: ["Medical Admission", "Biology", "DoctorBiology", "Online Exam", "Study Materials"],
+  keywords: ["Medical Admission", "Biology", "Institute Web", "Online Exam", "Study Materials"],
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "DoctorBiology",
+    title: "Institute Web",
   },
   openGraph: {
     type: "website",
     locale: "bn_BD",
-    url: "https://doctorbiology.com",
-    siteName: "DoctorBiology LMS",
-    title: "DoctorBiology LMS",
+    url: "https://instituteweb.com",
+    siteName: "Institute Web LMS",
+    title: "Institute Web LMS",
     description: "Medical Admission & Academic Care",
   },
 };

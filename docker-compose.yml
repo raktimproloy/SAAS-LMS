@@ -2,7 +2,7 @@ version: '3.8'
 services:
   lms-app:
     build: .
-    container_name: doctorbiology-lms
+    container_name: instituteweb-lms
     restart: always
     ports:
       - "3000:3000"

@@ -39,7 +39,7 @@ export function ReviewSection() {
             তারা কী বলছে আমাদের সম্পর্কে?
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-            হাজারো শিক্ষার্থীর আস্থার জায়গা DoctorBiology। চলুন শুনে নেওয়া যাক সফল শিক্ষার্থীদের বাস্তব অভিজ্ঞতা।
+            হাজারো শিক্ষার্থীর আস্থার জায়গা Institute Web। চলুন শুনে নেওয়া যাক সফল শিক্ষার্থীদের বাস্তব অভিজ্ঞতা।
           </p>
         </div>
       </div>

@@ -30,13 +30,13 @@ const footerLinks = [
 const socialLinks = [
   {
     label: "Facebook",
-    href: "https://facebook.com/doctorbiology",
+    href: "https://facebook.com/instituteweb",
     icon: FacebookIcon,
     color: "hover:text-blue-500",
   },
   {
     label: "YouTube",
-    href: "https://youtube.com/@doctorbiology",
+    href: "https://youtube.com/@instituteweb",
     icon: YoutubeIcon,
     color: "hover:text-red-500",
   },
@@ -166,8 +166,8 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-3 text-sm text-muted-foreground">
                 <Mail className="h-4 w-4 text-primary shrink-0" />
-                <a href="mailto:info@doctorbiology.com" className="hover:text-foreground transition-colors">
-                  info@doctorbiology.com
+                <a href="mailto:info@instituteweb.com" className="hover:text-foreground transition-colors">
+                  info@instituteweb.com
                 </a>
               </li>
               <li className="flex items-center gap-3 text-sm text-muted-foreground">
@@ -187,7 +187,7 @@ export function Footer() {
 
         {/* Bottom bar */}
         <div className="mt-12 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
-          <p>© {new Date().getFullYear()} DoctorBiology LMS. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Institute Web LMS. All rights reserved.</p>
           <p>Made with ❤️ for Medical Students</p>
         </div>
       </div>

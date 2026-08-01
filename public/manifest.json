@@ -1,6 +1,6 @@
 {
-  "name": "DoctorBiology LMS",
-  "short_name": "DoctorBiology",
+  "name": "Institute Web LMS",
+  "short_name": "Institute Web",
   "description": "Medical Admission & Academic Care Platform",
   "start_url": "/",
   "display": "standalone",

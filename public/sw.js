@@ -1,4 +1,4 @@
-const CACHE_NAME = 'doctorbiology-v1';
+const CACHE_NAME = 'instituteweb-v1';
 const STATIC_ASSETS = [
   '/',
   '/courses',

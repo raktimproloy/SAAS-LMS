@@ -106,7 +106,7 @@ const SidebarContent = ({
       <div className="flex h-14 items-center border-b px-6 lg:h-[60px]">
         <Link href="/admin/dashboard" className="flex items-center gap-2 font-semibold text-lg tracking-tight">
           <Database className="h-6 w-6 text-primary" />
-          <span className="">DoctorBiology</span>
+          <span className="">Institute Web</span>
         </Link>
       </div>
       <div className="flex-1 overflow-auto py-2">
