@@ -18,7 +18,8 @@ import {
   ClipboardList,
   CalendarCheck,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  MessageSquare
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -64,6 +65,7 @@ const sidebarLinks: SidebarLink[] = [
     ]
   },
   { name: "Website Content", href: "/admin/content", icon: Bell, perm: "content" },
+  { name: "SMS Logs", href: "/admin/sms", icon: MessageSquare, perm: "sms" },
   { name: "Settings", href: "/admin/settings", icon: Settings }, // no perm needed
 ];
 
@@ -248,7 +250,11 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   }, [pathname, router]);
 
   const handleLogout = async () => {
-    document.cookie = "admin_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT";
+    try {
+      await fetch('/api/admin/auth/logout', { method: 'POST' });
+    } catch (err) {
+      console.error("Logout failed", err);
+    }
     router.push("/admin/login");
     router.refresh();
   };

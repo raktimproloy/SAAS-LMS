@@ -364,3 +364,17 @@ model StudentReport {
 
   student Student @relation(fields: [student_id], references: [id])
 }
+
+
+model CronJob {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  description String?
+  schedule    String
+  action_type String
+  metadata    String?   @db.Text
+  is_active   Boolean   @default(true)
+  last_run    DateTime?
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+}
