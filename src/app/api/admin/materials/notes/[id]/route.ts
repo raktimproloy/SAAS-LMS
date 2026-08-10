@@ -46,6 +46,42 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   }
 }
 
+import { v2 as cloudinary } from "cloudinary";
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+function extractCloudinaryInfo(url: string) {
+  if (!url.includes('cloudinary.com')) return null;
+  const parts = url.split('/upload/');
+  if (parts.length < 2) return null;
+  
+  const preUpload = parts[0].split('/');
+  const resourceType = preUpload[preUpload.length - 1]; 
+  
+  const pathParts = parts[1].split('/');
+  let versionIndex = -1;
+  for (let i = 0; i < pathParts.length; i++) {
+    if (pathParts[i].match(/^v\d+$/)) {
+      versionIndex = i;
+      break;
+    }
+  }
+  
+  if (versionIndex === -1) return null;
+  
+  let publicId = pathParts.slice(versionIndex + 1).join('/');
+  
+  if (resourceType === 'image' || resourceType === 'video') {
+    publicId = publicId.replace(/\.[^/.]+$/, "");
+  }
+  
+  return { publicId, resourceType };
+}
+
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   const hasPerm = await checkPermission("materials");
   if (!hasPerm) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
@@ -54,6 +90,27 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
   if (isNaN(id)) return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
 
   try {
+    const note = await prisma.noteMaterial.findUnique({ where: { id } });
+    if (!note) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+    let urls: string[] = [];
+    try {
+      if (note.file_path.startsWith('[')) {
+        urls = JSON.parse(note.file_path);
+      } else {
+        urls = [note.file_path];
+      }
+    } catch {
+      urls = [note.file_path];
+    }
+
+    for (const url of urls) {
+      const info = extractCloudinaryInfo(url);
+      if (info) {
+        await cloudinary.uploader.destroy(info.publicId, { resource_type: info.resourceType }).catch(console.error);
+      }
+    }
+
     await prisma.noteMaterial.delete({
       where: { id }
     });

@@ -5,7 +5,7 @@ import { Phone, GripHorizontal } from "lucide-react";
 import { WhatsAppIcon } from "@/components/icons/svg";
 
 const PHONE_NUMBER = "8801987654321";
-const WHATSAPP_MESSAGE = encodeURIComponent("হ্যালো! DoctorBiology সম্পর্কে জানতে চাই।");
+const WHATSAPP_MESSAGE = encodeURIComponent("হ্যালো! Institute Web সম্পর্কে জানতে চাই।");
 
 const STORAGE_KEY = "floating-actions-pos";
 

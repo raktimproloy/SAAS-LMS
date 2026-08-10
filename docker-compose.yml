@@ -1,0 +1,15 @@
+services:
+  lms-app:
+    build:
+      context: .
+      args:
+        - DATABASE_URL=${DATABASE_URL}
+    container_name: instituteweb-lms
+    restart: always
+    ports:
+      - "4040:3000"
+    env_file:
+      - .env
+    # environment:
+    #   - DATABASE_URL=${DATABASE_URL}
+    #   - NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}

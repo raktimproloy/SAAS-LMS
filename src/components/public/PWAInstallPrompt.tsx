@@ -81,7 +81,7 @@ export function PWAInstallPrompt() {
                   App Download করুন! 📱
                 </h3>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  DoctorBiology App install করুন — offline-ও কাজ করে!
+                  Institute Web App install করুন — offline-ও কাজ করে!
                 </p>
 
                 <div className="flex items-center gap-2 mt-3">

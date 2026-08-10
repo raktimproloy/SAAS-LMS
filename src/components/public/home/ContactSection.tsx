@@ -56,13 +56,13 @@ export function ContactSection() {
             </a>
 
             {/* Email */}
-            <a href="mailto:support@doctorbiology.com" className="flex items-center gap-5 p-5 sm:p-6 rounded-[2rem] bg-card border border-border hover:border-pink-500/30 transition-all duration-300 group hover:shadow-lg">
+            <a href="mailto:support@instituteweb.com" className="flex items-center gap-5 p-5 sm:p-6 rounded-[2rem] bg-card border border-border hover:border-pink-500/30 transition-all duration-300 group hover:shadow-lg">
               <div className="w-14 h-14 shrink-0 rounded-2xl bg-pink-500/10 flex items-center justify-center group-hover:scale-110 group-hover:bg-pink-500/20 transition-all duration-300">
                 <Mail className="w-6 h-6 text-pink-500" />
               </div>
               <div>
                 <h4 className="text-sm font-medium text-muted-foreground mb-1">ইমেইল করুন</h4>
-                <p className="text-foreground font-bold text-lg sm:text-xl group-hover:text-pink-500 transition-colors">support@doctorbiology.com</p>
+                <p className="text-foreground font-bold text-lg sm:text-xl group-hover:text-pink-500 transition-colors">support@instituteweb.com</p>
               </div>
             </a>
 

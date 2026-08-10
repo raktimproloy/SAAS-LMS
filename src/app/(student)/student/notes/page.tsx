@@ -163,7 +163,7 @@ export default function StudentNotesPage() {
                       <a href={note.file_path} target="_blank" rel="noreferrer" className={cn(buttonVariants({ variant: "outline" }), "flex-1 gap-2 border-border hover:bg-muted text-foreground")}>
                         <Eye className="w-4 h-4" /> View
                       </a>
-                      <a href={note.file_path} download target="_blank" rel="noreferrer" className={cn(buttonVariants({ variant: "default" }), "gap-2 px-4 shadow-sm hover:shadow-md transition-shadow")}>
+                      <a href={`/api/download?url=${encodeURIComponent(note.file_path)}`} target="_blank" rel="noreferrer" className={cn(buttonVariants({ variant: "default" }), "gap-2 px-4 shadow-sm hover:shadow-md transition-shadow")}>
                         <Download className="w-4 h-4" />
                       </a>
                     </div>

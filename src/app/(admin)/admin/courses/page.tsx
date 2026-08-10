@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Pencil, BookOpen, Layers, Trash2, CheckCircle, XCircle } from "lucide-react";
+import { Plus, Pencil, BookOpen, Layers, Trash2, CheckCircle, XCircle, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -30,6 +30,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { cn } from "@/lib/utils";
+import { SmsModal } from "@/components/admin/SmsModal";
 
 // Types
 interface Course {
@@ -70,6 +71,12 @@ export default function CoursesBatchesPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
+
+  // SMS Modal States
+  const [isSmsOpen, setIsSmsOpen] = useState(false);
+  const [smsTargetType, setSmsTargetType] = useState<"course" | "batch" | "student">("course");
+  const [smsTargetId, setSmsTargetId] = useState<number | undefined>(undefined);
+  const [smsTargetName, setSmsTargetName] = useState<string>("");
 
   // Common Form Fields
   const [title, setTitle] = useState("");
@@ -545,6 +552,20 @@ export default function CoursesBatchesPage() {
                                 <Button onClick={() => handleDelete(course.id, "courses")} variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30">
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
+                                <Button 
+                                  onClick={() => {
+                                    setSmsTargetType("course");
+                                    setSmsTargetId(course.id);
+                                    setSmsTargetName(course.title);
+                                    setIsSmsOpen(true);
+                                  }} 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  className="h-8 w-8 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/30"
+                                  title="Send SMS to Course"
+                                >
+                                  <MessageSquare className="h-4 w-4" />
+                                </Button>
                               </div>
                             </TableCell>
                           </TableRow>
@@ -651,6 +672,20 @@ export default function CoursesBatchesPage() {
                                 <Button onClick={() => handleDelete(batch.id, "batches")} variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30">
                                   <Trash2 className="h-4 w-4" />
                                 </Button>
+                                <Button 
+                                  onClick={() => {
+                                    setSmsTargetType("batch");
+                                    setSmsTargetId(batch.id);
+                                    setSmsTargetName(batch.name);
+                                    setIsSmsOpen(true);
+                                  }} 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  className="h-8 w-8 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/30"
+                                  title="Send SMS to Batch"
+                                >
+                                  <MessageSquare className="h-4 w-4" />
+                                </Button>
                               </div>
                             </TableCell>
                           </TableRow>
@@ -675,6 +710,14 @@ export default function CoursesBatchesPage() {
           )}
         </CardContent>
       </Card>
+      
+      <SmsModal 
+        isOpen={isSmsOpen} 
+        onClose={() => setIsSmsOpen(false)}
+        targetType={smsTargetType}
+        targetId={smsTargetId}
+        targetName={smsTargetName}
+      />
     </div>
   );
 }

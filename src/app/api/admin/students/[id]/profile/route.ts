@@ -47,7 +47,9 @@ export async function GET(request: Request, { params }: { params: { id: string }
       return NextResponse.json({ error: "Student not found" }, { status: 404 });
     }
 
-    return NextResponse.json(student);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password: _password, ...safeStudent } = student;
+    return NextResponse.json(safeStudent);
   } catch (error) {
     console.error("Student profile API error:", error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });

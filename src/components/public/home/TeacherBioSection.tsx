@@ -84,7 +84,7 @@ export function TeacherBioSection() {
                   <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 bg-gradient-to-t from-black/90 via-black/50 to-transparent transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300 z-10 pointer-events-none">
                     <div className="flex items-center gap-3">
                       <span className="px-2.5 py-1 bg-primary text-white text-xs font-bold rounded-md tracking-wider">INTRO</span>
-                      <span className="text-white font-medium text-sm sm:text-base">DoctorBiology সম্পর্কে জানুন</span>
+                      <span className="text-white font-medium text-sm sm:text-base">Institute Web সম্পর্কে জানুন</span>
                     </div>
                   </div>
                 </div>
@@ -93,7 +93,7 @@ export function TeacherBioSection() {
                   <iframe
                     className="w-full h-full"
                     src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0&modestbranding=1"
-                    title="Doctor Biology Intro"
+                    title="Institute Web Intro"
                     frameBorder="0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen

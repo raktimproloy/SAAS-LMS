@@ -1,27 +1,41 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { User, Phone, MapPin, Mail, Calendar, Users, Camera, Shield, LogOut } from "lucide-react";
+import { User, Phone, MapPin, Mail, Calendar, Users, Camera, Shield, LogOut, Pencil, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+
+interface StudentData {
+  student_id: string;
+  name: string;
+  photo: string | null;
+  batch: { name: string; course: { title: string } };
+  phone: string | null;
+  email: string | null;
+  dob: string | Date | null;
+  gender: string | null;
+  address: string | null;
+  parent_name: string | null;
+  parent_relation: string | null;
+  parent_phone: string | null;
+}
 
 export default function StudentProfile() {
-  const [student, setStudent] = useState<{
-    student_id: string;
-    name: string;
-    photo: string | null;
-    batch: { name: string; course: { title: string } };
-    phone: string | null;
-    email: string | null;
-    dob: string | Date | null;
-    gender: string | null;
-    address: string | null;
-    parent_name: string | null;
-    parent_relation: string | null;
-    parent_phone: string | null;
-  } | null>(null);
+  const [student, setStudent] = useState<StudentData | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editAddress, setEditAddress] = useState("");
+  const [editPhoto, setEditPhoto] = useState("");
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [editError, setEditError] = useState("");
 
   const handleLogout = async () => {
     try {
@@ -32,8 +46,8 @@ export default function StudentProfile() {
     }
   };
 
-  useEffect(() => {
-    fetch('/api/student/me')
+  const loadProfile = () => {
+    return fetch('/api/student/me')
       .then(res => res.json())
       .then(data => {
         if (data && !data.error && data.name) {
@@ -45,7 +59,70 @@ export default function StudentProfile() {
         setLoading(false);
       })
       .catch(console.error);
+  };
+
+  useEffect(() => {
+    loadProfile();
   }, []);
+
+  const openEditDialog = () => {
+    if (!student) return;
+    setEditName(student.name);
+    setEditAddress(student.address || "");
+    setEditPhoto(student.photo || "");
+    setEditError("");
+    setIsEditOpen(true);
+  };
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingPhoto(true);
+    setEditError("");
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to upload photo");
+      setEditPhoto(data.url);
+    } catch (err: unknown) {
+      setEditError(err instanceof Error ? err.message : "Photo upload failed");
+    } finally {
+      setIsUploadingPhoto(false);
+      e.target.value = "";
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    if (!editName.trim()) {
+      setEditError("Name cannot be empty");
+      return;
+    }
+
+    setIsSaving(true);
+    setEditError("");
+
+    try {
+      const res = await fetch("/api/student/me", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: editName, address: editAddress, photo: editPhoto }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to update profile");
+
+      setStudent(data.data);
+      setIsEditOpen(false);
+    } catch (err: unknown) {
+      setEditError(err instanceof Error ? err.message : "Failed to update profile");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -115,15 +192,28 @@ export default function StudentProfile() {
           <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-cyan-500/20 rounded-full blur-[80px] pointer-events-none group-hover:scale-125 transition-transform duration-700 transform-gpu" />
         </div>
 
+        {/* Edit Profile Button */}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={openEditDialog}
+          className="absolute top-6 right-6 z-20 gap-2 rounded-xl bg-background/40 backdrop-blur-md border-white/10 hover:bg-background/60"
+        >
+          <Pencil className="w-3.5 h-3.5" /> Edit Profile
+        </Button>
+
         {/* Avatar */}
         <div className="relative z-10 shrink-0">
-          <div className="w-32 h-32 md:w-40 md:h-40 rounded-[2rem] overflow-hidden border-2 border-white/20 shadow-[0_0_30px_rgba(var(--primary),0.3)] bg-gradient-to-br from-primary/40 to-cyan-500/40 flex items-center justify-center relative group/avatar backdrop-blur-md">
+          <div
+            className="w-32 h-32 md:w-40 md:h-40 rounded-[2rem] overflow-hidden border-2 border-white/20 shadow-[0_0_30px_rgba(var(--primary),0.3)] bg-gradient-to-br from-primary/40 to-cyan-500/40 flex items-center justify-center relative group/avatar backdrop-blur-md cursor-pointer"
+            onClick={openEditDialog}
+          >
             {student.photo ? (
               <img src={student.photo} alt={student.name} className="w-full h-full object-cover" />
             ) : (
               <span className="text-5xl font-black text-white mix-blend-overlay opacity-80">{student.name.substring(0, 2).toUpperCase()}</span>
             )}
-            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/avatar:opacity-100 transition-opacity flex items-center justify-center cursor-pointer">
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/avatar:opacity-100 transition-opacity flex items-center justify-center">
               <Camera className="w-8 h-8 text-white/80" />
             </div>
           </div>
@@ -237,6 +327,69 @@ export default function StudentProfile() {
           Log Out
         </Button>
       </div>
+
+      {/* Edit Profile Dialog */}
+      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+        <DialogContent className="sm:max-w-[480px]">
+          <DialogHeader>
+            <DialogTitle>Edit Profile</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-5 py-2">
+            {editError && (
+              <div className="p-3 bg-red-50 text-red-600 rounded-md text-sm border border-red-200 font-medium">
+                {editError}
+              </div>
+            )}
+
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-24 h-24 rounded-2xl overflow-hidden border-2 border-border bg-gradient-to-br from-primary/40 to-cyan-500/40 flex items-center justify-center relative">
+                {editPhoto ? (
+                  <img src={editPhoto} alt="Preview" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-2xl font-black text-white mix-blend-overlay opacity-80">{editName.substring(0, 2).toUpperCase()}</span>
+                )}
+                {isUploadingPhoto && (
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                    <Loader2 className="w-6 h-6 text-white animate-spin" />
+                  </div>
+                )}
+              </div>
+              <label className="cursor-pointer">
+                <span className="text-sm font-medium text-primary hover:underline">
+                  {isUploadingPhoto ? "Uploading..." : "Change Photo"}
+                </span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handlePhotoUpload}
+                  disabled={isUploadingPhoto}
+                />
+              </label>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="editName">Full Name</Label>
+              <Input id="editName" value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="Your name" />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="editAddress">Location / Address</Label>
+              <Textarea id="editAddress" rows={3} value={editAddress} onChange={(e) => setEditAddress(e.target.value)} placeholder="Your address" />
+            </div>
+
+            <div className="flex justify-end gap-3 pt-2">
+              <Button variant="outline" onClick={() => setIsEditOpen(false)} disabled={isSaving}>
+                Cancel
+              </Button>
+              <Button onClick={handleSaveProfile} disabled={isSaving || isUploadingPhoto}>
+                {isSaving ? "Saving..." : "Save Changes"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

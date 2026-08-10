@@ -18,7 +18,8 @@ import {
   ClipboardList,
   CalendarCheck,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  MessageSquare
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -64,6 +65,7 @@ const sidebarLinks: SidebarLink[] = [
     ]
   },
   { name: "Website Content", href: "/admin/content", icon: Bell, perm: "content" },
+  { name: "SMS Logs", href: "/admin/sms", icon: MessageSquare, perm: "sms" },
   { name: "Settings", href: "/admin/settings", icon: Settings }, // no perm needed
 ];
 
@@ -106,7 +108,7 @@ const SidebarContent = ({
       <div className="flex h-14 items-center border-b px-6 lg:h-[60px]">
         <Link href="/admin/dashboard" className="flex items-center gap-2 font-semibold text-lg tracking-tight">
           <Database className="h-6 w-6 text-primary" />
-          <span className="">DoctorBiology</span>
+          <span className="">Institute Web</span>
         </Link>
       </div>
       <div className="flex-1 overflow-auto py-2">
@@ -248,7 +250,11 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   }, [pathname, router]);
 
   const handleLogout = async () => {
-    document.cookie = "admin_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT";
+    try {
+      await fetch('/api/admin/auth/logout', { method: 'POST' });
+    } catch (err) {
+      console.error("Logout failed", err);
+    }
     router.push("/admin/login");
     router.refresh();
   };

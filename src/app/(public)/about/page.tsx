@@ -34,7 +34,7 @@ export default function AboutPage() {
         <div className="max-w-7xl mx-auto relative z-10 text-center">
           <div data-aos="fade-down">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-white mb-6 tracking-tight leading-tight">
-              DoctorBiology - তে <br className="hidden sm:block" />
+              Institute Web - তে <br className="hidden sm:block" />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">আপনাকে স্বাগতম</span>
             </h1>
             <p className="text-white/60 max-w-2xl mx-auto text-lg sm:text-xl leading-relaxed">
@@ -104,7 +104,7 @@ export default function AboutPage() {
               </h2>
               <div className="space-y-4 text-muted-foreground leading-relaxed text-lg">
                 <p>
-                  DoctorBiology-এর পথচলা শুরু হয়েছিল একটি মহৎ উদ্দেশ্য নিয়ে - শিক্ষার্থীদের জন্য বায়োলজিকে সহজ, প্রাণবন্ত এবং আকর্ষণীয় করে তোলা। আমরা বিশ্বাস করি মুখস্তবিদ্যা নয়, বরং কনসেপ্ট ক্লিয়ার করার মাধ্যমেই আসল সফলতা আসে।
+                  Institute Web-এর পথচলা শুরু হয়েছিল একটি মহৎ উদ্দেশ্য নিয়ে - শিক্ষার্থীদের জন্য বায়োলজিকে সহজ, প্রাণবন্ত এবং আকর্ষণীয় করে তোলা। আমরা বিশ্বাস করি মুখস্তবিদ্যা নয়, বরং কনসেপ্ট ক্লিয়ার করার মাধ্যমেই আসল সফলতা আসে।
                 </p>
                 <p>
                   বছরের পর বছর ধরে আমরা হাজারো শিক্ষার্থীকে তাদের মেডিকেল স্বপ্ন পূরণে গাইড করে আসছি। আমাদের অফলাইন ক্যাম্পাস ও অনলাইন প্ল্যাটফর্ম মিলে তৈরি করেছে এমন এক ইকোসিস্টেম, যেখানে প্রতিটি স্টুডেন্ট পায় তার জন্য প্রয়োজনীয় সর্বোচ্চ সাপোর্ট।

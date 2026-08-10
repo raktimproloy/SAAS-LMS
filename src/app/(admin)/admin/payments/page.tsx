@@ -577,7 +577,7 @@ export default function PaymentsPage() {
               {selectedReceipt && (
                 <div className="p-6 bg-white dark:bg-slate-950 border rounded-lg receipt-container shadow-sm mt-2">
                   <div className="text-center mb-6 border-b pb-4">
-                    <h2 className="text-2xl font-bold uppercase tracking-wider text-slate-800 dark:text-slate-100">Doctor Biology</h2>
+                    <h2 className="text-2xl font-bold uppercase tracking-wider text-slate-800 dark:text-slate-100">Institute Web</h2>
                     <p className="text-sm text-slate-500">Official Payment Receipt</p>
                   </div>
 
@@ -785,7 +785,7 @@ export default function PaymentsPage() {
         {selectedReceipt && (
           <div className="max-w-2xl mx-auto font-sans text-black">
             <div className="text-center mb-8 border-b-2 border-black pb-6">
-              <h1 className="text-4xl font-extrabold uppercase tracking-widest mb-1">Doctor Biology</h1>
+              <h1 className="text-4xl font-extrabold uppercase tracking-widest mb-1">Institute Web</h1>
               <p className="text-lg text-gray-600">Official Payment Receipt</p>
             </div>
 

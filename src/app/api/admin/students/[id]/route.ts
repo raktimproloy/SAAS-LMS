@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { verifyToken } from "@/lib/jwt";
 import { cookies } from "next/headers";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 async function checkPermission(permission: string) {
   const token = cookies().get("admin_token")?.value;
@@ -23,9 +23,9 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     if (isNaN(id)) return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
 
     const body = await request.json();
-    const { 
-      student_id, name, gender, dob, phone, email, password, batch_id, 
-      parent_name, parent_phone, address, status
+    const {
+      student_id, name, gender, dob, phone, email, password, batch_id,
+      parent_name, parent_phone, address, status, photo
     } = body;
 
     const existingStudent = await prisma.student.findUnique({ where: { id } });
@@ -51,6 +51,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     if (parent_name !== undefined) updateData.parent_name = parent_name;
     if (parent_phone !== undefined) updateData.parent_phone = parent_phone;
     if (address !== undefined) updateData.address = address;
+    if (photo !== undefined) updateData.photo = photo;
     if (status) updateData.status = status;
     
     if (password) {

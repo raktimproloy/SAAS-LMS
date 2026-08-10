@@ -27,7 +27,7 @@ model Course {
   discount_fee           Float?
   start_date             DateTime?
   end_date               DateTime?
-  thumbnail              String?
+  thumbnail              String?   @db.Text
   details                String?   @db.Text
   subjects               Json?
   next_registration_date DateTime?
@@ -75,7 +75,7 @@ model Student {
   parent_name     String?
   parent_relation String?
   parent_phone    String?
-  photo           String?
+  photo           String?   @db.Text
   status          String    @default("active") // "active" | "inactive"
   enrolled_at     DateTime  @default(now())
   created_at      DateTime  @default(now())
@@ -132,7 +132,7 @@ model ExamQuestion {
   parent_id      Int?
   type           String  @default("mcq") // "mcq" | "passage"
   question_text  String  @db.Text
-  image_url      String?
+  image_url      String?  @db.Text
   image_urls     Json?
   options        Json? // Dynamic options array
   correct_option String?
@@ -223,7 +223,7 @@ model Notice {
 
 model Gallery {
   id         Int      @id @default(autoincrement())
-  image_path String
+  image_path String   @db.Text
   category   String // "home" | "success" | "about"
   caption    String?
   sort_order Int      @default(0)
@@ -237,7 +237,7 @@ model Teacher {
   qualifications      String?
   specialist_subjects Json?
   experience          String?
-  photo               String?
+  photo               String?  @db.Text
   sort_order          Int      @default(0)
   created_at          DateTime @default(now())
 
@@ -251,7 +251,7 @@ model TeacherSuccess {
   exam_type    String
   gpa          String?
   placement    String?
-  photo        String?
+  photo        String?  @db.Text
   year         String?
   sort_order   Int      @default(0)
   created_at   DateTime @default(now())
@@ -262,7 +262,7 @@ model TeacherSuccess {
 model StudentReview {
   id               Int      @id @default(autoincrement())
   student_name     String
-  image            String?
+  image            String?  @db.Text
   batch_name       String?
   current_position String?
   description      String   @db.Text
@@ -281,12 +281,12 @@ model VideoCourse {
   batch_id    Int?
   title       String
   description String?  @db.Text
-  url         String // YouTube/external link
+  url         String   @db.Text // YouTube/external link
   price       Float    @default(0.0)
   is_free     Boolean  @default(false)
   is_public   Boolean  @default(true)
   tags        Json?
-  thumbnail   String?
+  thumbnail   String?  @db.Text
   status      String   @default("active")
   sort_order  Int      @default(0)
   created_at  DateTime @default(now())
@@ -298,7 +298,7 @@ model VideoCourse {
 model NoteMaterial {
   id          Int      @id @default(autoincrement())
   title       String
-  file_path   String
+  file_path   String   @db.Text
   batch_id    Int?
   course_id   Int?
   type        String // "book" | "note"
@@ -334,9 +334,9 @@ model SocialMedia {
 
 model HeroBanner {
   id            Int      @id @default(autoincrement())
-  teacher_photo String?
+  teacher_photo String?  @db.Text
   description   String?  @db.Text
-  bg_image      String?
+  bg_image      String?  @db.Text
   cta_text      String?
   cta_link      String?
   is_active     Boolean  @default(true)
@@ -363,4 +363,18 @@ model StudentReport {
   created_at  DateTime @default(now())
 
   student Student @relation(fields: [student_id], references: [id])
+}
+
+
+model CronJob {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  description String?
+  schedule    String
+  action_type String
+  metadata    String?   @db.Text
+  is_active   Boolean   @default(true)
+  last_run    DateTime?
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
 }

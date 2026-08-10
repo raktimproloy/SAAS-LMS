@@ -64,7 +64,7 @@ export function BookLoader() {
       {/* Loading Text */}
       <div className="mt-24 flex flex-col items-center opacity-90">
         <span className="text-primary/80 font-bold text-sm tracking-[0.3em] uppercase mb-2">
-          Doctor Biology
+          Institute Web
         </span>
         <div className="flex items-center space-x-1">
           <span className="text-muted-foreground font-medium text-xs tracking-widest uppercase">

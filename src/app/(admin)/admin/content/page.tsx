@@ -376,7 +376,7 @@ export default function ContentManagementPage() {
                     </div>
                     <div className="space-y-2">
                       <Label>Email Address</Label>
-                      <Input type="email" placeholder="info@doctorbiology.com" />
+                      <Input type="email" placeholder="info@instituteweb.com" />
                     </div>
                     <div className="space-y-2">
                       <Label>WhatsApp Number</Label>
@@ -393,11 +393,11 @@ export default function ContentManagementPage() {
                     <h3 className="font-semibold text-lg border-b pb-2 border-border/50 text-primary">Social Media Links</h3>
                     <div className="space-y-2">
                       <Label>Facebook Page URL</Label>
-                      <Input placeholder="https://facebook.com/doctorbiology" />
+                      <Input placeholder="https://facebook.com/instituteweb" />
                     </div>
                     <div className="space-y-2">
                       <Label>YouTube Channel URL</Label>
-                      <Input placeholder="https://youtube.com/@doctorbiology" />
+                      <Input placeholder="https://youtube.com/@instituteweb" />
                     </div>
                   </div>
 

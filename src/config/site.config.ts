@@ -1,5 +1,5 @@
 export const siteConfig = {
-  instituteName: "DoctorBiology",
+  instituteName: "Institute Web",
   tagline: "Your Gateway to Medical Success",
   logo: "/assets/logo.png",
   theme: {
@@ -9,7 +9,7 @@ export const siteConfig = {
   },
   contact: {
     phone: "+880-XXXX-XXXXXX",
-    email: "info@doctorbiology.com",
+    email: "info@instituteweb.com",
     whatsapp: "+880XXXXXXXXXX",
     address: "Dhaka, Bangladesh",
   },
@@ -22,7 +22,7 @@ export const siteConfig = {
     defaultLanguage: "bn",
   },
   seo: {
-    defaultTitle: "DoctorBiology - Best Medical Coaching",
-    defaultDescription: "Join DoctorBiology for the best medical admission coaching and HSC/SSC academic care.",
+    defaultTitle: "Institute Web - Best Medical Coaching",
+    defaultDescription: "Join Institute Web for the best medical admission coaching and HSC/SSC academic care.",
   }
 }
