@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -36,6 +36,11 @@ interface StudentSidebarProps {
 export function StudentSidebar({ onLinkClick, LinkWrapper }: StudentSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const [optimisticPath, setOptimisticPath] = useState<string | null>(null);
+
+  useEffect(() => {
+    setOptimisticPath(null);
+  }, [pathname]);
   
   const Wrapper = LinkWrapper || React.Fragment;
 
@@ -61,12 +66,14 @@ export function StudentSidebar({ onLinkClick, LinkWrapper }: StudentSidebarProps
         <div className="flex-1 overflow-auto py-6">
           <nav className="grid gap-2 px-4">
             {navItems.map((item, index) => {
-              const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+              const currentPath = optimisticPath || pathname;
+              const isActive = currentPath === item.href || currentPath.startsWith(`${item.href}/`);
               return (
                 <Wrapper key={item.title} {...(LinkWrapper ? { asChild: true } : {})}>
                   <Link 
                     href={item.href} 
                     onClick={(e) => {
+                      setOptimisticPath(item.href);
                       if (onLinkClick) onLinkClick();
                       if (LinkWrapper) {
                         e.preventDefault();

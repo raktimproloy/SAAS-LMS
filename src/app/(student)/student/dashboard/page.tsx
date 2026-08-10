@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { CalendarClock, CheckCircle2, XCircle, FileText, AlertTriangle, Play, ChevronRight, GraduationCap } from "lucide-react";
@@ -18,6 +18,32 @@ type DashboardData = {
   reports?: any[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   allResults?: any[];
+};
+
+const ScrollReveal = ({ children, delay = 0, className = "" }: { children: React.ReactNode, delay?: number, className?: string }) => {
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => setIsVisible(true), delay);
+        observer.disconnect();
+      }
+    }, { threshold: 0.1 });
+    
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [delay]);
+
+  return (
+    <div 
+      ref={ref} 
+      className={`transition-all duration-700 ease-out fill-mode-both ${isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'} ${className}`}
+    >
+      {children}
+    </div>
+  );
 };
 
 export default function StudentDashboard() {
@@ -38,43 +64,83 @@ export default function StudentDashboard() {
 
   if (loading) {
     return (
-      <div className="flex flex-col gap-8 pb-10 w-full animate-in fade-in duration-500">
+      <div className="flex flex-col gap-4 w-full lg:h-[calc(100vh-150px)] lg:overflow-hidden">
         {/* Welcome Section Skeleton */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-          <div className="space-y-3">
-            <Skeleton className="h-10 w-64 md:w-96 bg-white/10 rounded-2xl" />
-            <Skeleton className="h-6 w-48 bg-white/5 rounded-xl" />
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0">
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-64 md:w-80 bg-white/10 rounded-lg" />
+            <Skeleton className="h-5 w-48 bg-white/5 rounded-md" />
           </div>
-          <Skeleton className="h-12 w-40 rounded-full bg-white/10" />
+          <Skeleton className="h-10 w-36 rounded-full bg-white/10" />
         </div>
 
-        {/* Top Row Skeletons */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-2">
-          <div className="bg-card/20 backdrop-blur-3xl border border-white/5 rounded-3xl p-6 shadow-xl h-[160px]">
-            <Skeleton className="h-6 w-48 mb-4 bg-white/10 rounded-xl" />
-            <Skeleton className="h-20 w-full bg-white/5 rounded-2xl" />
-          </div>
-          <div className="bg-card/20 backdrop-blur-3xl border border-white/5 rounded-3xl p-6 shadow-xl h-[160px]">
-            <Skeleton className="h-6 w-40 mb-4 bg-white/10 rounded-xl" />
-            <Skeleton className="h-20 w-full bg-white/5 rounded-2xl" />
-          </div>
-        </div>
-
-        {/* Bottom Row Skeletons */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-card/20 backdrop-blur-3xl border border-white/5 rounded-3xl p-6 shadow-xl h-[350px]">
-            <Skeleton className="h-6 w-48 mb-6 bg-white/10 rounded-xl" />
-            <div className="grid grid-cols-7 gap-2">
-              {Array.from({ length: 35 }).map((_, i) => (
-                <Skeleton key={i} className="aspect-square w-full bg-white/5 rounded-xl" />
-              ))}
+        {/* Main Content Grid Skeletons */}
+        <div className="flex flex-col gap-4 lg:flex-1">
+          {/* Top Row: Course & Next Exam */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="bg-card/20 backdrop-blur-3xl border border-white/5 rounded-2xl p-4 md:p-5 shadow-xl h-[140px] flex flex-col">
+              <Skeleton className="h-6 w-40 mb-3 bg-white/10 rounded-md shrink-0" />
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-background/30 border border-white/5">
+                <Skeleton className="w-12 h-12 rounded-xl bg-white/10 shrink-0" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-5 w-3/4 bg-white/10 rounded-md" />
+                  <Skeleton className="h-4 w-1/2 bg-white/5 rounded-md" />
+                </div>
+              </div>
+            </div>
+            <div className="bg-card/20 backdrop-blur-3xl border border-white/5 rounded-2xl p-4 md:p-5 shadow-xl h-[200px] lg:h-[140px] flex flex-col">
+              <Skeleton className="h-5 w-24 mb-1 bg-white/5 rounded-md shrink-0" />
+              <Skeleton className="h-7 w-64 mb-3 bg-white/10 rounded-md shrink-0" />
+              <div className="flex-1 flex flex-col justify-end gap-3">
+                <Skeleton className="h-14 w-full bg-white/5 rounded-xl shrink-0" />
+                <Skeleton className="h-9 w-full bg-white/10 rounded-xl shrink-0" />
+              </div>
             </div>
           </div>
-          <div className="bg-card/20 backdrop-blur-3xl border border-white/5 rounded-3xl p-6 shadow-xl h-[350px] flex flex-col gap-4">
-            <Skeleton className="h-6 w-40 mb-2 bg-white/10 rounded-xl shrink-0" />
-            {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="h-16 w-full bg-white/5 rounded-2xl shrink-0" />
-            ))}
+
+          {/* Bottom Row: Performance + Notices & Calendar */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:flex-1 lg:min-h-0">
+            {/* Left Side */}
+            <div className="flex flex-col gap-4 lg:flex-1 lg:min-h-0 order-2 lg:order-1">
+              <div className="bg-card/20 backdrop-blur-3xl border border-white/5 rounded-2xl p-4 md:p-5 shadow-xl lg:flex-1 lg:min-h-0 min-h-[200px] flex flex-col">
+                <Skeleton className="h-6 w-48 mb-4 bg-white/10 rounded-md shrink-0" />
+                <div className="flex-1 flex flex-col sm:flex-row items-center gap-6 justify-center min-h-0 py-2">
+                  <Skeleton className="w-20 h-20 rounded-full bg-white/10 shrink-0" />
+                  <div className="flex-1 w-full space-y-3 max-w-[200px] sm:max-w-none">
+                    <Skeleton className="h-14 w-full bg-white/5 rounded-xl" />
+                    <Skeleton className="h-9 w-full bg-white/10 rounded-xl" />
+                  </div>
+                </div>
+              </div>
+              <div className="bg-card/20 backdrop-blur-3xl border border-white/5 rounded-2xl p-4 md:p-5 shadow-xl lg:flex-1 lg:min-h-0 min-h-[250px] flex flex-col">
+                <div className="flex justify-between items-center mb-4 shrink-0">
+                  <Skeleton className="h-6 w-40 bg-white/10 rounded-md" />
+                  <Skeleton className="h-7 w-20 bg-white/10 rounded-xl" />
+                </div>
+                <div className="flex-1 space-y-2 overflow-hidden">
+                  {[1, 2, 3].map(i => (
+                    <Skeleton key={i} className="h-16 w-full bg-white/5 rounded-xl shrink-0" />
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Side */}
+            <div className="bg-card/20 backdrop-blur-3xl border border-white/5 rounded-2xl p-4 md:p-5 shadow-xl lg:flex-1 lg:min-h-0 min-h-[400px] flex flex-col order-1 lg:order-2">
+              <Skeleton className="h-6 w-56 mb-4 bg-white/10 rounded-md shrink-0" />
+              <div className="flex-1 flex flex-col gap-4 min-h-0">
+                <div className="flex justify-between items-center px-2 shrink-0">
+                  <Skeleton className="h-8 w-8 rounded-md bg-white/10" />
+                  <Skeleton className="h-6 w-32 rounded-md bg-white/5" />
+                  <Skeleton className="h-8 w-8 rounded-md bg-white/10" />
+                </div>
+                <div className="grid grid-cols-7 gap-2 flex-1">
+                  {Array.from({ length: 35 }).map((_, i) => (
+                    <Skeleton key={i} className="w-full h-full bg-white/5 rounded-xl" />
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -89,7 +155,7 @@ export default function StudentDashboard() {
   return (
     <div className="flex flex-col gap-4 w-full lg:h-[calc(100vh-150px)] lg:overflow-hidden animate-in fade-in duration-300">
       {/* Welcome Section */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0" data-aos="fade-down">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0 animate-in slide-in-from-top-4 fade-in duration-500">
         <div className="space-y-1">
           <h1 className="text-xl md:text-2xl font-bold tracking-tight text-foreground">
             Welcome back, {student?.name}!
@@ -119,8 +185,7 @@ export default function StudentDashboard() {
         {/* Top Row: Course & Next Exam */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:shrink-0">
           
-          {/* Enrolled Courses / Batches */}
-          <div className="bg-card/40 backdrop-blur-3xl border border-white/10 rounded-2xl p-4 md:p-5 shadow-xl relative overflow-hidden flex flex-col" data-aos="fade-up">
+          <ScrollReveal delay={100} className="bg-card/40 backdrop-blur-3xl border border-white/10 rounded-2xl p-4 md:p-5 shadow-xl relative overflow-hidden flex flex-col">
             <h3 className="text-base font-bold text-white mb-2 flex items-center gap-2 shrink-0">
               <GraduationCap className="w-5 h-5 text-primary" />
               My Course & Batch
@@ -137,10 +202,9 @@ export default function StudentDashboard() {
               </div>
             </div>
             <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-primary/10 rounded-full blur-xl group-hover:bg-primary/20 transition-colors pointer-events-none" />
-          </div>
+          </ScrollReveal>
 
-          {/* Upcoming Exam Card */}
-          <div className="bg-card/40 backdrop-blur-3xl border border-white/10 rounded-2xl p-4 md:p-5 shadow-xl relative overflow-hidden group flex flex-col" data-aos="fade-up">
+          <ScrollReveal delay={200} className="bg-card/40 backdrop-blur-3xl border border-white/10 rounded-2xl p-4 md:p-5 shadow-xl relative overflow-hidden group flex flex-col">
             {/* Decorative Glowing Circle */}
             <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/20 rounded-full blur-2xl pointer-events-none group-hover:scale-150 transition-transform duration-700" />
             <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none transform-gpu" />
@@ -182,7 +246,7 @@ export default function StudentDashboard() {
                 </div>
               )}
             </div>
-          </div>
+          </ScrollReveal>
 
         </div>
 
@@ -192,8 +256,7 @@ export default function StudentDashboard() {
           {/* Left Side: Split into Performance & Notices */}
           <div className="flex flex-col gap-4 lg:flex-1 lg:min-h-0 order-2 lg:order-1">
             
-            {/* Recent Performance Card */}
-            <div className="bg-card/40 backdrop-blur-2xl border border-white/10 rounded-2xl p-4 md:p-5 shadow-xl relative overflow-hidden group flex flex-col lg:flex-1 lg:min-h-0 min-h-[200px]" data-aos="fade-up">
+            <ScrollReveal delay={300} className="bg-card/40 backdrop-blur-2xl border border-white/10 rounded-2xl p-4 md:p-5 shadow-xl relative overflow-hidden group flex flex-col lg:flex-1 lg:min-h-0 min-h-[200px]">
               <div className="absolute bottom-0 left-0 w-32 h-32 bg-primary/10 rounded-full blur-[40px] pointer-events-none group-hover:bg-primary/20 transition-colors duration-500" />
               
               <div className="flex justify-between items-center mb-2 relative z-10 shrink-0">
@@ -257,10 +320,9 @@ export default function StudentDashboard() {
                   </div>
                 )}
               </div>
-            </div>
+            </ScrollReveal>
 
-            {/* Notices Section */}
-            <div className="bg-card/40 backdrop-blur-2xl border border-white/10 rounded-2xl p-4 md:p-5 shadow-lg relative overflow-hidden flex flex-col lg:flex-1 lg:min-h-0 min-h-[250px]" data-aos="fade-up">
+            <ScrollReveal delay={500} className="bg-card/40 backdrop-blur-2xl border border-white/10 rounded-2xl p-4 md:p-5 shadow-lg relative overflow-hidden flex flex-col lg:flex-1 lg:min-h-0 min-h-[250px]">
               <div className="flex justify-between items-center mb-2 relative z-10 shrink-0">
                 <h3 className="text-base font-bold text-white flex items-center gap-2">
                   <AlertTriangle className="w-5 h-5 text-amber-500 drop-shadow-sm" />
@@ -288,12 +350,11 @@ export default function StudentDashboard() {
                   </div>
                 )}
               </div>
-            </div>
+            </ScrollReveal>
 
           </div>
 
-          {/* Right Side: Calendar */}
-          <div className="bg-card/40 backdrop-blur-3xl border border-white/10 rounded-2xl p-4 md:p-5 shadow-xl relative overflow-hidden flex flex-col lg:flex-1 lg:min-h-0 min-h-[400px] order-1 lg:order-2" data-aos="fade-up">
+          <ScrollReveal delay={400} className="bg-card/40 backdrop-blur-3xl border border-white/10 rounded-2xl p-4 md:p-5 shadow-xl relative overflow-hidden flex flex-col lg:flex-1 lg:min-h-0 min-h-[400px] order-1 lg:order-2">
             <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[80px] -mr-20 -mt-20 pointer-events-none" />
             <h2 className="text-sm md:text-base font-bold mb-2 text-white flex items-center gap-2 shrink-0">
               <CalendarClock className="w-4 h-4 text-primary" />
@@ -307,7 +368,7 @@ export default function StudentDashboard() {
                 readOnly={true}
               />
             </div>
-          </div>
+          </ScrollReveal>
 
         </div>
 
