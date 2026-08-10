@@ -61,7 +61,7 @@ export default function AboutPage() {
                     <Icon className={`w-6 h-6 ${stat.color}`} />
                   </div>
                   <h3 className="text-3xl sm:text-4xl font-bold text-foreground mb-1">{stat.value}</h3>
-                  <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
+                  <p className="text-sm font-medium text-foreground/90">{stat.label}</p>
                 </div>
               );
             })}
@@ -102,7 +102,7 @@ export default function AboutPage() {
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground leading-tight">
                 শিক্ষার্থীদের সফলতাই <br /> আমাদের মূল লক্ষ্য
               </h2>
-              <div className="space-y-4 text-muted-foreground leading-relaxed text-lg">
+              <div className="space-y-4 text-foreground/90 leading-relaxed text-lg">
                 <p>
                   Institute Web-এর পথচলা শুরু হয়েছিল একটি মহৎ উদ্দেশ্য নিয়ে - শিক্ষার্থীদের জন্য বায়োলজিকে সহজ, প্রাণবন্ত এবং আকর্ষণীয় করে তোলা। আমরা বিশ্বাস করি মুখস্তবিদ্যা নয়, বরং কনসেপ্ট ক্লিয়ার করার মাধ্যমেই আসল সফলতা আসে।
                 </p>

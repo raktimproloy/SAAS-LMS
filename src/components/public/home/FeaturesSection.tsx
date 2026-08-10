@@ -75,7 +75,7 @@ export function FeaturesSection() {
           <h2 className="text-4xl sm:text-5xl md:text-6xl font-black text-foreground mb-6 tracking-tight">
             সেরা শিক্ষার <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-sky-400">অভিজ্ঞতা</span>
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto text-lg sm:text-xl leading-relaxed">
+          <p className="text-foreground max-w-2xl mx-auto text-lg sm:text-xl leading-relaxed">
             আমাদের প্ল্যাটফর্মে পাবেন সবকিছু যা একজন সফল মেডিকেল শিক্ষার্থীর প্রয়োজন।
             সেরা শিক্ষক, আধুনিক প্রযুক্তি এবং সঠিক গাইডলাইনের এক অনন্য সমন্বয়।
           </p>
@@ -106,7 +106,7 @@ export function FeaturesSection() {
                     {feature.title}
                   </h3>
 
-                  <p className="text-muted-foreground leading-relaxed text-base">
+                  <p className="text-foreground leading-relaxed text-base">
                     {feature.desc}
                   </p>
                 </div>

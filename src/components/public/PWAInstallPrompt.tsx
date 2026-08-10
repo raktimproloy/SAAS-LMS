@@ -80,7 +80,7 @@ export function PWAInstallPrompt() {
                 <h3 className="font-semibold text-sm text-foreground">
                   App Download করুন! 📱
                 </h3>
-                <p className="text-xs text-muted-foreground mt-0.5">
+                <p className="text-xs text-foreground/90 mt-0.5">
                   Institute Web App install করুন — offline-ও কাজ করে!
                 </p>
 
@@ -97,7 +97,7 @@ export function PWAInstallPrompt() {
                     size="sm"
                     variant="ghost"
                     onClick={handleDismiss}
-                    className="h-8 text-xs text-muted-foreground"
+                    className="h-8 text-xs text-foreground/90"
                   >
                     পরে
                   </Button>
@@ -106,7 +106,7 @@ export function PWAInstallPrompt() {
 
               <button
                 onClick={handleDismiss}
-                className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
+                className="text-foreground/90 hover:text-foreground transition-colors shrink-0"
                 aria-label="Close"
               >
                 <X className="h-4 w-4" />

@@ -91,7 +91,7 @@ export function Footer() {
                 Doctor<span className="text-primary">Biology</span>
               </span>
             </Link>
-            <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
+            <p className="text-sm text-foreground/90 leading-relaxed max-w-xs">
               মেডিকেল ভর্তি পরীক্ষা ও একাডেমিক প্রস্তুতির জন্য বাংলাদেশের সেরা অনলাইন প্ল্যাটফর্ম।
             </p>
 
@@ -107,7 +107,7 @@ export function Footer() {
                     rel="noopener noreferrer"
                     aria-label={s.label}
                     className={cn(
-                      "h-9 w-9 rounded-xl bg-muted border border-border flex items-center justify-center transition-all duration-200 hover:border-primary/50 hover:bg-primary/10 hover:scale-110 text-muted-foreground",
+                      "h-9 w-9 rounded-xl bg-muted border border-border flex items-center justify-center transition-all duration-200 hover:border-primary/50 hover:bg-primary/10 hover:scale-110 text-foreground/90",
                       s.color
                     )}
                   >
@@ -133,7 +133,7 @@ export function Footer() {
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors hover:translate-x-1 inline-flex items-center gap-1.5 group"
+                    className="text-sm text-foreground/90 hover:text-foreground transition-colors hover:translate-x-1 inline-flex items-center gap-1.5 group"
                   >
                     <span className="w-0 group-hover:w-2 h-px bg-primary transition-all duration-200 rounded-full" />
                     {link.label}
@@ -154,23 +154,23 @@ export function Footer() {
           >
             <h3 className="text-foreground font-semibold text-sm uppercase tracking-wider">Contact</h3>
             <ul className="space-y-3">
-              <li className="flex items-start gap-3 text-sm text-muted-foreground">
+              <li className="flex items-start gap-3 text-sm text-foreground/90">
                 <MapPin className="h-4 w-4 text-primary mt-0.5 shrink-0" />
                 <span>ঢাকা, বাংলাদেশ</span>
               </li>
-              <li className="flex items-center gap-3 text-sm text-muted-foreground">
+              <li className="flex items-center gap-3 text-sm text-foreground/90">
                 <Phone className="h-4 w-4 text-primary shrink-0" />
                 <a href="tel:+8801XXXXXXXXX" className="hover:text-foreground transition-colors">
                   +880 1XXXXXXXXX
                 </a>
               </li>
-              <li className="flex items-center gap-3 text-sm text-muted-foreground">
+              <li className="flex items-center gap-3 text-sm text-foreground/90">
                 <Mail className="h-4 w-4 text-primary shrink-0" />
                 <a href="mailto:info@instituteweb.com" className="hover:text-foreground transition-colors">
                   info@instituteweb.com
                 </a>
               </li>
-              <li className="flex items-center gap-3 text-sm text-muted-foreground">
+              <li className="flex items-center gap-3 text-sm text-foreground/90">
                 <WhatsAppIcon className="h-4 w-4 text-green-500 shrink-0" />
                 <a
                   href="https://wa.me/8801XXXXXXXXX"
@@ -186,7 +186,7 @@ export function Footer() {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-12 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
+        <div className="mt-12 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-foreground/90">
           <p>© {new Date().getFullYear()} Institute Web LMS. All rights reserved.</p>
           <p>Made with ❤️ for Medical Students</p>
         </div>

@@ -38,7 +38,7 @@ export function ReviewSection() {
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-6">
             তারা কী বলছে আমাদের সম্পর্কে?
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
+          <p className="text-foreground max-w-2xl mx-auto text-lg">
             হাজারো শিক্ষার্থীর আস্থার জায়গা Institute Web। চলুন শুনে নেওয়া যাক সফল শিক্ষার্থীদের বাস্তব অভিজ্ঞতা।
           </p>
         </div>
@@ -66,7 +66,7 @@ export function ReviewSection() {
                     </div>
                     <div>
                       <h4 className="text-foreground font-semibold text-sm">{review.name}</h4>
-                      <p className="text-muted-foreground text-xs truncate max-w-[150px]">{review.college}</p>
+                      <p className="text-foreground/90 text-xs truncate max-w-[150px]">{review.college}</p>
                     </div>
                   </div>
                   <div className="flex gap-0.5">

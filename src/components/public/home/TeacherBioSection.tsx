@@ -24,7 +24,7 @@ export function TeacherBioSection() {
               MBBS (DMC), FCPS (Medicine)
             </h3>
 
-            <p className="text-muted-foreground text-lg leading-relaxed mb-8">
+            <p className="text-foreground text-lg leading-relaxed mb-8">
               বিগত ১০ বছর ধরে মেডিকেল ভর্তিচ্ছু শিক্ষার্থীদের জীববিজ্ঞানের ভয় দূর করে তাদের স্বপ্ন পূরণে কাজ করে যাচ্ছি। আমার লক্ষ্য হলো প্রতিটি শিক্ষার্থী যেন শুধু মুখস্থ না করে, বরং বুঝে শিখতে পারে। আমার ক্লাসে আপনি পাবেন বাস্তব জীবনের উদাহরণ দিয়ে প্রতিটি টপিকের গভীর বিশ্লেষণ।
             </p>
 
@@ -35,7 +35,7 @@ export function TeacherBioSection() {
                 </div>
                 <div>
                   <h4 className="font-bold text-foreground text-lg">১০,০০০+</h4>
-                  <p className="text-sm text-muted-foreground">সফল শিক্ষার্থী</p>
+                  <p className="text-sm text-foreground/90">সফল শিক্ষার্থী</p>
                 </div>
               </div>
               <div className="flex items-center gap-4 p-4 rounded-2xl bg-card border border-border hover:border-sky-500/30 transition-colors shadow-sm">
@@ -44,7 +44,7 @@ export function TeacherBioSection() {
                 </div>
                 <div>
                   <h4 className="font-bold text-foreground text-lg">১০+ বছর</h4>
-                  <p className="text-sm text-muted-foreground">শিক্ষকতার অভিজ্ঞতা</p>
+                  <p className="text-sm text-foreground/90">শিক্ষকতার অভিজ্ঞতা</p>
                 </div>
               </div>
             </div>

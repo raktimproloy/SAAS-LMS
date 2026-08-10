@@ -59,7 +59,7 @@ export function GallerySection() {
 
 
   return (
-    <section className="py-24 px-4 sm:px-6 lg:px-8 bg-background relative overflow-hidden">
+    <section className="py-16 px-4 sm:px-6 lg:px-8 bg-background relative overflow-hidden">
       {/* Decorative Background */}
       <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-sky-500/5 rounded-full blur-[100px] pointer-events-none" />
@@ -67,20 +67,20 @@ export function GallerySection() {
       <div className="max-w-7xl mx-auto relative z-10">
 
         {/* Section Header */}
-        <div className="text-center mb-16" data-aos="fade-up">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-6">
+        <div className="text-center mb-10" data-aos="fade-up">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4">
             সেরা শিক্ষার অভিজ্ঞতা
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
+          <p className="text-foreground max-w-2xl mx-auto text-lg">
             আধুনিক ক্লাসরুম, ল্যাব এবং সেরা পরিবেশ নিয়ে আমাদের অফলাইন সেন্টারগুলোতে শিক্ষার্থীদের জন্য রয়েছে বিশ্বমানের পড়াশোনার অভিজ্ঞতা।
           </p>
         </div>
 
         {/* Gallery Container */}
-        <div className="max-w-5xl mx-auto flex flex-col items-center">
+        <div className="max-w-4xl mx-auto flex flex-col items-center">
 
           {/* Main Large Image */}
-          <div className="w-full aspect-[4/3] sm:aspect-[16/8] lg:aspect-[21/9] relative rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.3)] bg-black/20 border border-white/5 group">
+          <div className="w-full aspect-[16/9] lg:aspect-[21/9] relative rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.3)] bg-black/20 border border-white/5 group">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeImage.id}
@@ -103,13 +103,13 @@ export function GallerySection() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.2 }}
-                  className="absolute bottom-0 left-0 right-0 p-8 sm:p-10"
+                  className="absolute bottom-0 left-0 right-0 p-6 sm:p-8"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-primary/20 backdrop-blur-md flex items-center justify-center border border-white/20">
-                      <ImageIcon className="w-5 h-5 text-white" />
+                    <div className="w-8 h-8 rounded-full bg-primary/20 backdrop-blur-md flex items-center justify-center border border-white/20">
+                      <ImageIcon className="w-4 h-4 text-white" />
                     </div>
-                    <h3 className="text-2xl sm:text-3xl font-bold text-white tracking-wide">
+                    <h3 className="text-xl sm:text-2xl font-bold text-white tracking-wide">
                       {activeImage.title}
                     </h3>
                   </div>
@@ -144,7 +144,7 @@ export function GallerySection() {
             >
               {/* Duplicate array for smooth infinite loop if needed, but 6 is usually enough for auto slides */}
               {[...displayImages, ...displayImages].map((img, idx) => (
-                <SwiperSlide key={`${img.id}-${idx}`} className="!w-[140px] sm:!w-[200px]">
+                <SwiperSlide key={`${img.id}-${idx}`} className="!w-[120px] sm:!w-[160px]">
                   <div className="thumbnail-wrapper relative aspect-video rounded-xl overflow-hidden cursor-pointer border-2 transition-all duration-500">
                     <div
                       className="absolute inset-0 bg-cover bg-center"
