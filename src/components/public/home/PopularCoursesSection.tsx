@@ -51,7 +51,7 @@ export function PopularCoursesSection({ courses }: PopularCoursesSectionProps) {
               transition={{ duration: 0.5, delay: i * 0.1 }}
             >
               <Link href={`/courses/${c.id}`} className="block h-full group">
-                <div className="h-full bg-card/60 backdrop-blur-xl border border-border/60 hover:border-primary/40 rounded-3xl p-5 transition-all duration-500 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] hover:-translate-y-2 dark:hover:shadow-[0_20px_40px_-15px_rgba(255,255,255,0.05)] relative overflow-hidden flex flex-col">
+                <div className="h-full bg-card/60 backdrop-blur-xl border border-border/60 hover:border-primary/40 rounded-xl p-5 transition-all duration-500 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] hover:-translate-y-2 dark:hover:shadow-[0_20px_40px_-15px_rgba(255,255,255,0.05)] relative overflow-hidden flex flex-col">
                   {/* Decorative glow */}
                   <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-[40px] group-hover:bg-primary/20 transition-colors duration-500" />
                   

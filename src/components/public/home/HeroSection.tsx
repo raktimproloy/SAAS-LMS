@@ -38,7 +38,7 @@ function HeroSlider() {
   }, [slides.length]);
 
   return (
-    <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl border border-white/10 group">
+    <div className="relative w-full h-full rounded-xl overflow-hidden shadow-2xl border border-white/10 group">
       {slides.map((slide, index) => (
         <div
           key={index}
@@ -116,12 +116,12 @@ export function HeroSection() {
               className="mt-10 flex flex-col sm:flex-row gap-4 items-start sm:items-center"
             >
               <Link href="/student/login"
-                className="group px-8 py-4 rounded-2xl bg-white text-primary font-bold text-base shadow-2xl hover:bg-white/90 transition-all duration-300 flex items-center justify-center gap-2 w-full sm:w-auto">
+                className="group px-8 py-4 rounded-lg bg-white text-primary font-bold text-base shadow-2xl hover:bg-white/90 transition-all duration-300 flex items-center justify-center gap-2 w-full sm:w-auto">
                 এখনই শুরু করুন
                 <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link href="/courses"
-                className="px-8 py-4 rounded-2xl border border-white/25 text-white font-semibold text-base hover:bg-white/10 transition-all duration-300 backdrop-blur-sm flex justify-center w-full sm:w-auto">
+                className="px-8 py-4 rounded-lg border border-white/25 text-white font-semibold text-base hover:bg-white/10 transition-all duration-300 backdrop-blur-sm flex justify-center w-full sm:w-auto">
                 কোর্স দেখুন
               </Link>
             </motion.div>

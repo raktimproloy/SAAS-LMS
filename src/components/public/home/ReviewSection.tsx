@@ -53,7 +53,7 @@ export function ReviewSection() {
             {[...row1, ...row1, ...row1].map((review, idx) => (
               <div
                 key={`${review.id}-${idx}`}
-                className="w-[320px] sm:w-[400px] mx-3 sm:mx-4 shrink-0 bg-card/40 backdrop-blur-md border border-border rounded-3xl p-6 sm:p-8 hover:bg-card/60 transition-colors duration-300"
+                className="w-[320px] sm:w-[400px] mx-3 sm:mx-4 shrink-0 bg-card/40 backdrop-blur-md border border-border rounded-xl p-6 sm:p-8 hover:bg-card/60 transition-colors duration-300"
               >
                 <Quote className="w-10 h-10 text-foreground/5 mb-4" />
                 <p className="text-foreground/80 text-sm sm:text-base whitespace-normal leading-relaxed mb-6 line-clamp-3">
@@ -84,7 +84,7 @@ export function ReviewSection() {
             {[...row2, ...row2, ...row2].map((review, idx) => (
               <div
                 key={`${review.id}-${idx}`}
-                className="w-[320px] sm:w-[400px] mx-3 sm:mx-4 shrink-0 bg-card/40 backdrop-blur-md border border-white/10 rounded-3xl p-6 sm:p-8 hover:bg-card/60 transition-colors duration-300"
+                className="w-[320px] sm:w-[400px] mx-3 sm:mx-4 shrink-0 bg-card/40 backdrop-blur-md border border-white/10 rounded-xl p-6 sm:p-8 hover:bg-card/60 transition-colors duration-300"
               >
                 <Quote className="w-10 h-10 text-white/5 mb-4" />
                 <p className="text-white/80 text-sm sm:text-base whitespace-normal leading-relaxed mb-6 line-clamp-3">

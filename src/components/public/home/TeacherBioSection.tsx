@@ -29,7 +29,7 @@ export function TeacherBioSection() {
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-              <div className="flex items-center gap-4 p-4 rounded-2xl bg-card border border-border hover:border-primary/30 transition-colors shadow-sm">
+              <div className="flex items-center gap-4 p-4 rounded-lg bg-card border border-border hover:border-primary/30 transition-colors shadow-sm">
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
                   <HeartPulse className="w-6 h-6" />
                 </div>
@@ -38,7 +38,7 @@ export function TeacherBioSection() {
                   <p className="text-sm text-foreground/90">সফল শিক্ষার্থী</p>
                 </div>
               </div>
-              <div className="flex items-center gap-4 p-4 rounded-2xl bg-card border border-border hover:border-sky-500/30 transition-colors shadow-sm">
+              <div className="flex items-center gap-4 p-4 rounded-lg bg-card border border-border hover:border-sky-500/30 transition-colors shadow-sm">
                 <div className="w-12 h-12 rounded-full bg-sky-500/10 flex items-center justify-center text-sky-500 shrink-0">
                   <BookOpen className="w-6 h-6" />
                 </div>
@@ -53,10 +53,10 @@ export function TeacherBioSection() {
           {/* Right: Video Player */}
           <div data-aos="fade-left" className="relative">
             {/* Decorative background behind video */}
-            <div className="absolute -inset-4 bg-gradient-to-tr from-primary/30 to-sky-400/30 rounded-[2rem] blur-2xl opacity-50" />
+            <div className="absolute -inset-4 bg-gradient-to-tr from-primary/30 to-sky-400/30 rounded-xl blur-2xl opacity-50" />
 
             <div 
-              className="relative rounded-[2rem] overflow-hidden border border-white/10 shadow-2xl aspect-[16/10] sm:aspect-video bg-black group"
+              className="relative rounded-xl overflow-hidden border border-white/10 shadow-2xl aspect-[16/10] sm:aspect-video bg-black group"
             >
               {!isPlaying ? (
                 <div 

@@ -80,7 +80,7 @@ export function GallerySection() {
         <div className="max-w-4xl mx-auto flex flex-col items-center">
 
           {/* Main Large Image */}
-          <div className="w-full aspect-[16/9] lg:aspect-[21/9] relative rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.3)] bg-black/20 border border-white/5 group">
+          <div className="w-full aspect-[16/9] lg:aspect-[21/9] relative rounded-xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.3)] bg-black/20 border border-white/5 group">
             <AnimatePresence mode="wait">
               <motion.div
                 key={activeImage.id}

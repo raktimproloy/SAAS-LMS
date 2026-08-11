@@ -11,7 +11,7 @@ export function MapSection() {
     <section className="py-8 sm:py-12 px-4 sm:px-6 lg:px-8 bg-muted/40 relative">
       <div className="max-w-7xl mx-auto">
         {/* Large Google Map */}
-        <div className="w-full h-[300px] sm:h-[400px] lg:h-[450px] rounded-3xl overflow-hidden border-2 border-border shadow-2xl relative group">
+        <div className="w-full h-[300px] sm:h-[400px] lg:h-[450px] rounded-xl overflow-hidden border-2 border-border shadow-2xl relative group">
 
           {/* Overlay to avoid accidental scrolls - optional, we'll keep pointer-events auto for interactivity */}
           <iframe

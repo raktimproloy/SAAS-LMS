@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import prisma from "@/lib/db";
 import { HeroTeacherSection } from "@/components/public/home/HeroTeacherSection";
-import { ActionButtonsSection } from "@/components/public/home/ActionButtonsSection";
 import { PopularCoursesSection } from "@/components/public/home/PopularCoursesSection";
 import { GallerySection } from "@/components/public/home/GallerySection";
 import { NoticeBoardSection } from "@/components/public/home/NoticeBoardSection";
@@ -48,8 +47,6 @@ export default async function HomePage() {
         <Suspense fallback={<HeroSkeleton />}>
           <HeroTeacherSection teacher={data.teacher} />
         </Suspense>
-        
-        <ActionButtonsSection />
         
         <Suspense fallback={<SectionSkeleton />}>
           <PopularCoursesSection courses={data.courses} />

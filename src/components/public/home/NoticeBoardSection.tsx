@@ -53,7 +53,7 @@ export function NoticeBoardSection({ notices }: NoticeBoardSectionProps) {
               transition={{ duration: 0.5, delay: index * 0.1 }}
             >
               <Link href={`/notices/${notice.id}`} className="block h-full group">
-                <div className={`bg-card/40 backdrop-blur-xl border rounded-3xl p-5 shadow-xl relative overflow-hidden flex flex-col h-full transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 ${notice.isPinned
+                <div className={`bg-card/40 backdrop-blur-xl border rounded-xl p-5 shadow-xl relative overflow-hidden flex flex-col h-full transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 ${notice.isPinned
                     ? "border-primary/30 bg-gradient-to-br from-primary/5 to-transparent hover:border-primary/60"
                     : "border-border/50 hover:border-primary/40"
                   }`}

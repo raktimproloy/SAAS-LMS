@@ -92,13 +92,13 @@ export function FeaturesSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                className={`group relative rounded-[2rem] bg-card border border-border p-8 sm:p-10 overflow-hidden hover:-translate-y-2 transition-all duration-500 shadow-sm hover:shadow-md ${feature.borderColor}`}
+                className={`group relative rounded-xl bg-card border border-border p-8 sm:p-10 overflow-hidden hover:-translate-y-2 transition-all duration-500 shadow-sm hover:shadow-md ${feature.borderColor}`}
               >
                 {/* Background Hover Gradient */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
 
                 <div className="relative z-10">
-                  <div className="w-16 h-16 rounded-2xl bg-muted border border-border flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500 shadow-xl backdrop-blur-sm">
+                  <div className="w-16 h-16 rounded-lg bg-muted border border-border flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-500 shadow-xl backdrop-blur-sm">
                     <Icon className={`w-8 h-8 ${feature.iconColor}`} />
                   </div>
 

@@ -189,7 +189,7 @@ export function VideoCourseSection({ videoCourses }: VideoCourseSectionProps) {
           >
             {displayCourses.map((course) => (
               <SwiperSlide key={course.uniqueId} className="!w-[80vw] sm:!w-[500px] lg:!w-[600px]">
-                <div className="relative w-full aspect-[16/9] sm:aspect-[21/9] rounded-[2rem] overflow-hidden shadow-2xl border border-white/10 group">
+                <div className="relative w-full aspect-[4/3] sm:aspect-[16/9] rounded-xl overflow-hidden shadow-2xl border border-white/10 group">
                   <div
                     className="absolute inset-0 bg-cover bg-center opacity-60 mix-blend-overlay group-hover:scale-110 transition-transform duration-1000"
                     style={{ backgroundImage: `url(${course.bgImage})` }}
@@ -242,55 +242,6 @@ export function VideoCourseSection({ videoCourses }: VideoCourseSectionProps) {
           </Swiper>
         </div>
 
-        <div className="max-w-3xl mx-auto px-4 mt-2 sm:mt-6 h-auto relative">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeCourse.id}
-              initial={{ opacity: 0, scale: 0.95, y: 15 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -15 }}
-              transition={{ duration: 0.4, ease: "easeOut" }}
-              className="w-full bg-card/60 border border-border/60 rounded-3xl p-5 sm:p-6 backdrop-blur-xl shadow-2xl relative overflow-hidden"
-            >
-              <div className={`absolute -top-24 -right-24 w-48 h-48 ${getThemeGlow(activeCourse.theme)} rounded-full blur-[60px] pointer-events-none`} />
-
-              <div className="flex flex-col sm:flex-row items-start gap-6 sm:gap-10 relative z-10">
-                <div className="flex-1 w-full">
-                  <div className="flex items-center gap-3 mb-3">
-                    <h4 className="text-xl sm:text-2xl font-bold text-foreground">
-                      {activeCourse.englishTitle}
-                    </h4>
-                    <div className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-primary/10 rounded-full text-primary text-xs font-bold border border-primary/20">
-                      <Users className="w-3.5 h-3.5" />
-                      {activeCourse.students}
-                    </div>
-                  </div>
-
-                  <p className="text-foreground font-medium text-sm sm:text-base leading-relaxed pr-0 sm:pr-8">
-                    {activeCourse.description}
-                  </p>
-                </div>
-
-                <div className="w-full sm:w-auto shrink-0 grid grid-cols-3 sm:grid-cols-1 gap-4 sm:gap-6 border-t sm:border-t-0 sm:border-l border-border pt-6 sm:pt-0 sm:pl-10">
-                  {activeCourse.stats.map((stat, idx) => {
-                    const Icon = idx === 0 ? FileText : idx === 1 ? ClipboardList : PenTool;
-                    return (
-                      <div key={idx} className="flex flex-col sm:flex-row items-center sm:items-start gap-3 text-center sm:text-left group/stat cursor-default">
-                        <div className="w-10 h-10 rounded-xl bg-card border border-border flex items-center justify-center shrink-0 shadow-sm group-hover/stat:border-primary/50 transition-colors">
-                          <Icon className="w-5 h-5 text-primary group-hover/stat:scale-110 transition-transform" />
-                        </div>
-                        <div>
-                          <div className="text-lg sm:text-xl font-bold text-foreground">{stat.label}</div>
-                          <div className="text-xs font-bold text-foreground/90 uppercase tracking-wider">{stat.desc}</div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </motion.div>
-          </AnimatePresence>
-        </div>
       </div>
 
       <style dangerouslySetInnerHTML={{

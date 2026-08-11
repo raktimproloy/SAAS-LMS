@@ -17,7 +17,7 @@ export function ActionButtonsSection() {
         >
           <Link 
             href="/student/login"
-            className="w-full sm:w-auto group relative flex items-center justify-center gap-3 px-6 py-4 bg-primary text-primary-foreground rounded-2xl font-bold text-base shadow-[0_0_40px_-10px_hsl(var(--primary))] hover:shadow-[0_0_60px_-10px_hsl(var(--primary))] transition-all duration-300 hover:-translate-y-1 overflow-hidden"
+            className="w-full sm:w-auto group relative flex items-center justify-center gap-3 px-6 py-4 bg-primary text-primary-foreground rounded-lg font-bold text-base shadow-[0_0_40px_-10px_hsl(var(--primary))] hover:shadow-[0_0_60px_-10px_hsl(var(--primary))] transition-all duration-300 hover:-translate-y-1 overflow-hidden"
           >
             <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
             <LogIn className="w-5 h-5 relative z-10" />
@@ -25,7 +25,7 @@ export function ActionButtonsSection() {
           </Link>
 
           <button 
-            className="w-full sm:w-auto group relative flex items-center justify-center gap-3 px-6 py-4 bg-card border-2 border-primary/20 text-foreground rounded-2xl font-bold text-base shadow-xl hover:border-primary transition-all duration-300 hover:-translate-y-1"
+            className="w-full sm:w-auto group relative flex items-center justify-center gap-3 px-6 py-4 bg-card border-2 border-primary/20 text-foreground rounded-lg font-bold text-base shadow-xl hover:border-primary transition-all duration-300 hover:-translate-y-1"
           >
             <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300 text-primary">
               <Download className="w-4 h-4" />

@@ -31,68 +31,68 @@ export function ContactSection() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-10">
 
           {/* Left Side: Contact Info */}
-          <div className="lg:col-span-5 flex flex-col gap-4 sm:gap-6" data-aos="fade-right">
+          <div className="lg:col-span-5" data-aos="fade-right">
+            <div className="h-full flex flex-col justify-center gap-6 sm:gap-8">
+              {/* Phone */}
+              <a href="tel:+8801987654321" className="flex items-center gap-4 group">
+                <div className="w-12 h-12 shrink-0 rounded-lg bg-primary/10 flex items-center justify-center group-hover:scale-110 group-hover:bg-primary/20 transition-all duration-300">
+                  <Phone className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-foreground/90 mb-1">কল করুন</h4>
+                  <p className="text-foreground font-bold text-base sm:text-lg group-hover:text-primary transition-colors">+880 1987-654321</p>
+                </div>
+              </a>
 
-            {/* Phone */}
-            <a href="tel:+8801987654321" className="flex items-center gap-4 p-4 sm:p-5 rounded-[2rem] bg-card border border-border hover:border-primary/30 transition-all duration-300 group hover:shadow-lg">
-              <div className="w-12 h-12 shrink-0 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:scale-110 group-hover:bg-primary/20 transition-all duration-300">
-                <Phone className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <h4 className="text-sm font-medium text-foreground/90 mb-1">কল করুন</h4>
-                <p className="text-foreground font-bold text-base sm:text-lg group-hover:text-primary transition-colors">+880 1987-654321</p>
-              </div>
-            </a>
+              {/* WhatsApp */}
+              <a href="https://wa.me/8801987654321" target="_blank" rel="noreferrer" className="flex items-center gap-4 group">
+                <div className="w-12 h-12 shrink-0 rounded-lg bg-green-500/10 flex items-center justify-center group-hover:scale-110 group-hover:bg-green-500/20 transition-all duration-300">
+                  <WhatsAppIcon className="w-5 h-5 text-green-500" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-foreground/90 mb-1">হোয়াটসঅ্যাপ</h4>
+                  <p className="text-foreground font-bold text-base sm:text-lg group-hover:text-green-500 transition-colors">+880 1987-654321</p>
+                </div>
+              </a>
 
-            {/* WhatsApp */}
-            <a href="https://wa.me/8801987654321" target="_blank" rel="noreferrer" className="flex items-center gap-4 p-4 sm:p-5 rounded-[2rem] bg-card border border-border hover:border-green-500/30 transition-all duration-300 group hover:shadow-lg">
-              <div className="w-12 h-12 shrink-0 rounded-2xl bg-green-500/10 flex items-center justify-center group-hover:scale-110 group-hover:bg-green-500/20 transition-all duration-300">
-                <WhatsAppIcon className="w-5 h-5 text-green-500" />
-              </div>
-              <div>
-                <h4 className="text-sm font-medium text-foreground/90 mb-1">হোয়াটসঅ্যাপ</h4>
-                <p className="text-foreground font-bold text-base sm:text-lg group-hover:text-green-500 transition-colors">+880 1987-654321</p>
-              </div>
-            </a>
+              {/* Email */}
+              <a href="mailto:support@instituteweb.com" className="flex items-center gap-4 group">
+                <div className="w-12 h-12 shrink-0 rounded-lg bg-pink-500/10 flex items-center justify-center group-hover:scale-110 group-hover:bg-pink-500/20 transition-all duration-300">
+                  <Mail className="w-5 h-5 text-pink-500" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-foreground/90 mb-1">ইমেইল করুন</h4>
+                  <p className="text-foreground font-bold text-base sm:text-lg group-hover:text-pink-500 transition-colors">support@instituteweb.com</p>
+                </div>
+              </a>
 
-            {/* Email */}
-            <a href="mailto:support@instituteweb.com" className="flex items-center gap-4 p-4 sm:p-5 rounded-[2rem] bg-card border border-border hover:border-pink-500/30 transition-all duration-300 group hover:shadow-lg">
-              <div className="w-12 h-12 shrink-0 rounded-2xl bg-pink-500/10 flex items-center justify-center group-hover:scale-110 group-hover:bg-pink-500/20 transition-all duration-300">
-                <Mail className="w-5 h-5 text-pink-500" />
-              </div>
-              <div>
-                <h4 className="text-sm font-medium text-foreground/90 mb-1">ইমেইল করুন</h4>
-                <p className="text-foreground font-bold text-base sm:text-lg group-hover:text-pink-500 transition-colors">support@instituteweb.com</p>
-              </div>
-            </a>
-
-            {/* Office Address */}
-            <div className="flex items-start gap-4 p-4 sm:p-5 rounded-[2rem] bg-card border border-border group hover:border-primary/30 transition-all duration-300 hover:shadow-lg">
-              <div className="w-12 h-12 shrink-0 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                <MapPin className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <h4 className="text-foreground font-bold text-lg mb-1">প্রধান শাখা</h4>
-                <p className="text-foreground leading-relaxed mb-3 text-sm">৩য় তলা, ফার্মগেট মেইন রোড<br />ঢাকা, বাংলাদেশ</p>
-                <a href={directionsUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-sm font-bold text-primary hover:text-primary/80 transition-colors">
-                  <Navigation className="w-4 h-4" />
-                  ডিরেকশন দেখুন
-                </a>
+              {/* Office Address */}
+              <div className="flex items-start gap-4 group">
+                <div className="w-12 h-12 shrink-0 rounded-lg bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                  <MapPin className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <h4 className="text-foreground font-bold text-lg mb-1">প্রধান শাখা</h4>
+                  <p className="text-foreground leading-relaxed mb-3 text-sm">৩য় তলা, ফার্মগেট মেইন রোড<br />ঢাকা, বাংলাদেশ</p>
+                  <a href={directionsUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-sm font-bold text-primary hover:text-primary/80 transition-colors">
+                    <Navigation className="w-4 h-4" />
+                    ডিরেকশন দেখুন
+                  </a>
+                </div>
               </div>
             </div>
-
           </div>
 
           {/* Right Side: Admission / Contact Form */}
           <div className="lg:col-span-7" data-aos="fade-left">
-            <div className="bg-card border border-border rounded-[2rem] p-6 sm:p-8 shadow-xl shadow-black/5 relative overflow-hidden">
+            <div className="bg-card border border-border rounded-xl p-6 sm:p-8 shadow-xl shadow-black/5 relative overflow-hidden h-full">
 
               <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-[50px]" />
 
               <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-2">অনলাইনে ভর্তি / যোগাযোগ ফর্ম</h3>
               <p className="text-foreground text-sm mb-6">নিচের ফর্মটি পূরণ করুন। আমাদের টিম খুব দ্রুত আপনার সাথে যোগাযোগ করবে।</p>
 
-              <form className="space-y-5 relative z-10" onSubmit={(e) => e.preventDefault()}>
+              <form className="space-y-5 relative z-10 flex flex-col h-full" onSubmit={(e) => e.preventDefault()}>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div className="space-y-1.5">
@@ -126,12 +126,12 @@ export function ContactSection() {
                   </select>
                 </div>
 
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 flex-grow flex flex-col">
                   <label className="text-sm font-medium text-foreground">মেসেজ বা জিজ্ঞাসা (যদি থাকে)</label>
                   <textarea
                     rows={4}
                     placeholder="আপনার কিছু জানার থাকলে এখানে লিখুন..."
-                    className="w-full px-4 py-3 rounded-xl bg-background border border-input focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none"
+                    className="w-full flex-grow px-4 py-3 rounded-xl bg-background border border-input focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none"
                   />
                 </div>
 

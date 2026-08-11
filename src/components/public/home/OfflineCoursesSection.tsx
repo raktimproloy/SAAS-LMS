@@ -80,7 +80,7 @@ export function OfflineCoursesSection() {
                     viewport={{ once: true }}
                     transition={{ duration: 0.4, delay: bIndex * 0.1 }}
                     key={batch.id}
-                    className="bg-card/50 backdrop-blur-sm border border-border rounded-2xl p-5 sm:p-6 hover:bg-card hover:border-primary/40 hover:shadow-lg transition-all duration-300 flex flex-col sm:flex-row gap-6 justify-between group"
+                    className="bg-card/50 backdrop-blur-sm border border-border rounded-lg p-5 sm:p-6 hover:bg-card hover:border-primary/40 hover:shadow-lg transition-all duration-300 flex flex-col sm:flex-row gap-6 justify-between group"
                   >
 
                     <div className="flex-1">
