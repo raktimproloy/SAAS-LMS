@@ -186,16 +186,38 @@ model Payment {
   id             Int       @id @default(autoincrement())
   student_id     Int
   amount         Float
+  discount       Float     @default(0.0)
   due_amount     Float     @default(0.0)
   month          Int
   year           Int
   status         String // "paid" | "due" | "partial"
   receipt_number String?   @unique
+  payment_type   String?
+  invoice        String?   @unique
   paid_at        DateTime?
   note           String?   @db.Text
   created_at     DateTime  @default(now())
 
   student Student @relation(fields: [student_id], references: [id])
+}
+
+model Expense {
+  id           Int      @id @default(autoincrement())
+  title        String
+  description  String?  @db.Text
+  amount       Float
+  expended_by  String?
+  permitted_by String?
+  expense_date DateTime @default(now())
+  note         String?  @db.Text
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+}
+
+model PaymentType {
+  id         Int      @id @default(autoincrement())
+  name       String   @unique
+  created_at DateTime @default(now())
 }
 
 model Attendance {

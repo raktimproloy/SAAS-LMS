@@ -1,8 +1,15 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Pencil, BookOpen, Layers, Trash2, CheckCircle, XCircle, MessageSquare } from "lucide-react";
+import { Plus, Pencil, BookOpen, Layers, Trash2, CheckCircle, XCircle, MessageSquare, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -542,31 +549,39 @@ export default function CoursesBatchesPage() {
                               </Badge>
                             </TableCell>
                             <TableCell className="text-right">
-                              <div className="flex items-center justify-end gap-1">
-                                <Button onClick={() => handleToggleStatus(course.id, course.status, "courses")} variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-950/30">
-                                  {course.status === "active" ? <XCircle className="h-4 w-4 text-red-500" /> : <CheckCircle className="h-4 w-4" />}
-                                </Button>
-                                <Button onClick={() => handleEditCourse(course)} variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-950/30">
-                                  <Pencil className="h-4 w-4" />
-                                </Button>
-                                <Button onClick={() => handleDelete(course.id, "courses")} variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30">
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                                <Button 
-                                  onClick={() => {
+                              <DropdownMenu>
+                                <DropdownMenuTrigger className="h-8 w-8 p-0 flex items-center justify-center rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-muted-foreground">
+  <span className="sr-only">Open menu</span>
+  <MoreHorizontal className="h-4 w-4" />
+</DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem onClick={() => handleToggleStatus(course.id, course.status, "courses")}>
+                                    {course.status === "active" ? <XCircle className="mr-2 h-4 w-4 text-red-500" /> : <CheckCircle className="mr-2 h-4 w-4 text-green-600" />}
+                                    <span>{course.status === "active" ? "Deactivate" : "Activate"}</span>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => {
                                     setSmsTargetType("course");
                                     setSmsTargetId(course.id);
                                     setSmsTargetName(course.title);
                                     setIsSmsOpen(true);
-                                  }} 
-                                  variant="ghost" 
-                                  size="icon" 
-                                  className="h-8 w-8 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/30"
-                                  title="Send SMS to Course"
-                                >
-                                  <MessageSquare className="h-4 w-4" />
-                                </Button>
-                              </div>
+                                  }}>
+                                    <MessageSquare className="mr-2 h-4 w-4 text-blue-600" />
+                                    <span>Send SMS</span>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleEditCourse(course)}>
+                                    <Pencil className="mr-2 h-4 w-4" />
+                                    <span>Edit</span>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem 
+                                    onClick={() => handleDelete(course.id, "courses")}
+                                    className="text-destructive focus:text-destructive"
+                                  >
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    <span>Delete</span>
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
                             </TableCell>
                           </TableRow>
                         ))}
@@ -662,31 +677,39 @@ export default function CoursesBatchesPage() {
                               </Badge>
                             </TableCell>
                             <TableCell className="text-right">
-                              <div className="flex items-center justify-end gap-1">
-                                <Button onClick={() => handleToggleStatus(batch.id, batch.status, "batches")} variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-950/30">
-                                  {batch.status === "active" ? <XCircle className="h-4 w-4 text-red-500" /> : <CheckCircle className="h-4 w-4" />}
-                                </Button>
-                                <Button onClick={() => handleEditBatch(batch)} variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/30">
-                                  <Pencil className="h-4 w-4" />
-                                </Button>
-                                <Button onClick={() => handleDelete(batch.id, "batches")} variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30">
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                                <Button 
-                                  onClick={() => {
+                              <DropdownMenu>
+                                <DropdownMenuTrigger className="h-8 w-8 p-0 flex items-center justify-center rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-muted-foreground">
+  <span className="sr-only">Open menu</span>
+  <MoreHorizontal className="h-4 w-4" />
+</DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem onClick={() => handleToggleStatus(batch.id, batch.status, "batches")}>
+                                    {batch.status === "active" ? <XCircle className="mr-2 h-4 w-4 text-red-500" /> : <CheckCircle className="mr-2 h-4 w-4 text-green-600" />}
+                                    <span>{batch.status === "active" ? "Deactivate" : "Activate"}</span>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => {
                                     setSmsTargetType("batch");
                                     setSmsTargetId(batch.id);
                                     setSmsTargetName(batch.name);
                                     setIsSmsOpen(true);
-                                  }} 
-                                  variant="ghost" 
-                                  size="icon" 
-                                  className="h-8 w-8 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/30"
-                                  title="Send SMS to Batch"
-                                >
-                                  <MessageSquare className="h-4 w-4" />
-                                </Button>
-                              </div>
+                                  }}>
+                                    <MessageSquare className="mr-2 h-4 w-4 text-blue-600" />
+                                    <span>Send SMS</span>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleEditBatch(batch)}>
+                                    <Pencil className="mr-2 h-4 w-4" />
+                                    <span>Edit</span>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem 
+                                    onClick={() => handleDelete(batch.id, "batches")}
+                                    className="text-destructive focus:text-destructive"
+                                  >
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    <span>Delete</span>
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
                             </TableCell>
                           </TableRow>
                         ))}

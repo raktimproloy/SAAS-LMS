@@ -22,7 +22,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     if (isNaN(id)) return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
 
     const body = await request.json();
-    const { amount, due_amount, status, note, receipt_number, month, year } = body;
+    const { amount, discount, payment_type, due_amount, status, note, receipt_number, month, year } = body;
 
     const existingPayment = await prisma.payment.findUnique({ where: { id } });
     if (!existingPayment) return NextResponse.json({ error: "Payment not found" }, { status: 404 });
@@ -30,6 +30,8 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updateData: any = {};
     if (amount !== undefined) updateData.amount = parseFloat(amount);
+    if (discount !== undefined) updateData.discount = parseFloat(discount);
+    if (payment_type !== undefined) updateData.payment_type = payment_type || null;
     if (due_amount !== undefined) updateData.due_amount = parseFloat(due_amount);
     if (status) updateData.status = status;
     if (note !== undefined) updateData.note = note;

@@ -50,7 +50,10 @@ const sidebarLinks: SidebarLink[] = [
     subItems: [
       { name: "Students", href: "/admin/students", perm: "students" },
       { name: "Attendance", href: "/admin/attendance", perm: "students" },
+      { name: "QR Scanner", href: "/admin/qr-scanner", perm: "students" },
+      { name: "QR Cards", href: "/admin/qr-cards", perm: "students" },
       { name: "Payment", href: "/admin/payments", perm: "payments" },
+      { name: "Expenses", href: "/admin/expenses", perm: "expenses" },
       { name: "Study Materials", href: "/admin/materials", perm: "materials" },
       { name: "Report", href: "/admin/reports", perm: "reports" },
       { name: "Notices", href: "/admin/notices", perm: "notices" },
