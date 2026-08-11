@@ -11,7 +11,7 @@ export default function TestLoaderPage() {
           <BookLoader />
         </div>
 
-        <p className="mt-8 text-sm text-muted-foreground">
+        <p className="mt-8 text-sm text-foreground/90">
           This animation uses pure CSS transforms and Framer Motion to create a 3D book flipping effect.
         </p>
       </div>

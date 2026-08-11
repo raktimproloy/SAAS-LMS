@@ -9,7 +9,7 @@ export function ContactSection() {
   const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}`;
 
   return (
-    <section className="py-24 px-4 sm:px-6 lg:px-8 bg-background relative overflow-hidden">
+    <section className="py-16 px-4 sm:px-6 lg:px-8 bg-background relative overflow-hidden">
 
       {/* Decorative Elements */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
@@ -18,62 +18,62 @@ export function ContactSection() {
       <div className="max-w-7xl mx-auto relative z-10">
 
         {/* Header */}
-        <div className="text-center mb-16" data-aos="fade-up">
+        <div className="text-center mb-10" data-aos="fade-up">
 
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-6">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4">
             অ্যাডমিশন ও কন্টাক্ট
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
+          <p className="text-foreground max-w-2xl mx-auto text-lg">
             যেকোনো জিজ্ঞাসা বা নতুন ব্যাচে ভর্তি সংক্রান্ত তথ্যের জন্য আমাদের সাথে যোগাযোগ করুন। আমরা দ্রুত আপনার সাথে যোগাযোগ করবো।
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 lg:gap-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-10">
 
           {/* Left Side: Contact Info */}
           <div className="lg:col-span-5 flex flex-col gap-4 sm:gap-6" data-aos="fade-right">
 
             {/* Phone */}
-            <a href="tel:+8801987654321" className="flex items-center gap-5 p-5 sm:p-6 rounded-[2rem] bg-card border border-border hover:border-primary/30 transition-all duration-300 group hover:shadow-lg">
-              <div className="w-14 h-14 shrink-0 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:scale-110 group-hover:bg-primary/20 transition-all duration-300">
-                <Phone className="w-6 h-6 text-primary" />
+            <a href="tel:+8801987654321" className="flex items-center gap-4 p-4 sm:p-5 rounded-[2rem] bg-card border border-border hover:border-primary/30 transition-all duration-300 group hover:shadow-lg">
+              <div className="w-12 h-12 shrink-0 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:scale-110 group-hover:bg-primary/20 transition-all duration-300">
+                <Phone className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <h4 className="text-sm font-medium text-muted-foreground mb-1">কল করুন</h4>
-                <p className="text-foreground font-bold text-lg sm:text-xl group-hover:text-primary transition-colors">+880 1987-654321</p>
+                <h4 className="text-sm font-medium text-foreground/90 mb-1">কল করুন</h4>
+                <p className="text-foreground font-bold text-base sm:text-lg group-hover:text-primary transition-colors">+880 1987-654321</p>
               </div>
             </a>
 
             {/* WhatsApp */}
-            <a href="https://wa.me/8801987654321" target="_blank" rel="noreferrer" className="flex items-center gap-5 p-5 sm:p-6 rounded-[2rem] bg-card border border-border hover:border-green-500/30 transition-all duration-300 group hover:shadow-lg">
-              <div className="w-14 h-14 shrink-0 rounded-2xl bg-green-500/10 flex items-center justify-center group-hover:scale-110 group-hover:bg-green-500/20 transition-all duration-300">
-                <WhatsAppIcon className="w-6 h-6 text-green-500" />
+            <a href="https://wa.me/8801987654321" target="_blank" rel="noreferrer" className="flex items-center gap-4 p-4 sm:p-5 rounded-[2rem] bg-card border border-border hover:border-green-500/30 transition-all duration-300 group hover:shadow-lg">
+              <div className="w-12 h-12 shrink-0 rounded-2xl bg-green-500/10 flex items-center justify-center group-hover:scale-110 group-hover:bg-green-500/20 transition-all duration-300">
+                <WhatsAppIcon className="w-5 h-5 text-green-500" />
               </div>
               <div>
-                <h4 className="text-sm font-medium text-muted-foreground mb-1">হোয়াটসঅ্যাপ</h4>
-                <p className="text-foreground font-bold text-lg sm:text-xl group-hover:text-green-500 transition-colors">+880 1987-654321</p>
+                <h4 className="text-sm font-medium text-foreground/90 mb-1">হোয়াটসঅ্যাপ</h4>
+                <p className="text-foreground font-bold text-base sm:text-lg group-hover:text-green-500 transition-colors">+880 1987-654321</p>
               </div>
             </a>
 
             {/* Email */}
-            <a href="mailto:support@instituteweb.com" className="flex items-center gap-5 p-5 sm:p-6 rounded-[2rem] bg-card border border-border hover:border-pink-500/30 transition-all duration-300 group hover:shadow-lg">
-              <div className="w-14 h-14 shrink-0 rounded-2xl bg-pink-500/10 flex items-center justify-center group-hover:scale-110 group-hover:bg-pink-500/20 transition-all duration-300">
-                <Mail className="w-6 h-6 text-pink-500" />
+            <a href="mailto:support@instituteweb.com" className="flex items-center gap-4 p-4 sm:p-5 rounded-[2rem] bg-card border border-border hover:border-pink-500/30 transition-all duration-300 group hover:shadow-lg">
+              <div className="w-12 h-12 shrink-0 rounded-2xl bg-pink-500/10 flex items-center justify-center group-hover:scale-110 group-hover:bg-pink-500/20 transition-all duration-300">
+                <Mail className="w-5 h-5 text-pink-500" />
               </div>
               <div>
-                <h4 className="text-sm font-medium text-muted-foreground mb-1">ইমেইল করুন</h4>
-                <p className="text-foreground font-bold text-lg sm:text-xl group-hover:text-pink-500 transition-colors">support@instituteweb.com</p>
+                <h4 className="text-sm font-medium text-foreground/90 mb-1">ইমেইল করুন</h4>
+                <p className="text-foreground font-bold text-base sm:text-lg group-hover:text-pink-500 transition-colors">support@instituteweb.com</p>
               </div>
             </a>
 
             {/* Office Address */}
-            <div className="flex items-start gap-5 p-5 sm:p-6 rounded-[2rem] bg-card border border-border group hover:border-primary/30 transition-all duration-300 hover:shadow-lg">
-              <div className="w-14 h-14 shrink-0 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-                <MapPin className="w-6 h-6 text-primary" />
+            <div className="flex items-start gap-4 p-4 sm:p-5 rounded-[2rem] bg-card border border-border group hover:border-primary/30 transition-all duration-300 hover:shadow-lg">
+              <div className="w-12 h-12 shrink-0 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <MapPin className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <h4 className="text-foreground font-bold text-xl mb-2">প্রধান শাখা</h4>
-                <p className="text-muted-foreground leading-relaxed mb-4 text-sm sm:text-base">৩য় তলা, ফার্মগেট মেইন রোড<br />ঢাকা, বাংলাদেশ</p>
+                <h4 className="text-foreground font-bold text-lg mb-1">প্রধান শাখা</h4>
+                <p className="text-foreground leading-relaxed mb-3 text-sm">৩য় তলা, ফার্মগেট মেইন রোড<br />ঢাকা, বাংলাদেশ</p>
                 <a href={directionsUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-sm font-bold text-primary hover:text-primary/80 transition-colors">
                   <Navigation className="w-4 h-4" />
                   ডিরেকশন দেখুন
@@ -85,12 +85,12 @@ export function ContactSection() {
 
           {/* Right Side: Admission / Contact Form */}
           <div className="lg:col-span-7" data-aos="fade-left">
-            <div className="bg-card border border-border rounded-[2rem] p-8 sm:p-10 shadow-xl shadow-black/5 relative overflow-hidden">
+            <div className="bg-card border border-border rounded-[2rem] p-6 sm:p-8 shadow-xl shadow-black/5 relative overflow-hidden">
 
               <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-[50px]" />
 
-              <h3 className="text-2xl font-bold text-foreground mb-2">অনলাইনে ভর্তি / যোগাযোগ ফর্ম</h3>
-              <p className="text-muted-foreground text-sm mb-8">নিচের ফর্মটি পূরণ করুন। আমাদের টিম খুব দ্রুত আপনার সাথে যোগাযোগ করবে।</p>
+              <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-2">অনলাইনে ভর্তি / যোগাযোগ ফর্ম</h3>
+              <p className="text-foreground text-sm mb-6">নিচের ফর্মটি পূরণ করুন। আমাদের টিম খুব দ্রুত আপনার সাথে যোগাযোগ করবে।</p>
 
               <form className="space-y-5 relative z-10" onSubmit={(e) => e.preventDefault()}>
 
@@ -137,9 +137,9 @@ export function ContactSection() {
 
                 <button
                   type="submit"
-                  className="w-full flex items-center justify-center gap-2 py-4 mt-4 bg-primary text-primary-foreground font-bold text-lg rounded-xl hover:bg-primary/90 transition-all hover:scale-[1.01] active:scale-[0.99] shadow-lg shadow-primary/20"
+                  className="w-full flex items-center justify-center gap-2 py-3 mt-3 bg-primary text-primary-foreground font-bold text-base rounded-xl hover:bg-primary/90 transition-all hover:scale-[1.01] active:scale-[0.99] shadow-lg shadow-primary/20"
                 >
-                  <Send className="w-5 h-5" />
+                  <Send className="w-4 h-4" />
                   সাবমিট করুন
                 </button>
               </form>
