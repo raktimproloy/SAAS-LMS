@@ -13,12 +13,46 @@ async function checkPermission(permission: string) {
   return adminPayload.permissions?.includes("all") || adminPayload.permissions?.includes(permission);
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   const hasPerm = await checkPermission("payments");
   if (!hasPerm) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
 
   try {
+    const { searchParams } = new URL(request.url);
+    const search = searchParams.get("search");
+    const month = searchParams.get("month"); // YYYY-MM
+    const type = searchParams.get("type");
+    const start_date = searchParams.get("start_date");
+    const end_date = searchParams.get("end_date");
+
+    const where: any = {};
+    if (search) {
+      where.OR = [
+        { student: { name: { contains: search } } },
+        { student: { student_id: { contains: search } } },
+        { invoice: { contains: search } },
+        { receipt_number: { contains: search } },
+      ];
+    }
+    if (month) {
+      const [y, m] = month.split("-");
+      where.year = parseInt(y);
+      where.month = parseInt(m);
+    }
+    if (type) {
+      where.payment_type = type;
+    }
+    if (start_date && end_date) {
+      where.created_at = {
+        gte: new Date(`${start_date}T00:00:00.000Z`),
+        lte: new Date(`${end_date}T23:59:59.999Z`),
+      };
+    } else if (start_date) {
+      where.created_at = { gte: new Date(`${start_date}T00:00:00.000Z`) };
+    }
+
     const payments = await prisma.payment.findMany({
+      where,
       include: {
         student: {
           include: {
@@ -41,7 +75,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const {
-      student_id, amount, due_amount, month, year, status, note, receipt_number
+      student_id, amount, discount, payment_type, due_amount, month, year, status, note, receipt_number
     } = body;
 
     if (!student_id || !amount || !month || !year || !status) {
@@ -55,15 +89,31 @@ export async function POST(request: Request) {
       }
     }
 
+    // Auto generate invoice: INV-YYYYMM-XXXX
+    const prefix = `INV-${year}${month.toString().padStart(2, "0")}-`;
+    const lastPayment = await prisma.payment.findFirst({
+      where: { invoice: { startsWith: prefix } },
+      orderBy: { invoice: "desc" }
+    });
+    let seq = 1;
+    if (lastPayment && lastPayment.invoice) {
+      const lastSeq = parseInt(lastPayment.invoice.replace(prefix, ""));
+      if (!isNaN(lastSeq)) seq = lastSeq + 1;
+    }
+    const invoice = `${prefix}${seq.toString().padStart(4, "0")}`;
+
     const newPayment = await prisma.payment.create({
       data: {
         student_id: parseInt(student_id),
         amount: parseFloat(amount),
+        discount: discount ? parseFloat(discount) : 0,
+        payment_type: payment_type || null,
         due_amount: due_amount ? parseFloat(due_amount) : 0,
         month: parseInt(month),
         year: parseInt(year),
         status,
         receipt_number: receipt_number || null,
+        invoice,
         note: note || "",
         paid_at: status === "paid" || status === "partial" ? new Date() : null,
       }

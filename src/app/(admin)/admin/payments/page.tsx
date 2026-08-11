@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { Plus, Pencil, ReceiptText, Trash2, AlertTriangle, Printer, Search, Check, ChevronsUpDown, MoreHorizontal } from "lucide-react";
+import { Plus, Pencil, ReceiptText, Trash2, Search, Filter, Calendar as CalendarIcon, ChevronDown, ChevronRight, DollarSign, Users, CreditCard, MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -42,52 +42,28 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-// Types
-interface Course {
-  id: number;
-  title: string;
-  fee: number | null;
-  discount_fee: number | null;
-}
-
-interface Batch {
-  id: number;
-  name: string;
-  course: Course;
-}
-
-interface Student {
-  id: number;
-  student_id: string;
-  name: string;
-  phone: string;
-  batch: Batch;
-}
-
-interface Payment {
-  id: number;
-  amount: number;
-  due_amount: number;
-  month: number;
-  year: number;
-  status: string;
-  receipt_number: string | null;
-  paid_at: string | null;
-  note: string | null;
-  student: Student;
-}
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Check, ChevronsUpDown } from "lucide-react";
 
 const MONTHS = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"
 ];
 
-export default function PaymentsPage() {
-  const [payments, setPayments] = useState<Payment[]>([]);
-  const [students, setStudents] = useState<Student[]>([]);
+export default function FinancialPage() {
+  const [payments, setPayments] = useState<any[]>([]);
+  const [students, setStudents] = useState<any[]>([]);
+  const [paymentTypes, setPaymentTypes] = useState<any[]>([]);
+  const [summary, setSummary] = useState<any>(null);
+  const [balance, setBalance] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+
+  // Filters
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterMonth, setFilterMonth] = useState(""); // YYYY-MM
+  const [filterType, setFilterType] = useState("all");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   // Form states
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -96,43 +72,46 @@ export default function PaymentsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingPaymentId, setEditingPaymentId] = useState<number | null>(null);
 
+  // Expanded Groups
+  const [expandedDates, setExpandedDates] = useState<Record<string, boolean>>({});
+
   // Fields
-  const [selectedCourseId, setSelectedCourseId] = useState("");
-  const [selectedBatchId, setSelectedBatchId] = useState("");
   const [studentId, setStudentId] = useState("");
   const [amount, setAmount] = useState("");
-  const [dueAmount, setDueAmount] = useState("");
+  const [discount, setDiscount] = useState("0");
+  const [paymentType, setPaymentType] = useState("");
+  const [dueAmount, setDueAmount] = useState("0");
   const [month, setMonth] = useState((new Date().getMonth() + 1).toString());
   const [year, setYear] = useState(new Date().getFullYear().toString());
-  const [status, setStatus] = useState("due");
-  const [receiptNumber, setReceiptNumber] = useState("");
+  const [status, setStatus] = useState("paid");
   const [note, setNote] = useState("");
-  const [totalFee, setTotalFee] = useState<number>(0);
-
-  // Filters
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [batchFilter, setBatchFilter] = useState("all");
-  const [courseFilter, setCourseFilter] = useState("all");
-
-  // Actions states
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [paymentToDelete, setPaymentToDelete] = useState<number | null>(null);
-
-  // Receipt Modal
-  const [isReceiptOpen, setIsReceiptOpen] = useState(false);
-  const [selectedReceipt, setSelectedReceipt] = useState<Payment | null>(null);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [payRes, stuRes] = await Promise.all([
-        fetch("/api/admin/payments"),
-        fetch("/api/admin/students")
+      // Build query params
+      const params = new URLSearchParams();
+      if (searchQuery) params.append("search", searchQuery);
+      if (filterMonth) params.append("month", filterMonth);
+      if (filterType !== "all") params.append("type", filterType);
+      if (startDate) params.append("start_date", startDate);
+      if (endDate) params.append("end_date", endDate);
+
+      const qs = params.toString();
+
+      const [payRes, stuRes, ptRes, sumRes, balRes] = await Promise.all([
+        fetch(`/api/admin/payments?${qs}`),
+        fetch("/api/admin/students"),
+        fetch("/api/admin/settings/payment-types"),
+        fetch(`/api/admin/payments/financial-summary?${qs}`),
+        fetch(`/api/admin/payments/balance?${qs}`)
       ]);
 
       if (payRes.ok) setPayments(await payRes.json());
       if (stuRes.ok) setStudents(await stuRes.json());
+      if (ptRes.ok) setPaymentTypes(await ptRes.json());
+      if (sumRes.ok) setSummary(await sumRes.json());
+      if (balRes.ok) setBalance(await balRes.json());
     } catch (err) {
       console.error(err);
     } finally {
@@ -142,730 +121,457 @@ export default function PaymentsPage() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [filterMonth, filterType, startDate, endDate, searchQuery]);
 
-  const generateReceiptNumber = () => {
-    const d = new Date();
-    return `RCPT-${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}-${Math.floor(1000 + Math.random() * 9000)}`;
+  const toggleGroup = (date: string) => {
+    setExpandedDates(prev => ({ ...prev, [date]: !prev[date] }));
   };
 
-  const getStudentTotalFee = (stuId: string) => {
-    const student = students.find(s => s.id.toString() === stuId);
-    if (!student) return 0;
-    const course = student.batch?.course;
-    if (!course) return 0;
-    return course.discount_fee ?? course.fee ?? 0;
-  };
+  const groupedPayments = useMemo(() => {
+    const groups: Record<string, any[]> = {};
+    payments.forEach(p => {
+      const d = new Date(p.created_at).toLocaleDateString("en-US", { year: 'numeric', month: 'short', day: 'numeric' });
+      if (!groups[d]) groups[d] = [];
+      groups[d].push(p);
+    });
+    return groups;
+  }, [payments]);
 
-  const handleStudentChange = (val: string) => {
-    setStudentId(val);
-    if (!val) {
-      setTotalFee(0);
-      setDueAmount("");
-      setAmount("");
-      setStatus("due");
-      setReceiptNumber("");
-      return;
-    }
-    const fee = getStudentTotalFee(val);
-    setTotalFee(fee);
-    setDueAmount(fee.toString());
-    setAmount("0");
-    setStatus("due");
-    setReceiptNumber(generateReceiptNumber());
-  };
-
-  const handleAmountChange = (val: string) => {
-    setAmount(val);
-    const paid = parseFloat(val) || 0;
-    const due = Math.max(0, totalFee - paid);
-    setDueAmount(due.toString());
-
-    if (paid >= totalFee && totalFee > 0) {
-      setStatus("paid");
-    } else if (paid > 0) {
-      setStatus("partial");
-    } else {
-      setStatus("due");
-    }
-  };
-
-  const resetForm = () => {
-    setSelectedCourseId("");
-    setSelectedBatchId("");
-    setStudentId("");
-    setAmount("");
-    setDueAmount("");
-    setMonth((new Date().getMonth() + 1).toString());
-    setYear(new Date().getFullYear().toString());
-    setStatus("due");
-    setReceiptNumber("");
-    setNote("");
-    setTotalFee(0);
-    setEditingPaymentId(null);
+  const handleEdit = (p: any) => {
+    setEditingPaymentId(p.id);
+    setStudentId(p.student_id.toString());
+    setAmount(p.amount.toString());
+    setDiscount(p.discount?.toString() || "0");
+    setPaymentType(p.payment_type || "");
+    setDueAmount(p.due_amount.toString());
+    setMonth(p.month.toString());
+    setYear(p.year.toString());
+    setStatus(p.status);
+    setNote(p.note || "");
     setFormError("");
-  };
-
-  const handleAddClick = () => {
-    resetForm();
     setIsDialogOpen(true);
   };
 
-  const handleEditClick = (payment: Payment) => {
-    resetForm();
-    setEditingPaymentId(payment.id);
-    setSelectedCourseId(payment.student.batch?.course?.id?.toString() || "");
-    setSelectedBatchId(payment.student.batch?.id?.toString() || "");
-    setStudentId(payment.student.id.toString());
-    const fee = getStudentTotalFee(payment.student.id.toString());
-    setTotalFee(fee);
-    setAmount(payment.amount.toString());
-    setDueAmount(payment.due_amount.toString());
-    setMonth(payment.month.toString());
-    setYear(payment.year.toString());
-    setStatus(payment.status);
-    setReceiptNumber(payment.receipt_number || "");
-    setNote(payment.note || "");
-    setIsDialogOpen(true);
-  };
-
-  const handleDeleteClick = (id: number) => {
-    setPaymentToDelete(id);
-    setIsDeleteDialogOpen(true);
-  };
-
-  const handleDeleteConfirm = async () => {
-    if (!paymentToDelete) return;
+  const handleDelete = async (id: number) => {
+    if (!confirm("Are you sure you want to delete this payment?")) return;
     try {
-      const res = await fetch(`/api/admin/payments/${paymentToDelete}`, { method: "DELETE" });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to delete payment");
-      setIsDeleteDialogOpen(false);
-      setPaymentToDelete(null);
-      fetchData();
-    } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : "Failed to delete payment");
+      const res = await fetch(`/api/admin/payments/${id}`, { method: "DELETE" });
+      if (res.ok) fetchData();
+    } catch (err) {
+      console.error(err);
     }
-  };
-
-  const handleViewReceipt = (payment: Payment) => {
-    setSelectedReceipt(payment);
-    setIsReceiptOpen(true);
-  };
-
-  const handlePrint = () => {
-    window.print();
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError("");
-    setIsSubmitting(true);
+    if (!studentId || !amount || !month || !year || !status) {
+      setFormError("Please fill in all required fields.");
+      return;
+    }
 
+    setIsSubmitting(true);
     try {
+      const payload = {
+        student_id: studentId,
+        amount,
+        discount,
+        payment_type: paymentType,
+        due_amount: dueAmount,
+        month,
+        year,
+        status,
+        note
+      };
+
       const url = editingPaymentId ? `/api/admin/payments/${editingPaymentId}` : "/api/admin/payments";
       const method = editingPaymentId ? "PUT" : "POST";
 
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          student_id: studentId, amount, due_amount: dueAmount,
-          month, year, status, receipt_number: receiptNumber, note
-        }),
+        body: JSON.stringify(payload),
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to save payment");
-
-      setIsDialogOpen(false);
-      fetchData();
-
-      // Auto show receipt on new payment
-      if (!editingPaymentId && data.data) {
-        const studentInfo = students.find(s => s.id.toString() === studentId);
-        if (studentInfo) {
-          const receiptData = { ...data.data, student: studentInfo };
-          setSelectedReceipt(receiptData);
-          setIsReceiptOpen(true);
-        }
-      }
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setFormError(err.message);
+      if (res.ok) {
+        setIsDialogOpen(false);
+        fetchData();
+        resetForm();
       } else {
-        setFormError("Unknown error occurred");
+        const data = await res.json();
+        setFormError(data.error || "Failed to save payment");
       }
+    } catch (err) {
+      setFormError("Something went wrong");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const filteredPayments = useMemo(() => {
-    return payments.filter(p => {
-      const matchStatus = statusFilter === "all" || p.status === statusFilter;
-      const matchBatch = batchFilter === "all" || p.student?.batch?.id?.toString() === batchFilter;
-      const matchCourse = courseFilter === "all" || p.student?.batch?.course?.id?.toString() === courseFilter;
+  const resetForm = () => {
+    setEditingPaymentId(null);
+    setStudentId("");
+    setAmount("");
+    setDiscount("0");
+    setPaymentType("");
+    setDueAmount("0");
+    setMonth((new Date().getMonth() + 1).toString());
+    setYear(new Date().getFullYear().toString());
+    setStatus("paid");
+    setNote("");
+  };
 
-      const q = searchQuery.toLowerCase();
-      const matchSearch = q === "" ||
-        p.student?.name?.toLowerCase().includes(q) ||
-        p.student?.student_id?.toLowerCase().includes(q) ||
-        p.receipt_number?.toLowerCase().includes(q);
-
-      return matchStatus && matchBatch && matchCourse && matchSearch;
-    });
-  }, [payments, statusFilter, batchFilter, courseFilter, searchQuery]);
-
-  const uniqueBatches = useMemo(() => {
-    const batchesMap = new Map();
-    students.forEach(s => {
-      if (s.batch) {
-        batchesMap.set(s.batch.id, s.batch.name);
-      }
-    });
-    return Array.from(batchesMap.entries());
-  }, [students]);
-
-  const uniqueCourses = useMemo(() => {
-    const map = new Map();
-    students.forEach(s => {
-      if (s.batch?.course) map.set(s.batch.course.id, s.batch.course.title);
-    });
-    return Array.from(map.entries());
-  }, [students]);
-
-  const filteredBatchesForForm = useMemo(() => {
-    const map = new Map();
-    students.forEach(s => {
-      if (s.batch && s.batch.course?.id?.toString() === selectedCourseId) {
-        map.set(s.batch.id, s.batch.name);
-      }
-    });
-    return Array.from(map.entries());
-  }, [students, selectedCourseId]);
-
-  const filteredStudentsForForm = useMemo(() => {
-    return students.filter(s => s.batch?.id?.toString() === selectedBatchId);
-  }, [students, selectedBatchId]);
+  const selectedStudentObj = students.find((s) => s.id.toString() === studentId);
 
   return (
-    <>
-      <div className="flex flex-col gap-6 print:hidden">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Payment Management</h1>
-            <p className="text-muted-foreground mt-1">Record and track student payments and dues.</p>
-          </div>
-
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            {/* @ts-expect-error - Radix UI type mismatch for asChild */}
-            <DialogTrigger asChild>
-              <Button className="gap-2" onClick={handleAddClick}>
-                <Plus className="h-4 w-4" />
-                Add Payment
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>{editingPaymentId ? "Edit Payment" : "Record New Payment"}</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-6 py-4">
-                {formError && (
-                  <div className="p-3 bg-red-50 text-red-600 rounded-md text-sm border border-red-200">
-                    {formError}
-                  </div>
-                )}
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2 md:col-span-2">
-                    {/* Duplicate select removed */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:col-span-2">
-                      <div className="space-y-2">
-                        <Label htmlFor="course">Course</Label>
-                        <select
-                          id="course"
-                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
-                          value={selectedCourseId}
-                          onChange={(e) => {
-                            setSelectedCourseId(e.target.value);
-                            setSelectedBatchId("");
-                            handleStudentChange(""); // reset student and fees
-                          }}
-                          required
-                        >
-                          <option value="">Select Course...</option>
-                          {uniqueCourses.map(([id, title]) => (
-                            <option key={id} value={id}>{title}</option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="batch">Batch</Label>
-                        <select
-                          id="batch"
-                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background disabled:opacity-50"
-                          value={selectedBatchId}
-                          onChange={(e) => {
-                            setSelectedBatchId(e.target.value);
-                            handleStudentChange(""); // reset student and fees
-                          }}
-                          disabled={!selectedCourseId}
-                          required
-                        >
-                          <option value="">Select Batch...</option>
-                          {filteredBatchesForForm.map(([id, name]) => (
-                            <option key={id} value={id}>{name}</option>
-                          ))}
-                        </select>
-                      </div>
-
-                      <div className="space-y-2 md:col-span-2 flex flex-col">
-                        <Label htmlFor="student">Student</Label>
-                        <Popover open={openStudentPopover} onOpenChange={setOpenStudentPopover}>
-                          {/* @ts-expect-error - Radix UI type mismatch for asChild */}
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              role="combobox"
-                              aria-expanded={openStudentPopover}
-                              className="w-full justify-between"
-                              disabled={!selectedBatchId}
-                            >
-                              {studentId
-                                ? (() => {
-                                  const s = filteredStudentsForForm.find((s) => s.id.toString() === studentId);
-                                  return s ? `${s.student_id} - ${s.name}` : "Select Student...";
-                                })()
-                                : "Select Student..."}
-                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-[400px] p-0" align="start">
-                            <Command>
-                              <CommandInput placeholder="Search student by name or ID..." />
-                              <CommandList>
-                                <CommandEmpty>No student found.</CommandEmpty>
-                                <CommandGroup>
-                                  {filteredStudentsForForm.map((s) => (
-                                    <CommandItem
-                                      key={s.id}
-                                      value={`${s.student_id} ${s.name}`}
-                                      onSelect={() => {
-                                        handleStudentChange(s.id.toString());
-                                        setOpenStudentPopover(false);
-                                      }}
-                                    >
-                                      <Check
-                                        className={cn(
-                                          "mr-2 h-4 w-4",
-                                          studentId === s.id.toString() ? "opacity-100" : "opacity-0"
-                                        )}
-                                      />
-                                      {s.student_id} - {s.name}
-                                    </CommandItem>
-                                  ))}
-                                </CommandGroup>
-                              </CommandList>
-                            </Command>
-                          </PopoverContent>
-                        </Popover>
-                        {/* Hidden input to make HTML5 validation work if studentId is empty */}
-                        <input type="text" className="hidden" required value={studentId} readOnly />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2 md:col-span-2">
-                      <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-md border flex justify-between items-center">
-                        <span className="text-sm font-medium">Total Course Fee:</span>
-                        <span className="text-lg font-bold text-primary">৳ {totalFee.toFixed(2)}</span>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="month">For Month</Label>
-                      <select
-                        id="month"
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                        value={month}
-                        onChange={(e) => setMonth(e.target.value)}
-                        required
-                      >
-                        {MONTHS.map((m, i) => (
-                          <option key={i} value={i + 1}>{m}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="year">For Year</Label>
-                      <Input id="year" type="number" value={year} onChange={(e) => setYear(e.target.value)} required />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="amount">Paid Amount (৳)</Label>
-                      <Input id="amount" type="number" step="0.01" value={amount} onChange={(e) => handleAmountChange(e.target.value)} required />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="due">Due Amount (৳)</Label>
-                      <Input id="due" type="number" step="0.01" value={dueAmount} onChange={(e) => setDueAmount(e.target.value)} />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="status">Payment Status</Label>
-                      <select
-                        id="status"
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                        value={status}
-                        onChange={(e) => setStatus(e.target.value)}
-                        required
-                      >
-                        <option value="paid">Full Paid</option>
-                        <option value="partial">Partial Paid</option>
-                        <option value="due">Due</option>
-                      </select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="receipt">Receipt Number</Label>
-                      <Input id="receipt" value={receiptNumber} onChange={(e) => setReceiptNumber(e.target.value)} />
-                    </div>
-
-                    <div className="space-y-2 md:col-span-2">
-                      <Label htmlFor="note">Internal Note (Optional)</Label>
-                      <Input id="note" value={note} onChange={(e) => setNote(e.target.value)} />
-                    </div>
-                  </div>
-
-                  <div className="flex justify-end pt-4 border-t">
-                    <Button type="submit" disabled={isSubmitting}>
-                      {isSubmitting ? "Recording..." : (editingPaymentId ? "Update Payment" : "Record Payment")}
-                    </Button>
-                  </div>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
-
-          <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2 text-red-600">
-                  <AlertTriangle className="h-5 w-5" />
-                  Confirm Deletion
-                </DialogTitle>
-              </DialogHeader>
-              <div className="py-4">
-                <p className="text-sm text-muted-foreground">
-                  Are you sure you want to delete this payment record? This action cannot be undone and will affect accounting records.
-                </p>
-              </div>
-              <div className="flex justify-end gap-3 pt-4 border-t">
-                <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button variant="destructive" onClick={handleDeleteConfirm}>
-                  Delete
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-
-          <Dialog open={isReceiptOpen} onOpenChange={setIsReceiptOpen}>
-            <DialogContent className="sm:max-w-[600px]">
-              <DialogHeader className="flex flex-row items-center justify-between pb-2">
-                <DialogTitle>View Receipt</DialogTitle>
-                <Button variant="outline" size="sm" className="gap-2" onClick={handlePrint}>
-                  <Printer className="h-4 w-4" /> Print
-                </Button>
-              </DialogHeader>
-              {selectedReceipt && (
-                <div className="p-6 bg-white dark:bg-slate-950 border rounded-lg receipt-container shadow-sm mt-2">
-                  <div className="text-center mb-6 border-b pb-4">
-                    <h2 className="text-2xl font-bold uppercase tracking-wider text-slate-800 dark:text-slate-100">Institute Web</h2>
-                    <p className="text-sm text-slate-500">Official Payment Receipt</p>
-                  </div>
-
-                  <div className="flex justify-between mb-8 text-sm">
-                    <div>
-                      <p className="text-slate-500 mb-1">Receipt No:</p>
-                      <p className="font-semibold text-slate-800 dark:text-slate-200">{selectedReceipt.receipt_number || `REC-${selectedReceipt.id}`}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-slate-500 mb-1">Date:</p>
-                      <p className="font-semibold text-slate-800 dark:text-slate-200">
-                        {selectedReceipt.paid_at ? new Date(selectedReceipt.paid_at).toLocaleDateString() : new Date().toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="bg-slate-50 dark:bg-slate-900 rounded p-4 mb-6 text-sm">
-                    <div className="grid grid-cols-2 gap-y-3">
-                      <div className="text-slate-500">Student Name:</div>
-                      <div className="font-semibold">{selectedReceipt.student?.name}</div>
-
-                      <div className="text-slate-500">Student ID:</div>
-                      <div className="font-semibold">{selectedReceipt.student?.student_id}</div>
-
-                      <div className="text-slate-500">Batch / Course:</div>
-                      <div className="font-semibold">{selectedReceipt.student?.batch?.name}</div>
-
-                      <div className="text-slate-500">Payment For:</div>
-                      <div className="font-semibold">{MONTHS[selectedReceipt.month - 1]} {selectedReceipt.year}</div>
-                    </div>
-                  </div>
-
-                  <div className="border-t border-slate-200 dark:border-slate-800 pt-4 mb-6">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-slate-600 dark:text-slate-400">Total Paid Amount:</span>
-                      <span className="text-2xl font-bold text-green-600 dark:text-green-500">৳ {selectedReceipt.amount.toFixed(2)}</span>
-                    </div>
-                    {selectedReceipt.due_amount > 0 && (
-                      <div className="flex justify-between items-center">
-                        <span className="text-slate-500">Remaining Due:</span>
-                        <span className="text-lg font-medium text-red-500">৳ {selectedReceipt.due_amount.toFixed(2)}</span>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="text-center text-xs text-slate-400 mt-8 italic border-t pt-4">
-                    This is a computer-generated receipt and does not require a physical signature.
-                  </div>
-                </div>
-              )}
-            </DialogContent>
-          </Dialog>
+    <div className="flex flex-col gap-8 pb-10">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight mb-2">Financials</h1>
+          <p className="text-muted-foreground">Manage payments, invoices, and summaries.</p>
         </div>
 
-        <Card className="border-none shadow-sm dark:bg-slate-800/50 overflow-hidden">
-          <CardHeader className="pb-4">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-              <CardTitle>Recent Payments</CardTitle>
-              <div className="flex flex-wrap items-center gap-2">
-                <div className="relative">
-                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search by ID, Name or Receipt..."
-                    className="pl-9 w-[250px] bg-slate-100 dark:bg-slate-800 border-none outline-none focus-visible:ring-1 focus-visible:ring-primary"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </div>
-                <select
-                  className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                >
-                  <option value="all">All Status</option>
-                  <option value="paid">Full Paid</option>
-                  <option value="partial">Partial Paid</option>
-                  <option value="due">Due</option>
-                </select>
-                <select
-                  className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
-                  value={courseFilter}
-                  onChange={(e) => {
-                    setCourseFilter(e.target.value);
-                    setBatchFilter("all");
-                  }}
-                >
-                  <option value="all">All Courses</option>
-                  {uniqueCourses.map(([id, name]) => (
-                    <option key={id} value={id.toString()}>{name}</option>
-                  ))}
-                </select>
-                <select
-                  className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
-                  value={batchFilter}
-                  onChange={(e) => setBatchFilter(e.target.value)}
-                >
-                  <option value="all">All Batches</option>
-                  {uniqueBatches
-                    .filter(([_, __], index) => {
-                      if (courseFilter === "all") return true;
-                      const batch = students.find(s => s.batch?.id === _[0])?.batch;
-                      return batch?.course.id.toString() === courseFilter;
-                    })
-                    .map(([id, name]) => (
-                    <option key={id} value={id.toString()}>{name}</option>
-                  ))}
-                </select>
+        <Dialog open={isDialogOpen} onOpenChange={(open) => {
+          if (!open) resetForm();
+          setIsDialogOpen(open);
+        }}>
+          <DialogTrigger asChild>
+            <Button className="gap-2 bg-primary hover:bg-primary/90 shadow-md">
+              <Plus className="h-4 w-4" />
+              Collect Payment
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>{editingPaymentId ? "Edit Payment" : "Collect Payment"}</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4 py-4">
+              {formError && <div className="p-3 bg-red-50 text-red-600 rounded-md text-sm">{formError}</div>}
+              
+              <div className="space-y-2">
+                <Label>Student <span className="text-red-500">*</span></Label>
+                <Popover open={openStudentPopover} onOpenChange={setOpenStudentPopover}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={openStudentPopover}
+                      className="w-full justify-between"
+                    >
+                      {selectedStudentObj
+                        ? `${selectedStudentObj.name} (${selectedStudentObj.student_id})`
+                        : "Search student..."}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0">
+                    <Command>
+                      <CommandInput placeholder="Search student name or ID..." />
+                      <CommandList>
+                        <CommandEmpty>No student found.</CommandEmpty>
+                        <CommandGroup>
+                          {students.map((student) => (
+                            <CommandItem
+                              key={student.id}
+                              value={`${student.name} ${student.student_id}`}
+                              onSelect={() => {
+                                setStudentId(student.id.toString());
+                                setOpenStudentPopover(false);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  studentId === student.id.toString() ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              {student.name} ({student.student_id})
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </div>
-            </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Payment Type</Label>
+                  <select
+                    value={paymentType}
+                    onChange={(e) => setPaymentType(e.target.value)}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  >
+                    <option value="">Select Type...</option>
+                    {paymentTypes.map(pt => (
+                      <option key={pt.id} value={pt.name}>{pt.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Amount <span className="text-red-500">*</span></Label>
+                  <Input type="number" value={amount} onChange={(e) => setAmount(e.target.value)} required />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Discount</Label>
+                  <Input type="number" value={discount} onChange={(e) => setDiscount(e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Due Amount</Label>
+                  <Input type="number" value={dueAmount} onChange={(e) => setDueAmount(e.target.value)} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label>Month <span className="text-red-500">*</span></Label>
+                  <select
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    value={month}
+                    onChange={(e) => setMonth(e.target.value)}
+                  >
+                    {MONTHS.map((m, i) => (
+                      <option key={m} value={i + 1}>{m}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Year <span className="text-red-500">*</span></Label>
+                  <Input type="number" value={year} onChange={(e) => setYear(e.target.value)} required />
+                </div>
+                <div className="space-y-2">
+                  <Label>Status <span className="text-red-500">*</span></Label>
+                  <select
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value)}
+                  >
+                    <option value="paid">Paid</option>
+                    <option value="partial">Partial</option>
+                    <option value="due">Due</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Note (Optional)</Label>
+                <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Any additional notes..." />
+              </div>
+
+              <div className="flex justify-end pt-4">
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? "Saving..." : (editingPaymentId ? "Update Payment" : "Collect Payment")}
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="shadow-sm border-emerald-100 dark:border-emerald-900/50">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Net Collection</CardTitle>
+            <DollarSign className="h-4 w-4 text-emerald-500" />
           </CardHeader>
           <CardContent>
-            {loading ? (
-              <p className="text-sm text-muted-foreground">Loading...</p>
-            ) : (
-              <>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Student</TableHead>
-                        <TableHead>Month/Year</TableHead>
-                        <TableHead>Receipt No</TableHead>
-                        <TableHead>Paid (৳)</TableHead>
-                        <TableHead>Due (৳)</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredPayments.map((payment) => (
-                        <TableRow key={payment.id}>
-                          <TableCell>
-                            <div className="flex flex-col">
-                              <span className="font-medium text-slate-900 dark:text-slate-100">{payment.student?.name}</span>
-                              <span className="text-xs font-mono text-muted-foreground">{payment.student?.student_id} • {payment.student?.batch?.name}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex flex-col">
-                              <span>{MONTHS[payment.month - 1]}</span>
-                              <span className="text-xs text-muted-foreground">{payment.year}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="font-mono text-xs">
-                            {payment.receipt_number || "-"}
-                          </TableCell>
-                          <TableCell className="font-semibold text-green-600 dark:text-green-400">
-                            {payment.amount}
-                          </TableCell>
-                          <TableCell className={payment.due_amount > 0 ? "text-red-500 font-semibold" : ""}>
-                            {payment.due_amount}
-                          </TableCell>
-                          <TableCell>
-                            <Badge 
-                              variant="outline"
-                              className={`shadow-sm ${
-                                payment.status === "paid" 
-                                  ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:text-emerald-400" 
-                                  : payment.status === "partial" 
-                                    ? "bg-amber-500/10 text-amber-600 border-amber-500/20 dark:text-amber-400" 
-                                    : "bg-rose-500/10 text-rose-600 border-rose-500/20 dark:text-rose-400"
-                              }`}
-                            >
-                              {payment.status.toUpperCase()}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger className="h-8 w-8 p-0 flex items-center justify-center rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-muted-foreground">
-  <span className="sr-only">Open menu</span>
-  <MoreHorizontal className="h-4 w-4" />
-</DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => handleViewReceipt(payment)}>
-                                  <ReceiptText className="mr-2 h-4 w-4" />
-                                  <span>View Receipt</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleEditClick(payment)}>
-                                  <Pencil className="mr-2 h-4 w-4" />
-                                  <span>Edit</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem 
-                                  onClick={() => handleDeleteClick(payment.id)}
-                                  className="text-destructive focus:text-destructive"
-                                >
-                                  <Trash2 className="mr-2 h-4 w-4" />
-                                  <span>Delete</span>
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                      {filteredPayments.length === 0 && (
-                        <TableRow>
-                          <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                            No payments found matching criteria.
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-                {filteredPayments.length > 0 && (
-                  <div className="mt-4 text-sm text-muted-foreground">
-                    Showing {filteredPayments.length} results
-                  </div>
-                )}
-              </>
-            )}
+            <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+              ৳{summary?.netCollected?.toLocaleString() || 0}
+            </div>
+            <p className="text-xs text-muted-foreground">Total collected - discount</p>
+          </CardContent>
+        </Card>
+        <Card className="shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Discount</CardTitle>
+            <CreditCard className="h-4 w-4 text-orange-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              ৳{summary?.totalDiscount?.toLocaleString() || 0}
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Unique Students</CardTitle>
+            <Users className="h-4 w-4 text-blue-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{summary?.studentCount || 0}</div>
+          </CardContent>
+        </Card>
+        <Card className="shadow-sm border-primary/20 bg-primary/5 dark:bg-primary/10">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-primary">Final Balance</CardTitle>
+            <DollarSign className="h-4 w-4 text-primary" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-primary">
+              ৳{balance?.balance?.toLocaleString() || 0}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1 text-primary/70">
+              Net Collection (৳{balance?.netCollected || 0}) - Expenses (৳{balance?.totalExpense || 0})
+            </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Printable Receipt Area (Only visible when printing) */}
-      <div className="hidden print:block absolute top-0 left-0 w-full h-full bg-white z-[99999] print:p-8">
-        {selectedReceipt && (
-          <div className="max-w-2xl mx-auto font-sans text-black">
-            <div className="text-center mb-8 border-b-2 border-black pb-6">
-              <h1 className="text-4xl font-extrabold uppercase tracking-widest mb-1">Institute Web</h1>
-              <p className="text-lg text-gray-600">Official Payment Receipt</p>
+      {/* Filter Bar */}
+      <Card className="shadow-sm">
+        <CardContent className="p-4">
+          <div className="flex flex-col md:flex-row gap-4 items-center">
+            <div className="relative flex-1 w-full">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by student, ID, invoice..."
+                className="pl-9 bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
             </div>
-
-            <div className="flex justify-between mb-10 text-lg">
-              <div>
-                <p className="text-gray-500 mb-1 text-sm uppercase font-semibold">Receipt No</p>
-                <p className="font-bold">{selectedReceipt.receipt_number || `REC-${selectedReceipt.id}`}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-gray-500 mb-1 text-sm uppercase font-semibold">Date</p>
-                <p className="font-bold">
-                  {selectedReceipt.paid_at ? new Date(selectedReceipt.paid_at).toLocaleDateString('en-GB') : new Date().toLocaleDateString('en-GB')}
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-gray-100 border border-gray-300 rounded-lg p-6 mb-10 text-lg">
-              <div className="grid grid-cols-2 gap-y-6">
-                <div className="text-gray-600">Student Name:</div>
-                <div className="font-bold">{selectedReceipt.student?.name}</div>
-
-                <div className="text-gray-600">Student ID:</div>
-                <div className="font-bold">{selectedReceipt.student?.student_id}</div>
-
-                <div className="text-gray-600">Batch / Course:</div>
-                <div className="font-bold">{selectedReceipt.student?.batch?.name}</div>
-
-                <div className="text-gray-600">Payment For:</div>
-                <div className="font-bold">{MONTHS[selectedReceipt.month - 1]} {selectedReceipt.year}</div>
-              </div>
-            </div>
-
-            <div className="border-t-2 border-black pt-6 mb-12">
-              <div className="flex justify-between items-center mb-4">
-                <span className="text-xl font-bold">Total Paid Amount:</span>
-                <span className="text-3xl font-extrabold text-black">৳ {selectedReceipt.amount.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-lg text-gray-600">Payment Status:</span>
-                <span className="text-lg font-bold uppercase">{selectedReceipt.status}</span>
-              </div>
-              {selectedReceipt.due_amount > 0 && (
-                <div className="flex justify-between items-center mt-2">
-                  <span className="text-lg text-gray-600">Remaining Due:</span>
-                  <span className="text-xl font-bold text-gray-800">৳ {selectedReceipt.due_amount.toFixed(2)}</span>
-                </div>
-              )}
-            </div>
-
-            <div className="text-center mt-32">
-              <div className="w-48 mx-auto border-t border-black pt-2 text-sm text-gray-800">
-                Authorized Signature
-              </div>
-              <div className="mt-12 text-sm text-gray-500 italic">
-                Thank you for your payment. This is a computer-generated receipt.
+            <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto hide-scrollbar">
+              <select
+                className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                value={filterMonth}
+                onChange={(e) => setFilterMonth(e.target.value)}
+              >
+                <option value="">All Months</option>
+                <option value="2026-08">Aug 2026</option>
+                <option value="2026-09">Sep 2026</option>
+                <option value="2026-10">Oct 2026</option>
+                <option value="2026-11">Nov 2026</option>
+                <option value="2026-12">Dec 2026</option>
+                <option value="2027-01">Jan 2027</option>
+              </select>
+              <select
+                className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm"
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+              >
+                <option value="all">All Types</option>
+                {paymentTypes.map(pt => (
+                  <option key={pt.id} value={pt.name}>{pt.name}</option>
+                ))}
+              </select>
+              <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-md">
+                <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="h-8 text-sm" />
+                <span className="text-muted-foreground">-</span>
+                <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="h-8 text-sm" />
               </div>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Accordion List */}
+      <div className="space-y-4">
+        {Object.keys(groupedPayments).length === 0 ? (
+          <div className="text-center py-10 bg-slate-50 dark:bg-slate-900 rounded-lg border border-dashed">
+            <p className="text-muted-foreground">No payments found.</p>
+          </div>
+        ) : (
+          Object.keys(groupedPayments).map((date) => {
+            const dayPayments = groupedPayments[date];
+            const isExpanded = expandedDates[date] !== false; // Default expanded
+            const dayTotal = dayPayments.reduce((acc, p) => acc + (p.amount - (p.discount || 0)), 0);
+
+            return (
+              <Card key={date} className="overflow-hidden shadow-sm">
+                <div 
+                  className="bg-slate-100/50 dark:bg-slate-800/50 px-4 py-3 flex items-center justify-between cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                  onClick={() => toggleGroup(date)}
+                >
+                  <div className="flex items-center gap-3">
+                    {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                    <h3 className="font-medium flex items-center gap-2">
+                      <CalendarIcon className="h-4 w-4 text-primary" />
+                      {date}
+                    </h3>
+                    <Badge variant="secondary" className="ml-2 font-normal">{dayPayments.length} transactions</Badge>
+                  </div>
+                  <div className="font-bold text-primary">
+                    ৳{dayTotal.toLocaleString()}
+                  </div>
+                </div>
+                
+                {isExpanded && (
+                  <div className="border-t">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="bg-slate-50/50 dark:bg-slate-900/50 hover:bg-slate-50/50 dark:hover:bg-slate-900/50">
+                          <TableHead>Invoice</TableHead>
+                          <TableHead>Student</TableHead>
+                          <TableHead>Type & Month</TableHead>
+                          <TableHead className="text-right">Amount</TableHead>
+                          <TableHead className="text-right">Discount</TableHead>
+                          <TableHead className="text-right">Net</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead className="text-right">Action</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {dayPayments.map((p) => (
+                          <TableRow key={p.id}>
+                            <TableCell className="font-medium text-xs font-mono">{p.invoice}</TableCell>
+                            <TableCell>
+                              <div className="font-medium">{p.student?.name}</div>
+                              <div className="text-xs text-muted-foreground">{p.student?.student_id}</div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="text-sm">{p.payment_type || "N/A"}</div>
+                              <div className="text-xs text-muted-foreground">{MONTHS[p.month-1]} {p.year}</div>
+                            </TableCell>
+                            <TableCell className="text-right">৳{p.amount}</TableCell>
+                            <TableCell className="text-right text-orange-500">
+                              {p.discount ? `-৳${p.discount}` : "-"}
+                            </TableCell>
+                            <TableCell className="text-right font-semibold text-emerald-600 dark:text-emerald-400">
+                              ৳{p.amount - (p.discount || 0)}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={p.status === "paid" ? "default" : p.status === "partial" ? "secondary" : "destructive"}>
+                                {p.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" className="h-8 w-8 p-0">
+                                    <span className="sr-only">Open menu</span>
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem onClick={() => handleEdit(p)}>
+                                    <Pencil className="mr-2 h-4 w-4" /> Edit
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem>
+                                    <ReceiptText className="mr-2 h-4 w-4" /> Print Receipt
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => handleDelete(p.id)}>
+                                    <Trash2 className="mr-2 h-4 w-4" /> Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </Card>
+            );
+          })
         )}
       </div>
-    </>
+    </div>
   );
 }

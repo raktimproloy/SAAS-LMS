@@ -429,23 +429,33 @@ export default function StudentProfilePage() {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Month/Year</TableHead>
+                        <TableHead>Invoice</TableHead>
+                        <TableHead>Type & Month</TableHead>
                         <TableHead>Amount</TableHead>
-                        <TableHead>Due Amount</TableHead>
+                        <TableHead>Discount</TableHead>
+                        <TableHead>Net & Due</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead className="text-right">Action</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {student.payments?.length === 0 && (
-                        <TableRow><TableCell colSpan={5} className="text-center py-4">No payment records found</TableCell></TableRow>
+                        <TableRow><TableCell colSpan={7} className="text-center py-4">No payment records found</TableCell></TableRow>
                       )}
                       {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                       {student.payments?.map((payment: any) => (
                         <TableRow key={payment.id}>
-                          <TableCell className="font-medium">{payment.month}/{payment.year}</TableCell>
+                          <TableCell className="font-medium font-mono text-xs">{payment.invoice || "N/A"}</TableCell>
+                          <TableCell>
+                            <div>{payment.payment_type || "N/A"}</div>
+                            <div className="text-xs text-muted-foreground">{payment.month}/{payment.year}</div>
+                          </TableCell>
                           <TableCell>৳{payment.amount}</TableCell>
-                          <TableCell className="text-red-600 font-medium">{payment.due_amount > 0 ? `৳${payment.due_amount}` : "-"}</TableCell>
+                          <TableCell className="text-orange-500">{payment.discount ? `-৳${payment.discount}` : "-"}</TableCell>
+                          <TableCell>
+                            <div className="font-semibold text-emerald-600">৳{payment.amount - (payment.discount || 0)}</div>
+                            {payment.due_amount > 0 && <div className="text-xs text-red-600">Due: ৳{payment.due_amount}</div>}
+                          </TableCell>
                           <TableCell>
                             <Badge variant={payment.status === 'paid' ? 'default' : payment.status === 'due' ? 'destructive' : 'secondary'}>
                               {payment.status.toUpperCase()}

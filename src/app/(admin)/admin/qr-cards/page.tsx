@@ -1,13 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import { QRCodeSVG } from "qrcode.react";
-import { Printer, Download, CreditCard, LayoutGrid, LayoutTemplate } from "lucide-react";
+import { Printer, CreditCard, LayoutGrid } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface Course {
   id: number;
@@ -26,7 +24,9 @@ interface Student {
   name: string;
   photo: string | null;
   phone: string;
-  bloodGroup?: string;
+  parent_name?: string;
+  parent_phone?: string;
+  address?: string;
   batch: {
     name: string;
     course: {
@@ -34,6 +34,29 @@ interface Student {
     };
   };
 }
+
+const themes = {
+  classic: { primary: "#14b8a6", secondary: "#f97316" }, // Teal & Orange
+  blue: { primary: "#2563eb", secondary: "#3b82f6" }, 
+  emerald: { primary: "#059669", secondary: "#10b981" },
+  violet: { primary: "#7c3aed", secondary: "#8b5cf6" },
+  rose: { primary: "#e11d48", secondary: "#f43f5e" }
+};
+type ThemeKey = keyof typeof themes;
+
+const TopWave = ({ color1, color2 }: { color1: string, color2: string }) => (
+  <svg viewBox="0 0 100 40" preserveAspectRatio="none" className="absolute top-0 left-0 w-full h-[80px] z-0">
+    <path d="M0,0 L100,0 L100,10 C60,30 40,5 0,15 Z" fill={color2} />
+    <path d="M0,0 L40,0 C25,15 15,30 0,40 Z" fill={color1} />
+  </svg>
+);
+
+const BottomWave = ({ color1, color2 }: { color1: string, color2: string }) => (
+  <svg viewBox="0 0 100 40" preserveAspectRatio="none" className="absolute bottom-0 left-0 w-full h-[80px] z-0">
+    <path d="M0,40 L100,40 L100,20 C60,5 40,30 0,15 Z" fill={color1} />
+    <path d="M0,40 L30,40 C20,25 10,10 0,25 Z" fill={color2} />
+  </svg>
+);
 
 export default function QRCardsPage() {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -44,12 +67,26 @@ export default function QRCardsPage() {
   const [selectedCourse, setSelectedCourse] = useState<string>("");
   const [selectedBatch, setSelectedBatch] = useState<string>("");
   const [printCols, setPrintCols] = useState<string>("3");
-  const [themeColor, setThemeColor] = useState<string>("slate");
+  const [themeColor, setThemeColor] = useState<ThemeKey>("classic");
+  const [printSide, setPrintSide] = useState<string>("both"); // front, back, both
+  const [selectedStudents, setSelectedStudents] = useState<number[]>([]);
 
   useEffect(() => {
     fetch("/api/admin/courses").then(res => res.json()).then(setCourses);
     fetch("/api/admin/batches").then(res => res.json()).then(setBatches);
   }, []);
+
+  useEffect(() => {
+    if (students.length > 0) {
+      setSelectedStudents(students.map(s => s.id));
+    }
+  }, [students]);
+
+  const toggleSelection = (id: number) => {
+    setSelectedStudents(prev => 
+      prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]
+    );
+  };
 
   const handleGenerate = async () => {
     if (!selectedBatch) return;
@@ -72,50 +109,185 @@ export default function QRCardsPage() {
   };
 
   const filteredBatches = batches.filter(b => b.course_id.toString() === selectedCourse);
+  const t = themes[themeColor] || themes.classic;
 
-  const getThemeClasses = (theme: string) => {
-    switch (theme) {
-      case "blue": return "from-blue-600 to-blue-800 text-blue-50 border-blue-200";
-      case "emerald": return "from-emerald-600 to-emerald-800 text-emerald-50 border-emerald-200";
-      case "violet": return "from-violet-600 to-violet-800 text-violet-50 border-violet-200";
-      case "rose": return "from-rose-600 to-rose-800 text-rose-50 border-rose-200";
-      default: return "from-slate-800 to-slate-900 text-slate-50 border-slate-200";
-    }
-  };
+  const renderFront = (student: Student, isSelected: boolean) => (
+    <div 
+      className={`id-card-wrapper w-[280px] h-[440px] bg-white rounded-xl overflow-hidden shadow-md border border-gray-200 flex flex-col relative group print-card cursor-pointer transition-all ${isSelected ? '' : 'opacity-40 grayscale'} ${isSelected ? '' : 'hide-on-print'}`}
+      onClick={() => toggleSelection(student.id)}
+    >
+      <div className="absolute top-3 left-3 z-50 hide-on-print">
+        <div className={`w-6 h-6 rounded-full flex items-center justify-center shadow-sm border-2 transition-colors ${isSelected ? 'bg-emerald-500 border-emerald-500 text-white' : 'bg-white border-gray-300 text-transparent'}`}>
+           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+           </svg>
+        </div>
+      </div>
+      <TopWave color1={t.primary} color2={t.secondary} />
+      
+      <div className="z-10 mt-6 w-full flex justify-center">
+        <div className="w-12 h-12 rounded-full border-2 border-dashed flex items-center justify-center bg-white shadow-sm" style={{ borderColor: t.secondary, color: t.primary }}>
+          <CreditCard size={20} />
+        </div>
+      </div>
 
-  const getIconColor = (theme: string) => {
-    switch (theme) {
-      case "blue": return "text-blue-600";
-      case "emerald": return "text-emerald-600";
-      case "violet": return "text-violet-600";
-      case "rose": return "text-rose-600";
-      default: return "text-slate-800";
-    }
-  };
+      <div className="z-10 mt-4 flex justify-center w-full">
+        <div className="w-24 h-24 bg-gray-100 rounded-full border-4 overflow-hidden relative shadow-sm" style={{ borderColor: t.secondary }}>
+          {student.photo ? (
+            <img src={student.photo} alt="Student" className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-gray-300">
+              <LayoutGrid size={24} />
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="z-10 mt-4 w-full px-4 text-center">
+        <h3 className="font-bold text-[22px] text-gray-800 uppercase mb-0.5 truncate px-2 leading-tight tracking-wide">
+          {student.name}
+        </h3>
+        <p className="font-bold text-[13px] mb-1 tracking-wide" style={{ color: t.primary }}>ID: {student.student_id}</p>
+        <p className="text-[12px] font-semibold text-gray-600 truncate max-w-[200px] mx-auto">
+          {student.batch.course.title}
+        </p>
+      </div>
+
+      {/* Floating QR Code in the middle */}
+      <div className="z-10 mt-5 flex justify-center w-full">
+        <div className="p-2 bg-white rounded-xl shadow-md border border-gray-100">
+          <QRCodeSVG value={student.student_id} size={75} level="H" />
+        </div>
+      </div>
+
+      <BottomWave color1={t.primary} color2={t.secondary} />
+      
+      {/* Floating dots decoration */}
+      <div className="absolute left-6 top-[130px] w-4 h-4 rounded-full border opacity-40 pointer-events-none" style={{ borderColor: t.primary }} />
+      <div className="absolute right-8 top-[110px] w-3 h-3 rounded-full border opacity-40 pointer-events-none" style={{ borderColor: t.secondary }} />
+      <div className="absolute left-10 bottom-[100px] w-5 h-5 rounded-full border opacity-40 pointer-events-none" style={{ borderColor: t.primary }} />
+    </div>
+  );
+
+  const renderBack = (student: Student, isSelected: boolean) => (
+    <div 
+      className={`id-card-wrapper w-[280px] h-[440px] bg-white rounded-xl overflow-hidden shadow-md border border-gray-200 flex flex-col relative group print-card cursor-pointer transition-all ${isSelected ? '' : 'opacity-40 grayscale'} ${isSelected ? '' : 'hide-on-print'}`}
+      onClick={() => toggleSelection(student.id)}
+    >
+      <div className="absolute top-3 left-3 z-50 hide-on-print">
+        <div className={`w-6 h-6 rounded-full flex items-center justify-center shadow-sm border-2 transition-colors ${isSelected ? 'bg-emerald-500 border-emerald-500 text-white' : 'bg-white border-gray-300 text-transparent'}`}>
+           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+           </svg>
+        </div>
+      </div>
+      <TopWave color1={t.primary} color2={t.secondary} />
+      
+      <div className="z-10 mt-[90px] w-full flex flex-col px-8 text-left">
+        
+        {/* Parent Info */}
+        <div className="mb-4">
+          <h4 className="text-[10px] uppercase font-bold tracking-wider mb-1" style={{ color: t.secondary }}>Emergency Contact</h4>
+          <p className="text-[13px] font-bold text-gray-800 leading-tight mb-0.5">{student.parent_name || "N/A"}</p>
+          <p className="text-[12px] font-semibold text-gray-600">
+            Ph: {student.parent_phone || student.phone || "N/A"}
+          </p>
+        </div>
+
+        {/* Student Address */}
+        <div className="mb-6">
+          <h4 className="text-[10px] uppercase font-bold tracking-wider mb-1" style={{ color: t.secondary }}>Address</h4>
+          <p className="text-[12px] font-semibold text-gray-600 leading-snug">
+            {student.address || "Address not provided."}
+          </p>
+        </div>
+
+        {/* Institute Contact */}
+        <div className="mt-2 text-center w-full">
+          <h4 className="text-[10px] uppercase font-bold tracking-wider mb-1" style={{ color: t.secondary }}>
+            Institute Contact
+          </h4>
+          <div className="font-bold text-[18px] tracking-widest" style={{ color: t.primary }}>
+            001 123 456 789
+          </div>
+        </div>
+
+      </div>
+
+      <BottomWave color1={t.primary} color2={t.secondary} />
+      
+      {/* Floating dots decoration */}
+      <div className="absolute right-12 top-[100px] w-4 h-4 rounded-full border opacity-40 pointer-events-none" style={{ borderColor: t.primary }} />
+      <div className="absolute left-8 top-[160px] w-3 h-3 rounded-full border opacity-40 pointer-events-none" style={{ borderColor: t.secondary }} />
+      <div className="absolute right-6 bottom-[130px] w-5 h-5 rounded-full border opacity-40 pointer-events-none" style={{ borderColor: t.primary }} />
+    </div>
+  );
 
   return (
     <div className="flex flex-col gap-6 pb-10">
-      {/* Print Styles injected directly */}
       <style dangerouslySetInnerHTML={{ __html: `
         @media print {
-          body * { visibility: hidden; }
-          .print-area, .print-area * { visibility: visible; }
-          .print-area {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            display: grid !important;
-            grid-template-columns: repeat(${printCols}, minmax(0, 1fr)) !important;
-            gap: 1.5rem !important;
-            padding: 1rem !important;
+          /* Hide non-print elements */
+          .hide-on-print, aside, nav, header { 
+            display: none !important; 
           }
-          .hide-on-print { display: none !important; }
+          
+          /* Ensure page background is clean */
+          body, html, main, div[data-radix-scroll-area-viewport] {
+            background: white !important;
+            background-color: white !important;
+            color: black !important;
+            margin: 0 !important;
+            padding: 0 !important;
+          }
+          
+          /* Force hide any Next.js dev overlays or other root elements that might show backgrounds */
+          #__next {
+            background: white !important;
+          }
+
+          /* Dynamic Grid based on Layout selector */
+          .print-area {
+            display: grid !important;
+            grid-template-columns: repeat(${printCols}, 1fr) !important;
+            gap: 10px !important;
+            width: 100% !important;
+            justify-items: center;
+            align-items: flex-start;
+            background: white !important;
+            padding: 0 !important;
+          }
+
+          .print-card-container {
+            display: flex;
+            justify-content: center;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            height: ${printCols === '2' ? '430px' : printCols === '3' ? '340px' : '265px'} !important;
+            width: 100% !important;
+            overflow: hidden !important;
+          }
+
           .id-card-wrapper {
-            page-break-inside: avoid;
-            margin: 0 auto;
-            transform: scale(0.95);
-            transform-origin: top center;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            /* Use transform instead of zoom to prevent overlap bugs */
+            transform: scale(${printCols === '2' ? 0.95 : printCols === '3' ? 0.75 : 0.58}) !important;
+            transform-origin: top center !important;
+            margin: 0 !important;
+            box-shadow: none !important;
+            border: 1px solid #ccc !important;
+          }
+
+          /* Force exact colors for backgrounds and borders */
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+
+          @page {
+            size: A4 portrait;
+            margin: 10mm;
           }
         }
       `}} />
@@ -127,44 +299,63 @@ export default function QRCardsPage() {
 
       <Card className="border-none shadow-md hide-on-print">
         <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-6 items-end">
             <div className="grid gap-2">
               <Label>Select Course</Label>
-              <Select value={selectedCourse} onValueChange={(v) => { setSelectedCourse(v || ""); setSelectedBatch(""); }}>
-                <SelectTrigger><SelectValue placeholder="-- Choose Course --" /></SelectTrigger>
-                <SelectContent>
-                  {courses.map(c => <SelectItem key={c.id} value={c.id.toString()}>{c.title}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              <select 
+                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                value={selectedCourse} 
+                onChange={(e) => { setSelectedCourse(e.target.value); setSelectedBatch(""); }}
+              >
+                <option value="" disabled>-- Choose Course --</option>
+                {courses.map(c => <option key={c.id} value={c.id.toString()}>{c.title}</option>)}
+              </select>
             </div>
             
             <div className="grid gap-2">
               <Label>Select Batch</Label>
-              <Select value={selectedBatch} onValueChange={(v) => setSelectedBatch(v || "")} disabled={!selectedCourse}>
-                <SelectTrigger><SelectValue placeholder="-- Choose Batch --" /></SelectTrigger>
-                <SelectContent>
-                  {filteredBatches.map(b => <SelectItem key={b.id} value={b.id.toString()}>{b.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              <select 
+                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                value={selectedBatch} 
+                onChange={(e) => setSelectedBatch(e.target.value)} 
+                disabled={!selectedCourse}
+              >
+                <option value="" disabled>-- Choose Batch --</option>
+                {filteredBatches.map(b => <option key={b.id} value={b.id.toString()}>{b.name}</option>)}
+              </select>
             </div>
 
             <div className="grid gap-2">
               <Label>Theme Color</Label>
-              <Select value={themeColor} onValueChange={(v) => setThemeColor(v || "slate")}>
-                <SelectTrigger><SelectValue placeholder="Select Theme" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="slate">Slate (Classic)</SelectItem>
-                  <SelectItem value="blue">Blue (Professional)</SelectItem>
-                  <SelectItem value="emerald">Emerald (Success)</SelectItem>
-                  <SelectItem value="violet">Violet (Creative)</SelectItem>
-                  <SelectItem value="rose">Rose (Vibrant)</SelectItem>
-                </SelectContent>
-              </Select>
+              <select 
+                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                value={themeColor} 
+                onChange={(e) => setThemeColor(e.target.value as ThemeKey)}
+              >
+                <option value="classic">Classic (Teal & Orange)</option>
+                <option value="blue">Blue</option>
+                <option value="emerald">Emerald</option>
+                <option value="violet">Violet</option>
+                <option value="rose">Rose</option>
+              </select>
+            </div>
+
+            <div className="grid gap-2">
+              <Label>Print Side</Label>
+              <select 
+                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                value={printSide} 
+                onChange={(e) => setPrintSide(e.target.value)}
+              >
+                <option value="both">Both Sides (Front & Back)</option>
+                <option value="front">Front Side Only</option>
+                <option value="back">Back Side Only</option>
+              </select>
             </div>
 
             <Button onClick={handleGenerate} disabled={!selectedBatch || loading} className="w-full">
               <CreditCard className="w-4 h-4 mr-2" />
-              {loading ? "Generating..." : "Generate Cards"}
+              {loading ? "Generating..." : "Generate"}
             </Button>
           </div>
         </CardContent>
@@ -172,29 +363,42 @@ export default function QRCardsPage() {
 
       {students.length > 0 && (
         <div className="space-y-6">
-          <div className="flex items-center justify-between bg-muted/50 p-4 rounded-xl border hide-on-print">
+          <div className="flex flex-col md:flex-row items-center justify-between bg-muted/50 p-4 rounded-xl border hide-on-print gap-4">
             <div className="flex items-center gap-2">
               <div className="bg-primary/10 p-2 rounded-full">
                 <LayoutGrid className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <h3 className="font-semibold">{students.length} Cards Generated</h3>
-                <p className="text-xs text-muted-foreground">Ready for printing</p>
+                <h3 className="font-semibold">{students.length} Students Loaded</h3>
+                <p className="text-xs text-muted-foreground">{selectedStudents.length} selected for printing</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="h-9 border-dashed hide-on-print"
+                onClick={() => {
+                  if (selectedStudents.length === students.length) {
+                    setSelectedStudents([]);
+                  } else {
+                    setSelectedStudents(students.map(s => s.id));
+                  }
+                }}
+              >
+                {selectedStudents.length === students.length ? "Deselect All" : "Select All"}
+              </Button>
               <div className="flex items-center gap-2">
                 <Label className="text-sm">Layout:</Label>
-                <Select value={printCols} onValueChange={(v) => setPrintCols(v || "3")}>
-                  <SelectTrigger className="w-[140px] h-9">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="2">2 Columns</SelectItem>
-                    <SelectItem value="3">3 Columns (Standard)</SelectItem>
-                    <SelectItem value="4">4 Columns</SelectItem>
-                  </SelectContent>
-                </Select>
+                <select 
+                  className="flex h-9 w-[140px] items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  value={printCols} 
+                  onChange={(e) => setPrintCols(e.target.value)}
+                >
+                  <option value="2">2 Columns</option>
+                  <option value="3">3 Columns (Standard)</option>
+                  <option value="4">4 Columns</option>
+                </select>
               </div>
               <Button onClick={handlePrint} className="bg-emerald-600 hover:bg-emerald-700">
                 <Printer className="w-4 h-4 mr-2" /> Print Cards
@@ -202,74 +406,28 @@ export default function QRCardsPage() {
             </div>
           </div>
 
-          <div className="print-area grid gap-6" style={{ gridTemplateColumns: `repeat(auto-fill, minmax(280px, 1fr))` }}>
-            {students.map(student => (
-              <div key={student.id} className="id-card-wrapper w-[280px] h-[440px] bg-white rounded-2xl overflow-hidden shadow-xl border border-gray-100 flex flex-col relative mx-auto group">
-                
-                {/* Background Pattern */}
-                <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, black 1px, transparent 0)', backgroundSize: '16px 16px' }} />
-
-                {/* Header Banner */}
-                <div className={`h-32 bg-gradient-to-br ${getThemeClasses(themeColor)} relative flex items-start justify-center pt-6`}>
-                  <h2 className="font-bold text-lg tracking-wider uppercase text-white/95">INSTITUTE ID</h2>
-                  {/* Decorative curved bottom */}
-                  <div className="absolute -bottom-1 left-0 w-full overflow-hidden leading-none">
-                    <svg className="relative block w-full h-[40px]" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
-                      <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.8C59.71,118.08,130.83,119.78,200.7,113.14,242.27,109.2,282.91,73.1,321.39,56.44Z" fill="#ffffff"></path>
-                    </svg>
-                  </div>
-                </div>
-
-                {/* Profile Photo */}
-                <div className="absolute top-16 left-1/2 -translate-x-1/2 z-10">
-                  <div className="w-24 h-24 rounded-full p-1 bg-white shadow-lg">
-                    <Avatar className="w-full h-full rounded-full ring-2 ring-gray-100">
-                      <AvatarImage src={student.photo || ""} className="object-cover" />
-                      <AvatarFallback className="text-2xl font-bold bg-slate-50 text-slate-400">
-                        {student.name.substring(0,2).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                  </div>
-                </div>
-
-                {/* Content */}
-                <div className="flex-1 px-6 pt-12 pb-6 flex flex-col items-center text-center z-10">
-                  <div className="mb-4 w-full">
-                    <h3 className="font-bold text-xl text-gray-900 leading-tight mb-1 truncate px-2" title={student.name}>{student.name}</h3>
-                    <p className={`text-sm font-semibold ${getIconColor(themeColor)}`}>ID: {student.student_id}</p>
-                  </div>
-
-                  <div className="w-full space-y-2 text-xs text-gray-600 font-medium mb-auto">
-                    <div className="bg-gray-50 rounded-lg p-2 flex justify-between items-center border border-gray-100">
-                      <span className="text-gray-400">Course</span>
-                      <span className="text-gray-900 truncate max-w-[120px]">{student.batch.course.title}</span>
+          <div className="print-area flex flex-wrap gap-6 justify-start">
+            {students.map((student, i) => {
+              const isSelected = selectedStudents.includes(student.id);
+              return (
+                <Fragment key={student.id}>
+                  {(printSide === "front" || printSide === "both") && (
+                    <div key={`front-${student.id}`} className="print-card-container">
+                      {renderFront(student, isSelected)}
                     </div>
-                    <div className="bg-gray-50 rounded-lg p-2 flex justify-between items-center border border-gray-100">
-                      <span className="text-gray-400">Batch</span>
-                      <span className="text-gray-900">{student.batch.name}</span>
+                  )}
+                  {(printSide === "back" || printSide === "both") && (
+                    <div key={`back-${student.id}`} className="print-card-container">
+                      {renderBack(student, isSelected)}
                     </div>
-                    <div className="bg-gray-50 rounded-lg p-2 flex justify-between items-center border border-gray-100">
-                      <span className="text-gray-400">Phone</span>
-                      <span className="text-gray-900 font-mono">{student.phone}</span>
-                    </div>
-                  </div>
-
-                  {/* QR Code */}
-                  <div className="mt-4 p-2 bg-white rounded-xl shadow-sm border border-gray-100 inline-block">
-                    <QRCodeSVG 
-                      value={student.student_id} 
-                      size={80}
-                      level="H"
-                      className="opacity-90"
-                    />
-                  </div>
-                </div>
-
-              </div>
-            ))}
+                  )}
+                </Fragment>
+              );
+            })}
           </div>
         </div>
       )}
     </div>
   );
 }
+

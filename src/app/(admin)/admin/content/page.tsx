@@ -64,12 +64,18 @@ export default function ContentManagementPage() {
   const [heroCtaText, setHeroCtaText] = useState("");
   const [heroCtaLink, setHeroCtaLink] = useState("");
 
+  // Payment Types states
+  const [paymentTypes, setPaymentTypes] = useState<any[]>([]);
+  const [newPaymentType, setNewPaymentType] = useState("");
+  const [isSubmittingType, setIsSubmittingType] = useState(false);
+
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [notRes, heroRes] = await Promise.all([
+      const [notRes, heroRes, ptRes] = await Promise.all([
         fetch("/api/admin/content/notices"),
-        fetch("/api/admin/content/hero")
+        fetch("/api/admin/content/hero"),
+        fetch("/api/admin/settings/payment-types")
       ]);
       
       if (notRes.ok) setNotices(await notRes.json());
@@ -81,6 +87,7 @@ export default function ContentManagementPage() {
           setHeroCtaLink(heroData.cta_link || "");
         }
       }
+      if (ptRes.ok) setPaymentTypes(await ptRes.json());
     } catch (err) {
       console.error(err);
     } finally {
@@ -131,6 +138,46 @@ export default function ContentManagementPage() {
         }),
       });
       if (res.ok) alert("Hero banner updated successfully!");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleAddPaymentType = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmittingType(true);
+    try {
+      const res = await fetch("/api/admin/settings/payment-types", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newPaymentType }),
+      });
+      if (res.ok) {
+        setNewPaymentType("");
+        fetchData();
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to add payment type");
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsSubmittingType(false);
+    }
+  };
+
+  const handleDeletePaymentType = async (id: number) => {
+    if (!confirm("Are you sure you want to delete this payment type?")) return;
+    try {
+      const res = await fetch(`/api/admin/settings/payment-types/${id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        fetchData();
+      } else {
+        const err = await res.json();
+        alert(err.error || "Failed to delete payment type");
+      }
     } catch (err) {
       console.error(err);
     }
@@ -187,6 +234,16 @@ export default function ContentManagementPage() {
             <ImageIcon className="w-4 h-4 hidden sm:block" />
             Gallery
           </button>
+          <button
+            onClick={() => setActiveTab("payment-types")}
+            className={cn(
+              "flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 whitespace-nowrap",
+              activeTab === "payment-types" ? "bg-white dark:bg-slate-950 shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Settings className="w-4 h-4 hidden sm:block" />
+            Payment Types
+          </button>
         </div>
       </div>
 
@@ -199,12 +256,14 @@ export default function ContentManagementPage() {
               {activeTab === "hero" && "Homepage Hero Section"}
               {activeTab === "site-settings" && "Site Configuration"}
               {activeTab === "gallery" && "Gallery"}
+              {activeTab === "payment-types" && "Payment Types"}
             </CardTitle>
             <CardDescription className="mt-1">
               {activeTab === "notices" && "Manage your notice board."}
               {activeTab === "hero" && "Update the main banner shown to public visitors."}
               {activeTab === "site-settings" && "Manage contact information, social links, and map location."}
               {activeTab === "gallery" && "Manage public gallery."}
+              {activeTab === "payment-types" && "Manage payment types for financial transactions."}
             </CardDescription>
           </div>
           
@@ -446,6 +505,64 @@ export default function ContentManagementPage() {
           {activeTab === "gallery" && (
             <div className="p-6">
               <GalleryManager />
+            </div>
+          )}
+
+          {activeTab === "payment-types" && (
+            <div className="p-6">
+              <form onSubmit={handleAddPaymentType} className="flex gap-4 items-end max-w-lg mb-8">
+                <div className="flex-1 space-y-2">
+                  <Label>New Payment Type</Label>
+                  <Input 
+                    placeholder="e.g. Monthly Fee, Admission Fee" 
+                    value={newPaymentType}
+                    onChange={(e) => setNewPaymentType(e.target.value)}
+                    required
+                  />
+                </div>
+                <Button type="submit" disabled={isSubmittingType} className="bg-primary shadow-sm hover:bg-primary/90">
+                  <Plus className="w-4 h-4 mr-2" />
+                  {isSubmittingType ? "Adding..." : "Add Type"}
+                </Button>
+              </form>
+
+              <div className="rounded-lg border overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-slate-50/50 dark:bg-slate-900/50">
+                      <TableHead>Type Name</TableHead>
+                      <TableHead>Created At</TableHead>
+                      <TableHead className="text-right">Action</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {paymentTypes.map((pt) => (
+                      <TableRow key={pt.id}>
+                        <TableCell className="font-medium text-slate-900 dark:text-slate-100">{pt.name}</TableCell>
+                        <TableCell className="text-muted-foreground">{new Date(pt.created_at).toLocaleDateString()}</TableCell>
+                        <TableCell className="text-right">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => handleDeletePaymentType(pt.id)}
+                            className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {paymentTypes.length === 0 && (
+                      <TableRow>
+                        <TableCell colSpan={3} className="text-center py-8 text-muted-foreground">
+                          No payment types found.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
             </div>
           )}
         </CardContent>
