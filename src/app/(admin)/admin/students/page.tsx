@@ -74,7 +74,7 @@ interface Student {
 }
 
 // Custom Dropdown that guarantees downward opening
-const CustomDropdown = ({ value, onChange, options, placeholder }: { value: string, onChange: (val: string) => void, options: {value: string, label: string}[], placeholder: string }) => {
+const CustomDropdown = ({ value, onChange, options, placeholder }: { value: string, onChange: (val: string) => void, options: { value: string, label: string }[], placeholder: string }) => {
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -90,7 +90,7 @@ const CustomDropdown = ({ value, onChange, options, placeholder }: { value: stri
 
   return (
     <div className="relative w-full" ref={ref}>
-      <div 
+      <div
         className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background cursor-pointer"
         onClick={() => setIsOpen(!isOpen)}
       >
@@ -210,7 +210,7 @@ export default function StudentsPage() {
   useEffect(() => {
     // Only fetch students when course or batch filter changes
     fetchStudents();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterCourseId, filterBatchId]);
 
   const resetForm = () => {
@@ -551,7 +551,7 @@ export default function StudentsPage() {
                       value={dobDay}
                       onChange={setDobDay}
                       placeholder="Day"
-                      options={Array.from({length: 31}, (_, i) => {
+                      options={Array.from({ length: 31 }, (_, i) => {
                         const val = (i + 1).toString().padStart(2, '0');
                         return { value: val, label: val };
                       })}
@@ -568,7 +568,7 @@ export default function StudentsPage() {
                       value={dobYear}
                       onChange={setDobYear}
                       placeholder="Year"
-                      options={Array.from({length: 50}, (_, i) => {
+                      options={Array.from({ length: 50 }, (_, i) => {
                         const y = (new Date().getFullYear() - i).toString();
                         return { value: y, label: y };
                       })}
@@ -592,8 +592,8 @@ export default function StudentsPage() {
                     <div className="space-y-2">
                       <Label htmlFor="parent_phone" className="flex items-center justify-between">
                         <span>Parent Phone (Optional)</span>
-                        <button 
-                          type="button" 
+                        <button
+                          type="button"
                           onClick={() => setParentPhone(phone)}
                           className="text-xs text-blue-600 hover:underline flex items-center"
                         >
@@ -619,7 +619,7 @@ export default function StudentsPage() {
                     {(() => {
                       const course = courses.find(c => c.id.toString() === selectedCourseId);
                       const courseFee = course?.discount_fee || course?.fee;
-                      
+
                       return (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                           {courseFee ? (
@@ -637,10 +637,10 @@ export default function StudentsPage() {
 
                           <div className="space-y-2">
                             <Label htmlFor="pay_amount">Amount Paying (৳)</Label>
-                            <Input 
-                              id="pay_amount" 
-                              type="number" 
-                              value={paymentAmount} 
+                            <Input
+                              id="pay_amount"
+                              type="number"
+                              value={paymentAmount}
                               onChange={(e) => {
                                 const val = e.target.value;
                                 setPaymentAmount(val);
@@ -650,18 +650,18 @@ export default function StudentsPage() {
                                   setPaymentDue(d > 0 ? d.toString() : "0");
                                   setPaymentStatus(d > 0 ? (p > 0 ? "partial" : "due") : "paid");
                                 }
-                              }} 
+                              }}
                               placeholder="0"
                             />
                           </div>
 
                           <div className="space-y-2">
                             <Label htmlFor="pay_due">Due Amount (৳)</Label>
-                            <Input 
-                              id="pay_due" 
-                              type="number" 
-                              value={paymentDue} 
-                              onChange={(e) => setPaymentDue(e.target.value)} 
+                            <Input
+                              id="pay_due"
+                              type="number"
+                              value={paymentDue}
+                              onChange={(e) => setPaymentDue(e.target.value)}
                               placeholder="0"
                             />
                           </div>
@@ -686,9 +686,9 @@ export default function StudentsPage() {
                   {/* SMS Section */}
                   <div className="border rounded-lg p-4 bg-slate-50 dark:bg-slate-900/50 space-y-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <input 
-                        type="checkbox" 
-                        id="send_sms" 
+                      <input
+                        type="checkbox"
+                        id="send_sms"
                         className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
                         checked={sendWelcomeSms}
                         onChange={(e) => setSendWelcomeSms(e.target.checked)}
@@ -805,8 +805,8 @@ export default function StudentsPage() {
             </div>
           </div>
           <div className="flex-1 flex gap-2">
-            <Input 
-              placeholder="Search by ID or Name..." 
+            <Input
+              placeholder="Search by ID or Name..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && fetchStudents()}
@@ -874,13 +874,12 @@ export default function StudentsPage() {
                         </TableCell>
                         <TableCell>{student.phone}</TableCell>
                         <TableCell>
-                          <Badge 
+                          <Badge
                             variant="outline"
-                            className={`transition-colors shadow-sm ${
-                              student.status === "active" 
-                                ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:text-emerald-400" 
+                            className={`transition-colors shadow-sm ${student.status === "active"
+                                ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:text-emerald-400"
                                 : "bg-rose-500/10 text-rose-600 border-rose-500/20 dark:text-rose-400"
-                            }`}
+                              }`}
                           >
                             {student.status === "active" ? "Active" : "Inactive"}
                           </Badge>
@@ -888,9 +887,9 @@ export default function StudentsPage() {
                         <TableCell className="text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger className="h-8 w-8 p-0 flex items-center justify-center rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-muted-foreground">
-  <span className="sr-only">Open menu</span>
-  <MoreHorizontal className="h-4 w-4" />
-</DropdownMenuTrigger>
+                              <span className="sr-only">Open menu</span>
+                              <MoreHorizontal className="h-4 w-4" />
+                            </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem onClick={() => handleToggleStatus(student)}>
                                 <Power className={`mr-2 h-4 w-4 ${student.status === 'active' ? 'text-green-600' : 'text-muted-foreground'}`} />
@@ -913,7 +912,7 @@ export default function StudentsPage() {
                                 <span>Edit</span>
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem 
+                              <DropdownMenuItem
                                 onClick={() => handleDeleteClick(student.id)}
                                 className="text-destructive focus:text-destructive"
                               >
@@ -940,9 +939,9 @@ export default function StudentsPage() {
           )}
         </CardContent>
       </Card>
-      
-      <SmsModal 
-        isOpen={isSmsOpen} 
+
+      <SmsModal
+        isOpen={isSmsOpen}
         onClose={() => setIsSmsOpen(false)}
         targetType="student"
         targetId={smsTargetId}

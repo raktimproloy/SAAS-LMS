@@ -1,90 +1,220 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { Users, BookOpen, ArrowRight, PlayCircle } from "lucide-react";
-import { Course } from "@prisma/client";
+import { ArrowRight, ChevronDown, Clock, Calendar, Users } from "lucide-react";
 
-interface PopularCoursesSectionProps {
-  courses?: Course[];
+export interface CourseBatch {
+  id: number;
+  name: string;
+  start_time: string;
+  end_time: string;
+  status: string;
+  max_students: number | null;
+  class_days: unknown;
 }
 
-// Fallback data if DB is empty
-const fallbackCourses: any[] = [
-  { id: "1", title: "জীববিজ্ঞান (HSC)", fee: 5000, discount_fee: 3000 },
-  { id: "2", title: "মেডিকেল ভর্তি প্রস্তুতি", fee: 15000, discount_fee: 12000 },
-  { id: "3", title: "NEET Preparation", fee: 20000, discount_fee: 18000 },
+export interface CompactCourse {
+  id: number | string;
+  title: string;
+  fee: number | null;
+  discount_fee: number | null;
+  batches?: CourseBatch[];
+}
+
+interface PopularCoursesSectionProps {
+  courses?: CompactCourse[];
+}
+
+const fallbackCourses: CompactCourse[] = [
+  {
+    id: "1",
+    title: "জীববিজ্ঞান (HSC)",
+    fee: 5000,
+    discount_fee: 3000,
+    batches: [
+      { id: 1, name: "Morning Batch", start_time: "08:00 AM", end_time: "10:00 AM", status: "active", max_students: 40, class_days: ["রবি", "মঙ্গল", "বৃহস্পতি"] },
+      { id: 2, name: "Evening Batch", start_time: "04:00 PM", end_time: "06:00 PM", status: "active", max_students: 40, class_days: ["সোম", "বুধ", "শুক্র"] },
+    ],
+  },
+  {
+    id: "2",
+    title: "মেডিকেল ভর্তি প্রস্তুতি",
+    fee: 15000,
+    discount_fee: 12000,
+    batches: [
+      { id: 3, name: "Regular Batch", start_time: "10:00 AM", end_time: "01:00 PM", status: "active", max_students: 50, class_days: ["রবি", "বুধ"] },
+    ],
+  },
+  {
+    id: "3",
+    title: "NEET Preparation",
+    fee: 20000,
+    discount_fee: 18000,
+    batches: [],
+  },
 ];
+
+function formatDays(classDays: unknown): string | null {
+  if (!classDays) return null;
+  if (Array.isArray(classDays) && classDays.length > 0) {
+    return classDays.filter((d) => typeof d === "string").join(", ");
+  }
+  if (typeof classDays === "string" && classDays.trim()) return classDays;
+  return null;
+}
+
+function formatPrice(fee: number | null, discountFee: number | null) {
+  if (discountFee) {
+    return (
+      <span className="flex items-baseline gap-1.5 shrink-0">
+        {fee ? (
+          <span className="text-xs text-muted-foreground line-through">৳{fee}</span>
+        ) : null}
+        <span className="text-sm font-bold text-foreground">৳{discountFee}</span>
+      </span>
+    );
+  }
+  if (fee) {
+    return (
+      <span className="text-sm font-bold text-foreground shrink-0">
+        ৳{fee}
+      </span>
+    );
+  }
+  return null;
+}
 
 export function PopularCoursesSection({ courses }: PopularCoursesSectionProps) {
   const displayCourses = courses && courses.length > 0 ? courses : fallbackCourses;
+  const [openId, setOpenId] = useState<number | string | null>(null);
+
+  const toggle = (id: number | string) => {
+    setOpenId((prev) => (prev === id ? null : id));
+  };
 
   return (
-    <section className="py-16 px-4 sm:px-6 lg:px-8 relative z-10">
-      <div className="max-w-7xl mx-auto">
-        <motion.div 
+    <section className="py-12 px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="max-w-4xl mx-auto">
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.6 }}
-          className="flex flex-col md:flex-row justify-between items-end mb-8 gap-6"
+          className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-6 gap-4"
         >
           <div>
-            <span className="text-primary font-bold text-sm uppercase tracking-wider mb-2 block">Premium Learning</span>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-foreground">
+            <span className="text-primary font-bold text-sm uppercase tracking-wider mb-1 block">
+              Premium Learning
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground">
               জনপ্রিয় কোর্সসমূহ
             </h2>
           </div>
-          <Link href="/courses" className="group flex items-center gap-2 text-primary font-bold hover:text-primary/80 transition-colors">
+          <Link
+            href="/courses"
+            className="group flex items-center gap-2 text-primary font-bold hover:text-primary/80 transition-colors text-sm"
+          >
             সব কোর্স দেখুন
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {displayCourses.map((c, i) => (
-            <motion.div
-              key={c.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.5, delay: i * 0.1 }}
-            >
-              <Link href={`/courses/${c.id}`} className="block h-full group">
-                <div className="h-full bg-card/60 backdrop-blur-xl border border-border/60 hover:border-primary/40 rounded-xl p-5 transition-all duration-500 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] hover:-translate-y-2 dark:hover:shadow-[0_20px_40px_-15px_rgba(255,255,255,0.05)] relative overflow-hidden flex flex-col">
-                  {/* Decorative glow */}
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-[40px] group-hover:bg-primary/20 transition-colors duration-500" />
-                  
-                  <div className="relative z-10 flex-grow">
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-primary/10 text-primary text-xs font-bold mb-4 uppercase tracking-wider border border-primary/20">
-                      কোর্স
-                    </span>
-                    <h3 className="text-xl font-bold text-foreground leading-tight mb-3 group-hover:text-primary transition-colors">
-                      {c.title}
-                    </h3>
-                  </div>
+        <div className="flex flex-col gap-3">
+          {displayCourses.map((c, i) => {
+            const isOpen = openId === c.id;
+            const batches = c.batches ?? [];
+            const price = formatPrice(c.fee, c.discount_fee);
 
-                  <div className="relative z-10 pt-4 mt-4 border-t border-border/50">
-                    <div className="flex items-center justify-between">
-                      <div className="flex flex-col">
-                        {c.discount_fee ? (
-                          <>
-                            <span className="text-foreground/90 line-through text-sm font-semibold">৳{c.fee}</span>
-                            <span className="text-foreground font-bold text-xl">৳{c.discount_fee}</span>
-                          </>
+            return (
+              <motion.div
+                key={c.id}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.35, delay: i * 0.05 }}
+                className="bg-card/70 backdrop-blur-xl border border-border/60 rounded-xl overflow-hidden"
+              >
+                <button
+                  type="button"
+                  onClick={() => toggle(c.id)}
+                  aria-expanded={isOpen}
+                  className="w-full flex items-center gap-4 px-5 py-4 min-h-[56px] text-left hover:bg-muted/40 transition-colors"
+                >
+                  <span className="flex-1 min-w-0 font-semibold text-foreground text-base sm:text-lg truncate">
+                    {c.title}
+                  </span>
+                  {price}
+                  <ChevronDown
+                    className={`w-5 h-5 text-muted-foreground shrink-0 transition-transform duration-200 ${
+                      isOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+
+                <AnimatePresence initial={false}>
+                  {isOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.22, ease: "easeInOut" }}
+                      className="overflow-hidden"
+                    >
+                      <div className="px-5 pb-4 pt-1 border-t border-border/50">
+                        {batches.length === 0 ? (
+                          <p className="text-sm text-muted-foreground py-4">
+                            এই কোর্সে এখন কোনো ব্যাচ নেই।
+                          </p>
                         ) : (
-                          <span className="text-foreground font-bold text-xl">৳{c.fee}</span>
+                          <ul className="divide-y divide-border/40">
+                            {batches.map((batch) => {
+                              const days = formatDays(batch.class_days);
+                              return (
+                                <li key={batch.id} className="py-4 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium text-foreground">{batch.name}</p>
+                                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-muted-foreground">
+                                      <span className="inline-flex items-center gap-1">
+                                        <Clock className="w-3 h-3" />
+                                        {batch.start_time} – {batch.end_time}
+                                      </span>
+                                      {days && (
+                                        <span className="inline-flex items-center gap-1">
+                                          <Calendar className="w-3 h-3" />
+                                          {days}
+                                        </span>
+                                      )}
+                                      {batch.max_students ? (
+                                        <span className="inline-flex items-center gap-1">
+                                          <Users className="w-3 h-3" />
+                                          {batch.max_students} seats
+                                        </span>
+                                      ) : null}
+                                    </div>
+                                  </div>
+                                  <span
+                                    className={`self-start sm:self-center text-[10px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider border ${
+                                      batch.status === "active" || batch.status === "PUBLISHED"
+                                        ? "bg-green-500/10 text-green-600 border-green-500/20"
+                                        : "bg-muted text-muted-foreground border-border"
+                                    }`}
+                                  >
+                                    {batch.status === "active" || batch.status === "PUBLISHED" ? "Open" : "Closed"}
+                                  </span>
+                                </li>
+                              );
+                            })}
+                          </ul>
                         )}
                       </div>
-                      <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-primary/30">
-                        <ArrowRight className="w-5 h-5" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            </motion.div>
-          ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>

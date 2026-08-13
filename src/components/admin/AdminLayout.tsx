@@ -41,8 +41,8 @@ type SidebarLink = {
 
 const sidebarLinks: SidebarLink[] = [
   { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard }, // no perm needed
-  { name: "Assistants Team", href: "/admin/assistants", icon: Users, perm: "assistants" },
   { name: "Courses & Batches", href: "/admin/courses", icon: BookOpen, perm: "courses" },
+  { name: "Assistants Team", href: "/admin/assistants", icon: Users, perm: "assistants" },
   { name: "Video Courses", href: "/admin/video-courses", icon: Video, perm: "courses" },
   {
     name: "Management",

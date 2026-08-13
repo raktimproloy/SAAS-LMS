@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { MessageSquare, Plus, Clock, CheckCircle2, XCircle, Save, CalendarClock, Loader2 } from "lucide-react";
+import { MessageSquare, Plus, Clock, CheckCircle2, XCircle, Save, CalendarClock, Loader2, Wallet, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -41,6 +41,28 @@ export default function SmsLogsPage() {
   const [cronTemplate, setCronTemplate] = useState("Happy Birthday! Wishing you a day filled with happiness and a year filled with joy. - Doctor Biology");
   const [cronActive, setCronActive] = useState(false);
   const [savingCron, setSavingCron] = useState(false);
+
+  const [balance, setBalance] = useState<number | null>(null);
+  const [balanceLoading, setBalanceLoading] = useState(true);
+  const [balanceError, setBalanceError] = useState<string | null>(null);
+
+  const fetchBalance = async () => {
+    setBalanceLoading(true);
+    setBalanceError(null);
+    try {
+      const res = await fetch("/api/admin/sms/balance");
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Failed to fetch balance");
+      }
+      setBalance(data.balance);
+    } catch (err) {
+      setBalance(null);
+      setBalanceError(err instanceof Error ? err.message : "Failed to fetch balance");
+    } finally {
+      setBalanceLoading(false);
+    }
+  };
 
   const fetchLogsAndCron = async () => {
     setLoading(true);
@@ -112,6 +134,7 @@ export default function SmsLogsPage() {
 
   useEffect(() => {
     fetchLogsAndCron();
+    fetchBalance();
   }, []);
 
   return (
@@ -126,6 +149,43 @@ export default function SmsLogsPage() {
           Send Custom SMS
         </Button>
       </div>
+
+      <Card className="border-none shadow-sm bg-emerald-50/80 dark:bg-emerald-950/20">
+        <CardContent className="pt-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/15 flex items-center justify-center shrink-0">
+                <Wallet className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">BulkSMSBD Account Balance</p>
+                {balanceLoading ? (
+                  <div className="flex items-center gap-2 mt-1">
+                    <Loader2 className="w-4 h-4 animate-spin text-emerald-600" />
+                    <span className="text-sm text-muted-foreground">Loading balance...</span>
+                  </div>
+                ) : balanceError ? (
+                  <p className="text-sm text-rose-600 mt-1">{balanceError}</p>
+                ) : (
+                  <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-300 mt-0.5">
+                    ৳{balance?.toFixed(2)}
+                  </p>
+                )}
+              </div>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={fetchBalance}
+              disabled={balanceLoading}
+              className="gap-2 shrink-0"
+            >
+              <RefreshCw className={`w-4 h-4 ${balanceLoading ? "animate-spin" : ""}`} />
+              Refresh Balance
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card className="border-none shadow-md bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 overflow-hidden relative">
         <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">

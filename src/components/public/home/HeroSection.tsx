@@ -72,7 +72,7 @@ function HeroSlider() {
   );
 }
 
-export function HeroSection() {
+export function HeroSection({ hideButtons = false, showStatsCards = false }: { hideButtons?: boolean; showStatsCards?: boolean }) {
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20"
       style={{ background: "linear-gradient(135deg, hsl(210 100% 18%) 0%, hsl(210 100% 28%) 50%, hsl(217 25% 18%) 100%)" }}>
@@ -111,20 +111,49 @@ export function HeroSection() {
             </motion.p>
 
             {/* CTAs */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }}
-              className="mt-10 flex flex-col sm:flex-row gap-4 items-start sm:items-center"
-            >
-              <Link href="/student/login"
-                className="group px-8 py-4 rounded-lg bg-white text-primary font-bold text-base shadow-2xl hover:bg-white/90 transition-all duration-300 flex items-center justify-center gap-2 w-full sm:w-auto">
-                এখনই শুরু করুন
-                <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-              </Link>
-              <Link href="/courses"
-                className="px-8 py-4 rounded-lg border border-white/25 text-white font-semibold text-base hover:bg-white/10 transition-all duration-300 backdrop-blur-sm flex justify-center w-full sm:w-auto">
-                কোর্স দেখুন
-              </Link>
-            </motion.div>
+            {!hideButtons && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }}
+                className="mt-10 flex flex-col sm:flex-row gap-4 items-start sm:items-center"
+              >
+                <Link href="/student/login"
+                  className="group px-8 py-4 rounded-lg bg-white text-primary font-bold text-base shadow-2xl hover:bg-white/90 transition-all duration-300 flex items-center justify-center gap-2 w-full sm:w-auto">
+                  এখনই শুরু করুন
+                  <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                </Link>
+                <Link href="/courses"
+                  className="px-8 py-4 rounded-lg border border-white/25 text-white font-semibold text-base hover:bg-white/10 transition-all duration-300 backdrop-blur-sm flex justify-center w-full sm:w-auto">
+                  কোর্স দেখুন
+                </Link>
+              </motion.div>
+            )}
+
+            {showStatsCards && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }}
+                className="mt-10 flex flex-col sm:flex-row gap-4 items-start sm:items-center"
+              >
+                <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-5 flex items-center gap-5 w-full sm:w-auto shadow-xl">
+                  <div className="w-14 h-14 rounded-xl bg-sky-500/20 border border-sky-500/30 flex items-center justify-center shrink-0">
+                    <Users className="w-7 h-7 text-sky-400" />
+                  </div>
+                  <div>
+                    <h4 className="text-3xl font-black text-white mb-1">৫০০০+</h4>
+                    <p className="text-white/80 text-sm font-medium">সর্বমোট শিক্ষার্থী</p>
+                  </div>
+                </div>
+                
+                <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-5 flex items-center gap-5 w-full sm:w-auto shadow-xl">
+                  <div className="w-14 h-14 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center shrink-0">
+                    <BookOpen className="w-7 h-7 text-emerald-400" />
+                  </div>
+                  <div>
+                    <h4 className="text-3xl font-black text-white mb-1">১৫+</h4>
+                    <p className="text-white/80 text-sm font-medium">অভিজ্ঞ শিক্ষক</p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
           </div>
 
           {/* Right Column: Hero Slider */}

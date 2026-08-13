@@ -22,9 +22,28 @@ async function fetchHomeData() {
       orderBy: { created_at: 'desc' }
     }),
     prisma.course.findMany({
-      take: 6,
+      take: 8,
       orderBy: { created_at: 'desc' },
-      where: { status: 'PUBLISHED' }
+      where: { status: { in: ['PUBLISHED', 'active'] } },
+      select: {
+        id: true,
+        title: true,
+        fee: true,
+        discount_fee: true,
+        batches: {
+          where: { status: { in: ['active', 'PUBLISHED'] } },
+          orderBy: { created_at: 'desc' },
+          select: {
+            id: true,
+            name: true,
+            start_time: true,
+            end_time: true,
+            status: true,
+            max_students: true,
+            class_days: true,
+          },
+        },
+      },
     }),
     prisma.videoCourse.findMany({
       take: 4,

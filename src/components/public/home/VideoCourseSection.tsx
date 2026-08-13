@@ -185,7 +185,7 @@ export function VideoCourseSection({ videoCourses }: VideoCourseSectionProps) {
               dynamicBullets: true,
             }}
             modules={[EffectCoverflow, Pagination, Autoplay]}
-            className="w-full !pt-10 !pb-14 px-4"
+            className="video-courses-slider w-full !pt-10 !pb-14 px-4"
           >
             {displayCourses.map((course) => (
               <SwiperSlide key={course.uniqueId} className="!w-[80vw] sm:!w-[500px] lg:!w-[600px]">
@@ -246,17 +246,17 @@ export function VideoCourseSection({ videoCourses }: VideoCourseSectionProps) {
 
       <style dangerouslySetInnerHTML={{
         __html: `
-        .swiper-slide {
+        .video-courses-slider .swiper-slide {
           transition: filter 0.6s ease;
         }
-        .swiper-slide:not(.swiper-slide-active) {
+        .video-courses-slider .swiper-slide:not(.swiper-slide-active) {
           filter: blur(5px) brightness(0.6);
         }
-        .swiper-pagination-bullet {
+        .video-courses-slider .swiper-pagination-bullet {
           background-color: rgba(100, 116, 139, 0.5) !important;
           opacity: 1 !important;
         }
-        .swiper-pagination-bullet-active {
+        .video-courses-slider .swiper-pagination-bullet-active {
           background-color: hsl(var(--primary)) !important;
           width: 24px !important;
           border-radius: 8px !important;
