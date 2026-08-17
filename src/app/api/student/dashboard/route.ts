@@ -38,16 +38,30 @@ export async function GET() {
       }
     });
 
-    // 2. Fetch recent result
-    const recentResult = await prisma.examResult.findFirst({
-      where: { student_id: studentId },
-      orderBy: { created_at: 'desc' },
+    // 2. Fetch recent 5 OFFLINE results only (with date)
+    const recentResults = await prisma.examResult.findMany({
+      where: {
+        student_id: studentId,
+        exam: { type: "offline" },
+      },
+      orderBy: { created_at: "desc" },
+      take: 5,
       include: {
         exam: {
-          select: { title: true, type: true }
-        }
-      }
+          select: {
+            id: true,
+            title: true,
+            type: true,
+            start_time: true,
+            total_marks: true,
+            is_grading_enabled: true,
+          },
+        },
+      },
     });
+
+    // Keep first as recentResult for any older consumers
+    const recentResult = recentResults[0] ?? null;
 
     // 3. Fetch all active/published exams and find the next valid one
     const allRelevantExams = await prisma.exam.findMany({
@@ -131,6 +145,7 @@ export async function GET() {
     return NextResponse.json({
       attendance,
       recentResult,
+      recentResults,
       upcomingExam,
       paymentStatus: payment ? payment.status : "due",
       notices,

@@ -78,7 +78,7 @@ export function StudentHeader() {
         <Button 
           variant="ghost" 
           size="icon" 
-          className="shrink-0 bg-white/5 hover:bg-white/10 rounded-full h-10 w-10 border border-white/10" 
+          className="shrink-0 bg-muted/60 hover:bg-muted rounded-full h-10 w-10 border border-border" 
           onClick={() => router.back()}
         >
           <ArrowLeft className="h-5 w-5" />
@@ -110,7 +110,7 @@ export function StudentHeader() {
             clickedPath === '/student/notices' ? "scale-90 opacity-70" : "scale-100 opacity-100"
           )}
         >
-          <Button variant="ghost" size="icon" className="relative bg-white/5 hover:bg-white/10 rounded-full h-10 w-10 border border-white/10">
+          <Button variant="ghost" size="icon" className="relative bg-muted/60 hover:bg-muted rounded-full h-10 w-10 border border-border">
             <Bell className="h-5 w-5" />
             <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-destructive shadow-[0_0_8px_rgba(239,68,68,0.8)]" />
           </Button>

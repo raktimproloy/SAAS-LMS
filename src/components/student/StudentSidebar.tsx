@@ -53,7 +53,7 @@ export function StudentSidebar({ onLinkClick, LinkWrapper }: StudentSidebarProps
   return (
     <div className="flex h-full w-64 flex-col border-r border-sidebar-border bg-sidebar/90 backdrop-blur-2xl text-foreground relative z-20 overflow-hidden">
       {/* Ambient Floating Gradients */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-80 mix-blend-screen">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40 dark:opacity-80 dark:mix-blend-screen">
         <div className="absolute -top-[5%] -left-[20%] w-[140%] h-[40%] bg-[hsl(var(--gradient-1))]/40 rounded-full blur-[60px] animate-blob-y" />
         <div className="absolute top-[35%] -right-[30%] w-[120%] h-[30%] bg-[hsl(var(--gradient-2))]/35 rounded-full blur-[60px] animate-blob-y animation-delay-2000" />
         <div className="absolute -bottom-[5%] -left-[10%] w-[100%] h-[40%] bg-[hsl(var(--gradient-3))]/35 rounded-full blur-[60px] animate-blob-y animation-delay-4000" />
@@ -61,7 +61,7 @@ export function StudentSidebar({ onLinkClick, LinkWrapper }: StudentSidebarProps
       
       <div className="relative z-10 flex flex-col h-full">
         <div className="flex h-20 shrink-0 items-center justify-between px-6 border-b border-sidebar-border/50 bg-sidebar/40">
-          <h2 className="text-3xl font-bold tracking-tight text-white">Student Portal</h2>
+          <h2 className="text-3xl font-bold tracking-tight text-foreground">Student Portal</h2>
         </div>
         <div className="flex-1 overflow-auto py-6">
           <nav className="grid gap-2 px-4">
@@ -85,7 +85,7 @@ export function StudentSidebar({ onLinkClick, LinkWrapper }: StudentSidebarProps
                     className={cn(
                       "flex items-center rounded-full px-4 py-3 text-base transition-all duration-300",
                       isActive
-                        ? "animated-premium-glass text-white font-bold shadow-lg shadow-primary/20"
+                        ? "animated-premium-glass text-primary-foreground font-bold shadow-lg shadow-primary/20"
                         : "text-foreground/70 hover:bg-sidebar-accent hover:text-foreground border border-transparent font-medium gap-3"
                     )}
                   >

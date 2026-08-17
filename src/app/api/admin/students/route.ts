@@ -3,6 +3,7 @@ import prisma from "@/lib/db";
 import { verifyToken } from "@/lib/jwt";
 import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
+import { siteConfig } from "@/config/site.config";
 
 async function checkPermission(permission: string) {
   const token = cookies().get("admin_token")?.value;
@@ -24,6 +25,9 @@ export async function GET(request: Request) {
   const q = searchParams.get("q");
   const course_id = searchParams.get("course_id");
   const batch_id = searchParams.get("batch_id");
+  const status = searchParams.get("status");
+  const pageParam = searchParams.get("page");
+  const limitParam = searchParams.get("limit");
 
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -33,31 +37,68 @@ export async function GET(request: Request) {
     } else if (course_id) {
       whereClause.batch = { course_id: parseInt(course_id) };
     }
+    if (status && status !== "all") {
+      whereClause.status = status;
+    }
     if (q) {
       whereClause.OR = [
         { name: { contains: q } },
-        { student_id: { contains: q } }
+        { student_id: { contains: q } },
+        { phone: { contains: q } },
+        { parent_phone: { contains: q } },
+        { email: { contains: q } },
       ];
+    }
+
+    const include = {
+      batch: {
+        include: {
+          course: true
+        }
+      },
+    } as const;
+
+    const toSafe = (s: { password?: string }) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password, ...rest } = s;
+      return rest;
+    };
+
+    // Paginated response when `page` is present; otherwise return a raw array
+    // so QR cards, payments, and scanner keep working.
+    if (pageParam) {
+      const page = Math.max(1, parseInt(pageParam, 10) || 1);
+      const limit = Math.min(100, Math.max(1, parseInt(limitParam || "20", 10) || 20));
+      const skip = (page - 1) * limit;
+
+      const [students, total] = await prisma.$transaction([
+        prisma.student.findMany({
+          where: whereClause,
+          include,
+          orderBy: { created_at: "desc" },
+          skip,
+          take: limit,
+        }),
+        prisma.student.count({ where: whereClause }),
+      ]);
+
+      return NextResponse.json({
+        students: students.map(toSafe),
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.max(1, Math.ceil(total / limit)),
+        },
+      });
     }
 
     const students = await prisma.student.findMany({
       where: whereClause,
-      include: {
-        batch: {
-          include: {
-            course: true
-          }
-        },
-      },
+      include,
       orderBy: { created_at: "desc" },
     });
-    // Do not return passwords
-    const safeStudents = students.map(s => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { password, ...rest } = s;
-      return rest;
-    });
-    return NextResponse.json(safeStudents);
+    return NextResponse.json(students.map(toSafe));
   } catch {
     return NextResponse.json({ error: "Failed to fetch students" }, { status: 500 });
   }
@@ -162,8 +203,10 @@ export async function POST(request: Request) {
       // Lazy load SMS utility to avoid circular dependencies or if it's only needed here
       const { sendSMS } = await import("@/lib/sms");
       const personalizedMessage = welcome_sms_template
-        .replace(/{name}/g, newStudent.name || "")
-        .replace(/{student_id}/g, newStudent.student_id || "");
+        .replace(/\{name\}/gi, newStudent.name || "")
+        .replace(/\{student_id\}/gi, newStudent.student_id || "")
+        .replace(/\{institute\}/gi, siteConfig.instituteName)
+        .replace(/\{course\}/gi, "");
 
       const smsResult = await sendSMS(newStudent.phone, personalizedMessage);
       

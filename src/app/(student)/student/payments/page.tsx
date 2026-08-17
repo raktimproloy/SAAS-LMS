@@ -26,40 +26,40 @@ export default function StudentPaymentsPage() {
     return (
       <div className="space-y-8 w-full max-w-[1920px] mx-auto pb-12">
         {/* Header Banner Skeleton */}
-        <div className="relative bg-card/40 backdrop-blur-3xl p-8 md:p-10 rounded-3xl shadow-2xl flex flex-col justify-center items-start border border-white/10 h-[220px]">
+        <div className="relative bg-card/90 dark:bg-card/40 backdrop-blur-3xl p-8 md:p-10 rounded-3xl shadow-2xl flex flex-col justify-center items-start border border-border h-[220px]">
           <div className="flex items-center gap-4 mb-4">
-            <Skeleton className="w-14 h-14 rounded-2xl bg-white/10 shrink-0" />
-            <Skeleton className="h-10 w-64 md:w-80 bg-white/10 rounded-xl" />
+            <Skeleton className="w-14 h-14 rounded-2xl bg-muted shrink-0" />
+            <Skeleton className="h-10 w-64 md:w-80 bg-muted rounded-xl" />
           </div>
-          <Skeleton className="h-6 w-full max-w-lg bg-white/5 rounded-md" />
+          <Skeleton className="h-6 w-full max-w-lg bg-muted/50 rounded-md" />
         </div>
 
         {/* Billing Records Card Skeleton */}
-        <div className="bg-card/40 backdrop-blur-2xl border border-white/10 shadow-xl rounded-2xl">
-          <div className="bg-background/20 border-b border-white/5 p-6 pb-4 rounded-t-2xl">
+        <div className="bg-card/90 dark:bg-card/40 backdrop-blur-2xl border border-border shadow-xl rounded-2xl">
+          <div className="bg-background/20 border-b border-border/60 p-6 pb-4 rounded-t-2xl">
             <div className="flex items-center gap-2">
-              <Skeleton className="w-5 h-5 rounded-full bg-white/10 shrink-0" />
-              <Skeleton className="h-6 w-40 bg-white/10 rounded-md" />
+              <Skeleton className="w-5 h-5 rounded-full bg-muted shrink-0" />
+              <Skeleton className="h-6 w-40 bg-muted rounded-md" />
             </div>
           </div>
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
               {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="flex flex-col p-6 rounded-3xl border border-white/5 bg-background/40 shadow-lg gap-6 h-[220px]">
+                <div key={i} className="flex flex-col p-6 rounded-3xl border border-border/60 bg-background/40 shadow-lg gap-6 h-[220px]">
                   <div className="flex items-start justify-between gap-4">
-                    <Skeleton className="w-14 h-14 rounded-2xl bg-white/10 shrink-0" />
-                    <Skeleton className="w-10 h-10 rounded-xl bg-white/5 shrink-0" />
+                    <Skeleton className="w-14 h-14 rounded-2xl bg-muted shrink-0" />
+                    <Skeleton className="w-10 h-10 rounded-xl bg-muted/50 shrink-0" />
                   </div>
                   <div className="space-y-2">
-                    <Skeleton className="h-7 w-3/4 bg-white/10 rounded-lg" />
-                    <Skeleton className="h-4 w-1/2 bg-white/5 rounded-md" />
+                    <Skeleton className="h-7 w-3/4 bg-muted rounded-lg" />
+                    <Skeleton className="h-4 w-1/2 bg-muted/50 rounded-md" />
                   </div>
-                  <div className="flex items-end justify-between pt-4 border-t border-white/5 mt-auto">
+                  <div className="flex items-end justify-between pt-4 border-t border-border/60 mt-auto">
                     <div className="space-y-1">
-                      <Skeleton className="h-3 w-12 bg-white/5 rounded-md" />
-                      <Skeleton className="h-8 w-24 bg-white/10 rounded-lg" />
+                      <Skeleton className="h-3 w-12 bg-muted/50 rounded-md" />
+                      <Skeleton className="h-8 w-24 bg-muted rounded-lg" />
                     </div>
-                    <Skeleton className="w-16 h-6 rounded-full bg-white/10" />
+                    <Skeleton className="w-16 h-6 rounded-full bg-muted" />
                   </div>
                 </div>
               ))}
@@ -117,7 +117,7 @@ export default function StudentPaymentsPage() {
     <div className="space-y-8 w-full max-w-[1920px] mx-auto pb-12">
       {/* Header Banner */}
       <div 
-        className="relative bg-card/40 backdrop-blur-3xl p-8 md:p-10 rounded-3xl shadow-2xl flex flex-col justify-center items-start border border-white/10"
+        className="relative bg-card/90 dark:bg-card/40 backdrop-blur-3xl p-8 md:p-10 rounded-3xl shadow-2xl flex flex-col justify-center items-start border border-border"
         data-aos="fade-down" 
         data-aos-duration="600"
       >
@@ -132,7 +132,7 @@ export default function StudentPaymentsPage() {
 
         <div className="relative z-10">
           <h1 className="text-3xl md:text-5xl font-black tracking-tight mb-2 flex items-center gap-4 text-foreground">
-            <div className="p-3 bg-background/50 backdrop-blur-md rounded-2xl border border-white/10 shadow-sm">
+            <div className="p-3 bg-background/50 backdrop-blur-md rounded-2xl border border-border shadow-sm">
               <Receipt className="h-8 w-8 text-primary drop-shadow-[0_0_8px_rgba(var(--primary),0.5)]" />
             </div>
             Payment History
@@ -144,12 +144,12 @@ export default function StudentPaymentsPage() {
       </div>
 
       <Card 
-        className="bg-card/40 backdrop-blur-2xl border border-white/10 shadow-xl rounded-2xl relative"
+        className="bg-card/90 dark:bg-card/40 backdrop-blur-2xl border border-border shadow-xl rounded-2xl relative"
         data-aos="fade-up" 
         data-aos-delay="200"
       >
-        <CardHeader className="bg-background/20 border-b border-white/5 pb-4 rounded-t-2xl">
-          <CardTitle className="flex items-center gap-2 text-white">
+        <CardHeader className="bg-background/20 border-b border-border/60 pb-4 rounded-t-2xl">
+          <CardTitle className="flex items-center gap-2 text-foreground">
             <Receipt className="w-5 h-5 text-primary" />
             Billing Records
           </CardTitle>
@@ -163,7 +163,7 @@ export default function StudentPaymentsPage() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 p-6">
               {payments.map(payment => (
-                <div key={payment.id} className="flex flex-col p-6 rounded-3xl border border-white/5 bg-background/40 hover:bg-background/60 hover:border-white/10 transition-colors shadow-lg gap-6 group hover:-translate-y-1">
+                <div key={payment.id} className="flex flex-col p-6 rounded-3xl border border-border/60 bg-background/40 hover:bg-background/60 hover:border-border transition-colors shadow-lg gap-6 group hover:-translate-y-1">
                   <div className="flex items-start justify-between gap-4">
                     <div className={`p-4 rounded-2xl shrink-0 shadow-sm transition-transform group-hover:scale-105 ${
                       payment.status === 'paid' ? 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/20' :
@@ -174,7 +174,7 @@ export default function StudentPaymentsPage() {
                     </div>
                     
                     {(payment.status === 'paid' || payment.status === 'partial') && (
-                      <Button variant="ghost" size="icon" onClick={() => handleDownloadReceipt(payment)} title="Download Receipt" className="rounded-xl bg-white/5 hover:bg-primary/20 hover:text-primary transition-all shadow-sm h-10 w-10 shrink-0">
+                      <Button variant="ghost" size="icon" onClick={() => handleDownloadReceipt(payment)} title="Download Receipt" className="rounded-xl bg-muted/50 hover:bg-primary/20 hover:text-primary transition-all shadow-sm h-10 w-10 shrink-0">
                         <Download className="w-4 h-4" />
                       </Button>
                     )}
@@ -189,7 +189,7 @@ export default function StudentPaymentsPage() {
                     </p>
                   </div>
 
-                  <div className="flex items-end justify-between pt-4 border-t border-white/5 mt-auto">
+                  <div className="flex items-end justify-between pt-4 border-t border-border/60 mt-auto">
                     <div>
                       <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">Amount</div>
                       <div className="font-black text-3xl text-foreground tracking-tight">৳ {payment.amount}</div>

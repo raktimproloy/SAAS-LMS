@@ -131,35 +131,39 @@
     --sidebar-accent-foreground: 222.2 47.4% 11.2%;
     --sidebar-border: 220 25% 90%;
     --sidebar-ring: 220 25% 45%;
+    --gradient-1: 220 45% 55%;
+    --gradient-2: 210 50% 62%;
+    --gradient-3: 230 40% 58%;
   }
 
   .dark .student-portal {
     --background: 225 40% 13%; /* Balanced deep blue-slate */
-    --foreground: 0 0% 100%; /* Pure White */
+    --foreground: 210 20% 98%;
     --card: 225 35% 20%; /* Balanced glassy cards */
-    --card-foreground: 0 0% 100%;
+    --card-foreground: 210 20% 98%;
     --popover: 225 35% 20%;
-    --popover-foreground: 0 0% 100%;
-    --primary: 220 25% 40%; /* Dark low saturated premium slate */
+    --popover-foreground: 210 20% 98%;
+    --primary: 220 25% 50%;
     --primary-foreground: 0 0% 100%;
     --secondary: 225 30% 26%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary-foreground: 210 20% 98%;
     --muted: 225 30% 26%;
     --muted-foreground: 215 20% 77%;
     --accent: 225 30% 26%;
-    --accent-foreground: 0 0% 100%;
+    --accent-foreground: 210 20% 98%;
     --destructive: 0 62.8% 40.6%;
     --destructive-foreground: 0 0% 100%;
     --border: 225 35% 28%; 
     --input: 225 35% 28%;
-    --ring: 220 25% 40%;
-    --sidebar: 225 35% 20%; 
-    --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 220 25% 40%;
+    --ring: 220 25% 50%;
+    --sidebar: 225 35% 18%; 
+    --sidebar-foreground: 210 20% 98%;
+    --sidebar-primary: 220 25% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 225 30% 30%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-ring: 220 25% 40%;
+    --sidebar-accent-foreground: 210 20% 98%;
+    --sidebar-border: 225 30% 26%;
+    --sidebar-ring: 220 25% 50%;
     
     /* Nav Bar Floating Gradients - Strictly Blue */
     --gradient-1: 220 35% 40%; /* Primary blue */
@@ -245,14 +249,14 @@
     background: linear-gradient(135deg, hsl(var(--hero-bg-start)) 0%, hsl(var(--hero-bg-mid)) 50%, hsl(var(--hero-bg-end)) 100%);
   }
 
-  /* Animated Premium Glass Elements - Dark Low Saturated Mesh Gradient */
+  /* Animated Premium Glass Elements - works in light + dark student portal */
   .animated-premium-glass {
     position: relative;
     overflow: hidden;
-    background-color: hsl(220 25% 15%); /* Dark low saturated base */
-    color: #ffffff;
-    border: 1px solid hsl(220 20% 40% / 0.4);
-    box-shadow: 0 4px 15px -3px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+    background-color: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+    border: 1px solid hsl(var(--primary) / 0.5);
+    box-shadow: 0 4px 15px -3px hsl(var(--primary) / 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.12);
     transition: all 0.3s ease;
   }
 
@@ -264,9 +268,9 @@
     width: 200%;
     height: 200%;
     background-image: 
-      radial-gradient(circle at 20% 30%, hsl(220 35% 35% / 0.9) 0%, transparent 40%),
-      radial-gradient(circle at 80% 70%, hsl(220 45% 45% / 0.9) 0%, transparent 40%),
-      radial-gradient(circle at 50% 50%, hsl(220 25% 25% / 0.8) 0%, transparent 50%);
+      radial-gradient(circle at 20% 30%, hsl(var(--gradient-1) / 0.85) 0%, transparent 40%),
+      radial-gradient(circle at 80% 70%, hsl(var(--gradient-2) / 0.85) 0%, transparent 40%),
+      radial-gradient(circle at 50% 50%, hsl(var(--gradient-3) / 0.7) 0%, transparent 50%);
     animation: premium-floating-mesh 10s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
     filter: blur(12px);
     z-index: 0;
@@ -286,9 +290,14 @@
   }
 
   .animated-premium-glass:hover {
-    box-shadow: 0 6px 20px -3px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.15);
-    border-color: hsl(220 30% 50% / 0.6);
+    box-shadow: 0 6px 20px -3px hsl(var(--primary) / 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.18);
+    border-color: hsl(var(--primary) / 0.7);
     transform: translateY(-1px);
+  }
+
+  /* Soft glass panels for student portal cards */
+  .student-portal .portal-panel {
+    @apply bg-card/80 dark:bg-card/40 backdrop-blur-xl border border-border shadow-sm;
   }
 
   /* Custom Scrollbars */

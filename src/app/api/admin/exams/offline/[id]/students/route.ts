@@ -35,6 +35,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
         id: true,
         student_id: true,
         name: true,
+        photo: true,
         exam_results: {
           where: { exam_id: examId },
           select: {

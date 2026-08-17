@@ -2,9 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { format } from "date-fns";
-import { 
-  CheckCircle2, XCircle, Clock, UserPlus, Printer,
-  CalendarDays, FileBarChart2
+import {
+  CheckCircle2,
+  XCircle,
+  Clock,
+  UserPlus,
+  Printer,
+  CalendarDays,
+  FileBarChart2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -12,6 +17,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { siteConfig } from "@/config/site.config";
+
+const selectClass =
+  "flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 dark:bg-input/30";
 
 interface Course {
   id: number;
@@ -22,7 +31,8 @@ interface Batch {
   id: number;
   name: string;
   course_id: number;
-  class_days?: string[];
+  class_days?: string[] | null;
+  course?: { title?: string };
 }
 
 interface Student {
@@ -31,6 +41,31 @@ interface Student {
   name: string;
   photo: string | null;
   attendance?: { id: number; status: string } | null;
+}
+
+interface SessionDate {
+  day: number;
+  weekday: string;
+}
+
+interface MonthlyReport {
+  students: Student[];
+  records: Record<number, Record<number, string>>;
+  daysInMonth: number;
+  classDays: string[];
+  sessionDates: SessionDate[];
+  batch?: { id: number; name: string; course: string };
+}
+
+function parseClassDays(raw: unknown): string[] {
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw.map(String);
+  return [];
+}
+
+function weekdayShort(dateStr: string) {
+  const d = new Date(`${dateStr}T12:00:00`);
+  return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][d.getDay()];
 }
 
 export default function AttendancePage() {
@@ -42,104 +77,135 @@ export default function AttendancePage() {
   const [date, setDate] = useState<string>(format(new Date(), "yyyy-MM-dd"));
 
   useEffect(() => {
-    fetch("/api/admin/courses").then(res => res.json()).then(setCourses);
-    fetch("/api/admin/batches").then(res => res.json()).then(setBatches);
+    fetch("/api/admin/courses")
+      .then((res) => (res.ok ? res.json() : []))
+      .then(setCourses)
+      .catch(console.error);
+    fetch("/api/admin/batches")
+      .then((res) => (res.ok ? res.json() : []))
+      .then(setBatches)
+      .catch(console.error);
   }, []);
 
-  const filteredBatches = batches.filter(b => b.course_id.toString() === selectedCourse);
+  const filteredBatches = batches.filter((b) => String(b.course_id) === selectedCourse);
+
+  const selectedBatchData = batches.find((b) => b.id.toString() === selectedBatch);
+  const classDaysLabel = parseClassDays(selectedBatchData?.class_days).join(", ") || "All days";
 
   return (
-    <div className="flex flex-col gap-8 pb-10 animate-in fade-in duration-500">
-      
-      {/* Header & Tabs Area */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+    <div className="flex flex-col gap-6 pb-10">
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight mb-2">Attendance Management</h1>
-          <p className="text-muted-foreground">Manage daily attendance and view monthly reports.</p>
+          <h1 className="text-3xl font-bold tracking-tight">Attendance Management</h1>
+          <p className="mt-1 text-muted-foreground">Manage daily attendance and view monthly reports.</p>
         </div>
-        
-        {/* Custom Tab Switcher */}
+
         {selectedBatch && (
-          <div className="flex p-1 bg-slate-200/50 dark:bg-slate-800/50 rounded-lg max-w-sm w-full md:w-auto print:hidden">
+          <div className="flex w-full max-w-sm rounded-lg border border-border bg-muted/50 p-1 md:w-auto print:hidden">
             <button
+              type="button"
               onClick={() => setActiveTab("daily")}
               className={cn(
-                "flex-1 flex items-center justify-center gap-2 py-2 px-6 rounded-md text-sm font-medium transition-all duration-200",
-                activeTab === "daily" ? "bg-white dark:bg-slate-950 shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
+                "flex flex-1 items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors",
+                activeTab === "daily"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
               )}
             >
-              <CalendarDays className="w-4 h-4" />
+              <CalendarDays className="h-4 w-4" />
               Daily View
             </button>
             <button
+              type="button"
               onClick={() => setActiveTab("monthly")}
               className={cn(
-                "flex-1 flex items-center justify-center gap-2 py-2 px-6 rounded-md text-sm font-medium transition-all duration-200",
-                activeTab === "monthly" ? "bg-white dark:bg-slate-950 shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
+                "flex flex-1 items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors",
+                activeTab === "monthly"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
               )}
             >
-              <FileBarChart2 className="w-4 h-4" />
+              <FileBarChart2 className="h-4 w-4" />
               Monthly Report
             </button>
           </div>
         )}
       </div>
 
-      <Card className="border-none shadow-md print:hidden bg-slate-50/50 dark:bg-slate-900/50">
-        <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="grid gap-2">
-              <Label htmlFor="course">Select Course</Label>
-              <select 
+      <Card className="border border-border bg-card shadow-sm print:hidden">
+        <CardContent className="p-5">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="course">Course</Label>
+              <select
                 id="course"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+                className={selectClass}
                 value={selectedCourse}
                 onChange={(e) => {
                   setSelectedCourse(e.target.value);
                   setSelectedBatch("");
                 }}
               >
-                <option value="">-- Choose Course --</option>
-                {courses.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
+                <option value="">All / Choose course…</option>
+                {courses.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.title}
+                  </option>
+                ))}
               </select>
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="batch">Select Batch</Label>
-              <select 
+            <div className="space-y-1.5">
+              <Label htmlFor="batch">Batch</Label>
+              <select
                 id="batch"
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background disabled:opacity-50"
+                className={selectClass}
                 value={selectedBatch}
                 onChange={(e) => setSelectedBatch(e.target.value)}
                 disabled={!selectedCourse}
               >
-                <option value="">-- Choose Batch --</option>
-                {filteredBatches.map(b => <option key={b.id} value={b.id}>{b.name}</option>)}
+                <option value="">Choose batch…</option>
+                {filteredBatches.map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.name}
+                    {parseClassDays(b.class_days).length
+                      ? ` (${parseClassDays(b.class_days).join("/")})`
+                      : ""}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
+          {selectedBatchData && (
+            <p className="mt-3 text-xs text-muted-foreground">
+              Class days: <span className="font-medium text-foreground">{classDaysLabel}</span>
+            </p>
+          )}
         </CardContent>
       </Card>
 
-      {/* Main Content Area */}
       {selectedBatch && (
-        <div className="animate-in slide-in-from-bottom-2 duration-300">
+        <div>
           {activeTab === "daily" && (
             <DailyTab batchId={selectedBatch} date={date} setDate={setDate} batches={batches} />
           )}
-
-          {activeTab === "monthly" && (
-            <MonthlyTab batchId={selectedBatch} />
-          )}
+          {activeTab === "monthly" && <MonthlyTab batchId={selectedBatch} />}
         </div>
       )}
     </div>
   );
 }
 
-// -------------------------------------------------------------
-// DAILY TAB (Redesigned UI)
-// -------------------------------------------------------------
-function DailyTab({ batchId, date, setDate, batches }: { batchId: string, date: string, setDate: (d: string) => void, batches: Batch[] }) {
+function DailyTab({
+  batchId,
+  date,
+  setDate,
+  batches,
+}: {
+  batchId: string;
+  date: string;
+  setDate: (d: string) => void;
+  batches: Batch[];
+}) {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -147,6 +213,7 @@ function DailyTab({ batchId, date, setDate, batches }: { batchId: string, date: 
 
   useEffect(() => {
     fetchAttendance();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [batchId, date]);
 
   const fetchAttendance = async () => {
@@ -166,14 +233,20 @@ function DailyTab({ batchId, date, setDate, batches }: { batchId: string, date: 
 
   const markAttendance = async (studentId: number, status: string) => {
     try {
-      setStudents(prev => prev.map(s => {
-        if (s.id === studentId) return { ...s, attendance: { id: s.attendance?.id || 0, status } };
-        return s;
-      }));
+      setStudents((prev) =>
+        prev.map((s) =>
+          s.id === studentId ? { ...s, attendance: { id: s.attendance?.id || 0, status } } : s
+        )
+      );
       await fetch("/api/admin/attendance", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ student_id: studentId, batch_id: parseInt(batchId), date, status })
+        body: JSON.stringify({
+          student_id: studentId,
+          batch_id: parseInt(batchId),
+          date,
+          status,
+        }),
       });
     } catch (err) {
       console.error(err);
@@ -181,78 +254,102 @@ function DailyTab({ batchId, date, setDate, batches }: { batchId: string, date: 
     }
   };
 
-  const getDayName = (dateStr: string) => {
-    const d = new Date(dateStr);
-    return ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][d.getDay()];
-  };
-
-  const selectedBatchData = batches.find(b => b.id.toString() === batchId);
-  const isClassDay = selectedBatchData?.class_days?.includes(getDayName(date));
+  const selectedBatchData = batches.find((b) => b.id.toString() === batchId);
+  const classDays = parseClassDays(selectedBatchData?.class_days);
+  const dayName = weekdayShort(date);
+  const isClassDay = classDays.length === 0 || classDays.includes(dayName);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div className="lg:col-span-2 space-y-6">
-        <Card className="border-none shadow-xl shadow-slate-200/40 dark:shadow-none dark:bg-slate-900/50 overflow-hidden">
-          <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b pb-4 border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+      <div className="space-y-6 lg:col-span-2">
+        <Card className="overflow-hidden border border-border bg-card shadow-sm">
+          <CardHeader className="flex flex-col gap-4 border-b border-border pb-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <CardTitle className="text-xl">Daily Roster</CardTitle>
-              <div className="flex items-center gap-4 mt-3">
-                <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="w-[150px] h-9" />
-                <p className="text-sm text-muted-foreground">
-                  {isClassDay && <span className="inline-flex items-center text-emerald-600 bg-emerald-50 dark:bg-emerald-950/30 px-2.5 py-1 rounded-md text-xs font-semibold border border-emerald-200 dark:border-emerald-900">Regular Class Day</span>}
-                  {!isClassDay && <span className="inline-flex items-center text-amber-600 bg-amber-50 dark:bg-amber-950/30 px-2.5 py-1 rounded-md text-xs font-semibold border border-amber-200 dark:border-amber-900">Not a Regular Class Day</span>}
-                </p>
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <Input
+                  type="date"
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="h-9 w-[160px]"
+                />
+                {isClassDay ? (
+                  <span className="inline-flex items-center rounded-md border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+                    Class day ({dayName})
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center rounded-md border border-amber-500/20 bg-amber-500/10 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:text-amber-400">
+                    Not a class day ({dayName})
+                  </span>
+                )}
               </div>
             </div>
           </CardHeader>
-          <CardContent className="p-0 max-h-[600px] overflow-y-auto bg-white dark:bg-slate-950">
+          <CardContent className="max-h-[600px] overflow-y-auto p-0">
             {loading ? (
-              <div className="p-12 text-center text-muted-foreground flex flex-col items-center gap-3">
-                <div className="w-6 h-6 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+              <div className="flex flex-col items-center gap-3 p-12 text-muted-foreground">
+                <div className="h-6 w-6 animate-spin rounded-full border-4 border-primary border-t-transparent" />
                 Loading roster...
               </div>
             ) : students.length === 0 ? (
-              <div className="p-12 text-center text-muted-foreground bg-slate-50/50 dark:bg-slate-900/50 border-t">No students found for this batch.</div>
+              <div className="border-t border-border p-12 text-center text-muted-foreground">
+                No students found for this batch.
+              </div>
             ) : (
-              <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                {students.map(student => (
-                  <div key={student.id} className="flex items-center justify-between p-4 hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors">
-                    <div className="flex items-center gap-4">
+              <div className="divide-y divide-border">
+                {students.map((student) => (
+                  <div
+                    key={student.id}
+                    className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between hover:bg-muted/40"
+                  >
+                    <div className="flex items-center gap-3">
                       <Avatar className="h-10 w-10 border shadow-sm">
                         <AvatarImage src={student.photo || ""} />
-                        <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                          {student.name.substring(0,2).toUpperCase()}
+                        <AvatarFallback className="bg-primary/10 font-semibold text-primary">
+                          {student.name.substring(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <div className="font-semibold text-slate-900 dark:text-slate-100">{student.name}</div>
-                        <div className="text-xs text-muted-foreground font-medium">{student.student_id}</div>
+                        <div className="font-semibold text-foreground">{student.name}</div>
+                        <div className="text-xs text-muted-foreground">{student.student_id}</div>
                       </div>
                     </div>
-                    <div className="flex gap-2">
-                      <Button 
-                        size="sm" 
-                        variant={student.attendance?.status === "present" ? "default" : "outline"} 
-                        className={student.attendance?.status === "present" ? "bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm" : "hover:text-emerald-600 hover:border-emerald-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"} 
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        size="sm"
+                        variant={student.attendance?.status === "present" ? "default" : "outline"}
+                        className={
+                          student.attendance?.status === "present"
+                            ? "bg-emerald-500 text-white hover:bg-emerald-600"
+                            : ""
+                        }
                         onClick={() => markAttendance(student.id, "present")}
                       >
-                        <CheckCircle2 className="w-4 h-4 mr-1.5" /> Present
+                        <CheckCircle2 className="mr-1.5 h-4 w-4" /> Present
                       </Button>
-                      <Button 
-                        size="sm" 
-                        variant={student.attendance?.status === "late" ? "default" : "outline"} 
-                        className={student.attendance?.status === "late" ? "bg-amber-500 hover:bg-amber-600 text-white shadow-sm" : "hover:text-amber-600 hover:border-amber-200 hover:bg-amber-50 dark:hover:bg-amber-950/30"} 
+                      <Button
+                        size="sm"
+                        variant={student.attendance?.status === "late" ? "default" : "outline"}
+                        className={
+                          student.attendance?.status === "late"
+                            ? "bg-amber-500 text-white hover:bg-amber-600"
+                            : ""
+                        }
                         onClick={() => markAttendance(student.id, "late")}
                       >
-                        <Clock className="w-4 h-4 mr-1.5" /> Late
+                        <Clock className="mr-1.5 h-4 w-4" /> Late
                       </Button>
-                      <Button 
-                        size="sm" 
-                        variant={student.attendance?.status === "absent" ? "default" : "outline"} 
-                        className={student.attendance?.status === "absent" ? "bg-red-500 hover:bg-red-600 text-white shadow-sm" : "hover:text-red-600 hover:border-red-200 hover:bg-red-50 dark:hover:bg-red-950/30"} 
+                      <Button
+                        size="sm"
+                        variant={student.attendance?.status === "absent" ? "default" : "outline"}
+                        className={
+                          student.attendance?.status === "absent"
+                            ? "bg-red-500 text-white hover:bg-red-600"
+                            : ""
+                        }
                         onClick={() => markAttendance(student.id, "absent")}
                       >
-                        <XCircle className="w-4 h-4 mr-1.5" /> Absent
+                        <XCircle className="mr-1.5 h-4 w-4" /> Absent
                       </Button>
                     </div>
                   </div>
@@ -263,87 +360,211 @@ function DailyTab({ batchId, date, setDate, batches }: { batchId: string, date: 
         </Card>
       </div>
 
-      <div className="space-y-6">
-        <Card className="border-none shadow-xl shadow-blue-900/5 bg-gradient-to-b from-blue-50/80 to-blue-50/30 dark:from-blue-950/20 dark:to-transparent">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-lg text-blue-900 dark:text-blue-400 flex items-center gap-2">
-              <div className="p-2 bg-blue-100 dark:bg-blue-900/50 rounded-md">
-                <UserPlus className="w-5 h-5 text-blue-700 dark:text-blue-400" />
-              </div>
-              Makeup Class Entry
-            </CardTitle>
-            <p className="text-sm text-blue-700/80 dark:text-blue-400/80 mt-1">Add a student from another batch to today's class session.</p>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex gap-2">
-              <Input 
-                placeholder="Search ID or Name (Press Enter)..." 
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                onKeyDown={e => {
-                  if (e.key === 'Enter') {
-                    fetch(`/api/admin/students/search?q=${searchQuery}`).then(res => res.json()).then(data => {
-                      if (data.length > 0) setSearchResult(data[0]);
-                      else alert("No student found with that ID or name");
-                    });
-                  }
-                }}
-                className="bg-white dark:bg-slate-900 shadow-sm border-blue-200 dark:border-blue-900"
-              />
-            </div>
-            {searchResult && (
-              <div className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-blue-200 dark:border-blue-900 shadow-sm space-y-4 animate-in zoom-in-95">
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-10 w-10 border shadow-sm">
-                    <AvatarImage src={searchResult.photo || ""} />
-                    <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                      {searchResult.name.substring(0,2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="font-semibold text-sm">{searchResult.name}</div>
-                    <div className="text-xs text-muted-foreground">{searchResult.student_id}</div>
-                  </div>
+      <Card className="border border-border bg-card shadow-sm">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <UserPlus className="h-5 w-5 text-primary" />
+            Makeup Class Entry
+          </CardTitle>
+          <CardDescription>Add a student from another batch to today’s session.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Input
+            placeholder="Search ID or Name (Enter)…"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                fetch(`/api/admin/students/search?q=${searchQuery}`)
+                  .then((res) => res.json())
+                  .then((data) => {
+                    if (data.length > 0) setSearchResult(data[0]);
+                    else alert("No student found with that ID or name");
+                  });
+              }
+            }}
+          />
+          {searchResult && (
+            <div className="space-y-3 rounded-xl border border-border bg-muted/30 p-4">
+              <div className="flex items-center gap-3">
+                <Avatar className="h-10 w-10 border">
+                  <AvatarImage src={searchResult.photo || ""} />
+                  <AvatarFallback className="bg-primary/10 font-semibold text-primary">
+                    {searchResult.name.substring(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <div className="text-sm font-semibold">{searchResult.name}</div>
+                  <div className="text-xs text-muted-foreground">{searchResult.student_id}</div>
                 </div>
-                <Button onClick={() => {
+              </div>
+              <Button
+                onClick={() => {
                   markAttendance(searchResult.id, "present");
                   setSearchResult(null);
                   setSearchQuery("");
-                }} className="w-full bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm">
-                  <CheckCircle2 className="w-4 h-4 mr-2" /> Mark Present for Today
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+                }}
+                className="w-full bg-emerald-500 text-white hover:bg-emerald-600"
+              >
+                <CheckCircle2 className="mr-2 h-4 w-4" /> Mark Present for Today
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
 
-// -------------------------------------------------------------
-// MONTHLY TAB (Redesigned UI)
-// -------------------------------------------------------------
+function statusCell(status?: string) {
+  if (status === "present") {
+    return { label: "P", className: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 font-bold" };
+  }
+  if (status === "late") {
+    return { label: "L", className: "bg-amber-500/15 text-amber-700 dark:text-amber-400 font-bold" };
+  }
+  if (status === "absent") {
+    return { label: "A", className: "bg-rose-500/15 text-rose-700 dark:text-rose-400 font-bold" };
+  }
+  return { label: "—", className: "text-muted-foreground/40" };
+}
+
+function printMonthlyReport(report: MonthlyReport, month: string, year: string) {
+  const sessions = report.sessionDates?.length
+    ? report.sessionDates
+    : Array.from({ length: report.daysInMonth }, (_, i) => ({
+        day: i + 1,
+        weekday: "",
+      }));
+
+  const monthLabel = new Date(parseInt(year), parseInt(month) - 1, 1).toLocaleString("default", {
+    month: "long",
+    year: "numeric",
+  });
+
+  const classDaysText =
+    report.classDays?.length > 0 ? report.classDays.join(", ") : "All days";
+
+  const thead = `
+    <tr>
+      <th style="text-align:left;min-width:160px">Student</th>
+      ${sessions
+        .map(
+          (s) =>
+            `<th style="text-align:center;width:36px">${s.day}<div style="font-size:9px;font-weight:500;color:#666">${s.weekday}</div></th>`
+        )
+        .join("")}
+      <th style="text-align:center">P/L</th>
+      <th style="text-align:center">A</th>
+    </tr>
+  `;
+
+  const tbody = report.students
+    .map((student) => {
+      let present = 0;
+      let absent = 0;
+      const cells = sessions
+        .map((s) => {
+          const status = report.records[student.id]?.[s.day];
+          let text = "—";
+          let bg = "";
+          if (status === "present" || status === "late") {
+            text = status === "late" ? "L" : "P";
+            bg = status === "late" ? "background:#fff7ed;color:#c2410c" : "background:#ecfdf5;color:#047857";
+            present++;
+          } else if (status === "absent") {
+            text = "A";
+            bg = "background:#fef2f2;color:#dc2626";
+            absent++;
+          }
+          return `<td style="text-align:center;font-weight:700;${bg}">${text}</td>`;
+        })
+        .join("");
+      return `<tr>
+        <td>
+          <div style="font-weight:600">${escapeHtml(student.name)}</div>
+          <div style="font-size:10px;color:#666">${escapeHtml(student.student_id)}</div>
+        </td>
+        ${cells}
+        <td style="text-align:center;font-weight:700">${present}</td>
+        <td style="text-align:center;font-weight:700">${absent}</td>
+      </tr>`;
+    })
+    .join("");
+
+  const win = window.open("", "_blank", "width=1100,height=750");
+  if (!win) {
+    alert("Please allow popups to print.");
+    return;
+  }
+
+  win.document.open();
+  win.document.write(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Attendance — ${escapeHtml(monthLabel)}</title>
+        <style>
+          @page { size: A4 landscape; margin: 10mm; }
+          body { font-family: 'Segoe UI', Tahoma, sans-serif; font-size: 11px; color: #111; margin: 0; }
+          h1 { margin: 0 0 4px; font-size: 18px; text-align: center; }
+          .meta { text-align: center; color: #555; margin-bottom: 12px; font-size: 12px; }
+          table { width: 100%; border-collapse: collapse; }
+          th, td { border: 1px solid #d1d5db; padding: 4px 5px; vertical-align: middle; }
+          th { background: #f3f4f6; font-size: 10px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          td { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        </style>
+      </head>
+      <body>
+        <h1>${escapeHtml(siteConfig.instituteName)}</h1>
+        <div class="meta">
+          Monthly Attendance — ${escapeHtml(monthLabel)}
+          ${report.batch ? `<br/>${escapeHtml(report.batch.course)} · ${escapeHtml(report.batch.name)}` : ""}
+          <br/>Class days: ${escapeHtml(classDaysText)} · Sessions shown: ${sessions.length}
+        </div>
+        <table>
+          <thead>${thead}</thead>
+          <tbody>${tbody}</tbody>
+        </table>
+        <script>
+          window.onload = function () {
+            setTimeout(function () { window.print(); window.close(); }, 250);
+          };
+        </script>
+      </body>
+    </html>
+  `);
+  win.document.close();
+}
+
+function escapeHtml(value: unknown) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 function MonthlyTab({ batchId }: { batchId: string }) {
   const currentMonth = new Date().getMonth() + 1;
   const currentYear = new Date().getFullYear();
   const [month, setMonth] = useState(currentMonth.toString());
   const [year, setYear] = useState(currentYear.toString());
-  const [report, setReport] = useState<{ students: any[], records: Record<number, Record<number, string>>, daysInMonth: number } | null>(null);
+  const [report, setReport] = useState<MonthlyReport | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchReport();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [batchId, month, year]);
 
   const fetchReport = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/admin/attendance/monthly?batch_id=${batchId}&month=${month}&year=${year}`);
-      if (res.ok) {
-        const data = await res.json();
-        setReport(data);
-      }
+      const res = await fetch(
+        `/api/admin/attendance/monthly?batch_id=${batchId}&month=${month}&year=${year}`
+      );
+      if (res.ok) setReport(await res.json());
     } catch (err) {
       console.error(err);
     } finally {
@@ -351,184 +572,165 @@ function MonthlyTab({ batchId }: { batchId: string }) {
     }
   };
 
+  const sessions =
+    report?.sessionDates?.length
+      ? report.sessionDates
+      : report
+        ? Array.from({ length: report.daysInMonth }, (_, i) => ({
+            day: i + 1,
+            weekday: "",
+          }))
+        : [];
+
   return (
-    <Card className="border-none shadow-xl shadow-slate-200/40 dark:shadow-none dark:bg-slate-900/50 overflow-hidden">
-      <style dangerouslySetInnerHTML={{ __html: `
-        @media print {
-          body * { display: none !important; }
-          .monthly-print, .monthly-print * { display: block !important; }
-          .monthly-print { 
-            position: absolute !important; 
-            left: 0 !important; 
-            top: 0 !important; 
-            width: 100vw !important; 
-            background: white !important;
-            padding: 20px !important;
-          }
-          
-          /* Table print fixes */
-          .monthly-print table { border-collapse: collapse !important; width: 100% !important; }
-          .monthly-print th, .monthly-print td { border: 1px solid #ccc !important; padding: 4px !important; }
-          .monthly-print th.sticky, .monthly-print td.sticky { position: static !important; box-shadow: none !important; }
-          
-          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-          @page { size: landscape; margin: 10mm; }
-        }
-      `}} />
-      <CardHeader className="border-b bg-white dark:bg-slate-950 pb-4 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+    <Card className="overflow-hidden border border-border bg-card shadow-sm">
+      <CardHeader className="flex flex-col gap-4 border-b border-border pb-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-           <CardTitle className="text-xl">Monthly Overview</CardTitle>
-           <CardDescription className="mt-1">Detailed attendance grid for the selected month.</CardDescription>
+          <CardTitle className="text-xl">Monthly Overview</CardTitle>
+          <CardDescription className="mt-1">
+            Only class days are shown
+            {report?.classDays?.length
+              ? ` (${report.classDays.join(", ")})`
+              : " (all days — no class days set on batch)"}
+            .
+          </CardDescription>
         </div>
-        <div className="flex flex-wrap items-end gap-3 print:hidden">
+        <div className="flex flex-wrap items-end gap-3">
           <div className="grid gap-1.5">
-            <Label className="text-xs font-semibold text-muted-foreground">Month</Label>
-            <select value={month} onChange={(e) => setMonth(e.target.value)} className="h-9 w-32 rounded-md border text-sm px-3 bg-white shadow-sm hover:border-slate-400 focus:border-primary transition-colors cursor-pointer outline-none">
+            <Label className="text-xs text-muted-foreground">Month</Label>
+            <select
+              value={month}
+              onChange={(e) => setMonth(e.target.value)}
+              className={cn(selectClass, "h-9 w-36")}
+            >
               {[...Array(12)].map((_, i) => (
-                <option key={i+1} value={i+1}>{new Date(2000, i, 1).toLocaleString('default', { month: 'long' })}</option>
+                <option key={i + 1} value={i + 1}>
+                  {new Date(2000, i, 1).toLocaleString("default", { month: "long" })}
+                </option>
               ))}
             </select>
           </div>
           <div className="grid gap-1.5">
-            <Label className="text-xs font-semibold text-muted-foreground">Year</Label>
-            <select value={year} onChange={(e) => setYear(e.target.value)} className="h-9 w-24 rounded-md border text-sm px-3 bg-white shadow-sm hover:border-slate-400 focus:border-primary transition-colors cursor-pointer outline-none">
-              {[currentYear-1, currentYear, currentYear+1].map(y => (
-                <option key={y} value={y}>{y}</option>
+            <Label className="text-xs text-muted-foreground">Year</Label>
+            <select
+              value={year}
+              onChange={(e) => setYear(e.target.value)}
+              className={cn(selectClass, "h-9 w-24")}
+            >
+              {[currentYear - 1, currentYear, currentYear + 1].map((y) => (
+                <option key={y} value={y}>
+                  {y}
+                </option>
               ))}
             </select>
           </div>
-          <Button onClick={() => window.print()} variant="outline" className="bg-white shadow-sm hover:bg-slate-50 border-slate-200">
-            <Printer className="w-4 h-4 mr-2 text-slate-600" /> Print
+          <Button
+            variant="outline"
+            disabled={!report?.students?.length}
+            onClick={() => report && printMonthlyReport(report, month, year)}
+          >
+            <Printer className="mr-2 h-4 w-4" /> Print
           </Button>
         </div>
       </CardHeader>
-      
-      <CardContent className="p-0 overflow-x-auto bg-white dark:bg-slate-950">
-        <div className="monthly-print hidden print:block">
-          {report && (
-            <div className="w-full">
-              <div className="font-bold text-2xl text-center mb-6">
-                Monthly Attendance Report - {new Date(parseInt(year), parseInt(month)-1, 1).toLocaleString('default', { month: 'long', year: 'numeric' })}
-              </div>
-              <table className="w-full text-[10px]">
-                <thead>
-                  <tr className="bg-slate-100">
-                    <th className="p-2 text-left w-[200px]">Student Name</th>
-                    {[...Array(report.daysInMonth)].map((_, i) => (
-                      <th key={i} className="p-1 text-center w-[15px]">{i + 1}</th>
-                    ))}
-                    <th className="p-2 text-center w-[50px]">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {report.students.map(student => {
-                    let presentCount = 0;
-                    return (
-                      <tr key={student.id} className="border-b">
-                        <td className="p-2 font-medium">
-                          <div className="truncate">{student.name}</div>
-                          <div className="text-[9px] text-muted-foreground">{student.student_id}</div>
-                        </td>
-                        {[...Array(report.daysInMonth)].map((_, i) => {
-                          const day = i + 1;
-                          const status = report.records[student.id]?.[day];
-                          let content = "-";
-                          if (status === "present" || status === "late") {
-                            content = "P";
-                            presentCount++;
-                          } else if (status === "absent") {
-                            content = "A";
-                          }
-                          return (
-                            <td key={i} className={`p-1 text-center font-bold ${content === 'P' ? 'text-green-700 bg-green-50' : content === 'A' ? 'text-red-600 bg-red-50' : 'text-slate-300'}`}>
-                              {content}
-                            </td>
-                          );
-                        })}
-                        <td className="p-2 text-center font-bold bg-slate-50">{presentCount}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
 
-        {/* UI Table (not printed) */}
-        <div className="print:hidden">
-          {loading ? (
-            <div className="p-12 text-center text-muted-foreground flex flex-col items-center gap-3">
-               <div className="w-6 h-6 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-               Loading report...
-            </div>
-          ) : report && report.students.length > 0 ? (
-            <div className="min-w-[800px]">
-              <table className="w-full text-sm border-collapse">
-                <thead>
-                  <tr className="bg-slate-50/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800">
-                    <th className="p-4 text-left font-semibold sticky left-0 bg-slate-50/90 dark:bg-slate-900/90 backdrop-blur z-10 w-[220px] border-r border-slate-200 dark:border-slate-800">Student Info</th>
-                    {[...Array(report.daysInMonth)].map((_, i) => (
-                      <th key={i} className="p-2 text-center text-xs font-semibold text-slate-500 border-r border-slate-200 dark:border-slate-800 min-w-[32px]">{i + 1}</th>
-                    ))}
-                    <th className="p-4 text-center font-semibold w-[90px] text-slate-700 dark:text-slate-300">Total</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                  {report.students.map(student => {
-                    let presentCount = 0;
-                    return (
-                      <tr key={student.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
-                        <td className="p-3 font-medium sticky left-0 bg-white/95 dark:bg-slate-950/95 backdrop-blur z-10 border-r border-slate-200 dark:border-slate-800 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.02)]">
-                          <div className="flex items-center gap-3">
-                            <Avatar className="h-8 w-8">
-                              <AvatarImage src={student.photo || ""} />
-                              <AvatarFallback className="bg-slate-100 text-xs text-slate-600">{student.name.substring(0,2).toUpperCase()}</AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <div className="truncate w-[140px] text-sm font-semibold" title={student.name}>{student.name}</div>
-                              <div className="text-[11px] text-muted-foreground">{student.student_id}</div>
+      <CardContent className="overflow-x-auto p-0">
+        {loading ? (
+          <div className="flex flex-col items-center gap-3 p-12 text-muted-foreground">
+            <div className="h-6 w-6 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+            Loading report...
+          </div>
+        ) : report && report.students.length > 0 ? (
+          <div className="min-w-[640px]">
+            <table className="w-full border-collapse text-sm">
+              <thead>
+                <tr className="border-b border-border bg-muted/50">
+                  <th className="sticky left-0 z-10 w-[220px] border-r border-border bg-muted/90 p-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground backdrop-blur">
+                    Student
+                  </th>
+                  {sessions.map((s) => (
+                    <th
+                      key={s.day}
+                      className="min-w-[40px] border-r border-border p-2 text-center text-xs font-semibold text-muted-foreground"
+                      title={s.weekday}
+                    >
+                      <div>{s.day}</div>
+                      <div className="text-[10px] font-medium text-primary/80">{s.weekday.slice(0, 2)}</div>
+                    </th>
+                  ))}
+                  <th className="w-[70px] p-3 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    P/L
+                  </th>
+                  <th className="w-[60px] p-3 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    A
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {report.students.map((student) => {
+                  let present = 0;
+                  let absent = 0;
+                  return (
+                    <tr key={student.id} className="hover:bg-muted/30">
+                      <td className="sticky left-0 z-10 border-r border-border bg-card/95 p-3 backdrop-blur">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src={student.photo || ""} />
+                            <AvatarFallback className="bg-muted text-xs">
+                              {student.name.substring(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="min-w-0">
+                            <div className="truncate text-sm font-semibold" title={student.name}>
+                              {student.name}
                             </div>
+                            <div className="text-[11px] text-muted-foreground">{student.student_id}</div>
                           </div>
-                        </td>
-                        {[...Array(report.daysInMonth)].map((_, i) => {
-                          const day = i + 1;
-                          const status = report.records[student.id]?.[day];
-                          let content = <span className="text-slate-200 dark:text-slate-800 font-bold">-</span>;
-                          let bg = "";
-                          if (status === "present") {
-                            content = <span className="text-emerald-600 font-bold">P</span>;
-                            bg = "bg-emerald-50/30 dark:bg-emerald-950/20";
-                            presentCount++;
-                          } else if (status === "absent") {
-                            content = <span className="text-red-500 font-bold">A</span>;
-                            bg = "bg-red-50/30 dark:bg-red-950/20";
-                          } else if (status === "late") {
-                            content = <span className="text-amber-500 font-bold">L</span>;
-                            bg = "bg-amber-50/30 dark:bg-amber-950/20";
-                            presentCount++; // usually late counts as present for total
-                          }
-                          return (
-                            <td key={i} className={`p-2 text-center border-r border-slate-100 dark:border-slate-800 ${bg}`}>
-                              {content}
-                            </td>
-                          );
-                        })}
-                        <td className="p-3 text-center font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-900/20 text-base">
-                          {presentCount}
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <div className="p-16 text-center text-muted-foreground bg-slate-50/50 dark:bg-slate-900/50 border-t border-slate-100">
-              No attendance records found for {new Date(parseInt(year), parseInt(month)-1, 1).toLocaleString('default', { month: 'long', year: 'numeric' })}.
-            </div>
-          )}
-        </div>
+                        </div>
+                      </td>
+                      {sessions.map((s) => {
+                        const status = report.records[student.id]?.[s.day];
+                        if (status === "present" || status === "late") present++;
+                        if (status === "absent") absent++;
+                        const cell = statusCell(status);
+                        return (
+                          <td
+                            key={s.day}
+                            className={cn(
+                              "border-r border-border p-2 text-center text-sm",
+                              cell.className
+                            )}
+                          >
+                            {cell.label}
+                          </td>
+                        );
+                      })}
+                      <td className="bg-emerald-500/10 p-3 text-center text-base font-bold text-emerald-700 dark:text-emerald-400">
+                        {present}
+                      </td>
+                      <td className="bg-rose-500/10 p-3 text-center text-base font-bold text-rose-700 dark:text-rose-400">
+                        {absent}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+            <p className="border-t border-border px-4 py-2.5 text-center text-[11px] text-muted-foreground">
+              Showing {sessions.length} session
+              {sessions.length === 1 ? "" : "s"} for this month based on batch class days
+            </p>
+          </div>
+        ) : (
+          <div className="border-t border-border p-16 text-center text-muted-foreground">
+            No students found for{" "}
+            {new Date(parseInt(year), parseInt(month) - 1, 1).toLocaleString("default", {
+              month: "long",
+              year: "numeric",
+            })}
+            .
+          </div>
+        )}
       </CardContent>
     </Card>
   );

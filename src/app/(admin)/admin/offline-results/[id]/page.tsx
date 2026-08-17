@@ -1,23 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Save, Loader2, Search, Printer } from "lucide-react";
+import {
+  ArrowLeft,
+  Save,
+  Loader2,
+  Search,
+  Printer,
+  ChevronDown,
+  Check,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogDescription,
-} from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 
 interface Course {
@@ -42,7 +41,55 @@ interface Student {
   id: number;
   student_id: string;
   name: string;
+  photo?: string | null;
   exam_results: StudentResult[];
+}
+
+type DraftRow = {
+  marks: string;
+  comment: string;
+};
+
+function scoreTone(obtained: number | null, total: number) {
+  if (obtained == null || !total) {
+    return {
+      row: "bg-card hover:bg-muted/40",
+      accent: "border-l-muted-foreground/30",
+      mark: "text-muted-foreground",
+      badge: "border-border bg-muted text-muted-foreground",
+    };
+  }
+  const p = (obtained / total) * 100;
+  if (p >= 80) {
+    return {
+      row: "bg-emerald-50/70 dark:bg-emerald-950/20 hover:bg-emerald-50 dark:hover:bg-emerald-950/30",
+      accent: "border-l-emerald-500",
+      mark: "text-emerald-700 dark:text-emerald-400",
+      badge: "border-emerald-500/30 bg-emerald-500 text-white",
+    };
+  }
+  if (p >= 50) {
+    return {
+      row: "bg-sky-50/70 dark:bg-sky-950/20 hover:bg-sky-50 dark:hover:bg-sky-950/30",
+      accent: "border-l-sky-500",
+      mark: "text-sky-700 dark:text-sky-400",
+      badge: "border-sky-500/30 bg-sky-500 text-white",
+    };
+  }
+  if (p >= 33) {
+    return {
+      row: "bg-amber-50/70 dark:bg-amber-950/20 hover:bg-amber-50 dark:hover:bg-amber-950/30",
+      accent: "border-l-amber-500",
+      mark: "text-amber-700 dark:text-amber-400",
+      badge: "border-amber-500/30 bg-amber-500 text-white",
+    };
+  }
+  return {
+    row: "bg-rose-50/70 dark:bg-rose-950/20 hover:bg-rose-50 dark:hover:bg-rose-950/30",
+    accent: "border-l-rose-500",
+    mark: "text-rose-700 dark:text-rose-400",
+    badge: "border-rose-500/30 bg-rose-500 text-white",
+  };
 }
 
 export default function EditOfflineResultPage({ params }: { params: { id: string } }) {
@@ -51,12 +98,11 @@ export default function EditOfflineResultPage({ params }: { params: { id: string
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  
+
   const [courses, setCourses] = useState<Course[]>([]);
   const [batches, setBatches] = useState<Batch[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
 
-  // Exam Details
   const [courseId, setCourseId] = useState("");
   const [batchId, setBatchId] = useState("");
   const [title, setTitle] = useState("");
@@ -65,12 +111,82 @@ export default function EditOfflineResultPage({ params }: { params: { id: string
   const [startTime, setStartTime] = useState("");
   const [isGradingEnabled, setIsGradingEnabled] = useState(false);
   const [examId, setExamId] = useState<number | null>(isNew ? null : parseInt(params.id));
+  const [detailsOpen, setDetailsOpen] = useState(isNew);
 
-  // Search & Students
   const [studentSearch, setStudentSearch] = useState("");
-  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
-  const [marksInput, setMarksInput] = useState("");
-  const [commentInput, setCommentInput] = useState("");
+  const [drafts, setDrafts] = useState<Record<number, DraftRow>>({});
+  const [bulkSaving, setBulkSaving] = useState(false);
+  const [hasLocalDraft, setHasLocalDraft] = useState(false);
+  const [lastSavedAt, setLastSavedAt] = useState<string | null>(null);
+  const inputRefs = useRef<Record<number, HTMLInputElement | null>>({});
+
+  const draftStorageKey = examId ? `offline-results-draft-${examId}` : null;
+
+  const readLocalDraft = useCallback((): Record<number, DraftRow> | null => {
+    if (!draftStorageKey || typeof window === "undefined") return null;
+    try {
+      const raw = localStorage.getItem(draftStorageKey);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw) as { drafts?: Record<string, DraftRow> };
+      if (!parsed?.drafts || typeof parsed.drafts !== "object") return null;
+      const out: Record<number, DraftRow> = {};
+      Object.entries(parsed.drafts).forEach(([id, row]) => {
+        out[Number(id)] = {
+          marks: row?.marks ?? "",
+          comment: row?.comment ?? "",
+        };
+      });
+      return out;
+    } catch {
+      return null;
+    }
+  }, [draftStorageKey]);
+
+  const writeLocalDraft = useCallback(
+    (next: Record<number, DraftRow>) => {
+      if (!draftStorageKey || typeof window === "undefined") return;
+      try {
+        localStorage.setItem(
+          draftStorageKey,
+          JSON.stringify({ updatedAt: new Date().toISOString(), drafts: next })
+        );
+        setHasLocalDraft(true);
+      } catch (err) {
+        console.error("Failed to write draft", err);
+      }
+    },
+    [draftStorageKey]
+  );
+
+  const clearLocalDraft = useCallback(() => {
+    if (!draftStorageKey || typeof window === "undefined") return;
+    localStorage.removeItem(draftStorageKey);
+    setHasLocalDraft(false);
+  }, [draftStorageKey]);
+
+  const buildDraftsFromStudents = useCallback((list: Student[]) => {
+    const next: Record<number, DraftRow> = {};
+    list.forEach((s) => {
+      const result = s.exam_results[0];
+      next[s.id] = {
+        marks: result ? String(result.obtained_marks) : "",
+        comment: result?.comment || "",
+      };
+    });
+    return next;
+  }, []);
+
+  const updateDraft = (studentId: number, patch: Partial<DraftRow>) => {
+    setDrafts((prev) => {
+      const current = prev[studentId] || { marks: "", comment: "" };
+      const next = {
+        ...prev,
+        [studentId]: { ...current, ...patch },
+      };
+      writeLocalDraft(next);
+      return next;
+    });
+  };
 
   useEffect(() => {
     fetchInitialData();
@@ -82,11 +198,36 @@ export default function EditOfflineResultPage({ params }: { params: { id: string
     }
   }, [examId, batchId]);
 
+  const syncDrafts = useCallback(
+    (list: Student[]) => {
+      const fromServer = buildDraftsFromStudents(list);
+      const local = readLocalDraft();
+      if (local && Object.keys(local).length > 0) {
+        const merged: Record<number, DraftRow> = { ...fromServer };
+        Object.entries(local).forEach(([id, row]) => {
+          const sid = Number(id);
+          if (merged[sid] !== undefined || list.some((s) => s.id === sid)) {
+            merged[sid] = {
+              marks: row.marks ?? "",
+              comment: row.comment ?? "",
+            };
+          }
+        });
+        setDrafts(merged);
+        setHasLocalDraft(true);
+      } else {
+        setDrafts(fromServer);
+        setHasLocalDraft(false);
+      }
+    },
+    [buildDraftsFromStudents, readLocalDraft]
+  );
+
   const fetchInitialData = async () => {
     try {
       const [crsRes, batRes] = await Promise.all([
         fetch("/api/admin/courses"),
-        fetch("/api/admin/batches")
+        fetch("/api/admin/batches"),
       ]);
       if (crsRes.ok) setCourses(await crsRes.json());
       if (batRes.ok) setBatches(await batRes.json());
@@ -117,7 +258,9 @@ export default function EditOfflineResultPage({ params }: { params: { id: string
     try {
       const res = await fetch(`/api/admin/exams/offline/${examId}/students`);
       if (res.ok) {
-        setStudents(await res.json());
+        const list = await res.json();
+        setStudents(list);
+        syncDrafts(list);
       }
     } catch (err) {
       console.error(err);
@@ -141,17 +284,17 @@ export default function EditOfflineResultPage({ params }: { params: { id: string
       start_time: startTime,
       is_grading_enabled: isGradingEnabled,
       is_public: false,
-      status: "active"
+      status: "active",
     };
 
     try {
       const url = isNew ? "/api/admin/exams" : `/api/admin/exams/${examId}`;
       const method = isNew ? "POST" : "PUT";
-      
+
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
       });
 
       if (res.ok) {
@@ -182,49 +325,116 @@ export default function EditOfflineResultPage({ params }: { params: { id: string
     return "F";
   };
 
-  const handleSaveResult = async () => {
-    if (!selectedStudent || !examId) return;
-    const marks = parseFloat(marksInput);
-    if (isNaN(marks)) {
-      alert("Invalid marks");
+  const isRowDirty = (student: Student, draft: DraftRow) => {
+    const existing = student.exam_results[0];
+    const marksRaw = draft.marks.trim();
+    if (!existing) return marksRaw !== "" || draft.comment.trim() !== "";
+    const sameMarks = String(existing.obtained_marks) === marksRaw;
+    const sameComment = (existing.comment || "") === (draft.comment || "");
+    return !(sameMarks && sameComment);
+  };
+
+  const saveAllResults = async () => {
+    if (!examId) return;
+    const total = parseFloat(totalMarks) || 100;
+    const dirty = students.filter((s) => isRowDirty(s, drafts[s.id] || { marks: "", comment: "" }));
+
+    if (dirty.length === 0) {
+      clearLocalDraft();
+      setLastSavedAt(new Date().toLocaleTimeString());
       return;
     }
 
-    const grade = calculateGrade(marks, parseFloat(totalMarks));
+    for (const student of dirty) {
+      const draft = drafts[student.id] || { marks: "", comment: "" };
+      const marksRaw = draft.marks.trim();
+      if (marksRaw === "") continue;
+      const marks = parseFloat(marksRaw);
+      if (Number.isNaN(marks)) {
+        alert(`Invalid marks for ${student.name}`);
+        return;
+      }
+      if (marks < 0 || marks > total) {
+        alert(`Marks for ${student.name} must be between 0 and ${total}`);
+        return;
+      }
+    }
+
+    setBulkSaving(true);
+    let failed = 0;
 
     try {
-      const res = await fetch(`/api/admin/exams/offline/${examId}/results`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          student_id: selectedStudent.id,
-          obtained_marks: marks,
-          grade,
-          comment: commentInput
-        })
-      });
+      for (const student of dirty) {
+        const draft = drafts[student.id] || { marks: "", comment: "" };
+        const marksRaw = draft.marks.trim();
+        if (marksRaw === "") continue;
 
-      if (res.ok) {
-        await fetchStudents();
-        setSelectedStudent(null);
-      } else {
-        alert("Failed to save result");
+        const marks = parseFloat(marksRaw);
+        const grade = calculateGrade(marks, total);
+        const res = await fetch(`/api/admin/exams/offline/${examId}/results`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            student_id: student.id,
+            obtained_marks: marks,
+            grade,
+            comment: draft.comment || null,
+          }),
+        });
+        if (!res.ok) failed += 1;
       }
+
+      if (failed > 0) {
+        alert(`Failed to save ${failed} student result(s). Local draft kept.`);
+        await fetchStudents();
+        return;
+      }
+
+      clearLocalDraft();
+      setLastSavedAt(new Date().toLocaleTimeString());
+      await fetchStudents();
     } catch (err) {
       console.error(err);
+      alert("Failed to save results. Local draft kept.");
+    } finally {
+      setBulkSaving(false);
     }
   };
 
-  const filteredStudents = students.filter(s => 
-    s.name.toLowerCase().includes(studentSearch.toLowerCase()) || 
-    s.student_id.toLowerCase().includes(studentSearch.toLowerCase())
-  );
+  const filteredStudents = students
+    .filter(
+      (s) =>
+        s.name.toLowerCase().includes(studentSearch.toLowerCase()) ||
+        s.student_id.toLowerCase().includes(studentSearch.toLowerCase())
+    )
+    .sort((a, b) => a.student_id.localeCompare(b.student_id));
 
-  const gradedStudents = filteredStudents.filter(s => s.exam_results.length > 0).sort((a, b) => b.exam_results[0].obtained_marks - a.exam_results[0].obtained_marks);
-  const ungradedStudents = filteredStudents.filter(s => s.exam_results.length === 0).sort((a, b) => a.student_id.localeCompare(b.student_id));
+  const focusNext = (currentId: number) => {
+    const ids = filteredStudents.map((s) => s.id);
+    const idx = ids.indexOf(currentId);
+    if (idx === -1) return;
+    for (let i = idx + 1; i < ids.length; i++) {
+      const el = inputRefs.current[ids[i]];
+      if (el) {
+        el.focus();
+        el.select();
+        return;
+      }
+    }
+  };
+
+  const dirtyCount = students.filter((s) =>
+    isRowDirty(s, drafts[s.id] || { marks: "", comment: "" })
+  ).length;
+  const gradedCount = students.filter((s) => {
+    const draft = drafts[s.id];
+    if (draft?.marks?.trim()) return true;
+    return s.exam_results.length > 0;
+  }).length;
+  const total = parseFloat(totalMarks) || 100;
 
   if (loading) {
-    return <div className="p-8 text-center">Loading...</div>;
+    return <div className="p-8 text-center text-muted-foreground">Loading...</div>;
   }
 
   return (
@@ -235,7 +445,9 @@ export default function EditOfflineResultPage({ params }: { params: { id: string
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">{isNew ? "Publish Offline Result" : "Edit Offline Result"}</h1>
+            <h1 className="text-3xl font-bold tracking-tight">
+              {isNew ? "Publish Offline Result" : "Edit Offline Result"}
+            </h1>
           </div>
         </div>
         {!isNew && examId && (
@@ -248,226 +460,370 @@ export default function EditOfflineResultPage({ params }: { params: { id: string
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>Exam Details</CardTitle>
-          <CardDescription>Setup the exam information before entering results.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="space-y-2">
-              <Label>Course</Label>
-              <select 
-                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                value={courseId}
-                onChange={(e) => {
-                  setCourseId(e.target.value);
-                  setBatchId("");
-                }}
-              >
-                <option value="">Select Course</option>
-                {courses.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
-              </select>
+        <CardHeader
+          className="cursor-pointer select-none"
+          onClick={() => setDetailsOpen((open) => !open)}
+        >
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <CardTitle className="flex items-center gap-2">
+                Exam Details
+                <ChevronDown
+                  className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${
+                    detailsOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </CardTitle>
+              <CardDescription>
+                {detailsOpen
+                  ? "Setup the exam information before entering results."
+                  : [
+                      title || "Untitled exam",
+                      courses.find((c) => c.id.toString() === courseId)?.title,
+                      batches.find((b) => b.id.toString() === batchId)?.name,
+                      totalMarks ? `${totalMarks} marks` : null,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+              </CardDescription>
             </div>
-            
-            <div className="space-y-2">
-              <Label>Batch</Label>
-              <select 
-                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                value={batchId}
-                onChange={(e) => setBatchId(e.target.value)}
-              >
-                <option value="">Select Batch</option>
-                {batches.filter(b => b.course.id.toString() === courseId).map(b => (
-                  <option key={b.id} value={b.id}>{b.name}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Exam Name</Label>
-              <Input value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Midterm Physics" />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Total Marks</Label>
-              <Input type="number" value={totalMarks} onChange={e => setTotalMarks(e.target.value)} />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Duration (Minutes)</Label>
-              <Input type="number" value={durationMinutes} onChange={e => setDurationMinutes(e.target.value)} />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Date Held</Label>
-              <Input type="datetime-local" value={startTime} onChange={e => setStartTime(e.target.value)} />
-            </div>
-
-            <div className="space-y-2 flex flex-col justify-center">
-              <Label className="mb-2">Show Grading System</Label>
-              <div className="flex items-center gap-2">
-                <Checkbox id="grading" checked={isGradingEnabled} onCheckedChange={(checked) => setIsGradingEnabled(checked === true)} />
-                <Label htmlFor="grading" className="text-sm font-medium cursor-pointer">
-                  {isGradingEnabled ? "Enabled (A+ to F)" : "Disabled (Marks only)"}
-                </Label>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-6">
-            <Button onClick={handleSaveExamDetails} disabled={saving}>
-              {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
-              {isNew ? "Create Exam & Enter Results" : "Update Exam Details"}
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="shrink-0"
+              onClick={(e) => {
+                e.stopPropagation();
+                setDetailsOpen((open) => !open);
+              }}
+            >
+              {detailsOpen ? "Collapse" : "Expand"}
             </Button>
           </div>
-        </CardContent>
+        </CardHeader>
+        {detailsOpen && (
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="space-y-2">
+                <Label>Course</Label>
+                <select
+                  className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  value={courseId}
+                  onChange={(e) => {
+                    setCourseId(e.target.value);
+                    setBatchId("");
+                  }}
+                >
+                  <option value="">Select Course</option>
+                  {courses.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Batch</Label>
+                <select
+                  className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  value={batchId}
+                  onChange={(e) => setBatchId(e.target.value)}
+                >
+                  <option value="">Select Batch</option>
+                  {batches
+                    .filter((b) => b.course.id.toString() === courseId)
+                    .map((b) => (
+                      <option key={b.id} value={b.id}>
+                        {b.name}
+                      </option>
+                    ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Exam Name</Label>
+                <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Midterm Physics" />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Total Marks</Label>
+                <Input type="number" value={totalMarks} onChange={(e) => setTotalMarks(e.target.value)} />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Duration (Minutes)</Label>
+                <Input
+                  type="number"
+                  value={durationMinutes}
+                  onChange={(e) => setDurationMinutes(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Date Held</Label>
+                <Input type="datetime-local" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
+              </div>
+
+              <div className="space-y-2 flex flex-col justify-center">
+                <Label className="mb-2">Show Grading System</Label>
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="grading"
+                    checked={isGradingEnabled}
+                    onCheckedChange={(checked) => setIsGradingEnabled(checked === true)}
+                  />
+                  <Label htmlFor="grading" className="text-sm font-medium cursor-pointer">
+                    {isGradingEnabled ? "Enabled (A+ to F)" : "Disabled (Marks only)"}
+                  </Label>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <Button onClick={handleSaveExamDetails} disabled={saving}>
+                {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                {isNew ? "Create Exam & Enter Results" : "Update Exam Details"}
+              </Button>
+            </div>
+          </CardContent>
+        )}
       </Card>
 
       {!isNew && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Student Results</CardTitle>
-            <CardDescription>
-              {gradedStudents.length} out of {students.length} students have been graded.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="relative mb-6 max-w-md">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+        <div className="overflow-hidden rounded-xl border border-border bg-card shadow-sm mb-24">
+          <div className="flex flex-col gap-3 border-b border-border bg-gradient-to-r from-primary/10 via-violet-500/10 to-emerald-500/10 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-lg font-semibold tracking-tight">Student Results</h2>
+              <p className="text-sm text-muted-foreground">
+                {gradedCount} / {students.length} filled ·{" "}
+                {hasLocalDraft || dirtyCount > 0 ? (
+                  <span className="font-medium text-amber-600 dark:text-amber-400">
+                    {dirtyCount} unsaved change{dirtyCount === 1 ? "" : "s"} (kept in browser)
+                  </span>
+                ) : (
+                  <span className="text-emerald-600 dark:text-emerald-400">All synced</span>
+                )}
+              </p>
+            </div>
+            <div className="relative w-full sm:max-w-xs">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Search students by ID or Name..."
+                placeholder="Search by ID or name…"
                 value={studentSearch}
-                onChange={e => setStudentSearch(e.target.value)}
-                className="pl-8"
-              />
-            </div>
-
-            <div className="space-y-6">
-              {/* Graded Students */}
-              <div className="space-y-3">
-                <h3 className="font-semibold text-green-600">Graded Students ({gradedStudents.length})</h3>
-                <div className="flex flex-col gap-3">
-                  {gradedStudents.map(student => (
-                    <div 
-                      key={student.id}
-                      onClick={() => {
-                        setSelectedStudent(student);
-                        setMarksInput(student.exam_results[0].obtained_marks.toString());
-                        setCommentInput(student.exam_results[0].comment || "");
-                      }}
-                      className="group flex items-center justify-between border-l-4 border-l-green-500 border border-green-100 dark:border-green-900/30 hover:border-green-300 dark:hover:border-green-800 bg-green-50/30 dark:bg-green-900/10 p-3 lg:p-4 rounded-md cursor-pointer transition-all shadow-sm hover:shadow-md"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="flex-shrink-0 w-10 h-10 bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-400 rounded-full flex items-center justify-center font-bold text-sm">
-                          {student.name.charAt(0).toUpperCase()}
-                        </div>
-                        <div>
-                          <div className="font-semibold text-base group-hover:text-green-700 dark:group-hover:text-green-400 transition-colors">{student.name}</div>
-                          <div className="font-mono text-xs text-muted-foreground">ID: {student.student_id}</div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4 text-right">
-                        {isGradingEnabled && (
-                          <Badge className="bg-green-500 hover:bg-green-600 text-white text-sm px-3 py-0.5 h-auto shadow-sm">
-                            {student.exam_results[0].grade || calculateGrade(student.exam_results[0].obtained_marks, parseFloat(totalMarks))}
-                          </Badge>
-                        )}
-                        <div className="flex flex-col items-end">
-                           <span className="text-xs text-muted-foreground mb-0.5">Marks</span>
-                           <span className="font-bold text-green-700 dark:text-green-400 text-base lg:text-lg leading-none">
-                             {student.exam_results[0].obtained_marks} 
-                             <span className="text-xs font-normal text-muted-foreground ml-1">/ {totalMarks}</span>
-                           </span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <Separator />
-
-              {/* Ungraded Students */}
-              <div className="space-y-3">
-                <h3 className="font-semibold text-muted-foreground">Pending / Absent Students ({ungradedStudents.length})</h3>
-                <p className="text-sm text-muted-foreground">Students in this list are treated as absent/0 marks by default.</p>
-                <div className="flex flex-col gap-3">
-                  {ungradedStudents.map(student => (
-                    <div 
-                      key={student.id}
-                      onClick={() => {
-                        setSelectedStudent(student);
-                        setMarksInput("");
-                        setCommentInput("");
-                      }}
-                      className="flex items-center justify-between border border-dashed border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-500 bg-gray-50/50 dark:bg-gray-800/30 p-3 lg:p-4 rounded-md cursor-pointer transition-all opacity-80 hover:opacity-100"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="flex-shrink-0 w-10 h-10 bg-gray-200 dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-full flex items-center justify-center font-bold text-sm">
-                          {student.name.charAt(0).toUpperCase()}
-                        </div>
-                        <div>
-                          <div className="font-medium text-base text-gray-700 dark:text-gray-300">{student.name}</div>
-                          <div className="font-mono text-xs text-muted-foreground">ID: {student.student_id}</div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <Badge variant="outline" className="text-gray-500 border-gray-300 dark:border-gray-600">Pending</Badge>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Grading Dialog */}
-      <Dialog open={selectedStudent !== null} onOpenChange={(open) => !open && setSelectedStudent(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Enter Result</DialogTitle>
-            <DialogDescription>
-              {selectedStudent?.name} ({selectedStudent?.student_id})
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label>Marks Obtained (out of {totalMarks})</Label>
-              <Input 
-                type="number" 
-                step="0.01" 
-                value={marksInput} 
-                onChange={e => setMarksInput(e.target.value)} 
-                placeholder="e.g. 85.5"
-                autoFocus
-              />
-            </div>
-            
-            {isGradingEnabled && marksInput && !isNaN(parseFloat(marksInput)) && (
-              <div className="p-3 bg-secondary rounded-lg flex items-center justify-between">
-                <span className="font-medium">Calculated Grade:</span>
-                <Badge variant="default" className="text-lg px-3">{calculateGrade(parseFloat(marksInput), parseFloat(totalMarks))}</Badge>
-              </div>
-            )}
-
-            <div className="space-y-2">
-              <Label>Teacher Comment (Optional)</Label>
-              <Input 
-                value={commentInput} 
-                onChange={e => setCommentInput(e.target.value)} 
-                placeholder="Great progress..."
+                onChange={(e) => setStudentSearch(e.target.value)}
+                className="h-9 bg-background/80 pl-9"
               />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setSelectedStudent(null)}>Cancel</Button>
-            <Button onClick={handleSaveResult}>Save Result</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[720px] text-sm">
+              <thead className="bg-muted/60">
+                <tr className="border-b border-border text-left">
+                  <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Student
+                  </th>
+                  <th className="w-28 px-3 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    ID
+                  </th>
+                  <th className="w-36 px-3 py-3 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Marks
+                    <span className="block font-normal normal-case tracking-normal text-[10px] opacity-70">
+                      out of {total}
+                    </span>
+                  </th>
+                  {isGradingEnabled && (
+                    <th className="w-24 px-3 py-3 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Grade
+                    </th>
+                  )}
+                  <th className="px-3 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Comment
+                  </th>
+                  <th className="w-28 px-3 py-3 text-center text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    Status
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredStudents.length === 0 ? (
+                  <tr>
+                    <td colSpan={isGradingEnabled ? 6 : 5} className="px-4 py-12 text-center text-muted-foreground">
+                      No students found
+                    </td>
+                  </tr>
+                ) : (
+                  filteredStudents.map((student) => {
+                    const draft = drafts[student.id] || { marks: "", comment: "" };
+                    const marksNum = draft.marks.trim() === "" ? null : parseFloat(draft.marks);
+                    const obtained =
+                      marksNum != null && !Number.isNaN(marksNum)
+                        ? marksNum
+                        : student.exam_results[0]
+                          ? student.exam_results[0].obtained_marks
+                          : null;
+                    const tone = scoreTone(obtained, total);
+                    const liveGrade =
+                      obtained != null ? calculateGrade(obtained, total) : null;
+                    const dirty = isRowDirty(student, draft);
+                    const isPending = !student.exam_results.length && draft.marks.trim() === "";
+
+                    return (
+                      <tr
+                        key={student.id}
+                        className={`border-b border-border/80 border-l-4 last:border-b-0 transition-colors ${tone.accent} ${tone.row}`}
+                      >
+                        <td className="px-4 py-2.5">
+                          <div className="flex items-center gap-3 min-w-0">
+                            {student.photo ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                src={student.photo}
+                                alt={student.name}
+                                className="h-11 w-11 shrink-0 rounded-full object-cover border-2 border-background shadow-sm ring-1 ring-border"
+                              />
+                            ) : (
+                              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary border border-primary/20 shadow-sm">
+                                {student.name.charAt(0).toUpperCase()}
+                              </div>
+                            )}
+                            <div className="min-w-0">
+                              <p className="truncate font-semibold text-foreground">{student.name}</p>
+                              {isPending && (
+                                <p className="text-[11px] font-medium text-amber-600 dark:text-amber-400">
+                                  Pending
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-3 py-2.5">
+                          <span className="font-mono text-xs text-muted-foreground">{student.student_id}</span>
+                        </td>
+                        <td className="px-3 py-2">
+                          <div className="flex items-center justify-center gap-1.5">
+                            <input
+                              ref={(el) => {
+                                inputRefs.current[student.id] = el;
+                              }}
+                              type="number"
+                              step="0.01"
+                              min={0}
+                              max={total}
+                              placeholder="—"
+                              value={draft.marks}
+                              onChange={(e) => updateDraft(student.id, { marks: e.target.value })}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  e.preventDefault();
+                                  focusNext(student.id);
+                                }
+                              }}
+                              className={`h-10 w-[5.5rem] rounded-lg border border-input bg-background text-center text-base font-bold tabular-nums shadow-sm outline-none focus-visible:ring-2 focus-visible:ring-ring ${tone.mark}`}
+                            />
+                            <span className="text-xs text-muted-foreground">/ {total}</span>
+                          </div>
+                        </td>
+                        {isGradingEnabled && (
+                          <td className="px-3 py-2.5 text-center">
+                            {liveGrade ? (
+                              <Badge className={`${tone.badge} px-2.5 py-0.5 text-sm shadow-sm`}>
+                                {liveGrade}
+                              </Badge>
+                            ) : (
+                              <span className="text-muted-foreground">—</span>
+                            )}
+                          </td>
+                        )}
+                        <td className="px-3 py-2">
+                          <input
+                            type="text"
+                            placeholder="Optional note…"
+                            value={draft.comment}
+                            onChange={(e) => updateDraft(student.id, { comment: e.target.value })}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                focusNext(student.id);
+                              }
+                            }}
+                            className="h-9 w-full min-w-[140px] rounded-lg border border-input bg-background/80 px-2.5 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                          />
+                        </td>
+                        <td className="px-3 py-2.5 text-center">
+                          {dirty ? (
+                            <Badge
+                              variant="outline"
+                              className="border-violet-500/30 bg-violet-500/10 text-violet-700 dark:text-violet-300"
+                            >
+                              Draft
+                            </Badge>
+                          ) : student.exam_results.length > 0 ? (
+                            <Badge
+                              variant="outline"
+                              className="border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+                            >
+                              Graded
+                            </Badge>
+                          ) : (
+                            <Badge
+                              variant="outline"
+                              className="border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400"
+                            >
+                              Pending
+                            </Badge>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+          <p className="border-t border-border px-4 py-2.5 text-center text-[11px] text-muted-foreground">
+            Typing is stored in this browser until you press Save · Enter moves to the next student
+          </p>
+        </div>
+      )}
+
+      {!isNew && (
+        <div className="fixed bottom-0 inset-x-0 z-40 border-t border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 md:left-[220px] lg:left-[260px] print:hidden">
+          <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="text-sm text-muted-foreground">
+              {hasLocalDraft || dirtyCount > 0 ? (
+                <span>
+                  <span className="font-medium text-amber-600 dark:text-amber-400">
+                    {dirtyCount} unsaved
+                  </span>{" "}
+                  — safe if you reload; saved to localStorage
+                </span>
+              ) : lastSavedAt ? (
+                <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+                  <Check className="h-3.5 w-3.5" />
+                  Saved at {lastSavedAt}
+                </span>
+              ) : (
+                <span>No pending changes</span>
+              )}
+            </div>
+            <Button
+              size="lg"
+              className="min-w-[180px] shadow-lg"
+              onClick={() => void saveAllResults()}
+              disabled={bulkSaving || (dirtyCount === 0 && !hasLocalDraft)}
+            >
+              {bulkSaving ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="h-4 w-4" />
+              )}
+              {bulkSaving ? "Saving…" : "Save Results"}
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

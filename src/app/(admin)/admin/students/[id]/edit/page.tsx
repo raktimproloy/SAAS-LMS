@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { siteConfig } from "@/config/site.config";
 
 interface Course {
   id: number;
@@ -102,7 +103,9 @@ export default function AddStudentPage() {
   const [paymentDue, setPaymentDue] = useState("0");
   const [paymentStatus, setPaymentStatus] = useState("paid");
   const [sendWelcomeSms, setSendWelcomeSms] = useState(true);
-  const [welcomeSmsTemplate, setWelcomeSmsTemplate] = useState("Welcome {name} to {course}! Log in at https://institute.app");
+  const [welcomeSmsTemplate, setWelcomeSmsTemplate] = useState(
+    "Welcome {name} to {institute}! Your ID: {student_id}. Login with your phone number as password."
+  );
 
   const fetchData = async () => {
     setLoading(true);
@@ -172,7 +175,9 @@ export default function AddStudentPage() {
       payload.payment_status = paymentStatus;
       payload.send_welcome_sms = sendWelcomeSms;
       const selectedCourseTitle = courses.find(c => c.id.toString() === selectedCourseId)?.title || "our course";
-      payload.welcome_sms_template = welcomeSmsTemplate.replace(/{course}/g, selectedCourseTitle);
+      payload.welcome_sms_template = welcomeSmsTemplate
+        .replace(/\{institute\}/gi, siteConfig.instituteName)
+        .replace(/\{course\}/gi, selectedCourseTitle);
 
       const res = await fetch("/api/admin/students", {
         method: "POST",
@@ -549,10 +554,12 @@ export default function AddStudentPage() {
                       value={welcomeSmsTemplate}
                       onChange={(e) => setWelcomeSmsTemplate(e.target.value)}
                     />
-                    <div className="flex gap-2 text-xs text-muted-foreground mt-1">
+                    <div className="flex flex-wrap gap-2 text-xs text-muted-foreground mt-1">
                       <span className="font-semibold">Available Variables:</span>
-                      <span className="px-1.5 py-0.5 bg-muted rounded font-mono text-primary">{'{name}'}</span>
-                      <span className="px-1.5 py-0.5 bg-muted rounded font-mono text-primary">{'{course}'}</span>
+                      <span className="px-1.5 py-0.5 bg-muted rounded font-mono text-primary">{"{name}"}</span>
+                      <span className="px-1.5 py-0.5 bg-muted rounded font-mono text-primary">{"{institute}"}</span>
+                      <span className="px-1.5 py-0.5 bg-muted rounded font-mono text-primary">{"{student_id}"}</span>
+                      <span className="px-1.5 py-0.5 bg-muted rounded font-mono text-primary">{"{course}"}</span>
                     </div>
                   </div>
                 )}

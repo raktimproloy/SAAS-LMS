@@ -269,7 +269,6 @@ export default function ContentManagementPage() {
           
           {activeTab === "notices" && (
             <Dialog open={isNoticeDialogOpen} onOpenChange={setIsNoticeDialogOpen}>
-            {/* @ts-expect-error - Radix UI type mismatch for asChild */}
             <DialogTrigger asChild>
               <Button className="gap-2 bg-primary hover:bg-primary/90 shadow-md">
                 <Plus className="h-4 w-4" />

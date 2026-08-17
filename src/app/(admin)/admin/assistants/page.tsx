@@ -174,7 +174,6 @@ export default function AssistantsPage() {
           setIsDialogOpen(open);
           if (!open) resetForm();
         }}>
-          {/* @ts-expect-error - Radix UI type mismatch for asChild */}
           <DialogTrigger asChild>
             <Button className="gap-2" onClick={resetForm}>
               <Plus className="h-4 w-4" />

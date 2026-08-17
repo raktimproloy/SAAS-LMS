@@ -58,9 +58,9 @@ export function StudentBottomNav() {
         isVisible ? "translate-y-0" : "translate-y-full"
       )}
     >
-      <div className="bg-card/40 backdrop-blur-3xl border-t border-white/10 rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.3)] px-2 py-2 md:pb-4 relative overflow-hidden">
+      <div className="bg-card/90 dark:bg-card/40 backdrop-blur-3xl border-t border-border rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.08)] dark:shadow-[0_-8px_30px_rgba(0,0,0,0.3)] px-2 py-2 md:pb-4 relative overflow-hidden">
         {/* Ambient Floating Gradients */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none mix-blend-screen opacity-100">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40 dark:opacity-100 dark:mix-blend-screen">
           <div className="absolute -bottom-[20%] -left-[10%] w-[60%] h-[150%] bg-[hsl(var(--gradient-1))]/50 rounded-full blur-[35px] animate-blob-y" />
           <div className="absolute -bottom-[20%] -right-[10%] w-[50%] h-[120%] bg-[hsl(var(--gradient-2))]/40 rounded-full blur-[35px] animate-blob-y animation-delay-2000" />
           <div className="absolute top-[10%] left-[30%] w-[40%] h-[150%] bg-[hsl(var(--gradient-3))]/40 rounded-full blur-[35px] animate-blob-y animation-delay-4000" />
@@ -88,7 +88,7 @@ export function StudentBottomNav() {
                     <item.icon
                       className={cn(
                         "h-5 w-5 transition-colors",
-                        isActive ? "text-white" : "text-muted-foreground"
+                        isActive ? "text-primary-foreground" : "text-muted-foreground"
                       )}
                       strokeWidth={isActive ? 2.5 : 2}
                     />
@@ -98,7 +98,7 @@ export function StudentBottomNav() {
                   className={cn(
                     "text-[10px] font-bold transition-all duration-200 drop-shadow-sm tracking-tight mt-0.5",
                     isActive
-                      ? "text-white scale-110"
+                      ? "text-primary scale-110"
                       : "text-muted-foreground"
                   )}
                 >

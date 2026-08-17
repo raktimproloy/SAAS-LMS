@@ -486,7 +486,7 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
 
                       if (isThisSelected) {
                         bgColor = "bg-primary/5 border-primary text-primary dark:bg-primary/10 dark:border-primary shadow-sm ring-1 ring-primary/20";
-                        letterBgColor = "bg-primary text-white";
+                        letterBgColor = "bg-primary text-primary-foreground";
                         textStyle = "text-primary dark:text-primary";
                       } else if (isAnswered) {
                         bgColor = "bg-muted/30 border-border/50 opacity-60 cursor-not-allowed";
@@ -596,7 +596,7 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
               disabled={isSubmitting}
             >
               {isSubmitting ? (
-                <span className="flex items-center gap-2"><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"/> Submit</span>
+                <span className="flex items-center gap-2"><div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin"/> Submit</span>
               ) : (
                 <span className="flex items-center gap-1.5 sm:gap-2">Submit <span className="hidden sm:inline">Exam</span> <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 group-hover:scale-110 transition-transform" /></span>
               )}

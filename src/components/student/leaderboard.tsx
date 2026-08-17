@@ -86,8 +86,8 @@ export function Leaderboard({ entries, currentStudentId }: LeaderboardProps) {
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-[80px] -mr-20 -mt-20 pointer-events-none transform-gpu" />
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-cyan-600/10 rounded-full blur-[80px] -ml-20 -mb-20 pointer-events-none transform-gpu" />
       </div>
-      <div className="bg-card/60 backdrop-blur-3xl rounded-3xl border border-white/10 shadow-lg shadow-primary/20 ring-1 ring-primary/50 overflow-hidden relative" data-aos="fade-down">
-        <div className="p-4 sm:p-6 border-b border-white/10 flex items-center gap-3 sm:gap-4 relative z-10">
+      <div className="bg-card/90 dark:bg-card/60 backdrop-blur-3xl rounded-3xl border border-border shadow-lg shadow-primary/20 ring-1 ring-primary/50 overflow-hidden relative" data-aos="fade-down">
+        <div className="p-4 sm:p-6 border-b border-border flex items-center gap-3 sm:gap-4 relative z-10">
           <div className="p-2 sm:p-3 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl sm:rounded-2xl shadow-[0_0_15px_rgba(251,191,36,0.3)] border border-amber-300/30 shrink-0">
             <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-amber-950" />
           </div>
@@ -109,7 +109,7 @@ export function Leaderboard({ entries, currentStudentId }: LeaderboardProps) {
             <div 
               key={entry.id} 
               className={`flex items-center gap-2 sm:gap-4 p-3 sm:p-4 sm:px-6 transition-all duration-300 relative group ${
-                isCurrentUser ? 'bg-primary/10 hover:bg-primary/20' : 'hover:bg-white/5'
+                isCurrentUser ? 'bg-primary/10 hover:bg-primary/20' : 'hover:bg-muted/60'
               }`}
               data-aos="fade-up"
             >
@@ -120,7 +120,7 @@ export function Leaderboard({ entries, currentStudentId }: LeaderboardProps) {
                 <MedalIcon rank={rank} />
               </div>
 
-              <Avatar className={`w-9 h-9 sm:w-12 sm:h-12 border-2 shadow-md ${isCurrentUser ? 'border-primary/50' : 'border-white/10'}`}>
+              <Avatar className={`w-9 h-9 sm:w-12 sm:h-12 border-2 shadow-md ${isCurrentUser ? 'border-primary/50' : 'border-border'}`}>
                 <AvatarImage src={photo || ""} />
                 <AvatarFallback className="bg-background/50 font-bold text-xs sm:text-base">{name.substring(0, 2).toUpperCase()}</AvatarFallback>
               </Avatar>
@@ -129,7 +129,7 @@ export function Leaderboard({ entries, currentStudentId }: LeaderboardProps) {
                 <div className={`flex items-center gap-1.5 sm:gap-2 ${isCurrentUser ? 'text-primary drop-shadow-md' : 'text-foreground'}`}>
                   <span className="font-bold text-sm sm:text-base truncate">{name}</span>
                   {isCurrentUser && (
-                    <span className="shrink-0 flex items-center justify-center text-[9px] sm:text-[10px] uppercase tracking-wider font-black bg-primary text-white px-1.5 sm:px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(var(--primary),0.6)]">
+                    <span className="shrink-0 flex items-center justify-center text-[9px] sm:text-[10px] uppercase tracking-wider font-black bg-primary text-primary-foreground px-1.5 sm:px-2 py-0.5 rounded-full shadow-[0_0_10px_rgba(var(--primary),0.6)]">
                       You
                     </span>
                   )}
@@ -137,7 +137,7 @@ export function Leaderboard({ entries, currentStudentId }: LeaderboardProps) {
                 <p className="text-xs sm:text-sm text-muted-foreground truncate mt-0.5">{batchName}</p>
               </div>
 
-              <div className="text-right shrink-0 w-[72px] sm:w-[96px] bg-background/40 px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl border border-white/5 backdrop-blur-sm flex flex-col items-end justify-center">
+              <div className="text-right shrink-0 w-[72px] sm:w-[96px] bg-background/40 px-2 sm:px-3 py-1.5 sm:py-2 rounded-xl border border-border/60 backdrop-blur-sm flex flex-col items-end justify-center">
                 <div className="font-black text-lg sm:text-xl text-foreground leading-tight whitespace-nowrap">
                   {entry.obtained_marks} <span className="text-[10px] sm:text-xs font-semibold text-muted-foreground">pts</span>
                 </div>

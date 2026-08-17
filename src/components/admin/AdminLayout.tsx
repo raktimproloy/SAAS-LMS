@@ -7,7 +7,6 @@ import {
   LayoutDashboard,
   Users,
   BookOpen,
-  CreditCard,
   FileText,
   Bell,
   Settings,
@@ -16,10 +15,12 @@ import {
   Database,
   Video,
   ClipboardList,
-  CalendarCheck,
   ChevronDown,
-  ChevronRight,
-  MessageSquare
+  MessageSquare,
+  QrCode,
+  Wallet,
+  Globe,
+  UserCog,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -40,36 +41,42 @@ type SidebarLink = {
 };
 
 const sidebarLinks: SidebarLink[] = [
-  { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard }, // no perm needed
-  { name: "Courses & Batches", href: "/admin/courses", icon: BookOpen, perm: "courses" },
-  { name: "Assistants Team", href: "/admin/assistants", icon: Users, perm: "assistants" },
-  { name: "Video Courses", href: "/admin/video-courses", icon: Video, perm: "courses" },
   {
-    name: "Management",
+    name: "QR Code",
+    icon: QrCode,
+    subItems: [
+      { name: "QR Scanner", href: "/admin/qr-scanner", perm: "students" },
+      { name: "QR Generate", href: "/admin/qr-cards", perm: "students" },
+    ],
+  },
+  { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
+  { name: "Course & Batches", href: "/admin/courses", icon: BookOpen, perm: "courses" },
+  {
+    name: "Student",
     icon: Users,
     subItems: [
-      { name: "Students", href: "/admin/students", perm: "students" },
+      { name: "Student List", href: "/admin/students", perm: "students" },
       { name: "Attendance", href: "/admin/attendance", perm: "students" },
-      { name: "QR Scanner", href: "/admin/qr-scanner", perm: "students" },
-      { name: "QR Cards", href: "/admin/qr-cards", perm: "students" },
-      { name: "Payment", href: "/admin/payments", perm: "payments" },
-      { name: "Expenses", href: "/admin/expenses", perm: "expenses" },
-      { name: "Study Materials", href: "/admin/materials", perm: "materials" },
       { name: "Report", href: "/admin/reports", perm: "reports" },
-      { name: "Notices", href: "/admin/notices", perm: "notices" },
-    ]
+      { name: "Result", href: "/admin/offline-results", perm: "exams" },
+    ],
   },
   {
-    name: "Exam",
-    icon: FileText,
+    name: "Financial",
+    icon: Wallet,
     subItems: [
-      { name: "Online Exam", href: "/admin/exams", perm: "exams" },
-      { name: "Result", href: "/admin/offline-results", perm: "exams" },
-    ]
+      { name: "Payment", href: "/admin/payments", perm: "payments" },
+      { name: "Expenses", href: "/admin/expenses", perm: "expenses" },
+    ],
   },
-  { name: "Website Content", href: "/admin/content", icon: Bell, perm: "content" },
+  { name: "Study Material", href: "/admin/materials", icon: ClipboardList, perm: "materials" },
+  { name: "Notice", href: "/admin/content", icon: Bell, perm: "content" },
+  { name: "Online Exam", href: "/admin/exams", icon: FileText, perm: "exams" },
+  { name: "Video Courses", href: "/admin/video-courses", icon: Video, perm: "courses" },
+  { name: "Assistant Team", href: "/admin/assistants", icon: UserCog, perm: "assistants" },
   { name: "SMS Logs", href: "/admin/sms", icon: MessageSquare, perm: "sms" },
-  { name: "Settings", href: "/admin/settings", icon: Settings }, // no perm needed
+  { name: "Website Content", href: "/admin/content", icon: Globe, perm: "content" },
+  { name: "Settings", href: "/admin/settings", icon: Settings },
 ];
 
 interface AdminUser {
@@ -270,15 +277,25 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading interface...</div>;
   }
 
-  // Client-side route protection
-  const flattenedLinks = sidebarLinks.flatMap(link => link.subItems ? link.subItems : [{ name: link.name, href: link.href || "", perm: link.perm }]);
-  const currentLink = flattenedLinks.find(link => link.href && pathname.startsWith(link.href));
+  // Client-side route protection — longest href match; allow if any matching perm passes
+  const flattenedLinks = sidebarLinks.flatMap((link) =>
+    link.subItems ? link.subItems : [{ name: link.name, href: link.href || "", perm: link.perm }]
+  );
+  const matchingLinks = flattenedLinks
+    .filter(
+      (link) =>
+        link.href &&
+        (pathname === link.href || pathname.startsWith(`${link.href}/`))
+    )
+    .sort((a, b) => (b.href?.length || 0) - (a.href?.length || 0));
+  const bestHrefLen = matchingLinks[0]?.href?.length ?? 0;
+  const currentLinks = matchingLinks.filter((l) => (l.href?.length || 0) === bestHrefLen);
 
   const hasAccess = (() => {
-    if (!currentLink || !currentLink.perm) return true;
+    if (currentLinks.length === 0) return true;
     if (user?.role === "super_admin") return true;
     if (user?.permissions?.includes("all")) return true;
-    return user?.permissions?.includes(currentLink.perm);
+    return currentLinks.some((link) => !link.perm || user?.permissions?.includes(link.perm));
   })();
 
   return (
@@ -297,7 +314,6 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         {/* Header */}
         <header className="flex h-14 items-center gap-4 border-b bg-muted/20 px-4 lg:h-[60px] lg:px-6 sticky top-0 z-30 backdrop-blur-sm print:hidden">
           <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
-            {/* @ts-expect-error - Radix UI type mismatch for asChild */}
             <SheetTrigger asChild>
               <Button variant="outline" size="icon" className="shrink-0 md:hidden">
                 <Menu className="h-5 w-5" />

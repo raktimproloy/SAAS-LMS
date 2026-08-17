@@ -14,6 +14,37 @@ async function checkPermission(permission: string) {
   return adminPayload.permissions?.includes("all") || adminPayload.permissions?.includes(permission);
 }
 
+const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
+
+function parseClassDays(raw: unknown): string[] {
+  if (!raw) return [];
+  if (Array.isArray(raw)) return raw.map(String);
+  if (typeof raw === "string") {
+    try {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed.map(String) : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
+/** Days of the month that fall on the batch's class weekdays (e.g. Sat/Mon/Wed). */
+function getSessionDates(year: number, month: number, classDays: string[]) {
+  const daysInMonth = endOfMonth(new Date(year, month - 1)).getDate();
+  const allowed = new Set(classDays);
+  const sessions: { day: number; weekday: string }[] = [];
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const weekday = WEEKDAYS[new Date(year, month - 1, day).getDay()];
+    if (allowed.size === 0 || allowed.has(weekday)) {
+      sessions.push({ day, weekday });
+    }
+  }
+  return sessions;
+}
+
 export async function GET(request: Request) {
   const hasPerm = await checkPermission("students");
   if (!hasPerm) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
@@ -29,66 +60,73 @@ export async function GET(request: Request) {
 
   try {
     const year = parseInt(yearStr);
-    const month = parseInt(monthStr); // 1-12
-    
-    // Create Date objects for start and end of month
-    // Note: month in Date constructor is 0-indexed, so month - 1
+    const month = parseInt(monthStr);
+    const batchId = parseInt(batch_id);
+
     const startDate = startOfMonth(new Date(year, month - 1));
     const endDate = endOfMonth(new Date(year, month - 1));
 
-    // 1. Get all students in this batch
-    const batchStudents = await prisma.student.findMany({
-      where: { batch_id: parseInt(batch_id), status: "active" },
-      select: { id: true, student_id: true, name: true }
+    const batch = await prisma.batch.findUnique({
+      where: { id: batchId },
+      select: {
+        id: true,
+        name: true,
+        class_days: true,
+        course: { select: { title: true } },
+      },
     });
 
-    // 2. Get all attendance records for this batch in this month
+    if (!batch) {
+      return NextResponse.json({ error: "Batch not found" }, { status: 404 });
+    }
+
+    const classDays = parseClassDays(batch.class_days);
+    const sessionDates = getSessionDates(year, month, classDays);
+
+    const batchStudents = await prisma.student.findMany({
+      where: { batch_id: batchId, status: "active" },
+      select: { id: true, student_id: true, name: true, photo: true },
+      orderBy: { name: "asc" },
+    });
+
     const attendances = await prisma.attendance.findMany({
       where: {
-        batch_id: parseInt(batch_id),
+        batch_id: batchId,
         date: {
           gte: startDate,
           lte: endDate,
-        }
+        },
       },
       select: {
         student_id: true,
         date: true,
-        status: true
-      }
+        status: true,
+      },
     });
 
-    // 3. Structure the response
-    // { students: [...], records: { [studentId]: { [day]: status } } }
-    
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const records: Record<number, Record<number, string>> = {};
-    
-    batchStudents.forEach(s => {
+    batchStudents.forEach((s) => {
       records[s.id] = {};
     });
 
-    attendances.forEach(a => {
-      // Create record entry if student is from cross-batch or just missing
-      if (!records[a.student_id]) {
-        records[a.student_id] = {};
-        // We could fetch cross-batch student details here if needed, 
-        // but for now, we just map what we have.
-      }
-      
-      const day = a.date.getDate(); // 1-31
+    attendances.forEach((a) => {
+      if (!records[a.student_id]) records[a.student_id] = {};
+      const day = a.date.getDate();
       records[a.student_id][day] = a.status;
     });
 
-    // Sort students alphabetically
-    const sortedStudents = batchStudents.sort((a, b) => a.name.localeCompare(b.name));
-
-    return NextResponse.json({ 
-      students: sortedStudents, 
+    return NextResponse.json({
+      students: batchStudents,
       records,
-      daysInMonth: endDate.getDate()
+      daysInMonth: endDate.getDate(),
+      classDays,
+      sessionDates,
+      batch: {
+        id: batch.id,
+        name: batch.name,
+        course: batch.course?.title || "",
+      },
     });
-
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: "Failed to fetch monthly report" }, { status: 500 });
