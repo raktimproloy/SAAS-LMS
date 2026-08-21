@@ -18,7 +18,15 @@ const navLinks = [
 
 type LoginState = "none" | "student" | "admin";
 
-export function Navbar({ initialLoginState = "none" }: { initialLoginState?: LoginState }) {
+export function Navbar({ 
+  initialLoginState = "none",
+  siteName = "DoctorBiology",
+  siteLogo = null
+}: { 
+  initialLoginState?: LoginState,
+  siteName?: string,
+  siteLogo?: string | null
+}) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -66,12 +74,21 @@ export function Navbar({ initialLoginState = "none" }: { initialLoginState?: Log
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 lg:h-20 flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 group shrink-0">
-            <div className="h-9 w-9 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30 group-hover:shadow-primary/50 transition-shadow">
-              <Dna className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <span className="font-bold text-lg tracking-tight text-foreground">
-              Doctor<span className="text-primary">Biology</span>
-            </span>
+            {siteLogo ? (
+              <div className="h-9 w-auto max-w-[120px] rounded flex items-center justify-center overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={siteLogo} alt={siteName} className="h-full w-auto object-contain" />
+              </div>
+            ) : (
+              <div className="h-9 w-9 rounded-xl bg-primary flex items-center justify-center shadow-lg shadow-primary/30 group-hover:shadow-primary/50 transition-shadow">
+                <Dna className="h-5 w-5 text-primary-foreground" />
+              </div>
+            )}
+            {!siteLogo && (
+              <span className="font-bold text-lg tracking-tight text-foreground">
+                {siteName}
+              </span>
+            )}
           </Link>
 
           {/* Desktop Nav Links */}

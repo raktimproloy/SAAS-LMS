@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { GalleryManager } from "@/components/admin/GalleryManager";
+import { SiteSettingsForm } from "@/components/admin/SiteSettingsForm";
 import {
   Table,
   TableBody,
@@ -313,64 +314,7 @@ export default function ContentManagementPage() {
 
           {activeTab === "site-settings" && (
             <div className="p-6">
-              
-              <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); alert("Site settings UI only! API not connected yet."); }}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {/* Contact Info */}
-                  <div className="space-y-4">
-                    <h3 className="font-semibold text-lg border-b pb-2 border-border/50 text-primary">Contact Information</h3>
-                    <div className="space-y-2">
-                      <Label>Phone Number</Label>
-                      <Input placeholder="+880 1XXXXXXXXX" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Email Address</Label>
-                      <Input type="email" placeholder="info@instituteweb.com" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>WhatsApp Number</Label>
-                      <Input placeholder="8801XXXXXXXXX" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Physical Address</Label>
-                      <Textarea placeholder="Farmgate, Dhaka, Bangladesh" rows={3} />
-                    </div>
-                  </div>
-
-                  {/* Social Links */}
-                  <div className="space-y-4">
-                    <h3 className="font-semibold text-lg border-b pb-2 border-border/50 text-primary">Social Media Links</h3>
-                    <div className="space-y-2">
-                      <Label>Facebook Page URL</Label>
-                      <Input placeholder="https://facebook.com/instituteweb" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>YouTube Channel URL</Label>
-                      <Input placeholder="https://youtube.com/@instituteweb" />
-                    </div>
-                  </div>
-
-                  {/* Map Config */}
-                  <div className="space-y-4 md:col-span-2">
-                    <h3 className="font-semibold text-lg border-b pb-2 border-border/50 text-primary">Google Map Integration</h3>
-                    <div className="space-y-2">
-                      <Label>Google Maps Embed URL (src attribute)</Label>
-                      <Textarea 
-                        placeholder="https://www.google.com/maps/embed?pb=..." 
-                        rows={3} 
-                      />
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Go to Google Maps, click Share &gt; Embed a map, and copy the link inside the <code>src="..."</code> attribute.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-4 border-t border-border mt-6 flex justify-end">
-                  <Button type="submit">Save Configuration</Button>
-                </div>
-              </form>
-            
+              <SiteSettingsForm />
             </div>
           )}
 

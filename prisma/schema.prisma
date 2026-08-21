@@ -39,6 +39,7 @@ model Course {
   video_courses VideoCourse[]
   exams         Exam[]
   notes         NoteMaterial[]
+  form_submissions FormSubmission[]
 }
 
 model Batch {
@@ -411,4 +412,19 @@ model CronJob {
   last_run    DateTime?
   created_at  DateTime  @default(now())
   updated_at  DateTime  @updatedAt
+}
+
+model FormSubmission {
+  id         Int      @id @default(autoincrement())
+  name       String
+  phone      String
+  email      String?
+  course_id  Int?
+  message    String?  @db.Text
+  type       String   @default("CONTACT") // "CONTACT" | "MARKETING"
+  status     String   @default("PENDING") // "PENDING" | "CONTACTED"
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  
+  course     Course?  @relation(fields: [course_id], references: [id], onDelete: SetNull)
 }

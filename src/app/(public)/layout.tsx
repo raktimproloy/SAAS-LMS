@@ -5,8 +5,9 @@ import { FloatingActions } from "@/components/public/FloatingActions";
 import { PWAInstallPrompt } from "@/components/public/PWAInstallPrompt";
 import { MotifBackground } from "@/components/public/motif";
 import { siteConfig } from "@/config/site.config";
+import prisma from "@/lib/db";
 
-export default function PublicLayout({
+export default async function PublicLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -19,13 +20,24 @@ export default function PublicLayout({
   if (adminToken) initialLoginState = "admin";
   else if (studentToken) initialLoginState = "student";
 
+  const settings = await prisma.siteSetting.findMany({
+    where: { group_name: "site_config" }
+  });
+  const config = settings.reduce((acc, curr) => {
+    acc[curr.setting_key] = curr.setting_value;
+    return acc;
+  }, {} as Record<string, string>);
+  
+  const siteName = config.site_name || "DoctorBiology";
+  const siteLogo = config.site_logo || null;
+
   return (
     <div className="student-portal min-h-screen flex flex-col relative">
       <MotifBackground motif={siteConfig.motif} />
       <div className="relative z-10 flex flex-col flex-1 min-h-screen">
-        <Navbar initialLoginState={initialLoginState} />
+        <Navbar initialLoginState={initialLoginState} siteName={siteName} siteLogo={siteLogo} />
         <main className="flex-1">{children}</main>
-        <Footer />
+        <Footer siteName={siteName} siteLogo={siteLogo} />
       </div>
       <FloatingActions />
       <PWAInstallPrompt />

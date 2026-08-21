@@ -57,7 +57,13 @@ const fadeUp: Variants = {
   }),
 };
 
-export function Footer() {
+export function Footer({
+  siteName = "DoctorBiology",
+  siteLogo = null
+}: {
+  siteName?: string,
+  siteLogo?: string | null
+}) {
   return (
     <footer className="relative bg-card border-t border-border text-card-foreground overflow-hidden">
       {/* Decorative top glow with animation */}
@@ -84,12 +90,21 @@ export function Footer() {
             className="space-y-4"
           >
             <Link href="/" className="flex items-center gap-2.5 group w-fit">
-              <div className="h-10 w-10 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center">
-                <Dna className="h-5 w-5 text-sky-300" />
-              </div>
-              <span className="font-bold text-xl text-foreground">
-                Doctor<span className="text-primary">Biology</span>
-              </span>
+              {siteLogo ? (
+                <div className="h-10 w-auto max-w-[120px] rounded flex items-center justify-center overflow-hidden">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={siteLogo} alt={siteName} className="h-full w-auto object-contain" />
+                </div>
+              ) : (
+                <div className="h-10 w-10 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center">
+                  <Dna className="h-5 w-5 text-sky-300" />
+                </div>
+              )}
+              {!siteLogo && (
+                <span className="font-bold text-xl text-foreground">
+                  {siteName}
+                </span>
+              )}
             </Link>
             <p className="text-sm text-foreground/90 leading-relaxed max-w-xs">
               মেডিকেল ভর্তি পরীক্ষা ও একাডেমিক প্রস্তুতির জন্য বাংলাদেশের সেরা অনলাইন প্ল্যাটফর্ম।
