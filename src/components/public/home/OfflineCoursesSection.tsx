@@ -35,7 +35,7 @@ const offlineCourses = [
 
 export function OfflineCoursesSection() {
   return (
-    <section className="py-24 px-4 sm:px-6 lg:px-8 relative bg-muted/40 overflow-hidden">
+    <section className="py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
 
       {/* Decorative Gradients */}
       <div className="absolute top-40 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />

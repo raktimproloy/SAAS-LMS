@@ -15,7 +15,7 @@ export default function ContactPage() {
   }, []);
 
   return (
-    <div className="bg-background">
+    <div>
 
       {/* Contact Page Hero Section */}
       <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-28 px-4 sm:px-6 lg:px-8 bg-[#0B0F19] overflow-hidden">

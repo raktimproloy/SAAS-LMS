@@ -2,7 +2,6 @@ import prisma from "@/lib/db";
 import { format } from "date-fns";
 import { Pin, Bell, CalendarDays } from "lucide-react";
 import Link from "next/link";
-import { FloatingBackground } from "@/components/public/ui/FloatingBackground";
 
 export const revalidate = 3600;
 
@@ -15,9 +14,7 @@ export default async function NoticesPage() {
   });
 
   return (
-    <div className="relative min-h-screen bg-background pt-32 pb-24 px-4 sm:px-6 lg:px-8 selection:bg-primary/20 selection:text-primary">
-      <FloatingBackground />
-      
+    <div className="relative min-h-screen pt-32 pb-24 px-4 sm:px-6 lg:px-8 selection:bg-primary/20 selection:text-primary">
       <div className="max-w-4xl mx-auto relative z-10">
         
         <div className="text-center mb-16">

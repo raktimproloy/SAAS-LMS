@@ -114,7 +114,7 @@ export default async function AdminDashboard() {
                     <TableRow key={student.id}>
                       <TableCell className="font-medium">{student.student_id}</TableCell>
                       <TableCell>{student.name}</TableCell>
-                      <TableCell>{student.batch.name}</TableCell>
+                      <TableCell>{student.batch?.name}</TableCell>
                       <TableCell className="text-muted-foreground">{format(new Date(student.created_at), 'dd MMM yyyy')}</TableCell>
                       <TableCell className="text-right">
                         <Badge variant={status.toLowerCase() === "paid" ? "default" : "destructive"} className="capitalize">

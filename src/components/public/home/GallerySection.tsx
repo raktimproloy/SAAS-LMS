@@ -7,49 +7,28 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import "swiper/css";
 
-const fallbackImages = [
-  { id: 1, src: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=1200", title: "Gallery" },
-  { id: 2, src: "https://images.unsplash.com/photo-1516321497487-e288fb19713f?w=1200", title: "Gallery" },
-  { id: 3, src: "https://images.unsplash.com/photo-1577896851231-70ef18881754?w=1200", title: "Gallery" },
-  { id: 4, src: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=1200", title: "Gallery" },
-  { id: 5, src: "https://images.unsplash.com/photo-1580894732444-8ecded790047?w=1200", title: "Gallery" },
-  { id: 6, src: "https://images.unsplash.com/photo-1544928147-79a2dbc1f389?w=1200", title: "Gallery" },
-];
-
 type GalleryImage = { id: number; src: string; title: string };
 
-export function GallerySection() {
+export function GallerySection({ initialImages = [] }: { initialImages?: any[] }) {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [images, setImages] = useState<GalleryImage[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchGallery = async () => {
-      try {
-        const res = await fetch("/api/admin/content/gallery");
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.length > 0) {
-            const mappedImages = data.map((img: { id: number; image_path: string; caption?: string }) => ({
-              id: img.id,
-              src: img.image_path,
-              title: img.caption || "Gallery",
-            }));
-            setImages(mappedImages);
-          }
-        }
-      } catch (err) {
-        console.error("Failed to fetch gallery:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchGallery();
-  }, []);
+  const images = useMemo<GalleryImage[]>(() => {
+    if (initialImages && initialImages.length > 0) {
+      return initialImages.map((img) => ({
+        id: img.id,
+        src: img.image_path,
+        title: img.caption || "Gallery",
+      }));
+    }
+    return [];
+  }, [initialImages]);
+
+  if (images.length === 0) {
+    return null;
+  }
 
   const thumbImages = useMemo(() => {
-    const source = images.length > 0 ? images : fallbackImages;
-    return source.slice(0, 5);
+    return images.slice(0, 5);
   }, [images]);
 
   const loopSlides = useMemo(() => {
@@ -62,20 +41,17 @@ export function GallerySection() {
 
   const activeImage = thumbImages[activeIndex % Math.max(thumbImages.length, 1)] ?? thumbImages[0];
 
-  if (loading || !activeImage) {
+  if (!activeImage) {
     return null;
   }
 
   return (
-    <section className="py-16 px-4 sm:px-6 lg:px-8 bg-background relative isolate z-10 overflow-hidden">
+    <section className="py-16 px-4 sm:px-6 lg:px-8 relative isolate z-10 overflow-hidden">
       <div className="max-w-7xl mx-auto relative">
         <div className="text-center mb-10" data-aos="fade-up">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4">
-            সেরা শিক্ষার অভিজ্ঞতা
+            গ্যালারি ও কিছু স্মৃতি
           </h2>
-          <p className="text-foreground max-w-2xl mx-auto text-lg">
-            আধুনিক ক্লাসরুম, ল্যাব এবং সেরা পরিবেশ নিয়ে আমাদের অফলাইন সেন্টারগুলোতে শিক্ষার্থীদের জন্য রয়েছে বিশ্বমানের পড়াশোনার অভিজ্ঞতা।
-          </p>
         </div>
 
         <div className="max-w-4xl mx-auto flex flex-col items-center">
@@ -88,13 +64,22 @@ export function GallerySection() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.35, ease: "easeInOut" }}
-                className="absolute inset-0"
+                className="absolute inset-0 overflow-hidden"
               >
+                {/* Blurred backdrop for images that don't fill the aspect ratio */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={activeImage.src}
                   alt=""
-                  className="absolute inset-0 w-full h-full object-cover"
+                  className="absolute inset-0 w-full h-full object-cover blur-2xl opacity-40 scale-110"
+                  draggable={false}
+                />
+                {/* Main uncropped image */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={activeImage.src}
+                  alt=""
+                  className="absolute inset-0 w-full h-full object-contain z-10 drop-shadow-2xl"
                   draggable={false}
                 />
               </motion.div>

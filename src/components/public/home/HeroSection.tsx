@@ -94,7 +94,7 @@ export function HeroSection({ hideButtons = false, showStatsCards = false }: { h
             {/* Headline */}
             <motion.h1
               initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.1 }}
-              className="text-4xl sm:text-5xl lg:text-7xl font-bold text-white leading-tight"
+              className="text-4xl sm:text-5xl lg:text-7xl font-bold text-white leading-tight tracking-wide drop-shadow-2xl [text-shadow:_0_4px_8px_rgba(0,0,0,0.5)]"
             >
               মেডিকেল ভর্তি{" "}
               <span className="text-sky-300">স্বপ্নকে</span>
@@ -104,7 +104,7 @@ export function HeroSection({ hideButtons = false, showStatsCards = false }: { h
 
             <motion.p
               initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }}
-              className="mt-6 text-white/70 text-lg sm:text-xl max-w-xl leading-relaxed"
+              className="mt-6 text-white/90 text-lg sm:text-xl max-w-xl leading-relaxed tracking-wide drop-shadow-lg"
             >
               অনলাইন ক্লাস, মডেল টেস্ট, স্টাডি মেটেরিয়াল ও পার্সোনালাইজড গাইডেন্স দিয়ে
               মেডিকেল ভর্তি পরীক্ষার জন্য নিজেকে প্রস্তুত করুন।

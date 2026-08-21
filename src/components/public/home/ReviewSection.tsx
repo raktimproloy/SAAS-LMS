@@ -27,7 +27,7 @@ export function ReviewSection() {
   };
 
   return (
-    <section className="py-24 overflow-hidden bg-muted/40 relative border-t border-border">
+    <section className="py-24 overflow-hidden relative border-t border-border">
 
       {/* Decorative Elements */}
       <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-indigo-500/5 rounded-full blur-[100px] pointer-events-none -translate-y-1/2" />

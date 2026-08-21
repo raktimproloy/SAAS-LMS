@@ -7,13 +7,12 @@ import { NoticeBoardSection } from "@/components/public/home/NoticeBoardSection"
 import { VideoCourseSection } from "@/components/public/home/VideoCourseSection";
 import { ContactSection } from "@/components/public/home/ContactSection";
 import { MapSection } from "@/components/public/home/MapSection";
-import { FloatingBackground } from "@/components/public/ui/FloatingBackground";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export const revalidate = 3600; // Revalidate every hour
+export const revalidate = 60; // Revalidate every minute
 
 async function fetchHomeData() {
-  const [teacher, notices, courses, videoCourses] = await Promise.all([
+  const [teacher, notices, courses, videoCourses, gallery] = await Promise.all([
     prisma.teacher.findFirst({
       orderBy: { created_at: 'asc' }
     }),
@@ -49,40 +48,41 @@ async function fetchHomeData() {
       take: 4,
       orderBy: { created_at: 'desc' },
       where: { status: 'PUBLISHED' }
+    }),
+    prisma.gallery.findMany({
+      orderBy: { sort_order: 'asc' }
     })
   ]);
 
-  return { teacher, notices, courses, videoCourses };
+  return { teacher, notices, courses, videoCourses, gallery };
 }
 
 export default async function HomePage() {
   const data = await fetchHomeData();
 
   return (
-    <div className="relative bg-background min-h-screen selection:bg-primary/20 selection:text-primary">
-      <FloatingBackground />
-      
+    <div className="relative min-h-screen selection:bg-primary/20 selection:text-primary">
       <div className="relative z-10">
         <Suspense fallback={<HeroSkeleton />}>
           <HeroTeacherSection teacher={data.teacher} />
         </Suspense>
-        
+
         <Suspense fallback={<SectionSkeleton />}>
           <PopularCoursesSection courses={data.courses} />
         </Suspense>
-        
+
         <Suspense fallback={<SectionSkeleton />}>
-          <GallerySection />
+          <GallerySection initialImages={data.gallery} />
         </Suspense>
-        
+
         <Suspense fallback={<SectionSkeleton />}>
           <VideoCourseSection videoCourses={data.videoCourses} />
         </Suspense>
-        
+
         <Suspense fallback={<SectionSkeleton />}>
           <NoticeBoardSection notices={data.notices} />
         </Suspense>
-        
+
         <ContactSection />
         <MapSection />
       </div>

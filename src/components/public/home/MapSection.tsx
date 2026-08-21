@@ -8,7 +8,7 @@ export function MapSection() {
   const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}`;
 
   return (
-    <section className="py-8 sm:py-12 px-4 sm:px-6 lg:px-8 bg-muted/40 relative">
+    <section className="py-8 sm:py-12 px-4 sm:px-6 lg:px-8 relative">
       <div className="max-w-7xl mx-auto">
         {/* Large Google Map */}
         <div className="w-full h-[300px] sm:h-[400px] lg:h-[450px] rounded-xl overflow-hidden border-2 border-border shadow-2xl relative group">

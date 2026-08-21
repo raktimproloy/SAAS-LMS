@@ -134,6 +134,8 @@
     --gradient-1: 220 45% 55%;
     --gradient-2: 210 50% 62%;
     --gradient-3: 230 40% 58%;
+    --motif-color: 220 30% 42%;
+    --motif-glow: 220 65% 72%;
   }
 
   .dark .student-portal {
@@ -169,6 +171,8 @@
     --gradient-1: 220 35% 40%; /* Primary blue */
     --gradient-2: 220 45% 48%; /* Less dark blue */
     --gradient-3: 220 30% 32%; /* Dark blue */
+    --motif-color: 210 30% 82%;
+    --motif-glow: 220 80% 64%;
   }
 
   @keyframes blob {

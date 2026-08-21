@@ -58,7 +58,8 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
       where: { id: parseInt(params.id) },
     });
     return NextResponse.json({ success: true });
-  } catch {
-    return NextResponse.json({ error: "Failed to delete course. Ensure no batches are linked." }, { status: 500 });
+  } catch (err: any) {
+    console.error("Failed to delete course:", err);
+    return NextResponse.json({ error: err.message || "Failed to delete course. Ensure no batches are linked." }, { status: 500 });
   }
 }

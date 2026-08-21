@@ -1,6 +1,5 @@
 import prisma from "@/lib/db";
 import { LeaderboardClient } from "@/components/public/leaderboard/LeaderboardClient";
-import { FloatingBackground } from "@/components/public/ui/FloatingBackground";
 import { Trophy } from "lucide-react";
 
 export const revalidate = 3600;
@@ -14,9 +13,7 @@ export default async function LeaderboardPage() {
   });
 
   return (
-    <div className="relative min-h-screen bg-background pt-32 pb-24 px-4 sm:px-6 lg:px-8 selection:bg-primary/20 selection:text-primary">
-      <FloatingBackground />
-      
+    <div className="relative min-h-screen pt-32 pb-24 px-4 sm:px-6 lg:px-8 selection:bg-primary/20 selection:text-primary">
       <div className="relative z-10 max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary font-bold text-sm mb-4 border border-primary/20">

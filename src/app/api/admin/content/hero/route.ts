@@ -18,11 +18,10 @@ export async function GET() {
   if (!hasPerm) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
 
   try {
-    const banners = await prisma.heroBanner.findMany({
-      orderBy: { created_at: "desc" },
-      take: 1
+    const teacher = await prisma.teacher.findFirst({
+      orderBy: { created_at: "asc" }
     });
-    return NextResponse.json(banners[0] || null);
+    return NextResponse.json(teacher || null);
   } catch {
     return NextResponse.json({ error: "Failed to fetch hero banner" }, { status: 500 });
   }
@@ -34,20 +33,35 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { teacher_photo, description, bg_image, cta_text, cta_link, is_active } = body;
+    const { name, bio, qualifications, photo } = body;
 
-    const newBanner = await prisma.heroBanner.create({
-      data: {
-        teacher_photo,
-        description,
-        bg_image,
-        cta_text,
-        cta_link,
-        is_active: is_active ?? true
-      }
+    const existingTeacher = await prisma.teacher.findFirst({
+      orderBy: { created_at: "asc" }
     });
 
-    return NextResponse.json({ success: true, data: newBanner }, { status: 201 });
+    let teacher;
+    if (existingTeacher) {
+      teacher = await prisma.teacher.update({
+        where: { id: existingTeacher.id },
+        data: { 
+          name: name || existingTeacher.name, 
+          bio, 
+          qualifications, 
+          photo 
+        }
+      });
+    } else {
+      teacher = await prisma.teacher.create({
+        data: { 
+          name: name || "Teacher", 
+          bio, 
+          qualifications, 
+          photo 
+        }
+      });
+    }
+
+    return NextResponse.json({ success: true, data: teacher }, { status: 201 });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ error: "Failed to update hero banner" }, { status: 500 });

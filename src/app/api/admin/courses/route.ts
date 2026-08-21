@@ -24,7 +24,10 @@ export async function GET() {
 
   try {
     const courses = await prisma.course.findMany({
-      orderBy: { created_at: "desc" },
+      orderBy: [
+        { sort_order: "asc" },
+        { created_at: "desc" }
+      ],
     });
     return NextResponse.json(courses);
   } catch {

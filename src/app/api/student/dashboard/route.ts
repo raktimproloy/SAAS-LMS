@@ -68,7 +68,7 @@ export async function GET() {
       where: {
         OR: [
           { batch_id: student.batch_id },
-          { course_id: student.batch.course_id },
+          { course_id: student.batch?.course_id ?? -1 },
           { is_public: true }
         ],
         status: { in: ["published", "active"] }
@@ -105,7 +105,7 @@ export async function GET() {
       where: {
         OR: [
           { target_type: 'all' },
-          { target_type: 'course', target_id: student.batch.course_id },
+          { target_type: 'course', target_id: student.batch?.course_id ?? -1 },
           { target_type: 'batch', target_id: student.batch_id }
         ]
       },

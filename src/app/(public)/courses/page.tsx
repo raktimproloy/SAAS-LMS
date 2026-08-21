@@ -99,7 +99,7 @@ export default function CoursesPage() {
   };
 
   return (
-    <div className="bg-background">
+    <div>
 
       {/* Course Page Hero Section */}
       <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-28 px-4 sm:px-6 lg:px-8 bg-[#0B0F19] overflow-hidden">
@@ -121,7 +121,7 @@ export default function CoursesPage() {
       </section>
 
       {/* All Courses Grid Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-background relative z-10">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16" data-aos="fade-up">
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">আমাদের কোর্সসমূহ</h2>

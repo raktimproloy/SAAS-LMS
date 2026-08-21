@@ -25,9 +25,7 @@ export default function AboutPage() {
   }, []);
 
   return (
-    <div className="bg-background">
-
-      {/* 1. About Hero Section */}
+    <div>
       <HeroTeacherSection teacher={null} hideButtons={true} showStatsCards={true} />
 
 

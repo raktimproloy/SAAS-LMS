@@ -46,7 +46,10 @@ export async function POST(request: Request) {
         id: student.id,
         student_id: student.student_id,
         name: student.name,
-        batch_name: student.batch.name,
+        batch: student.batch ? {
+          id: student.batch.id,
+          name: student.batch.name
+        } : null,
       },
     });
 

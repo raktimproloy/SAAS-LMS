@@ -50,10 +50,11 @@ model Batch {
   status       String   @default("active")
   max_students Int?
   class_days   Json?
+  sort_order   Int      @default(0)
   created_at   DateTime @default(now())
   updated_at   DateTime @updatedAt
 
-  course       Course         @relation(fields: [course_id], references: [id])
+  course       Course         @relation(fields: [course_id], references: [id], onDelete: Cascade)
   students     Student[]
   routines     Routine[]
   exams        Exam[]
@@ -71,7 +72,7 @@ model Student {
   phone           String
   email           String?
   password        String
-  batch_id        Int
+  batch_id        Int?
   parent_name     String?
   parent_relation String?
   parent_phone    String?
@@ -81,7 +82,7 @@ model Student {
   created_at      DateTime  @default(now())
   updated_at      DateTime  @updatedAt
 
-  batch        Batch           @relation(fields: [batch_id], references: [id])
+  batch        Batch?          @relation(fields: [batch_id], references: [id], onDelete: SetNull)
   payments     Payment[]
   exam_results ExamResult[]
   attendance   Attendance[]
@@ -100,7 +101,7 @@ model Routine {
   teacher_name String?
   created_at   DateTime @default(now())
 
-  batch Batch @relation(fields: [batch_id], references: [id])
+  batch Batch @relation(fields: [batch_id], references: [id], onDelete: Cascade)
 }
 
 model Exam {
@@ -119,8 +120,8 @@ model Exam {
   is_grading_enabled Boolean @default(false)
   created_at       DateTime  @default(now())
 
-  batch               Batch?                  @relation(fields: [batch_id], references: [id])
-  course              Course?                 @relation(fields: [course_id], references: [id])
+  batch               Batch?                  @relation(fields: [batch_id], references: [id], onDelete: SetNull)
+  course              Course?                 @relation(fields: [course_id], references: [id], onDelete: Cascade)
   questions           ExamQuestion[]
   results             ExamResult[]
   public_participants PublicExamParticipant[]
@@ -140,8 +141,8 @@ model ExamQuestion {
   explanation    String? @db.Text
   sort_order     Int     @default(0)
 
-  exam     Exam           @relation(fields: [exam_id], references: [id])
-  parent   ExamQuestion?  @relation("PassageQuestions", fields: [parent_id], references: [id])
+  exam     Exam           @relation(fields: [exam_id], references: [id], onDelete: Cascade)
+  parent   ExamQuestion?  @relation("PassageQuestions", fields: [parent_id], references: [id], onDelete: Cascade)
   children ExamQuestion[] @relation("PassageQuestions")
 }
 
@@ -161,8 +162,8 @@ model ExamResult {
   grade              String?
   created_at         DateTime @default(now())
 
-  exam               Exam                   @relation(fields: [exam_id], references: [id])
-  student            Student?               @relation(fields: [student_id], references: [id])
+  exam               Exam                   @relation(fields: [exam_id], references: [id], onDelete: Cascade)
+  student            Student?               @relation(fields: [student_id], references: [id], onDelete: SetNull)
   public_participant PublicExamParticipant?
 }
 
@@ -178,8 +179,8 @@ model PublicExamParticipant {
   exam_result_id Int      @unique
   created_at     DateTime @default(now())
 
-  exam   Exam       @relation(fields: [exam_id], references: [id])
-  result ExamResult @relation(fields: [exam_result_id], references: [id])
+  exam   Exam       @relation(fields: [exam_id], references: [id], onDelete: Cascade)
+  result ExamResult @relation(fields: [exam_result_id], references: [id], onDelete: Cascade)
 }
 
 model Payment {
@@ -313,8 +314,8 @@ model VideoCourse {
   sort_order  Int      @default(0)
   created_at  DateTime @default(now())
 
-  course Course @relation(fields: [course_id], references: [id])
-  batch  Batch? @relation(fields: [batch_id], references: [id])
+  course Course @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  batch  Batch? @relation(fields: [batch_id], references: [id], onDelete: SetNull)
 }
 
 model NoteMaterial {
@@ -330,8 +331,8 @@ model NoteMaterial {
   sort_order  Int      @default(0)
   created_at  DateTime @default(now())
 
-  batch  Batch?  @relation(fields: [batch_id], references: [id])
-  course Course? @relation(fields: [course_id], references: [id])
+  batch  Batch?  @relation(fields: [batch_id], references: [id], onDelete: SetNull)
+  course Course? @relation(fields: [course_id], references: [id], onDelete: Cascade)
 }
 
 model SiteSetting {

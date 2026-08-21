@@ -26,7 +26,7 @@ export async function GET() {
         status: { in: ["active", "published", "completed"] },
         OR: [
           { batch_id: student.batch_id },
-          { course_id: student.batch.course_id },
+          { course_id: student.batch?.course_id ?? -1 },
           { is_public: true }
         ]
       },

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Plus, Pencil, Settings, MoreHorizontal, Trash2 } from "lucide-react";
+import { Plus, Pencil, Settings, MoreHorizontal, Trash2, Database } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -91,6 +91,14 @@ export default function ExamsPage() {
   const [batchId, setBatchId] = useState("");
   const [courseId, setCourseId] = useState("");
   const [status, setStatus] = useState("active");
+
+  // Question Bank import
+  const [importExamId, setImportExamId] = useState<number | null>(null);
+  const [importPaperId, setImportPaperId] = useState("");
+  const [importReplace, setImportReplace] = useState(false);
+  const [importError, setImportError] = useState("");
+  const [importSubmitting, setImportSubmitting] = useState(false);
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -194,6 +202,37 @@ export default function ExamsPage() {
     } catch (err) {
       console.error(err);
       alert("Failed to delete exam");
+    }
+  };
+
+  const openImportDialog = (exam: Exam) => {
+    setImportExamId(exam.id);
+    setImportPaperId("");
+    setImportReplace((exam._count?.questions || 0) > 0);
+    setImportError("");
+    setIsImportDialogOpen(true);
+  };
+
+  const handleImportQuestionBank = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!importExamId || !importPaperId.trim()) return;
+    setImportError("");
+    setImportSubmitting(true);
+    try {
+      const res = await fetch(`/api/admin/exams/${importExamId}/import-question-bank`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ paper_id: importPaperId.trim(), replace: importReplace }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Import failed");
+      setIsImportDialogOpen(false);
+      fetchData();
+      alert(`Imported ${data.imported} questions (${data.total_marks} marks total)`);
+    } catch (err) {
+      setImportError(err instanceof Error ? err.message : "Import failed");
+    } finally {
+      setImportSubmitting(false);
     }
   };
 
@@ -483,6 +522,10 @@ export default function ExamsPage() {
                                 <Pencil className="mr-2 h-4 w-4" />
                                 <span>Edit</span>
                               </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => openImportDialog(exam)}>
+                                <Database className="mr-2 h-4 w-4" />
+                                <span>Import from Question Bank</span>
+                              </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem 
                                 onClick={() => handleDelete(exam.id)}
@@ -511,6 +554,46 @@ export default function ExamsPage() {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Import from Question Bank</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleImportQuestionBank} className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Paste the Paper ID from Question Bank → Exam Paper tab. Create the exam first, then import questions here.
+            </p>
+            <div className="space-y-2">
+              <Label htmlFor="paper_id">Paper ID</Label>
+              <Input
+                id="paper_id"
+                placeholder="pap_xxxxxxxxxxxx"
+                value={importPaperId}
+                onChange={(e) => setImportPaperId(e.target.value)}
+                required
+              />
+            </div>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={importReplace}
+                onChange={(e) => setImportReplace(e.target.checked)}
+              />
+              Replace existing questions if exam already has questions
+            </label>
+            {importError && <p className="text-sm text-destructive">{importError}</p>}
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setIsImportDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={importSubmitting}>
+                {importSubmitting ? "Importing..." : "Import"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -24,7 +24,7 @@ export async function GET() {
       where: {
         OR: [
           { batch_id: student.batch_id },
-          { course_id: student.batch.course_id },
+          { course_id: student.batch?.course_id ?? -1 },
           { batch_id: null, course_id: null } // Global notes if any
         ]
       },

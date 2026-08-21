@@ -17,7 +17,7 @@ interface HeroTeacherSectionProps {
 
 export function HeroTeacherSection({ teacher, hideButtons = false, showStatsCards = false }: HeroTeacherSectionProps) {
   const name = teacher?.name || "ডাঃ রাকিবুল ইসলাম";
-  const bio = teacher?.bio || "বিগত ১০ বছর ধরে মেডিকেল ভর্তিচ্ছু শিক্ষার্থীদের জীববিজ্ঞানের ভয় দূর করে তাদের স্বপ্ন পূরণে কাজ করে যাচ্ছি। আমার লক্ষ্য হলো প্রতিটি শিক্ষার্থী যেন শুধু মুখস্থ না করে, বরং বুঝে শিখতে পারে।";
+  const bio = teacher?.bio || "বিগত ১০ বছর ধরে শিক্ষার্থীদের বাংলা ভাষার প্রতি ভালোবাসা তৈরি করতে ও পরীক্ষায় সেরা ফলাফল অর্জনে কাজ করে যাচ্ছি। আমার লক্ষ্য হলো প্রতিটি শিক্ষার্থী যেন শুধু মুখস্থ না করে, বরং বাংলা ভাষার সৌন্দর্য ও গভীরতা হৃদয় দিয়ে অনুভব করে শিখতে পারে।";
   const image = teacher?.photo || "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80";
 
   const { promptInstall, isInstalled, isIOS, canInstall } = usePWAInstall();
@@ -53,23 +53,23 @@ export function HeroTeacherSection({ teacher, hideButtons = false, showStatsCard
     <section className="relative min-h-[60vh] flex items-center pt-16 pb-8 px-4 sm:px-6 lg:px-8 overflow-hidden">
       <div className="max-w-7xl mx-auto w-full relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-          
+
           {/* Left: Image */}
-          <div className="relative order-2 lg:order-1 flex justify-center">
+          <div className="relative order-1 flex justify-center">
             <div className="relative max-w-sm w-full">
-              <Image 
-                src={image} 
-                alt={name} 
+              <Image
+                src={image}
+                alt={name}
                 width={400}
                 height={500}
-                className="object-cover object-top w-full h-auto shadow-2xl"
+                className="object-cover object-top w-full h-auto"
                 priority
               />
             </div>
           </div>
 
           {/* Right: Bio & Info */}
-          <div className="order-1 lg:order-2 space-y-5">
+          <div className="order-2 space-y-5 text-center lg:text-left">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -79,22 +79,22 @@ export function HeroTeacherSection({ teacher, hideButtons = false, showStatsCard
                 <span className="gradient-text">{name}</span>
               </h1>
               <h3 className="text-lg sm:text-xl text-foreground font-semibold mb-4">
-                MBBS (DMC), FCPS (Medicine)
+                {teacher?.qualifications || "বি.এ (সম্মান), এম.এ (বাংলা), ঢাকা বিশ্ববিদ্যালয়"}
               </h3>
-              
-              <p className="text-foreground text-base leading-relaxed max-w-xl">
+
+              <p className="text-foreground text-base leading-relaxed max-w-xl mx-auto lg:mx-0">
                 {bio}
               </p>
             </motion.div>
 
             {!hideButtons && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.4 }}
-                className="flex flex-col sm:flex-row gap-4 pt-4"
+                className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4 pt-4"
               >
-                <Link 
+                <Link
                   href="/student/login"
                   className="w-full sm:w-auto group relative flex items-center justify-center gap-3 px-6 py-4 bg-primary text-primary-foreground rounded-lg font-bold text-base shadow-[0_0_40px_-10px_hsl(var(--primary))] hover:shadow-[0_0_60px_-10px_hsl(var(--primary))] transition-all duration-300 hover:-translate-y-1 overflow-hidden"
                 >
@@ -103,7 +103,7 @@ export function HeroTeacherSection({ teacher, hideButtons = false, showStatsCard
                   <span className="relative z-10 text-white">Student Login</span>
                 </Link>
 
-                <button 
+                <button
                   type="button"
                   onClick={handleInstallClick}
                   disabled={installing}
@@ -134,7 +134,7 @@ export function HeroTeacherSection({ teacher, hideButtons = false, showStatsCard
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.4 }}
-                className="flex flex-col sm:flex-row gap-4 pt-4"
+                className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4 pt-4"
               >
                 <div className="bg-card backdrop-blur-md border border-border rounded-2xl p-5 flex items-center gap-5 w-full sm:w-auto shadow-xl">
                   <div className="w-14 h-14 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center shrink-0">
@@ -147,7 +147,7 @@ export function HeroTeacherSection({ teacher, hideButtons = false, showStatsCard
                     <p className="text-muted-foreground text-sm font-medium">সর্বমোট শিক্ষার্থী</p>
                   </div>
                 </div>
-                
+
                 <div className="bg-card backdrop-blur-md border border-border rounded-2xl p-5 flex items-center gap-5 w-full sm:w-auto shadow-xl">
                   <div className="w-14 h-14 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
                     <svg className="w-7 h-7 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -164,7 +164,7 @@ export function HeroTeacherSection({ teacher, hideButtons = false, showStatsCard
               </motion.div>
             )}
           </div>
-          
+
         </div>
       </div>
 

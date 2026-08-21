@@ -22,7 +22,7 @@ export async function GET() {
 
     const videos = await prisma.videoCourse.findMany({
       where: {
-        course_id: student.batch.course_id,
+        course_id: student.batch?.course_id ?? -1,
         status: 'active'
       },
       orderBy: { sort_order: 'asc' }

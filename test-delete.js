@@ -1,0 +1,1 @@
+const { PrismaClient } = require('@prisma/client'); const prisma = new PrismaClient(); async function main() { try { await prisma.course.delete({ where: { id: 3 } }); console.log('Deleted course'); } catch (e) { console.error('Error:', e.message); } finally { await prisma.$disconnect(); } } main();

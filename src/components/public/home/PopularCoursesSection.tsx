@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight, ChevronDown, Clock, Calendar, Users } from "lucide-react";
+import { formatTimeRangeBengali, translateDayToBengali } from "@/lib/bengali";
 
 export interface CourseBatch {
   id: number;
@@ -34,8 +35,8 @@ const fallbackCourses: CompactCourse[] = [
     fee: 5000,
     discount_fee: 3000,
     batches: [
-      { id: 1, name: "Morning Batch", start_time: "08:00 AM", end_time: "10:00 AM", status: "active", max_students: 40, class_days: ["রবি", "মঙ্গল", "বৃহস্পতি"] },
-      { id: 2, name: "Evening Batch", start_time: "04:00 PM", end_time: "06:00 PM", status: "active", max_students: 40, class_days: ["সোম", "বুধ", "শুক্র"] },
+      { id: 1, name: "Morning Batch", start_time: "08:00", end_time: "10:00", status: "active", max_students: 40, class_days: ["রবি", "মঙ্গল", "বৃহস্পতি"] },
+      { id: 2, name: "Evening Batch", start_time: "16:00", end_time: "18:00", status: "active", max_students: 40, class_days: ["সোম", "বুধ", "শুক্র"] },
     ],
   },
   {
@@ -44,7 +45,7 @@ const fallbackCourses: CompactCourse[] = [
     fee: 15000,
     discount_fee: 12000,
     batches: [
-      { id: 3, name: "Regular Batch", start_time: "10:00 AM", end_time: "01:00 PM", status: "active", max_students: 50, class_days: ["রবি", "বুধ"] },
+      { id: 3, name: "Regular Batch", start_time: "10:00", end_time: "13:00", status: "active", max_students: 50, class_days: ["রবি", "বুধ"] },
     ],
   },
   {
@@ -59,9 +60,9 @@ const fallbackCourses: CompactCourse[] = [
 function formatDays(classDays: unknown): string | null {
   if (!classDays) return null;
   if (Array.isArray(classDays) && classDays.length > 0) {
-    return classDays.filter((d) => typeof d === "string").join(", ");
+    return classDays.filter((d) => typeof d === "string").map(d => translateDayToBengali(d)).join(", ");
   }
-  if (typeof classDays === "string" && classDays.trim()) return classDays;
+  if (typeof classDays === "string" && classDays.trim()) return translateDayToBengali(classDays);
   return null;
 }
 
@@ -105,11 +106,8 @@ export function PopularCoursesSection({ courses }: PopularCoursesSectionProps) {
           className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-6 gap-4"
         >
           <div>
-            <span className="text-primary font-bold text-sm uppercase tracking-wider mb-1 block">
-              Premium Learning
-            </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground">
-              জনপ্রিয় কোর্সসমূহ
+              আমাদের কোর্সসমূহ
             </h2>
           </div>
           <Link
@@ -147,9 +145,8 @@ export function PopularCoursesSection({ courses }: PopularCoursesSectionProps) {
                   </span>
                   {price}
                   <ChevronDown
-                    className={`w-5 h-5 text-muted-foreground shrink-0 transition-transform duration-200 ${
-                      isOpen ? "rotate-180" : ""
-                    }`}
+                    className={`w-5 h-5 text-muted-foreground shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
+                      }`}
                   />
                 </button>
 
@@ -178,7 +175,7 @@ export function PopularCoursesSection({ courses }: PopularCoursesSectionProps) {
                                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-muted-foreground">
                                       <span className="inline-flex items-center gap-1">
                                         <Clock className="w-3 h-3" />
-                                        {batch.start_time} – {batch.end_time}
+                                        {formatTimeRangeBengali(batch.start_time, batch.end_time)}
                                       </span>
                                       {days && (
                                         <span className="inline-flex items-center gap-1">
@@ -195,11 +192,10 @@ export function PopularCoursesSection({ courses }: PopularCoursesSectionProps) {
                                     </div>
                                   </div>
                                   <span
-                                    className={`self-start sm:self-center text-[10px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider border ${
-                                      batch.status === "active" || batch.status === "PUBLISHED"
+                                    className={`self-start sm:self-center text-[10px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider border ${batch.status === "active" || batch.status === "PUBLISHED"
                                         ? "bg-green-500/10 text-green-600 border-green-500/20"
                                         : "bg-muted text-muted-foreground border-border"
-                                    }`}
+                                      }`}
                                   >
                                     {batch.status === "active" || batch.status === "PUBLISHED" ? "Open" : "Closed"}
                                   </span>

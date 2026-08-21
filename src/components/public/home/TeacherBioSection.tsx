@@ -7,7 +7,7 @@ export function TeacherBioSection() {
   const [isPlaying, setIsPlaying] = useState(false);
 
   return (
-    <section className="py-24 px-4 sm:px-6 lg:px-8 bg-muted/40 relative overflow-hidden">
+    <section className="py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Background elements */}
       <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
       <div className="absolute -right-64 top-1/2 -translate-y-1/2 w-96 h-96 bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
@@ -25,7 +25,7 @@ export function TeacherBioSection() {
             </h3>
 
             <p className="text-foreground text-lg leading-relaxed mb-8">
-              বিগত ১০ বছর ধরে মেডিকেল ভর্তিচ্ছু শিক্ষার্থীদের জীববিজ্ঞানের ভয় দূর করে তাদের স্বপ্ন পূরণে কাজ করে যাচ্ছি। আমার লক্ষ্য হলো প্রতিটি শিক্ষার্থী যেন শুধু মুখস্থ না করে, বরং বুঝে শিখতে পারে। আমার ক্লাসে আপনি পাবেন বাস্তব জীবনের উদাহরণ দিয়ে প্রতিটি টপিকের গভীর বিশ্লেষণ।
+              বিগত ১০ বছর ধরে শিক্ষার্থীদের বাংলা ভাষার প্রতি ভালোবাসা তৈরি করতে ও পরীক্ষায় সেরা ফলাফল অর্জনে কাজ করে যাচ্ছি। আমার লক্ষ্য হলো প্রতিটি শিক্ষার্থী যেন শুধু মুখস্থ না করে, বরং বাংলা ভাষার সৌন্দর্য ও গভীরতা হৃদয় দিয়ে অনুভব করে শিখতে পারে। আমার ক্লাসে আপনি পাবেন সাহিত্য ও ব্যাকরণের এক অপূর্ব সমন্বয়।
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">

@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Plus, Pencil, BookOpen, Layers, Trash2, CheckCircle, XCircle, MessageSquare, MoreHorizontal } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { Plus, Pencil, BookOpen, Layers, Trash2, CheckCircle, XCircle, MessageSquare, MoreHorizontal, GripVertical } from "lucide-react";
+import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
+import { formatTimeBengali, translateDayToBengali } from "@/lib/bengali";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -84,6 +86,64 @@ export default function CoursesBatchesPage() {
   const [smsTargetType, setSmsTargetType] = useState<"course" | "batch" | "student">("course");
   const [smsTargetId, setSmsTargetId] = useState<number | undefined>(undefined);
   const [smsTargetName, setSmsTargetName] = useState<string>("");
+
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  const handleDragEndCourses = async (result: DropResult) => {
+    if (!result.destination) return;
+    const items = Array.from(courses);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+
+    setCourses(items);
+
+    try {
+      await fetch('/api/admin/courses/reorder', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderedIds: items.map(i => i.id) })
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const groupedBatches = useMemo(() => {
+    const groups: Record<number, { course: Course, batches: Batch[] }> = {};
+    courses.forEach(c => { groups[c.id] = { course: c, batches: [] }; });
+    batches.forEach(b => {
+      if (groups[b.course.id]) {
+        groups[b.course.id].batches.push(b);
+      } else {
+        groups[b.course.id] = { course: b.course, batches: [b] };
+      }
+    });
+    return Object.values(groups).filter(g => g.batches.length > 0);
+  }, [courses, batches]);
+
+  const handleDragEndBatches = async (result: DropResult, courseId: number) => {
+    if (!result.destination) return;
+    const group = groupedBatches.find(g => g.course.id === courseId);
+    if (!group) return;
+    const items = Array.from(group.batches);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem);
+    
+    const finalBatches = batches.filter(b => b.course.id !== courseId).concat(items);
+    setBatches(finalBatches);
+
+    try {
+      await fetch('/api/admin/batches/reorder', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderedIds: items.map(i => i.id) })
+      });
+      fetchData();
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   // Common Form Fields
   const [title, setTitle] = useState("");
@@ -460,7 +520,7 @@ export default function CoursesBatchesPage() {
                                   else setClassDays(classDays.filter(d => d !== day));
                                 }}
                               />
-                              <span className="text-sm font-medium">{day}</span>
+                              <span className="text-sm font-medium">{translateDayToBengali(day)}</span>
                             </label>
                           ))}
                         </div>
@@ -499,6 +559,7 @@ export default function CoursesBatchesPage() {
                     <Table>
                       <TableHeader className="bg-slate-50/50 dark:bg-slate-800/50">
                         <TableRow>
+                          <TableHead className="w-[50px]"></TableHead>
                           <TableHead className="py-4">Course Title</TableHead>
                           <TableHead>Fee</TableHead>
                           <TableHead>Discount Fee</TableHead>
@@ -507,22 +568,37 @@ export default function CoursesBatchesPage() {
                           <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
-                      <TableBody>
-                        {courses.map((course) => (
-                          <TableRow key={course.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20">
-                            <TableCell className="font-semibold text-slate-800 dark:text-slate-200 py-4">
-                              <div className="flex items-center gap-3">
-                                {course.thumbnail ? (
-                                  /* eslint-disable-next-line @next/next/no-img-element */
-                                  <img src={course.thumbnail} alt={course.title} className="w-10 h-10 rounded-md object-cover bg-slate-100" />
-                                ) : (
-                                  <div className="w-10 h-10 rounded-md bg-indigo-50 dark:bg-indigo-950/30 flex items-center justify-center text-indigo-500">
-                                    <BookOpen className="w-5 h-5" />
-                                  </div>
-                                )}
-                                {course.title}
-                              </div>
-                            </TableCell>
+                      {mounted && (
+                        <DragDropContext onDragEnd={handleDragEndCourses}>
+                          <Droppable droppableId="courses-droppable">
+                            {(provided) => (
+                              <TableBody {...provided.droppableProps} ref={provided.innerRef}>
+                                {courses.map((course, index) => (
+                                  <Draggable key={course.id.toString()} draggableId={course.id.toString()} index={index}>
+                                    {(provided) => (
+                                      <TableRow 
+                                        ref={provided.innerRef} 
+                                        {...provided.draggableProps} 
+                                        className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 bg-background"
+                                      >
+                                        <TableCell>
+                                          <div {...provided.dragHandleProps} className="cursor-grab p-2 hover:bg-slate-100 rounded-md inline-flex">
+                                            <GripVertical className="h-4 w-4 text-slate-400" />
+                                          </div>
+                                        </TableCell>
+                                        <TableCell className="font-semibold text-slate-800 dark:text-slate-200 py-4">
+                                          <div className="flex items-center gap-3">
+                                            {course.thumbnail ? (
+                                              /* eslint-disable-next-line @next/next/no-img-element */
+                                              <img src={course.thumbnail} alt={course.title} className="w-10 h-10 rounded-md object-cover bg-slate-100" />
+                                            ) : (
+                                              <div className="w-10 h-10 rounded-md bg-indigo-50 dark:bg-indigo-950/30 flex items-center justify-center text-indigo-500">
+                                                <BookOpen className="w-5 h-5" />
+                                              </div>
+                                            )}
+                                            {course.title}
+                                          </div>
+                                        </TableCell>
                             <TableCell>{course.fee ? `৳ ${course.fee}` : "-"}</TableCell>
                             <TableCell>
                               {course.discount_fee ? (
@@ -584,18 +660,25 @@ export default function CoursesBatchesPage() {
                               </DropdownMenu>
                             </TableCell>
                           </TableRow>
-                        ))}
-                        {courses.length === 0 && (
-                          <TableRow>
-                            <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">
-                              <div className="flex flex-col items-center justify-center gap-2">
-                                <BookOpen className="w-8 h-8 text-slate-300" />
-                                <p>No courses found. Add your first course to get started.</p>
-                              </div>
-                            </TableCell>
-                          </TableRow>
                         )}
-                      </TableBody>
+                      </Draggable>
+                                ))}
+                                {provided.placeholder}
+                                {courses.length === 0 && (
+                                  <TableRow>
+                                    <TableCell colSpan={7} className="text-center py-10 text-muted-foreground">
+                                      <div className="flex flex-col items-center justify-center gap-2">
+                                        <BookOpen className="w-8 h-8 text-slate-300" />
+                                        <p>No courses found. Add your first course to get started.</p>
+                                      </div>
+                                    </TableCell>
+                                  </TableRow>
+                                )}
+                              </TableBody>
+                            )}
+                          </Droppable>
+                        </DragDropContext>
+                      )}
                     </Table>
                   </div>
                   {courses.length > 0 && renderPagination()}
@@ -618,116 +701,137 @@ export default function CoursesBatchesPage() {
                   </div>
                 </div>
               ) : (
-                <>
-                  <div className="overflow-x-auto rounded-md border border-slate-100 dark:border-slate-800">
-                    <Table>
-                      <TableHeader className="bg-slate-50/50 dark:bg-slate-800/50">
-                        <TableRow>
-                          <TableHead className="py-4">Batch Name</TableHead>
-                          <TableHead>Associated Course</TableHead>
-                          <TableHead>Time</TableHead>
-                          <TableHead>Capacity</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {batches.map((batch) => (
-                          <TableRow key={batch.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20">
-                            <TableCell className="font-semibold text-slate-800 dark:text-slate-200 py-4">
-                              <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center text-blue-500">
-                                  <Layers className="w-4 h-4" />
-                                </div>
-                                {batch.name}
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant="outline" className="bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20 backdrop-blur-md">
-                                {batch.course?.title || "Unknown Course"}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="font-medium text-slate-600 dark:text-slate-400">
-                              {batch.start_time ? (
-                                (() => {
-                                  // Convert 24h to 12h format
-                                  const formatTime = (t: string) => {
-                                    if (!t) return "";
-                                    const [h, m] = t.split(":");
-                                    let hour = parseInt(h, 10);
-                                    const ampm = hour >= 12 ? "PM" : "AM";
-                                    hour = hour % 12 || 12;
-                                    return `${hour}:${m} ${ampm}`;
-                                  };
-                                  return `${formatTime(batch.start_time)} - ${formatTime(batch.end_time)}`;
-                                })()
-                              ) : "Not Set"}
-                            </TableCell>
-                            <TableCell>{batch.max_students ? `${batch.max_students} Students` : "Not Set"}</TableCell>
-                            <TableCell>
-                              <Badge 
-                                variant="outline"
-                                className={`cursor-pointer transition-colors shadow-sm ${
-                                  batch.status === "active" 
-                                    ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 hover:bg-emerald-500/20 dark:text-emerald-400" 
-                                    : "bg-slate-500/10 text-slate-600 border-slate-500/20 hover:bg-slate-500/20 dark:text-slate-400"
-                                }`}
-                              >
-                                {batch.status === "active" ? "Active" : "Inactive"}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <DropdownMenu>
-                                <DropdownMenuTrigger className="h-8 w-8 p-0 flex items-center justify-center rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-muted-foreground">
+                <div className="flex flex-col gap-8">
+                  {groupedBatches.map(group => (
+                    <div key={group.course.id} className="space-y-3">
+                      <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                        <BookOpen className="w-5 h-5 text-primary" />
+                        {group.course.title}
+                      </h3>
+                      <div className="overflow-x-auto rounded-md border border-slate-100 dark:border-slate-800">
+                        <Table>
+                          <TableHeader className="bg-slate-50/50 dark:bg-slate-800/50">
+                            <TableRow>
+                              <TableHead className="py-4 w-[50px]"></TableHead>
+                              <TableHead>Batch Name</TableHead>
+                              <TableHead>Time & Days</TableHead>
+                              <TableHead>Capacity</TableHead>
+                              <TableHead>Status</TableHead>
+                              <TableHead className="text-right">Actions</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          {mounted && (
+                            <DragDropContext onDragEnd={(result) => handleDragEndBatches(result, group.course.id)}>
+                              <Droppable droppableId={`batches-${group.course.id}`}>
+                                {(provided) => (
+                                  <TableBody {...provided.droppableProps} ref={provided.innerRef}>
+                                    {group.batches.map((batch, index) => (
+                                      <Draggable key={batch.id.toString()} draggableId={batch.id.toString()} index={index}>
+                                        {(provided) => (
+                                          <TableRow 
+                                            ref={provided.innerRef} 
+                                            {...provided.draggableProps} 
+                                            className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 bg-background"
+                                          >
+                                            <TableCell>
+                                              <div {...provided.dragHandleProps} className="cursor-grab p-2 hover:bg-slate-100 rounded-md inline-flex">
+                                                <GripVertical className="h-4 w-4 text-slate-400" />
+                                              </div>
+                                            </TableCell>
+                                            <TableCell className="font-semibold text-slate-800 dark:text-slate-200 py-4">
+                                              <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-950/30 flex items-center justify-center text-blue-500">
+                                                  <Layers className="w-4 h-4" />
+                                                </div>
+                                                {batch.name}
+                                              </div>
+                                            </TableCell>
+                                            <TableCell className="font-medium text-slate-600 dark:text-slate-400">
+                                              <div className="flex flex-col gap-1">
+                                                <span>
+                                                  {batch.start_time ? (
+                                                    `${formatTimeBengali(batch.start_time)} - ${formatTimeBengali(batch.end_time)}`
+                                                  ) : "Not Set"}
+                                                </span>
+                                                {batch.class_days && batch.class_days.length > 0 && (
+                                                  <span className="text-xs text-muted-foreground font-normal">
+                                                    {batch.class_days.map(d => translateDayToBengali(d)).join(", ")}
+                                                  </span>
+                                                )}
+                                              </div>
+                                            </TableCell>
+                                            <TableCell>{batch.max_students ? `${batch.max_students} Students` : "Not Set"}</TableCell>
+                                            <TableCell>
+                                              <Badge 
+                                                variant="outline"
+                                                className={`cursor-pointer transition-colors shadow-sm ${
+                                                  batch.status === "active" 
+                                                    ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 hover:bg-emerald-500/20 dark:text-emerald-400" 
+                                                    : "bg-slate-500/10 text-slate-600 border-slate-500/20 hover:bg-slate-500/20 dark:text-slate-400"
+                                                }`}
+                                              >
+                                                {batch.status === "active" ? "Active" : "Inactive"}
+                                              </Badge>
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                              <DropdownMenu>
+                                                <DropdownMenuTrigger className="h-8 w-8 p-0 flex items-center justify-center rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-muted-foreground">
   <span className="sr-only">Open menu</span>
   <MoreHorizontal className="h-4 w-4" />
 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem onClick={() => handleToggleStatus(batch.id, batch.status, "batches")}>
-                                    {batch.status === "active" ? <XCircle className="mr-2 h-4 w-4 text-red-500" /> : <CheckCircle className="mr-2 h-4 w-4 text-green-600" />}
-                                    <span>{batch.status === "active" ? "Deactivate" : "Activate"}</span>
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => {
-                                    setSmsTargetType("batch");
-                                    setSmsTargetId(batch.id);
-                                    setSmsTargetName(batch.name);
-                                    setIsSmsOpen(true);
-                                  }}>
-                                    <MessageSquare className="mr-2 h-4 w-4 text-blue-600" />
-                                    <span>Send SMS</span>
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => handleEditBatch(batch)}>
-                                    <Pencil className="mr-2 h-4 w-4" />
-                                    <span>Edit</span>
-                                  </DropdownMenuItem>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem 
-                                    onClick={() => handleDelete(batch.id, "batches")}
-                                    className="text-destructive focus:text-destructive"
-                                  >
-                                    <Trash2 className="mr-2 h-4 w-4" />
-                                    <span>Delete</span>
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                        {batches.length === 0 && (
-                          <TableRow>
-                            <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">
-                              <div className="flex flex-col items-center justify-center gap-2">
-                                <Layers className="w-8 h-8 text-slate-300" />
-                                <p>No batches found. Add your first batch to a course.</p>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        )}
-                      </TableBody>
-                    </Table>
-                  </div>
-                  {batches.length > 0 && renderPagination()}
-                </>
+                                                <DropdownMenuContent align="end">
+                                                  <DropdownMenuItem onClick={() => handleToggleStatus(batch.id, batch.status, "batches")}>
+                                                    {batch.status === "active" ? <XCircle className="mr-2 h-4 w-4 text-red-500" /> : <CheckCircle className="mr-2 h-4 w-4 text-green-600" />}
+                                                    <span>{batch.status === "active" ? "Deactivate" : "Activate"}</span>
+                                                  </DropdownMenuItem>
+                                                  <DropdownMenuItem onClick={() => {
+                                                    setSmsTargetType("batch");
+                                                    setSmsTargetId(batch.id);
+                                                    setSmsTargetName(batch.name);
+                                                    setIsSmsOpen(true);
+                                                  }}>
+                                                    <MessageSquare className="mr-2 h-4 w-4 text-blue-600" />
+                                                    <span>Send SMS</span>
+                                                  </DropdownMenuItem>
+                                                  <DropdownMenuItem onClick={() => handleEditBatch(batch)}>
+                                                    <Pencil className="mr-2 h-4 w-4" />
+                                                    <span>Edit</span>
+                                                  </DropdownMenuItem>
+                                                  <DropdownMenuSeparator />
+                                                  <DropdownMenuItem 
+                                                    onClick={() => handleDelete(batch.id, "batches")}
+                                                    className="text-destructive focus:text-destructive"
+                                                  >
+                                                    <Trash2 className="mr-2 h-4 w-4" />
+                                                    <span>Delete</span>
+                                                  </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                              </DropdownMenu>
+                                            </TableCell>
+                                          </TableRow>
+                                        )}
+                                      </Draggable>
+                                    ))}
+                                    {provided.placeholder}
+                                  </TableBody>
+                                )}
+                              </Droppable>
+                            </DragDropContext>
+                          )}
+                        </Table>
+                      </div>
+                    </div>
+                  ))}
+                  {groupedBatches.length === 0 && (
+                    <div className="text-center py-10 text-muted-foreground border rounded-md">
+                      <div className="flex flex-col items-center justify-center gap-2">
+                        <Layers className="w-8 h-8 text-slate-300" />
+                        <p>No batches found. Add your first batch to a course.</p>
+                      </div>
+                    </div>
+                  )}
+                  {groupedBatches.length > 0 && renderPagination()}
+                </div>
               )}
             </div>
           )}

@@ -72,6 +72,7 @@ const sidebarLinks: SidebarLink[] = [
   { name: "Study Material", href: "/admin/materials", icon: ClipboardList, perm: "materials" },
   { name: "Notice", href: "/admin/content", icon: Bell, perm: "content" },
   { name: "Online Exam", href: "/admin/exams", icon: FileText, perm: "exams" },
+  { name: "Question Bank", href: "/admin/question-bank", icon: Database, perm: "exams" },
   { name: "Video Courses", href: "/admin/video-courses", icon: Video, perm: "courses" },
   { name: "Assistant Team", href: "/admin/assistants", icon: UserCog, perm: "assistants" },
   { name: "SMS Logs", href: "/admin/sms", icon: MessageSquare, perm: "sms" },

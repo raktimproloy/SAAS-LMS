@@ -62,7 +62,7 @@ const features = [
 
 export function FeaturesSection() {
   return (
-    <section className="py-24 px-4 sm:px-6 lg:px-8 bg-background relative overflow-hidden">
+    <section className="py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
 
       {/* Decorative Gradients */}
       <div className="absolute top-1/4 left-0 w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[120px] pointer-events-none" />

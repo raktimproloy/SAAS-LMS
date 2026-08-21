@@ -19,7 +19,7 @@ export function NoticeBoardSection({ notices }: NoticeBoardSectionProps) {
   const displayNotices = notices && notices.length > 0 ? notices : fallbackNotices as any;
 
   return (
-    <section className="py-16 px-4 sm:px-6 lg:px-8 bg-background relative overflow-hidden">
+    <section className="py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
       <div className="max-w-7xl mx-auto relative z-10">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Pencil, Trash2, Megaphone, Layout, Settings, Image as ImageIcon, MoreHorizontal } from "lucide-react";
+import { Plus, Pencil, Trash2, Megaphone, Layout, Settings, Image as ImageIcon, MoreHorizontal, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -45,24 +45,17 @@ interface Notice {
 }
 
 export default function ContentManagementPage() {
-  const [activeTab, setActiveTab] = useState("notices");
+  const [activeTab, setActiveTab] = useState("hero");
   
   // Data States
-  const [notices, setNotices] = useState<Notice[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Notice Form states
-  const [isNoticeDialogOpen, setIsNoticeDialogOpen] = useState(false);
-  const [noticeTitle, setNoticeTitle] = useState("");
-  const [noticeContent, setNoticeContent] = useState("");
-  const [noticeTarget, setNoticeTarget] = useState("all");
-  const [noticeType, setNoticeType] = useState("general");
-  const [isPinned, setIsPinned] = useState(false);
-
-  // Hero Form states
-  const [heroDesc, setHeroDesc] = useState("");
-  const [heroCtaText, setHeroCtaText] = useState("");
-  const [heroCtaLink, setHeroCtaLink] = useState("");
+  // Hero / Teacher Form states
+  const [teacherName, setTeacherName] = useState("");
+  const [teacherBio, setTeacherBio] = useState("");
+  const [teacherQualifications, setTeacherQualifications] = useState("");
+  const [teacherPhoto, setTeacherPhoto] = useState("");
+  const [isUploadingHero, setIsUploadingHero] = useState(false);
 
   // Payment Types states
   const [paymentTypes, setPaymentTypes] = useState<any[]>([]);
@@ -72,19 +65,18 @@ export default function ContentManagementPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [notRes, heroRes, ptRes] = await Promise.all([
-        fetch("/api/admin/content/notices"),
+      const [heroRes, ptRes] = await Promise.all([
         fetch("/api/admin/content/hero"),
         fetch("/api/admin/settings/payment-types")
       ]);
       
-      if (notRes.ok) setNotices(await notRes.json());
       if (heroRes.ok) {
         const heroData = await heroRes.json();
         if (heroData) {
-          setHeroDesc(heroData.description || "");
-          setHeroCtaText(heroData.cta_text || "");
-          setHeroCtaLink(heroData.cta_link || "");
+          setTeacherName(heroData.name || "");
+          setTeacherBio(heroData.bio || "");
+          setTeacherQualifications(heroData.qualifications || "");
+          setTeacherPhoto(heroData.photo || "");
         }
       }
       if (ptRes.ok) setPaymentTypes(await ptRes.json());
@@ -99,31 +91,7 @@ export default function ContentManagementPage() {
     fetchData();
   }, []);
 
-  const handleNoticeSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const res = await fetch("/api/admin/content/notices", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: noticeTitle,
-          content: noticeContent,
-          target_type: noticeTarget,
-          type: noticeType,
-          is_pinned: isPinned
-        }),
-      });
-      if (res.ok) {
-        setIsNoticeDialogOpen(false);
-        setNoticeTitle("");
-        setNoticeContent("");
-        setIsPinned(false);
-        fetchData();
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  };
+
 
   const handleHeroSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -132,14 +100,42 @@ export default function ContentManagementPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          description: heroDesc,
-          cta_text: heroCtaText,
-          cta_link: heroCtaLink
+          name: teacherName,
+          bio: teacherBio,
+          qualifications: teacherQualifications,
+          photo: teacherPhoto
         }),
       });
       if (res.ok) alert("Hero banner updated successfully!");
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const handleHeroFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingHero(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      
+      const uploadRes = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const uploadData = await uploadRes.json();
+      
+      if (!uploadRes.ok) throw new Error(uploadData.error || "Failed to upload file");
+      
+      setTeacherPhoto(uploadData.url);
+    } catch (err: any) {
+      alert(err.message || "An error occurred during upload");
+    } finally {
+      setIsUploadingHero(false);
+      e.target.value = '';
     }
   };
 
@@ -194,16 +190,7 @@ export default function ContentManagementPage() {
 
         {/* Custom Tab Switcher */}
         <div className="flex p-1 bg-slate-200/50 dark:bg-slate-800/50 rounded-lg max-w-xl w-full flex-wrap md:flex-nowrap gap-1 overflow-x-auto hide-scrollbar">
-          <button
-            onClick={() => setActiveTab("notices")}
-            className={cn(
-              "flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 whitespace-nowrap",
-              activeTab === "notices" ? "bg-white dark:bg-slate-950 shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            <Megaphone className="w-4 h-4 hidden sm:block" />
-            Notices
-          </button>
+
           <button
             onClick={() => setActiveTab("hero")}
             className={cn(
@@ -252,181 +239,67 @@ export default function ContentManagementPage() {
         <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b pb-4 border-slate-100 dark:border-slate-800 gap-4">
           <div>
             <CardTitle className="text-xl text-slate-800 dark:text-slate-100">
-              {activeTab === "notices" && "All Notices"}
               {activeTab === "hero" && "Homepage Hero Section"}
               {activeTab === "site-settings" && "Site Configuration"}
               {activeTab === "gallery" && "Gallery"}
               {activeTab === "payment-types" && "Payment Types"}
             </CardTitle>
             <CardDescription className="mt-1">
-              {activeTab === "notices" && "Manage your notice board."}
               {activeTab === "hero" && "Update the main banner shown to public visitors."}
               {activeTab === "site-settings" && "Manage contact information, social links, and map location."}
               {activeTab === "gallery" && "Manage public gallery."}
               {activeTab === "payment-types" && "Manage payment types for financial transactions."}
             </CardDescription>
           </div>
-          
-          {activeTab === "notices" && (
-            <Dialog open={isNoticeDialogOpen} onOpenChange={setIsNoticeDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="gap-2 bg-primary hover:bg-primary/90 shadow-md">
-                <Plus className="h-4 w-4" />
-                Add Notice
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px]">
-              <DialogHeader>
-                <DialogTitle>Publish Notice</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleNoticeSubmit} className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label>Title</Label>
-                  <Input value={noticeTitle} onChange={(e) => setNoticeTitle(e.target.value)} required />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label>Content</Label>
-                  <Textarea rows={4} value={noticeContent} onChange={(e) => setNoticeContent(e.target.value)} required />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Target Audience</Label>
-                    <select 
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                      value={noticeTarget} 
-                      onChange={(e) => setNoticeTarget(e.target.value)}
-                    >
-                      <option value="all">Everyone (Public)</option>
-                      <option value="segment">Specific Segment</option>
-                      <option value="batch">Specific Batch</option>
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Notice Type</Label>
-                    <select 
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                      value={noticeType} 
-                      onChange={(e) => setNoticeType(e.target.value)}
-                    >
-                      <option value="general">General Info</option>
-                      <option value="exam">Exam Alert</option>
-                      <option value="result">Result Publication</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 pt-2">
-                  <input type="checkbox" checked={isPinned} onChange={(e) => setIsPinned(e.target.checked)} id="pin" />
-                  <Label htmlFor="pin">Pin this notice to top</Label>
-                </div>
-                
-                <div className="flex justify-end pt-4">
-                  <Button type="submit">Publish Notice</Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
-          )}
         </CardHeader>
-
         <CardContent className="p-0">
-          {activeTab === "notices" && (
-            <div className="p-6">
-              
-              {loading ? (
-                <p className="text-sm text-muted-foreground">Loading notices...</p>
-              ) : (
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Title</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead>Target</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {notices.map((notice) => (
-                        <TableRow key={notice.id}>
-                          <TableCell className="font-medium">
-                            {notice.is_pinned && <Badge className="mr-2" variant="destructive">Pinned</Badge>}
-                            {notice.title}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant="outline">{notice.type}</Badge>
-                          </TableCell>
-                          <TableCell className="capitalize">{notice.target_type}</TableCell>
-                          <TableCell>{new Date(notice.created_at).toLocaleDateString()}</TableCell>
-                          <TableCell className="text-right">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger className="h-8 w-8 p-0 flex items-center justify-center rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-muted-foreground">
-  <span className="sr-only">Open menu</span>
-  <MoreHorizontal className="h-4 w-4" />
-</DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem>
-                                  <Pencil className="mr-2 h-4 w-4" />
-                                  <span>Edit</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem className="text-destructive focus:text-destructive">
-                                  <Trash2 className="mr-2 h-4 w-4" />
-                                  <span>Delete</span>
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                      {notices.length === 0 && (
-                        <TableRow>
-                          <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                            No notices found.
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-            
-            </div>
-          )}
-
           {activeTab === "hero" && (
             <div className="p-6 max-w-2xl">
               
               <form onSubmit={handleHeroSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label>Main Description Text</Label>
-                  <Textarea 
-                    rows={4} 
-                    value={heroDesc} 
-                    onChange={(e) => setHeroDesc(e.target.value)} 
-                    placeholder="e.g. Join the best biology coaching in Bangladesh..."
+                  <Label>Teacher Name</Label>
+                  <Input 
+                    value={teacherName} 
+                    onChange={(e) => setTeacherName(e.target.value)} 
+                    placeholder="e.g. প্রভাষক মোঃ আব্দুল্লাহ" 
                   />
                 </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>CTA Button Text</Label>
-                    <Input 
-                      value={heroCtaText} 
-                      onChange={(e) => setHeroCtaText(e.target.value)} 
-                      placeholder="e.g. Enroll Now" 
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>CTA Button Link</Label>
-                    <Input 
-                      value={heroCtaLink} 
-                      onChange={(e) => setHeroCtaLink(e.target.value)} 
-                      placeholder="e.g. /register" 
-                    />
+                <div className="space-y-2">
+                  <Label>Qualifications</Label>
+                  <Input 
+                    value={teacherQualifications} 
+                    onChange={(e) => setTeacherQualifications(e.target.value)} 
+                    placeholder="e.g. বি.এ (সম্মান), এম.এ (বাংলা)" 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Bio / Description</Label>
+                  <Textarea 
+                    rows={4} 
+                    value={teacherBio} 
+                    onChange={(e) => setTeacherBio(e.target.value)} 
+                    placeholder="e.g. বিগত ১০ বছর ধরে..."
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Teacher Photo URL</Label>
+                  <Input 
+                    value={teacherPhoto} 
+                    onChange={(e) => setTeacherPhoto(e.target.value)} 
+                    placeholder="https://..." 
+                  />
+                  <div className="mt-2 flex items-center gap-4">
+                    <Label className="cursor-pointer bg-secondary text-secondary-foreground hover:bg-secondary/80 h-9 px-4 py-2 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors">
+                      {isUploadingHero ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : "Upload Image"}
+                      <input type="file" className="hidden" accept="image/*" onChange={handleHeroFileUpload} disabled={isUploadingHero} />
+                    </Label>
+                    {teacherPhoto && (
+                      <div className="h-10 w-10 rounded-full overflow-hidden border">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={teacherPhoto} alt="Teacher" className="w-full h-full object-cover" />
+                      </div>
+                    )}
                   </div>
                 </div>
 

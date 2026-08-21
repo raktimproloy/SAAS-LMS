@@ -1,7 +1,11 @@
+import type { MotifId } from "@/components/public/motif/types";
+
 export const siteConfig = {
   instituteName: "Institute Web",
   tagline: "Your Gateway to Medical Success",
   logo: "/assets/logo.png",
+  /** Public-page decorative motif — switch to "medical" for doctor theme */
+  motif: "bangla" as MotifId,
   theme: {
     primary: "#0D9488",
     secondary: "#7C3AED",

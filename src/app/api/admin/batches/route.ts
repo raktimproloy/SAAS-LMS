@@ -22,7 +22,10 @@ export async function GET() {
       include: {
         course: true
       },
-      orderBy: { created_at: "desc" },
+      orderBy: [
+        { sort_order: "asc" },
+        { created_at: "desc" }
+      ],
     });
     return NextResponse.json(batches);
   } catch {

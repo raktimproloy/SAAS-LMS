@@ -9,7 +9,7 @@ export function ContactSection() {
   const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destination)}`;
 
   return (
-    <section className="py-16 px-4 sm:px-6 lg:px-8 bg-background relative overflow-hidden">
+    <section className="py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
 
       {/* Decorative Elements */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
