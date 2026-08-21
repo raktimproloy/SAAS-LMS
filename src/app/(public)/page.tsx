@@ -3,6 +3,7 @@ import prisma from "@/lib/db";
 import { HeroTeacherSection } from "@/components/public/home/HeroTeacherSection";
 import { PopularCoursesSection } from "@/components/public/home/PopularCoursesSection";
 import { GallerySection } from "@/components/public/home/GallerySection";
+import { DemoClassSection } from "@/components/public/home/DemoClassSection";
 import { NoticeBoardSection } from "@/components/public/home/NoticeBoardSection";
 import { VideoCourseSection } from "@/components/public/home/VideoCourseSection";
 import { ContactSection } from "@/components/public/home/ContactSection";
@@ -12,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export const revalidate = 60; // Revalidate every minute
 
 async function fetchHomeData() {
-  const [teacher, notices, courses, videoCourses, gallery] = await Promise.all([
+  const [teacher, notices, courses, videoCourses, gallery, demoVideos, demoSectionTitle] = await Promise.all([
     prisma.teacher.findFirst({
       orderBy: { created_at: 'asc' }
     }),
@@ -47,14 +48,24 @@ async function fetchHomeData() {
     prisma.videoCourse.findMany({
       take: 4,
       orderBy: { created_at: 'desc' },
-      where: { status: 'PUBLISHED' }
+      where: { is_public: true, status: 'active' }
     }),
     prisma.gallery.findMany({
       orderBy: { sort_order: 'asc' }
+    }),
+    prisma.demoVideo.findMany({
+      where: { is_active: true },
+      orderBy: [
+        { sort_order: 'asc' },
+        { created_at: 'desc' }
+      ]
+    }),
+    prisma.siteSetting.findUnique({
+      where: { setting_key: 'demo_class_section_title' }
     })
   ]);
 
-  return { teacher, notices, courses, videoCourses, gallery };
+  return { teacher, notices, courses, videoCourses, gallery, demoVideos, demoSectionTitle: demoSectionTitle?.setting_value };
 }
 
 export default async function HomePage() {
@@ -73,6 +84,10 @@ export default async function HomePage() {
 
         <Suspense fallback={<SectionSkeleton />}>
           <GallerySection initialImages={data.gallery} />
+        </Suspense>
+
+        <Suspense fallback={<SectionSkeleton />}>
+          <DemoClassSection videos={data.demoVideos} sectionTitle={data.demoSectionTitle} />
         </Suspense>
 
         <Suspense fallback={<SectionSkeleton />}>

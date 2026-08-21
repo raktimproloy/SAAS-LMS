@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { VideoCourseCard } from "@/components/admin/video-courses/VideoCourseCard";
 import { VideoCourseDialog } from "@/components/admin/video-courses/VideoCourseDialog";
+import { DemoClassesTab } from "@/components/admin/video-courses/DemoClassesTab";
+import { cn } from "@/lib/utils";
 
 type VideoCourse = {
   id: number;
@@ -21,6 +23,7 @@ type VideoCourse = {
 };
 
 export default function VideoCoursesPage() {
+  const [activeTab, setActiveTab] = useState("courses");
   const [videoCourses, setVideoCourses] = useState<VideoCourse[]>([]);
   const [courses, setCourses] = useState<{ id: number; title: string }[]>([]);
   const [batches, setBatches] = useState<{ id: number; name: string; course_id: number }[]>([]);
@@ -116,29 +119,52 @@ export default function VideoCoursesPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
             <Video className="h-8 w-8 text-primary" />
-            Video Courses
+            Video Content
           </h1>
           <p className="text-muted-foreground mt-1">
-            Manage your video library, assign to courses/batches, and control pricing.
+            Manage your video library, assign to courses, and add demo classes for the homepage.
           </p>
         </div>
-        <Button onClick={openAddDialog} className="gap-2">
-          <Plus className="h-4 w-4" />
-          Add Video Course
-        </Button>
       </div>
 
-      <div className="flex items-center justify-between">
-        <div className="relative w-full max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input 
-            placeholder="Search by title or course..." 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9"
-          />
-        </div>
+      <div className="flex p-1 bg-slate-200/50 dark:bg-slate-800/50 rounded-lg max-w-sm w-full gap-1 mb-6">
+        <button
+          onClick={() => setActiveTab("courses")}
+          className={cn(
+            "flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200",
+            activeTab === "courses" ? "bg-white dark:bg-slate-950 shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          Video Courses
+        </button>
+        <button
+          onClick={() => setActiveTab("demo")}
+          className={cn(
+            "flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200",
+            activeTab === "demo" ? "bg-white dark:bg-slate-950 shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          Demo Classes
+        </button>
       </div>
+        
+      {activeTab === "courses" && (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div className="relative w-full max-w-sm">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input 
+                placeholder="Search by title or course..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            <Button onClick={openAddDialog} className="gap-2">
+              <Plus className="h-4 w-4" />
+              Add Video Course
+            </Button>
+          </div>
 
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-pulse">
@@ -174,6 +200,12 @@ export default function VideoCoursesPage() {
         batches={batches}
         onSaved={fetchData}
       />
+      </div>
+      )}
+
+      {activeTab === "demo" && (
+        <DemoClassesTab />
+      )}
     </div>
   );
 }

@@ -97,7 +97,11 @@ export function VideoCourseSection({ videoCourses }: VideoCourseSectionProps) {
   const [swiperInstance, setSwiperInstance] = useState<SwiperClass | null>(null);
   const [activeCourseIndex, setActiveCourseIndex] = useState(0);
 
-  const displayVideoCourses = videoCourses && videoCourses.length > 0 ? videoCourses.map((c, i) => ({
+  if (!videoCourses || videoCourses.length === 0) {
+    return null;
+  }
+
+  const displayVideoCourses = videoCourses.map((c, i) => ({
     id: c.id,
     bgImage: c.thumbnail || "https://images.unsplash.com/photo-1614036634955-ae5e90f9cb9c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
     theme: ["purple", "emerald", "blue", "orange"][i % 4],
@@ -114,7 +118,7 @@ export function VideoCourseSection({ videoCourses }: VideoCourseSectionProps) {
       { label: "20+", desc: "Assignments" },
       { label: "10+", desc: "Exams" }
     ]
-  })) : fallbackVideoCourses;
+  }));
 
   const isLoopable = displayVideoCourses.length > 2;
   const displayCourses = isLoopable
@@ -145,11 +149,7 @@ export function VideoCourseSection({ videoCourses }: VideoCourseSectionProps) {
           transition={{ duration: 0.6 }}
           className="text-center"
         >
-          <span className="text-primary font-bold text-sm uppercase tracking-wider mb-2 block">Video Library</span>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-foreground mb-4">সকল রেকর্ডেড ক্লাস</h2>
-          <p className="text-foreground max-w-xl mx-auto text-base">
-            যেকোনো সময়, যেকোনো জায়গা থেকে সেরা শিক্ষকদের অফলাইন রেকর্ডেড ক্লাসের মাধ্যমে নিজের প্রস্তুতি সম্পন্ন করুন।
-          </p>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-foreground">সকল রেকর্ডেড ক্লাস</h2>
         </motion.div>
       </div>
 
