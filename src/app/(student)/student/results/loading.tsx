@@ -52,8 +52,9 @@ export default function ResultsLoading() {
       {/* Grid Layout Skeleton (Default fallback for SSR loading) */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
         {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="bg-card/90 dark:bg-card/40 backdrop-blur-2xl border border-border rounded-3xl p-6 md:p-8 flex flex-col shadow-xl overflow-hidden">
-            <div className="flex justify-between items-start gap-4 border-b border-border/60 mb-4 pb-4">
+          <div key={i} className="relative bg-card/90 dark:bg-card/40 backdrop-blur-2xl border border-border rounded-3xl p-6 md:p-8 flex flex-col shadow-xl overflow-hidden">
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-muted rounded-full blur-2xl pointer-events-none" />
+            <div className="relative z-10 flex justify-between items-start gap-4 border-b border-border/60 mb-4 pb-4">
               <div className="flex-1 min-w-0">
                 <Skeleton className="h-6 w-24 mb-3 bg-muted rounded-full" />
                 <Skeleton className="h-7 w-3/4 bg-muted rounded-md" />
@@ -66,7 +67,7 @@ export default function ResultsLoading() {
                 </div>
               </div>
             </div>
-            <div className="flex items-center justify-between mb-8 mt-2">
+            <div className="relative z-10 flex items-center justify-between mb-8 mt-2">
               <div className="flex flex-col">
                 <Skeleton className="h-3 w-12 mb-2 bg-muted/50 rounded-md" />
                 <Skeleton className="h-10 w-24 bg-muted rounded-xl" />
@@ -82,7 +83,7 @@ export default function ResultsLoading() {
                 </div>
               </div>
             </div>
-            <div className="mt-auto pt-4 border-t border-border/60">
+            <div className="relative z-10 mt-auto pt-4 border-t border-border/60">
               <Skeleton className="w-full h-12 bg-muted rounded-xl" />
             </div>
           </div>

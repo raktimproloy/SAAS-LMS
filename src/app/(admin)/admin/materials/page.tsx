@@ -38,6 +38,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Types
 interface Course {
@@ -279,10 +280,10 @@ export default function MaterialsPage() {
   );
 
   return (
-    <div className="flex flex-col gap-8 pb-10">
+    <div className="flex flex-col gap-8 pb-10" data-aos="fade-up">
       
       {/* Header Area */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6" data-aos="fade-down">
         <div>
           <h1 className="text-3xl font-bold tracking-tight mb-2">Study Materials</h1>
           <p className="text-muted-foreground">Manage your institution&apos;s PDFs, Lecture Notes, and Books.</p>
@@ -290,7 +291,7 @@ export default function MaterialsPage() {
       </div>
 
       {/* Main Content Area */}
-      <Card className="border-none shadow-xl shadow-slate-200/40 dark:shadow-none dark:bg-slate-900/50 overflow-hidden">
+      <Card className="border-none shadow-xl shadow-slate-200/40 dark:shadow-none dark:bg-slate-900/50 overflow-hidden" data-aos="fade-up" data-aos-delay="100">
         <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b pb-4 border-slate-100 dark:border-slate-800">
           <div>
             <CardTitle className="text-xl text-slate-800 dark:text-slate-100">
@@ -298,11 +299,11 @@ export default function MaterialsPage() {
             </CardTitle>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <Button onClick={handleOpenDialog} className="gap-2 bg-primary hover:bg-primary/90 shadow-md">
+            <Button onClick={handleOpenDialog} className="gap-2 bg-primary hover:bg-primary/90 shadow-md w-full sm:w-auto">
               <Plus className="h-4 w-4" />
               Add New Material
             </Button>
-            <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+            <DialogContent className="sm:max-w-[600px] w-[95vw] max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle className="text-xl">
                   {editMode ? "Edit" : "Add New"} Material
@@ -462,34 +463,61 @@ export default function MaterialsPage() {
           </Dialog>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="p-6">
-            {loading ? (
-              <div className="flex justify-center py-10">
-                <div className="animate-pulse flex space-x-4">
-                  <div className="h-12 w-12 bg-slate-200 dark:bg-slate-700 rounded-full"></div>
-                  <div className="space-y-3">
-                    <div className="h-4 w-[250px] bg-slate-200 dark:bg-slate-700 rounded"></div>
-                    <div className="h-4 w-[200px] bg-slate-200 dark:bg-slate-700 rounded"></div>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <>
-                <div className="overflow-x-auto rounded-md border border-slate-100 dark:border-slate-800">
-                  <Table>
-                    <TableHeader className="bg-slate-50/50 dark:bg-slate-800/50">
-                      <TableRow>
-                        <TableHead className="py-4">Material Details</TableHead>
-                        <TableHead>Target</TableHead>
-                        <TableHead>Access</TableHead>
-                        <TableHead>Link</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
+          <div className="p-4 sm:p-6">
+            <div className="overflow-x-auto rounded-md border border-slate-100 dark:border-slate-800">
+              <Table>
+                <TableHeader className="bg-slate-50/50 dark:bg-slate-800/50">
+                  <TableRow>
+                    <TableHead className="py-4">Material Details</TableHead>
+                    <TableHead>Target</TableHead>
+                    <TableHead>Access</TableHead>
+                    <TableHead>Link</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {loading ? (
+                    Array.from({ length: 5 }).map((_, i) => (
+                      <TableRow key={i}>
+                        <TableCell className="py-4">
+                          <div className="flex items-center gap-3">
+                            <Skeleton className="w-10 h-10 rounded-md shrink-0" />
+                            <div className="space-y-2">
+                              <Skeleton className="h-4 w-32" />
+                              <Skeleton className="h-3 w-16" />
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col gap-1">
+                            <Skeleton className="h-5 w-24 rounded-full" />
+                            <Skeleton className="h-3 w-16" />
+                          </div>
+                        </TableCell>
+                        <TableCell><Skeleton className="h-5 w-16 rounded-full" /></TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <Skeleton className="h-4 w-12" />
+                            <Skeleton className="h-5 w-16 rounded" />
+                          </div>
+                        </TableCell>
+                        <TableCell><Skeleton className="h-5 w-20 rounded-full" /></TableCell>
+                        <TableCell className="text-right"><Skeleton className="h-8 w-8 rounded-md ml-auto" /></TableCell>
                       </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {notes.map((note) => (
-                        <TableRow key={note.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20">
+                    ))
+                  ) : notes.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">
+                        <div className="flex flex-col items-center justify-center gap-2">
+                          <FileText className="w-8 h-8 text-slate-300" />
+                          <p>No study materials found. Add your first material to get started.</p>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    notes.map((note) => (
+                      <TableRow key={note.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20">
                           <TableCell className="py-4">
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 rounded-md bg-indigo-50 dark:bg-indigo-950/30 flex items-center justify-center text-indigo-500 shrink-0">
@@ -597,23 +625,11 @@ export default function MaterialsPage() {
                             </DropdownMenu>
                           </TableCell>
                         </TableRow>
-                      ))}
-                      {notes.length === 0 && (
-                        <TableRow>
-                          <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">
-                            <div className="flex flex-col items-center justify-center gap-2">
-                              <FileText className="w-8 h-8 text-slate-300" />
-                              <p>No study materials found. Add your first material to get started.</p>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-                {notes.length > 0 && renderPagination()}
-              </>
-            )}
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+              {notes.length > 0 && renderPagination()}
           </div>
         </CardContent>
       </Card>

@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import AOS from "aos";
-import "aos/dist/aos.css";
 import { Building2, Target, History, Trophy, Users, GraduationCap, Quote } from "lucide-react";
 import Image from "next/image";
 
@@ -20,9 +18,6 @@ const stats = [
 ];
 
 export default function AboutPage() {
-  useEffect(() => {
-    AOS.init({ duration: 700, easing: "ease-out-cubic", once: true, offset: 50 });
-  }, []);
 
   return (
     <div>

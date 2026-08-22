@@ -33,6 +33,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Types
 interface Notice {
@@ -181,12 +182,12 @@ export default function ContentManagementPage() {
   };
 
   return (
-    <div className="flex flex-col gap-8 pb-10">
+    <div className="flex flex-col gap-8 pb-10 p-4 sm:p-6" data-aos="fade-up">
       {/* Header & Tabs Area */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6" data-aos="fade-down">
         <div>
           <h1 className="text-3xl font-bold tracking-tight mb-2">Website Content</h1>
-          <p className="text-muted-foreground">Manage notices, banners, and public pages.</p>
+          <p className="text-muted-foreground text-sm sm:text-base">Manage notices, banners, and public pages.</p>
         </div>
 
         {/* Custom Tab Switcher */}
@@ -236,7 +237,7 @@ export default function ContentManagementPage() {
       </div>
 
       {/* Main Content Area */}
-      <Card className="border-none shadow-xl shadow-slate-200/40 dark:shadow-none dark:bg-slate-900/50 overflow-hidden">
+      <Card className="border-none shadow-xl shadow-slate-200/40 dark:shadow-none dark:bg-slate-900/50 overflow-hidden" data-aos="fade-up" data-aos-delay="100">
         <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b pb-4 border-slate-100 dark:border-slate-800 gap-4">
           <div>
             <CardTitle className="text-xl text-slate-800 dark:text-slate-100">
@@ -342,7 +343,7 @@ export default function ContentManagementPage() {
                 </Button>
               </form>
 
-              <div className="rounded-lg border overflow-hidden">
+              <div className="rounded-lg border overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-slate-50/50 dark:bg-slate-900/50">
@@ -352,29 +353,38 @@ export default function ContentManagementPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {paymentTypes.map((pt) => (
-                      <TableRow key={pt.id}>
-                        <TableCell className="font-medium text-slate-900 dark:text-slate-100">{pt.name}</TableCell>
-                        <TableCell className="text-muted-foreground">{new Date(pt.created_at).toLocaleDateString()}</TableCell>
-                        <TableCell className="text-right">
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => handleDeletePaymentType(pt.id)}
-                            className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
-                          >
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            Delete
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                    {paymentTypes.length === 0 && (
+                    {loading ? (
+                      Array.from({ length: 3 }).map((_, i) => (
+                        <TableRow key={i}>
+                          <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                          <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                          <TableCell className="text-right"><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
+                        </TableRow>
+                      ))
+                    ) : paymentTypes.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={3} className="text-center py-8 text-muted-foreground">
                           No payment types found.
                         </TableCell>
                       </TableRow>
+                    ) : (
+                      paymentTypes.map((pt) => (
+                        <TableRow key={pt.id}>
+                          <TableCell className="font-medium text-slate-900 dark:text-slate-100">{pt.name}</TableCell>
+                          <TableCell className="text-muted-foreground">{new Date(pt.created_at).toLocaleDateString()}</TableCell>
+                          <TableCell className="text-right">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => handleDeletePaymentType(pt.id)}
+                              className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Delete
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))
                     )}
                   </TableBody>
                 </Table>

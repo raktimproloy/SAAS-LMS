@@ -140,7 +140,7 @@ export function PopularCoursesSection({ courses }: PopularCoursesSectionProps) {
                   aria-expanded={isOpen}
                   className="w-full flex items-center gap-4 px-5 py-4 min-h-[56px] text-left hover:bg-muted/40 transition-colors"
                 >
-                  <span className="flex-1 min-w-0 font-semibold text-foreground text-base sm:text-lg truncate">
+                  <span className="flex-1 min-w-0 font-semibold text-foreground text-base sm:text-lg line-clamp-2 text-wrap">
                     {c.title}
                   </span>
                   {price}

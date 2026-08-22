@@ -78,23 +78,23 @@ export default async function HomePage() {
           <HeroTeacherSection teacher={data.teacher} />
         </Suspense>
 
-        <Suspense fallback={<SectionSkeleton />}>
+        <Suspense fallback={<PopularCoursesSkeleton />}>
           <PopularCoursesSection courses={data.courses} />
         </Suspense>
 
-        <Suspense fallback={<SectionSkeleton />}>
+        <Suspense fallback={<GallerySkeleton />}>
           <GallerySection initialImages={data.gallery} />
         </Suspense>
 
-        <Suspense fallback={<SectionSkeleton />}>
+        <Suspense fallback={<DemoClassSkeleton />}>
           <DemoClassSection videos={data.demoVideos} sectionTitle={data.demoSectionTitle} />
         </Suspense>
 
-        <Suspense fallback={<SectionSkeleton />}>
+        <Suspense fallback={<VideoCourseSkeleton />}>
           <VideoCourseSection videoCourses={data.videoCourses} />
         </Suspense>
 
-        <Suspense fallback={<SectionSkeleton />}>
+        <Suspense fallback={<NoticeBoardSkeleton />}>
           <NoticeBoardSection notices={data.notices} />
         </Suspense>
 
@@ -107,36 +107,120 @@ export default async function HomePage() {
 
 function HeroSkeleton() {
   return (
-    <div className="w-full min-h-[80vh] flex items-center pt-20 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-12">
-        <div className="space-y-6">
-          <Skeleton className="h-16 w-3/4 bg-primary/10" />
-          <Skeleton className="h-8 w-1/2 bg-primary/10" />
-          <Skeleton className="h-32 w-full bg-primary/10" />
-          <div className="flex gap-4">
-            <Skeleton className="h-12 w-32 bg-primary/10" />
-            <Skeleton className="h-12 w-32 bg-primary/10" />
+    <section className="relative min-h-[60vh] flex items-center pt-16 pb-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+          <div className="order-2 lg:order-1 flex justify-center">
+            <Skeleton className="w-full max-w-sm aspect-[4/5] rounded-3xl bg-primary/10" />
+          </div>
+          <div className="order-1 lg:order-2 space-y-5 flex flex-col items-center lg:items-start">
+            <Skeleton className="h-12 sm:h-14 w-3/4 bg-primary/10" />
+            <Skeleton className="h-6 sm:h-8 w-1/2 bg-primary/10" />
+            <div className="w-full space-y-2">
+              <Skeleton className="h-4 w-full bg-primary/10" />
+              <Skeleton className="h-4 w-[90%] bg-primary/10" />
+              <Skeleton className="h-4 w-[95%] bg-primary/10" />
+              <Skeleton className="h-4 w-[80%] bg-primary/10" />
+            </div>
+            <div className="flex flex-col sm:flex-row gap-4 pt-4 w-full sm:w-auto">
+              <Skeleton className="h-14 w-full sm:w-40 rounded-lg bg-primary/10" />
+              <Skeleton className="h-14 w-full sm:w-40 rounded-lg bg-primary/10" />
+            </div>
           </div>
         </div>
-        <div className="hidden lg:block">
-          <Skeleton className="w-full aspect-[4/5] rounded-3xl bg-primary/10" />
-        </div>
       </div>
-    </div>
+    </section>
   );
 }
 
-function SectionSkeleton() {
+function PopularCoursesSkeleton() {
   return (
-    <section className="py-24 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto space-y-12">
-        <div className="space-y-4">
-          <Skeleton className="h-12 w-64 bg-primary/10" />
-          <Skeleton className="h-6 w-96 bg-primary/10" />
+    <section className="py-12 px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="max-w-4xl mx-auto">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-6 gap-4">
+          <Skeleton className="h-8 sm:h-10 w-48 bg-primary/10" />
+          <Skeleton className="h-5 w-24 bg-primary/10" />
+        </div>
+        <div className="flex flex-col gap-3">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-[76px] sm:h-[56px] w-full rounded-xl bg-primary/10" />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function GallerySkeleton() {
+  return (
+    <section className="py-24 px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-16">
+          <Skeleton className="h-10 w-64 mx-auto mb-4 bg-primary/10" />
+          <Skeleton className="h-5 w-96 mx-auto bg-primary/10" />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <Skeleton key={i} className={`w-full rounded-2xl bg-primary/10 ${i % 2 === 0 ? 'h-64' : 'h-80'}`} />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function DemoClassSkeleton() {
+  return (
+    <section className="py-24 px-4 sm:px-6 lg:px-8 relative">
+      <div className="max-w-7xl mx-auto relative z-10">
+        <div className="text-center mb-12 sm:mb-16">
+          <Skeleton className="h-10 w-64 mx-auto bg-primary/10" />
+        </div>
+        <div className="px-4 sm:px-12 grid grid-cols-1 md:grid-cols-2 gap-8">
+          {[1, 2].map((i) => (
+            <Skeleton key={i} className="w-full aspect-video rounded-3xl bg-primary/10" />
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function VideoCourseSkeleton() {
+  return (
+    <section className="py-20 px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-16">
+          <Skeleton className="h-10 w-64 mx-auto mb-4 bg-primary/10" />
+          <Skeleton className="h-5 w-96 mx-auto bg-primary/10" />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="flex flex-col gap-4">
+              <Skeleton className="w-full aspect-video rounded-2xl bg-primary/10" />
+              <div className="space-y-2">
+                <Skeleton className="h-5 w-3/4 bg-primary/10" />
+                <Skeleton className="h-4 w-1/2 bg-primary/10" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function NoticeBoardSkeleton() {
+  return (
+    <section className="py-20 px-4 sm:px-6 lg:px-8 bg-muted/30">
+      <div className="max-w-5xl mx-auto">
+        <div className="flex items-center justify-between mb-8 sm:mb-12">
+          <Skeleton className="h-10 w-48 bg-primary/10" />
+          <Skeleton className="h-10 w-32 rounded-full bg-primary/10" />
+        </div>
+        <div className="grid gap-4 sm:gap-6">
           {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-80 w-full rounded-2xl bg-primary/10" />
+            <Skeleton key={i} className="h-24 w-full rounded-2xl bg-primary/10" />
           ))}
         </div>
       </div>

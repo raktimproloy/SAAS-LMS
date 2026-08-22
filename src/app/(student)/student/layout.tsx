@@ -2,8 +2,6 @@
 
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
-import AOS from "aos";
-import "aos/dist/aos.css";
 import { StudentSidebar } from "@/components/student/StudentSidebar";
 import { StudentHeader } from "@/components/student/StudentHeader";
 import { StudentBottomNav } from "@/components/student/StudentBottomNav";
@@ -22,15 +20,6 @@ export default function StudentLayout({
 
   // Check if we are on the exam taking page
   const isTakeExamPage = pathname?.includes('/take');
-
-  useEffect(() => {
-    AOS.init({
-      duration: 600,
-      once: true,
-      easing: "ease-out-cubic",
-      offset: 20, // Trigger sooner when scrolling
-    });
-  }, []);
 
   return (
     <div className="student-portal flex min-h-screen bg-background relative text-foreground">

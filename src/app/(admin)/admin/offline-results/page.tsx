@@ -20,9 +20,10 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
-  DialogDescription
+  DialogDescription,
+  DialogFooter
 } from "@/components/ui/dialog";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Course {
   id: number;
@@ -109,27 +110,27 @@ export default function OfflineResultsPage() {
   });
 
   return (
-    <div className="flex flex-col gap-6 w-full pb-12">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="flex flex-col gap-6 w-full pb-12" data-aos="fade-up">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4" data-aos="fade-down">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Offline Exam Results</h1>
           <p className="text-muted-foreground mt-1">Manage and publish offline exam results for students.</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => window.print()}>
+        <div className="flex items-center gap-2 w-full md:w-auto">
+          <Button variant="outline" onClick={() => window.print()} className="flex-1 md:flex-none">
             <Printer className="h-4 w-4 mr-2" />
-            Print to PDF
+            Print
           </Button>
-          <Link href="/admin/offline-results/new">
-            <Button>
+          <Link href="/admin/offline-results/new" className="flex-1 md:flex-none">
+            <Button className="w-full">
               <Plus className="h-4 w-4 mr-2" />
-              Publish a Result
+              Publish
             </Button>
           </Link>
         </div>
       </div>
 
-      <Card>
+      <Card data-aos="fade-up" data-aos-delay="100">
         <CardHeader className="pb-3 border-b">
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
             <div className="flex items-center gap-2 w-full max-w-sm">
@@ -140,7 +141,7 @@ export default function OfflineResultsPage() {
                 className="w-full"
               />
             </div>
-            <div className="flex items-center gap-2 w-full md:w-auto">
+            <div className="flex flex-col sm:flex-row items-center gap-2 w-full md:w-auto">
               <select 
                 className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 value={selectedCourse}
@@ -182,11 +183,20 @@ export default function OfflineResultsPage() {
               </TableHeader>
               <TableBody>
                 {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                      Loading exams...
-                    </TableCell>
-                  </TableRow>
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <TableRow key={i}>
+                      <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                      <TableCell>
+                        <div className="space-y-2">
+                          <Skeleton className="h-4 w-24" />
+                          <Skeleton className="h-3 w-16" />
+                        </div>
+                      </TableCell>
+                      <TableCell><Skeleton className="h-4 w-12" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                      <TableCell className="text-right print:hidden"><Skeleton className="h-8 w-24 ml-auto" /></TableCell>
+                    </TableRow>
+                  ))
                 ) : filteredExams.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
@@ -242,7 +252,7 @@ export default function OfflineResultsPage() {
       </Card>
 
       <Dialog open={deleteExamId !== null} onOpenChange={(open) => !open && setDeleteExamId(null)}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[425px] w-[95vw]">
           <DialogHeader>
             <DialogTitle>Delete Result?</DialogTitle>
             <DialogDescription>

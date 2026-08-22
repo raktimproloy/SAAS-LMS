@@ -3,8 +3,6 @@
 import { useEffect, useState } from "react";
 import { BookOpen, Users, Star, ArrowRight, Sparkles, GraduationCap, ChevronDown, Clock, Calendar } from "lucide-react";
 import Link from "next/link";
-import AOS from "aos";
-import "aos/dist/aos.css";
 import { motion, AnimatePresence } from "framer-motion";
 import { VideoCourseSection } from "@/components/public/home/VideoCourseSection";
 import { ContactSection } from "@/components/public/home/ContactSection";
@@ -89,10 +87,6 @@ const courses = [
 
 export default function CoursesPage() {
   const [expandedCourse, setExpandedCourse] = useState<number | null>(null);
-
-  useEffect(() => {
-    AOS.init({ duration: 700, easing: "ease-out-cubic", once: true, offset: 50 });
-  }, []);
 
   const toggleCourse = (idx: number) => {
     setExpandedCourse(prev => prev === idx ? null : idx);

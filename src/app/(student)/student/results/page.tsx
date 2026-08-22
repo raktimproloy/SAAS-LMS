@@ -8,32 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { FileText, Trophy, ArrowRight, BookOpen, LayoutGrid, List, ChevronUp } from "lucide-react";
 import { examTypeLabel, isOfflineExamType, isOnlineExamType } from "@/lib/exam-type";
 
-const ScrollReveal = ({ children, delay = 0, className = "", onClick }: { children: React.ReactNode, delay?: number, className?: string, onClick?: () => void }) => {
-  const [isVisible, setIsVisible] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
-        setTimeout(() => setIsVisible(true), delay);
-        observer.disconnect();
-      }
-    }, { threshold: 0.1 });
-    
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [delay]);
-
-  return (
-    <div 
-      ref={ref} 
-      onClick={onClick}
-      className={`transition-all duration-700 ease-out fill-mode-both ${isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'} ${className}`}
-    >
-      {children}
-    </div>
-  );
-};
 
 interface ExamResult {
   id: number;
@@ -262,8 +237,9 @@ function StudentResultsContent() {
         {layout === 'grid' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
             {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="bg-card/90 dark:bg-card/40 backdrop-blur-2xl border border-border rounded-3xl p-6 md:p-8 flex flex-col shadow-xl overflow-hidden">
-                <div className="flex justify-between items-start gap-4 border-b border-border/60 mb-4 pb-4">
+              <div key={i} className="relative bg-card/90 dark:bg-card/40 backdrop-blur-2xl border border-border rounded-3xl p-6 md:p-8 flex flex-col shadow-xl overflow-hidden">
+                <div className="absolute -top-10 -right-10 w-32 h-32 bg-muted rounded-full blur-2xl pointer-events-none" />
+                <div className="relative z-10 flex justify-between items-start gap-4 border-b border-border/60 mb-4 pb-4">
                   <div className="flex-1 min-w-0">
                     <Skeleton className="h-6 w-24 mb-3 bg-muted rounded-full" />
                     <Skeleton className="h-7 w-3/4 bg-muted rounded-md" />
@@ -276,7 +252,7 @@ function StudentResultsContent() {
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center justify-between mb-8 mt-2">
+                <div className="relative z-10 flex items-center justify-between mb-8 mt-2">
                   <div className="flex flex-col">
                     <Skeleton className="h-3 w-12 mb-2 bg-muted/50 rounded-md" />
                     <Skeleton className="h-10 w-24 bg-muted rounded-xl" />
@@ -292,7 +268,7 @@ function StudentResultsContent() {
                     </div>
                   </div>
                 </div>
-                <div className="mt-auto pt-4 border-t border-border/60">
+                <div className="relative z-10 mt-auto pt-4 border-t border-border/60">
                   <Skeleton className="w-full h-12 bg-muted rounded-xl" />
                 </div>
               </div>
@@ -406,12 +382,12 @@ function StudentResultsContent() {
           const filteredResults = results.filter(matchesFilter);
           if (filteredResults.length === 0) {
             return (
-              <ScrollReveal className="col-span-full py-20 text-center bg-card/90 dark:bg-card/40 backdrop-blur-3xl rounded-[2.5rem] border border-border shadow-lg relative overflow-hidden">
+              <div data-aos="fade-up" className="col-span-full py-20 text-center bg-card/90 dark:bg-card/40 backdrop-blur-3xl rounded-[2.5rem] border border-border shadow-lg relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent opacity-50" />
                 <FileText className="h-20 w-20 mx-auto mb-6 text-muted-foreground/30 relative z-10" />
                 <p className="text-xl font-bold text-foreground mb-2 relative z-10">No results found.</p>
                 <p className="text-muted-foreground relative z-10">You haven't completed any {filter !== 'all' ? filter : ''} exams yet.</p>
-              </ScrollReveal>
+              </div>
             );
           }
           return filteredResults.map((result, index) => {
@@ -420,9 +396,10 @@ function StudentResultsContent() {
             if (layout === 'list' && expandedId !== result.id) {
               const offline = isOfflineExamType(result.exam.type);
               return (
-                <ScrollReveal 
+                <div 
                   key={result.id}
-                  delay={(index % 8) * 100}
+                  data-aos="fade-up"
+                  data-aos-delay={(index % 8) * 100}
                   onClick={() => router.push(resultHref(result))}
                   className="flex items-center justify-between p-5 sm:p-6 sm:px-8 bg-card/90 dark:bg-card/40 backdrop-blur-2xl border border-border rounded-2xl cursor-pointer hover:bg-card/90 dark:bg-card/60 hover:border-primary/30 transition-all group shadow-lg gap-4"
                 >
@@ -468,16 +445,17 @@ function StudentResultsContent() {
                       )}
                     </div>
                   )}
-                </ScrollReveal>
+                </div>
               );
             }
 
             const offline = isOfflineExamType(result.exam.type);
 
             return (
-              <ScrollReveal 
+              <div 
                 key={result.id} 
-                delay={(index % 5) * 100}
+                data-aos="fade-up"
+                data-aos-delay={(index % 5) * 100}
                 className="group relative bg-card/90 dark:bg-card/40 backdrop-blur-2xl border border-border rounded-3xl p-6 md:p-8 flex flex-col shadow-xl transition-all duration-500 hover:shadow-primary/20 overflow-hidden"
               >
                 {/* Background Decor */}
@@ -575,7 +553,7 @@ function StudentResultsContent() {
                     )}
                   </div>
                 </div>
-              </ScrollReveal>
+              </div>
             );
           })
         })()}

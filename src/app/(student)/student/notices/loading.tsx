@@ -4,15 +4,21 @@ export default function NoticesLoading() {
   return (
     <div className="space-y-8 w-full max-w-[1920px] mx-auto pb-20">
       {/* Header Banner Skeleton */}
-      <div className="relative bg-card/90 dark:bg-card/40 backdrop-blur-3xl p-8 md:p-10 rounded-[2.5rem] shadow-2xl flex flex-col md:flex-row w-full items-start md:items-center justify-between gap-6 border border-border mb-2 h-[220px]">
-        <div className="space-y-4">
-          <div className="flex items-center gap-4">
-            <Skeleton className="w-14 h-14 rounded-2xl bg-muted shrink-0" />
-            <Skeleton className="h-10 w-48 bg-muted rounded-xl" />
-          </div>
-          <Skeleton className="h-6 w-full max-w-lg bg-muted/50 rounded-md" />
+      <div className="relative bg-card/90 dark:bg-card/40 backdrop-blur-3xl p-8 md:p-10 rounded-[2.5rem] shadow-2xl flex flex-col justify-center items-start border border-border mb-2 w-full">
+        <div className="absolute inset-0 overflow-hidden rounded-[2.5rem] pointer-events-none">
+          <div className="absolute -top-12 -right-12 w-64 h-64 bg-primary/10 rounded-full blur-3xl transform-gpu pointer-events-none" />
+          <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-emerald-500/5 rounded-full blur-2xl pointer-events-none transform-gpu" />
         </div>
-        <Skeleton className="w-32 h-12 rounded-2xl bg-muted shrink-0" />
+        <div className="relative z-10 flex flex-col md:flex-row w-full items-start md:items-center justify-between gap-6">
+          <div className="space-y-4 w-full">
+            <div className="flex items-center gap-4">
+              <Skeleton className="w-14 h-14 rounded-2xl bg-muted shrink-0" />
+              <Skeleton className="h-10 w-48 bg-muted rounded-xl" />
+            </div>
+            <Skeleton className="h-6 w-full max-w-lg bg-muted/50 rounded-md mt-4" />
+          </div>
+          <Skeleton className="w-40 h-12 rounded-2xl bg-muted shrink-0" />
+        </div>
       </div>
 
       {/* Notices Grid Skeleton */}

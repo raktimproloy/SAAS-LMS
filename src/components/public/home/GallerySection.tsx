@@ -111,7 +111,7 @@ export function GallerySection({ initialImages = [] }: { initialImages?: any[] }
               {loopSlides.map((img) => (
                 <SwiperSlide
                   key={img._key}
-                  className="!w-[110px] sm:!w-[140px]"
+                  className="!w-[90px] sm:!w-[140px]"
                 >
                   <div className="thumbnail-wrapper relative aspect-video rounded-lg overflow-hidden border-2 border-transparent transition-[border-color,box-shadow,transform] duration-300">
                     {/* eslint-disable-next-line @next/next/no-img-element */}

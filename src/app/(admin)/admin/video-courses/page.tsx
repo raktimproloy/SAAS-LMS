@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { VideoCourseCard } from "@/components/admin/video-courses/VideoCourseCard";
 import { VideoCourseDialog } from "@/components/admin/video-courses/VideoCourseDialog";
 import { DemoClassesTab } from "@/components/admin/video-courses/DemoClassesTab";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 type VideoCourse = {
@@ -92,9 +93,9 @@ export default function VideoCoursesPage() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-4 sm:p-6" data-aos="fade-up">
       {/* Promotional Banner */}
-      <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-6 md:p-8 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden group">
+      <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-2xl p-6 md:p-8 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden group" data-aos="fade-down">
         {/* Decorative background elements */}
         <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-all duration-500"></div>
         <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-32 h-32 bg-white/10 rounded-full blur-xl group-hover:bg-white/20 transition-all duration-500"></div>
@@ -115,7 +116,7 @@ export default function VideoCoursesPage() {
           </Button>
         </div>
       </div>
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4" data-aos="fade-down" data-aos-delay="100">
         <div>
           <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
             <Video className="h-8 w-8 text-primary" />
@@ -127,7 +128,7 @@ export default function VideoCoursesPage() {
         </div>
       </div>
 
-      <div className="flex p-1 bg-slate-200/50 dark:bg-slate-800/50 rounded-lg max-w-sm w-full gap-1 mb-6">
+      <div className="flex p-1 bg-slate-200/50 dark:bg-slate-800/50 rounded-lg max-w-sm w-full gap-1 mb-6 overflow-x-auto hide-scrollbar" data-aos="fade-up" data-aos-delay="150">
         <button
           onClick={() => setActiveTab("courses")}
           className={cn(
@@ -149,8 +150,8 @@ export default function VideoCoursesPage() {
       </div>
         
       {activeTab === "courses" && (
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
+        <div className="space-y-6" data-aos="fade-up" data-aos-delay="200">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="relative w-full max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input 
@@ -160,16 +161,24 @@ export default function VideoCoursesPage() {
                 className="pl-9"
               />
             </div>
-            <Button onClick={openAddDialog} className="gap-2">
+            <Button onClick={openAddDialog} className="gap-2 w-full sm:w-auto">
               <Plus className="h-4 w-4" />
               Add Video Course
             </Button>
           </div>
 
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-pulse">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {[1, 2, 3, 4].map(i => (
-            <div key={i} className="bg-card border rounded-xl h-80"></div>
+            <div key={i} className="flex flex-col gap-2 p-4 border rounded-xl shadow-sm">
+              <Skeleton className="h-40 w-full rounded-md" />
+              <Skeleton className="h-6 w-3/4 mt-2" />
+              <Skeleton className="h-4 w-1/2" />
+              <div className="flex justify-between items-center mt-4">
+                <Skeleton className="h-8 w-20 rounded-full" />
+                <Skeleton className="h-8 w-24 rounded-full" />
+              </div>
+            </div>
           ))}
         </div>
       ) : filteredCourses.length === 0 ? (

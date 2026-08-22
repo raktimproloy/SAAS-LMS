@@ -129,7 +129,7 @@ export function SmsModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] w-[95vw] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Send SMS to {targetType === 'student' ? targetName : `${targetType} ${targetName}`}</DialogTitle>
         </DialogHeader>

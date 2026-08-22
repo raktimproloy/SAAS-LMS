@@ -38,6 +38,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { SmsModal } from "@/components/admin/SmsModal";
 
@@ -363,10 +364,10 @@ export default function CoursesBatchesPage() {
   );
 
   return (
-    <div className="flex flex-col gap-8 pb-10">
+    <div className="flex flex-col gap-8 pb-10" data-aos="fade-up">
       
       {/* Header & Tabs Area */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6" data-aos="fade-down">
         <div>
           <h1 className="text-3xl font-bold tracking-tight mb-2">Academic Setup</h1>
           <p className="text-muted-foreground">Manage your institution&apos;s Courses and their associated Batches.</p>
@@ -398,7 +399,7 @@ export default function CoursesBatchesPage() {
       </div>
 
       {/* Main Content Area */}
-      <Card className="border-none shadow-xl shadow-slate-200/40 dark:shadow-none dark:bg-slate-900/50 overflow-hidden">
+      <Card className="border-none shadow-xl shadow-slate-200/40 dark:shadow-none dark:bg-slate-900/50 overflow-hidden" data-aos="fade-up" data-aos-delay="100">
         <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b pb-4 border-slate-100 dark:border-slate-800">
           <div>
             <CardTitle className="text-xl text-slate-800 dark:text-slate-100">
@@ -544,14 +545,38 @@ export default function CoursesBatchesPage() {
           {activeTab === "courses" && (
             <div className="p-6">
               {loading ? (
-                <div className="flex justify-center py-10">
-                  <div className="animate-pulse flex space-x-4">
-                    <div className="h-12 w-12 bg-slate-200 dark:bg-slate-700 rounded-full"></div>
-                    <div className="space-y-3">
-                      <div className="h-4 w-[250px] bg-slate-200 dark:bg-slate-700 rounded"></div>
-                      <div className="h-4 w-[200px] bg-slate-200 dark:bg-slate-700 rounded"></div>
-                    </div>
-                  </div>
+                <div className="overflow-x-auto rounded-md border border-slate-100 dark:border-slate-800">
+                  <Table>
+                    <TableHeader className="bg-slate-50/50 dark:bg-slate-800/50">
+                      <TableRow>
+                        <TableHead className="w-[50px]"><Skeleton className="h-4 w-4" /></TableHead>
+                        <TableHead className="py-4"><Skeleton className="h-4 w-32" /></TableHead>
+                        <TableHead><Skeleton className="h-4 w-16" /></TableHead>
+                        <TableHead><Skeleton className="h-4 w-20" /></TableHead>
+                        <TableHead><Skeleton className="h-4 w-24" /></TableHead>
+                        <TableHead><Skeleton className="h-4 w-16" /></TableHead>
+                        <TableHead className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <TableRow key={i}>
+                          <TableCell><Skeleton className="h-6 w-6 rounded-md" /></TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-3">
+                              <Skeleton className="w-10 h-10 rounded-md" />
+                              <Skeleton className="h-4 w-48" />
+                            </div>
+                          </TableCell>
+                          <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                          <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                          <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                          <TableCell><Skeleton className="h-6 w-20 rounded-full" /></TableCell>
+                          <TableCell className="text-right"><Skeleton className="h-8 w-8 rounded-md ml-auto" /></TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
                 </div>
               ) : (
                 <>
@@ -691,13 +716,43 @@ export default function CoursesBatchesPage() {
           {activeTab === "batches" && (
             <div className="p-6">
               {loading ? (
-                <div className="flex justify-center py-10">
-                  <div className="animate-pulse flex space-x-4">
-                    <div className="h-12 w-12 bg-slate-200 dark:bg-slate-700 rounded-full"></div>
-                    <div className="space-y-3">
-                      <div className="h-4 w-[250px] bg-slate-200 dark:bg-slate-700 rounded"></div>
-                      <div className="h-4 w-[200px] bg-slate-200 dark:bg-slate-700 rounded"></div>
-                    </div>
+                <div className="space-y-3">
+                  <Skeleton className="h-6 w-48 mb-4" />
+                  <div className="overflow-x-auto rounded-md border border-slate-100 dark:border-slate-800">
+                    <Table>
+                      <TableHeader className="bg-slate-50/50 dark:bg-slate-800/50">
+                        <TableRow>
+                          <TableHead className="py-4 w-[50px]"><Skeleton className="h-4 w-4" /></TableHead>
+                          <TableHead><Skeleton className="h-4 w-32" /></TableHead>
+                          <TableHead><Skeleton className="h-4 w-24" /></TableHead>
+                          <TableHead><Skeleton className="h-4 w-20" /></TableHead>
+                          <TableHead><Skeleton className="h-4 w-16" /></TableHead>
+                          <TableHead className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {Array.from({ length: 3 }).map((_, i) => (
+                          <TableRow key={i}>
+                            <TableCell><Skeleton className="h-6 w-6 rounded-md" /></TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-3">
+                                <Skeleton className="w-8 h-8 rounded-full" />
+                                <Skeleton className="h-4 w-32" />
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="space-y-2">
+                                <Skeleton className="h-4 w-32" />
+                                <Skeleton className="h-3 w-40" />
+                              </div>
+                            </TableCell>
+                            <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                            <TableCell><Skeleton className="h-6 w-20 rounded-full" /></TableCell>
+                            <TableCell className="text-right"><Skeleton className="h-8 w-8 rounded-md ml-auto" /></TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
                   </div>
                 </div>
               ) : (

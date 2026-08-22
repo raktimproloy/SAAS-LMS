@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface SmsLog {
   id: number;
@@ -138,8 +139,8 @@ export default function SmsLogsPage() {
   }, []);
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+    <div className="flex flex-col gap-6" data-aos="fade-up">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4" data-aos="fade-down">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">SMS Operations</h1>
           <p className="text-muted-foreground mt-1">Manage bulk messaging and view SMS delivery logs.</p>
@@ -150,7 +151,7 @@ export default function SmsLogsPage() {
         </Button>
       </div>
 
-      <Card className="border-none shadow-sm bg-emerald-50/80 dark:bg-emerald-950/20">
+      <Card className="border-none shadow-sm bg-emerald-50/80 dark:bg-emerald-950/20" data-aos="fade-up" data-aos-delay="100">
         <CardContent className="pt-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-start gap-3">
@@ -187,7 +188,7 @@ export default function SmsLogsPage() {
         </CardContent>
       </Card>
 
-      <Card className="border-none shadow-md bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 overflow-hidden relative">
+      <Card className="border-none shadow-md bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 overflow-hidden relative" data-aos="fade-up" data-aos-delay="200">
         <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
           <CalendarClock className="w-48 h-48" />
         </div>
@@ -256,17 +257,15 @@ export default function SmsLogsPage() {
         </CardContent>
       </Card>
 
-      <Card className="border-none shadow-sm dark:bg-slate-800/50 overflow-hidden">
+      <Card className="border-none shadow-sm dark:bg-slate-800/50 overflow-hidden" data-aos="fade-up" data-aos-delay="300">
         <CardHeader>
           <CardTitle>Recent SMS Logs</CardTitle>
         </CardHeader>
-        <CardContent>
-          {loading ? (
-            <p className="text-sm text-muted-foreground">Loading logs...</p>
-          ) : (
-            <div className="overflow-x-auto">
+        <CardContent className="p-0">
+          <div className="p-6">
+            <div className="overflow-x-auto rounded-md border border-slate-100 dark:border-slate-800">
               <Table>
-                <TableHeader>
+                <TableHeader className="bg-slate-50/50 dark:bg-slate-800/50">
                   <TableRow>
                     <TableHead>Phone Number</TableHead>
                     <TableHead className="w-1/2">Message</TableHead>
@@ -276,48 +275,59 @@ export default function SmsLogsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {logs.map((log) => (
-                    <TableRow key={log.id}>
-                      <TableCell className="font-medium">{log.phone}</TableCell>
-                      <TableCell>
-                        <div className="text-sm text-muted-foreground line-clamp-2" title={log.message}>
-                          {log.message}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="capitalize">
-                          {log.type.replace('_', ' ')}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {log.sent_at ? new Date(log.sent_at).toLocaleString() : (
-                          <span className="text-muted-foreground italic flex items-center gap-1"><Clock className="w-3 h-3"/> Pending</span>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {log.status === "sent" ? (
-                          <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
-                            <CheckCircle2 className="w-3 h-3 mr-1" /> Sent
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline" className="bg-rose-500/10 text-rose-600 border-rose-500/20">
-                            <XCircle className="w-3 h-3 mr-1" /> Failed
-                          </Badge>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                  {logs.length === 0 && (
+                  {loading ? (
+                    Array.from({ length: 5 }).map((_, i) => (
+                      <TableRow key={i}>
+                        <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                        <TableCell><Skeleton className="h-4 w-64" /></TableCell>
+                        <TableCell><Skeleton className="h-6 w-16 rounded-full" /></TableCell>
+                        <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                        <TableCell><Skeleton className="h-6 w-20 rounded-full" /></TableCell>
+                      </TableRow>
+                    ))
+                  ) : logs.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                         No SMS logs found.
                       </TableCell>
                     </TableRow>
+                  ) : (
+                    logs.map((log) => (
+                      <TableRow key={log.id}>
+                        <TableCell className="font-medium">{log.phone}</TableCell>
+                        <TableCell>
+                          <div className="text-sm text-muted-foreground line-clamp-2" title={log.message}>
+                            {log.message}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="capitalize">
+                            {log.type.replace('_', ' ')}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {log.sent_at ? new Date(log.sent_at).toLocaleString() : (
+                            <span className="text-muted-foreground italic flex items-center gap-1"><Clock className="w-3 h-3"/> Pending</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {log.status === "sent" ? (
+                            <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
+                              <CheckCircle2 className="w-3 h-3 mr-1" /> Sent
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="bg-rose-500/10 text-rose-600 border-rose-500/20">
+                              <XCircle className="w-3 h-3 mr-1" /> Failed
+                            </Badge>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))
                   )}
                 </TableBody>
               </Table>
             </div>
-          )}
+          </div>
         </CardContent>
       </Card>
 

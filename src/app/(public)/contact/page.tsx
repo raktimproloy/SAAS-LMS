@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import AOS from "aos";
-import "aos/dist/aos.css";
 import { Headphones, MessageSquareText } from "lucide-react";
 
 import { ContactSection } from "@/components/public/home/ContactSection";
@@ -10,9 +8,6 @@ import { MapSection } from "@/components/public/home/MapSection";
 import { ReviewSection } from "@/components/public/home/ReviewSection";
 
 export default function ContactPage() {
-  useEffect(() => {
-    AOS.init({ duration: 700, easing: "ease-out-cubic", once: true, offset: 50 });
-  }, []);
 
   return (
     <div>
