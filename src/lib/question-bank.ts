@@ -10,11 +10,12 @@ export function isQuestionBankConfigured(): boolean {
 }
 
 export function buildHmacHeaders(): Record<string, string> {
-  const timestamp = Date.now().toString();
+  const timestamp = Math.floor(Date.now() / 1000).toString();
   const nonce = crypto.randomBytes(16).toString("hex");
+  const message = `${QB_CLIENT_ID}:${timestamp}:${nonce}`;
   const signature = crypto
     .createHmac("sha256", QB_CLIENT_SECRET)
-    .update(`${timestamp}.${nonce}`)
+    .update(message)
     .digest("hex");
 
   return {
@@ -28,7 +29,7 @@ export function buildHmacHeaders(): Record<string, string> {
 
 export async function requestEmbedToken(userId: string, userName: string, role = "teacher") {
   const headers = buildHmacHeaders();
-  const res = await fetch(`${QB_API_URL}/v1/sso/embed-token`, {
+  const res = await fetch(`${QB_API_URL}/embed/sso/embed-token`, {
     method: "POST",
     headers,
     body: JSON.stringify({ user_id: userId, user_name: userName, role }),
@@ -51,7 +52,7 @@ export async function fetchTenantStatus() {
 }
 
 export async function fetchPaperById(paperId: string): Promise<QbPaper> {
-  const res = await fetch(`${QB_API_URL}/v1/papers/${encodeURIComponent(paperId)}`, {
+  const res = await fetch(`${QB_API_URL}/papers/${encodeURIComponent(paperId)}`, {
     headers: {
       "X-Client-Id": QB_CLIENT_ID,
       Authorization: `Bearer ${QB_CLIENT_SECRET}`,

@@ -69,7 +69,7 @@ export default function QuestionBankPage() {
 
   if (status === "unconfigured") {
     return (
-      <div className="p-4 sm:p-6 max-w-lg" data-aos="fade-up">
+      <div className="p-4 sm:p-6 max-w-lg">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -94,7 +94,7 @@ export default function QuestionBankPage() {
 
   if (status === "inactive" || error) {
     return (
-      <div className="p-4 sm:p-6 max-w-lg" data-aos="fade-up">
+      <div className="p-4 sm:p-6 max-w-lg">
         <Card className="border-amber-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-amber-800">
@@ -116,7 +116,7 @@ export default function QuestionBankPage() {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] sm:-m-4 md:-m-6" data-aos="fade-in">
+    <div className="flex flex-col flex-1 overflow-hidden bg-background">
       <div className="flex items-center justify-between px-4 py-2 border-b bg-muted/30 shrink-0">
         <div className="flex items-center gap-2 text-sm font-medium">
           <Database className="h-4 w-4 text-primary" />
@@ -137,7 +137,7 @@ export default function QuestionBankPage() {
         <iframe
           src={embedUrl}
           title="Question Bank"
-          className="flex-1 w-full border-0 bg-background"
+          className="flex-1 w-full h-full border-0 bg-background block"
           allow="clipboard-write"
         />
       )}

@@ -35,7 +35,12 @@ export async function GET() {
   try {
     const adminUser = await prisma.admin.findUnique({ where: { id: admin.id } });
     const name = adminUser?.name || admin.email || "Admin";
-    const { embed_token } = await requestEmbedToken(String(admin.id), name, admin.role);
+    
+    // The Question Bank frontend only supports 'teacher' and 'student' roles.
+    // If we pass 'super_admin' or other LMS roles, the frontend might crash or show a blank screen.
+    const mappedRole = admin.role === "student" ? "student" : "teacher";
+    
+    const { embed_token } = await requestEmbedToken(String(admin.id), name, mappedRole);
     return NextResponse.json({
       embed_url: getEmbedUrl(embed_token),
     });

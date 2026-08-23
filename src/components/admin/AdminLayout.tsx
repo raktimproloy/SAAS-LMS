@@ -94,12 +94,16 @@ const SidebarContent = ({
   pathname,
   user,
   setIsMobileOpen,
-  handleLogout
+  handleLogout,
+  siteName,
+  siteLogo
 }: {
   pathname: string;
   user: AdminUser | null;
   setIsMobileOpen: (v: boolean) => void;
   handleLogout: () => void;
+  siteName: string;
+  siteLogo: string | null;
 }) => {
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {};
@@ -119,8 +123,17 @@ const SidebarContent = ({
     <div className="flex h-full flex-col gap-2">
       <div className="flex h-14 items-center border-b px-6 lg:h-[60px]">
         <Link href="/admin/dashboard" className="flex items-center gap-2 font-semibold text-lg tracking-tight">
-          <Database className="h-6 w-6 text-primary" />
-          <span className="">Institute Web</span>
+          {siteLogo ? (
+            <div className="h-8 w-auto max-w-[150px] flex items-center justify-center overflow-hidden">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={siteLogo} alt={siteName} className="h-full w-auto object-contain" />
+            </div>
+          ) : (
+            <>
+              <Database className="h-6 w-6 text-primary" />
+              <span className="">{siteName}</span>
+            </>
+          )}
         </Link>
       </div>
       <div className="flex-1 overflow-auto py-2">
@@ -229,8 +242,17 @@ const SidebarContent = ({
   );
 };
 
-export function AdminLayout({ children }: { children: React.ReactNode }) {
+export function AdminLayout({ 
+  children,
+  siteName = "Institute Web",
+  siteLogo = null
+}: { 
+  children: React.ReactNode;
+  siteName?: string;
+  siteLogo?: string | null;
+}) {
   const pathname = usePathname();
+  const isQuestionBank = pathname.startsWith("/admin/question-bank");
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const router = useRouter();
 
@@ -301,7 +323,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   })();
 
   return (
-    <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[260px_1fr]">
+    <div className="grid h-screen overflow-hidden w-full md:grid-cols-[220px_1fr] lg:grid-cols-[260px_1fr]">
       {/* Desktop Sidebar */}
       <div className="hidden border-r bg-muted/20 md:block sticky top-0 h-screen print:hidden">
         <SidebarContent
@@ -309,10 +331,12 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           user={user}
           setIsMobileOpen={setIsMobileOpen}
           handleLogout={handleLogout}
+          siteName={siteName}
+          siteLogo={siteLogo}
         />
       </div>
 
-      <div className="flex flex-col">
+      <div className="flex flex-col h-full overflow-hidden">
         {/* Header */}
         <header className="flex h-14 items-center gap-4 border-b bg-muted/20 px-4 lg:h-[60px] lg:px-6 sticky top-0 z-30 backdrop-blur-sm print:hidden">
           <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
@@ -328,6 +352,8 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                 user={user}
                 setIsMobileOpen={setIsMobileOpen}
                 handleLogout={handleLogout}
+                siteName={siteName}
+                siteLogo={siteLogo}
               />
             </SheetContent>
           </Sheet>
@@ -355,7 +381,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Main Content */}
-        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-slate-50/50 dark:bg-transparent relative print:p-0 print:m-0 print:bg-transparent">
+        <main className={cn("flex flex-1 flex-col bg-slate-50/50 dark:bg-transparent relative print:p-0 print:m-0 print:bg-transparent", isQuestionBank ? "overflow-hidden" : "gap-4 p-4 lg:gap-6 lg:p-6 overflow-auto")}>
           {!hasAccess ? (
             <div className="flex flex-col items-center justify-center flex-1 h-[60vh]">
               <div className="text-center space-y-4">
