@@ -153,12 +153,16 @@ export function VideoCourseSection({ videoCourses }: VideoCourseSectionProps) {
         </motion.div>
       </div>
 
-      <div
+      <motion.div
         className="w-full relative z-10"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onTouchStart={handleMouseEnter}
         onTouchEnd={handleMouseLeave}
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.6, delay: 0.2 }}
       >
         <div className="pb-8">
           <Swiper
@@ -242,7 +246,7 @@ export function VideoCourseSection({ videoCourses }: VideoCourseSectionProps) {
           </Swiper>
         </div>
 
-      </div>
+      </motion.div>
 
       <style dangerouslySetInnerHTML={{
         __html: `

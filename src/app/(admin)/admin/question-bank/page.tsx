@@ -5,6 +5,7 @@ import { Database, ExternalLink, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { motion } from "framer-motion";
 
 export default function QuestionBankPage() {
   const [embedUrl, setEmbedUrl] = useState<string | null>(null);
@@ -88,7 +89,7 @@ export default function QuestionBankPage() {
             </ul>
           </CardContent>
         </Card>
-      </div>
+      </motion.div>
     );
   }
 
@@ -111,7 +112,7 @@ export default function QuestionBankPage() {
             </Button>
           </CardContent>
         </Card>
-      </div>
+      </motion.div>
     );
   }
 
@@ -141,6 +142,6 @@ export default function QuestionBankPage() {
           allow="clipboard-write"
         />
       )}
-    </div>
+    </motion.div>
   );
 }

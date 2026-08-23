@@ -232,14 +232,14 @@ export function PopularCoursesSection({ courses, showAll = false }: PopularCours
             const price = formatPrice(c.fee, c.discount_fee);
 
             return (
-              <motion.div
-                key={c.id}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-40px" }}
-                transition={{ duration: 0.35, delay: i * 0.05 }}
-                className="bg-card/70 backdrop-blur-xl border border-border/60 rounded-xl overflow-hidden"
-              >
+                <motion.div
+                  key={c.id}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-40px" }}
+                  transition={{ duration: 0.35, delay: 0.2 + i * 0.1 }}
+                  className="bg-card/70 backdrop-blur-xl border border-border/60 rounded-xl overflow-hidden"
+                >
                 <button
                   type="button"
                   onClick={() => toggle(c.id)}

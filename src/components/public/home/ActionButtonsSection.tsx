@@ -28,14 +28,14 @@ export function ActionButtonsSection() {
   return (
     <section className="py-8 px-4 sm:px-6 lg:px-8 relative z-10">
       <div className="max-w-4xl mx-auto">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.6 }}
           className="flex flex-col sm:flex-row gap-4 justify-center items-center"
         >
-          <Link 
+          <Link
             href="/student/login"
             className="w-full sm:w-auto group relative flex items-center justify-center gap-3 px-6 py-4 bg-primary text-primary-foreground rounded-lg font-bold text-base shadow-[0_0_40px_-10px_hsl(var(--primary))] hover:shadow-[0_0_60px_-10px_hsl(var(--primary))] transition-all duration-300 hover:-translate-y-1 overflow-hidden"
           >
@@ -44,7 +44,7 @@ export function ActionButtonsSection() {
             <span className="relative z-10 text-white">Student Login</span>
           </Link>
 
-          <button 
+          <button
             type="button"
             onClick={handleInstallClick}
             disabled={installing || isInstalled}

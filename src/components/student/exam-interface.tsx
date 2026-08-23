@@ -600,24 +600,43 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
 
       {/* Submit Confirmation Dialog */}
       <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Submit Exam?</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to submit the exam? You cannot change your answers after submission.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="mt-4">
-            <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>Cancel</Button>
-            <Button 
-              onClick={() => {
-                setShowConfirmDialog(false);
-                handleSubmit();
-              }}
-            >
-              Confirm Submit
-            </Button>
-          </DialogFooter>
+        <DialogContent className="sm:max-w-md p-0 overflow-hidden border-0 shadow-2xl rounded-3xl">
+          <div className="bg-gradient-to-br from-primary/10 via-background to-background p-6 sm:p-8 relative">
+            <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
+            
+            <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6 shadow-inner ring-1 ring-primary/20 relative z-10">
+              <CheckCircle2 className="w-8 h-8 text-primary" />
+            </div>
+            
+            <DialogHeader className="text-center sm:text-center space-y-2 relative z-10">
+              <DialogTitle className="text-2xl font-black tracking-tight text-foreground">Submit Exam?</DialogTitle>
+              <DialogDescription className="text-base text-muted-foreground/90">
+                You have attempted <strong className="text-foreground">{attemptedCount}</strong> out of <strong className="text-foreground">{questions.filter(q => q.type !== 'passage').length}</strong> questions.
+                Are you sure you want to submit? You cannot change your answers after submission.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <DialogFooter className="mt-8 flex-col sm:flex-row gap-3 sm:gap-4 relative z-10">
+              <Button 
+                variant="outline" 
+                size="lg"
+                className="w-full sm:w-1/2 rounded-xl h-12 font-semibold border-border hover:bg-muted"
+                onClick={() => setShowConfirmDialog(false)}
+              >
+                Go Back
+              </Button>
+              <Button 
+                size="lg"
+                className="w-full sm:w-1/2 rounded-xl h-12 font-bold bg-gradient-to-r from-blue-500 via-cyan-500 to-blue-500 bg-[length:200%_auto] animate-gradient text-white hover:scale-[1.02] transition-all shadow-[0_0_20px_rgba(6,182,212,0.3)] border-0"
+                onClick={() => {
+                  setShowConfirmDialog(false);
+                  handleSubmit();
+                }}
+              >
+                Confirm Submit
+              </Button>
+            </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

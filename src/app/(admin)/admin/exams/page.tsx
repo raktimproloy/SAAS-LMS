@@ -391,7 +391,7 @@ export default function ExamsPage() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="total_marks">Default Marks / Question</Label>
+                  <Label htmlFor="total_marks">Default Marks Per Question</Label>
                   <Input id="total_marks" type="number" step="0.5" value={totalMarks} onChange={(e) => setTotalMarks(e.target.value)} required />
                 </div>
                 

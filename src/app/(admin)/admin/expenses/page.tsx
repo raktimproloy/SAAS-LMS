@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { Plus, Pencil, Trash2, Search, Calendar as CalendarIcon, ChevronDown, ChevronRight, TrendingDown } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Calendar as CalendarIcon, ChevronDown, ChevronRight, TrendingDown, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -185,16 +185,22 @@ export default function ExpensesPage() {
           <p className="text-muted-foreground">Manage institute expenses and bills.</p>
         </div>
 
-        <Dialog open={isDialogOpen} onOpenChange={(open) => {
-          if (!open) resetForm();
-          setIsDialogOpen(open);
-        }}>
-          <DialogTrigger asChild>
-            <Button className="gap-2 bg-red-600 hover:bg-red-700 shadow-md w-full sm:w-auto">
-              <Plus className="h-4 w-4" />
-              Add Expense
-            </Button>
-          </DialogTrigger>
+        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+          <Button variant="outline" className="gap-2 w-full sm:w-auto print:hidden" onClick={() => window.print()}>
+            <Printer className="h-4 w-4" />
+            Print
+          </Button>
+
+          <Dialog open={isDialogOpen} onOpenChange={(open) => {
+            if (!open) resetForm();
+            setIsDialogOpen(open);
+          }}>
+            <DialogTrigger asChild>
+              <Button className="gap-2 bg-red-600 hover:bg-red-700 shadow-md w-full sm:w-auto print:hidden">
+                <Plus className="h-4 w-4" />
+                Add Expense
+              </Button>
+            </DialogTrigger>
           <DialogContent className="sm:max-w-[500px] w-[95vw] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editingExpenseId ? "Edit Expense" : "Add Expense"}</DialogTitle>
@@ -242,6 +248,7 @@ export default function ExpensesPage() {
             </form>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {/* Summary Cards */}
@@ -270,7 +277,7 @@ export default function ExpensesPage() {
       </div>
 
       {/* Filter Bar */}
-      <Card className="shadow-sm" data-aos="fade-up" data-aos-delay="200">
+      <Card className="shadow-sm print:hidden" data-aos="fade-up" data-aos-delay="200">
         <CardContent className="p-4">
           <div className="flex flex-col md:flex-row gap-4 items-center">
             <div className="relative flex-1 w-full">
@@ -347,7 +354,7 @@ export default function ExpensesPage() {
                           <TableHead>Expended By</TableHead>
                           <TableHead>Permitted By</TableHead>
                           <TableHead className="text-right">Amount</TableHead>
-                          <TableHead className="text-right">Action</TableHead>
+                          <TableHead className="text-right print:hidden">Action</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -360,7 +367,7 @@ export default function ExpensesPage() {
                             <TableCell className="text-right font-semibold text-red-600 dark:text-red-400">
                               ৳{e.amount}
                             </TableCell>
-                            <TableCell className="text-right">
+                            <TableCell className="text-right print:hidden">
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                   <Button variant="ghost" className="h-8 w-8 p-0">

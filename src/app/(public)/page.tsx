@@ -110,20 +110,20 @@ function HeroSkeleton() {
       <div className="max-w-7xl mx-auto w-full">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           <div className="order-2 lg:order-1 flex justify-center">
-            <Skeleton className="w-full max-w-sm aspect-[4/5] rounded-3xl bg-primary/10" />
+            <Skeleton className="w-full max-w-sm aspect-[4/5] rounded-3xl" />
           </div>
           <div className="order-1 lg:order-2 space-y-5 flex flex-col items-center lg:items-start">
-            <Skeleton className="h-12 sm:h-14 w-3/4 bg-primary/10" />
-            <Skeleton className="h-6 sm:h-8 w-1/2 bg-primary/10" />
+            <Skeleton className="h-12 sm:h-14 w-3/4" />
+            <Skeleton className="h-6 sm:h-8 w-1/2" />
             <div className="w-full space-y-2">
-              <Skeleton className="h-4 w-full bg-primary/10" />
-              <Skeleton className="h-4 w-[90%] bg-primary/10" />
-              <Skeleton className="h-4 w-[95%] bg-primary/10" />
-              <Skeleton className="h-4 w-[80%] bg-primary/10" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-[90%]" />
+              <Skeleton className="h-4 w-[95%]" />
+              <Skeleton className="h-4 w-[80%]" />
             </div>
             <div className="flex flex-col sm:flex-row gap-4 pt-4 w-full sm:w-auto">
-              <Skeleton className="h-14 w-full sm:w-40 rounded-lg bg-primary/10" />
-              <Skeleton className="h-14 w-full sm:w-40 rounded-lg bg-primary/10" />
+              <Skeleton className="h-14 w-full sm:w-40 rounded-lg" />
+              <Skeleton className="h-14 w-full sm:w-40 rounded-lg" />
             </div>
           </div>
         </div>
@@ -137,12 +137,11 @@ function PopularCoursesSkeleton() {
     <section className="py-12 px-4 sm:px-6 lg:px-8 relative z-10">
       <div className="max-w-4xl mx-auto">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-6 gap-4">
-          <Skeleton className="h-8 sm:h-10 w-48 bg-primary/10" />
-          <Skeleton className="h-5 w-24 bg-primary/10" />
+          <Skeleton className="h-8 sm:h-10 w-48" />
         </div>
         <div className="flex flex-col gap-3">
           {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-[76px] sm:h-[56px] w-full rounded-xl bg-primary/10" />
+            <Skeleton key={i} className="h-[76px] sm:h-[56px] w-full rounded-xl" />
           ))}
         </div>
       </div>
@@ -155,12 +154,12 @@ function GallerySkeleton() {
     <section className="py-24 px-4 sm:px-6 lg:px-8 relative z-10">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <Skeleton className="h-10 w-64 mx-auto mb-4 bg-primary/10" />
-          <Skeleton className="h-5 w-96 mx-auto bg-primary/10" />
+          <Skeleton className="h-10 w-64 mx-auto mb-4" />
+          <Skeleton className="h-5 w-96 mx-auto" />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <Skeleton key={i} className={`w-full rounded-2xl bg-primary/10 ${i % 2 === 0 ? 'h-64' : 'h-80'}`} />
+            <Skeleton key={i} className={`w-full rounded-2xl ${i % 2 === 0 ? 'h-64' : 'h-80'}`} />
           ))}
         </div>
       </div>
@@ -173,11 +172,11 @@ function DemoClassSkeleton() {
     <section className="py-24 px-4 sm:px-6 lg:px-8 relative">
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="text-center mb-12 sm:mb-16">
-          <Skeleton className="h-10 w-64 mx-auto bg-primary/10" />
+          <Skeleton className="h-10 w-64 mx-auto" />
         </div>
         <div className="px-4 sm:px-12 grid grid-cols-1 md:grid-cols-2 gap-8">
           {[1, 2].map((i) => (
-            <Skeleton key={i} className="w-full aspect-video rounded-3xl bg-primary/10" />
+            <Skeleton key={i} className="w-full aspect-video rounded-3xl" />
           ))}
         </div>
       </div>
@@ -190,16 +189,15 @@ function VideoCourseSkeleton() {
     <section className="py-20 px-4 sm:px-6 lg:px-8 relative z-10">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <Skeleton className="h-10 w-64 mx-auto mb-4 bg-primary/10" />
-          <Skeleton className="h-5 w-96 mx-auto bg-primary/10" />
+          <Skeleton className="h-10 w-64 mx-auto mb-4" />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="flex flex-col gap-4">
-              <Skeleton className="w-full aspect-video rounded-2xl bg-primary/10" />
+              <Skeleton className="w-full aspect-video rounded-2xl" />
               <div className="space-y-2">
-                <Skeleton className="h-5 w-3/4 bg-primary/10" />
-                <Skeleton className="h-4 w-1/2 bg-primary/10" />
+                <Skeleton className="h-5 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
               </div>
             </div>
           ))}
@@ -214,12 +212,12 @@ function NoticeBoardSkeleton() {
     <section className="py-20 px-4 sm:px-6 lg:px-8 bg-muted/30">
       <div className="max-w-5xl mx-auto">
         <div className="flex items-center justify-between mb-8 sm:mb-12">
-          <Skeleton className="h-10 w-48 bg-primary/10" />
-          <Skeleton className="h-10 w-32 rounded-full bg-primary/10" />
+          <Skeleton className="h-10 w-48" />
+          <Skeleton className="h-10 w-32 rounded-full" />
         </div>
         <div className="grid gap-4 sm:gap-6">
           {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-24 w-full rounded-2xl bg-primary/10" />
+            <Skeleton key={i} className="h-24 w-full rounded-2xl" />
           ))}
         </div>
       </div>
