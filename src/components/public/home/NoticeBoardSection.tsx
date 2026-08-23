@@ -27,13 +27,13 @@ export function NoticeBoardSection({ notices }: NoticeBoardSectionProps) {
   };
 
   return (
-    <section className="py-24 px-4 sm:px-6 lg:px-8 bg-transparent relative overflow-hidden">
+    <section className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-transparent relative overflow-hidden">
       {/* Decorative abstract shapes */}
       <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-primary/5 to-transparent pointer-events-none" />
       <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-start">
           
           {/* Left Column: Heading */}
           <motion.div 
@@ -41,12 +41,12 @@ export function NoticeBoardSection({ notices }: NoticeBoardSectionProps) {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.6 }}
-            className="lg:col-span-4 sticky top-24"
+            className="lg:col-span-4 lg:sticky lg:top-24 flex flex-col sm:flex-row lg:flex-col justify-between items-start sm:items-center lg:items-start"
           >
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-foreground mb-6 leading-tight">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-foreground mb-2 lg:mb-6 leading-tight">
               বোর্ড নোটিশ <br className="hidden lg:block"/> ও বিজ্ঞপ্তি
             </h2>
-            <Link href="/notices" className="inline-flex items-center gap-2 text-base font-bold text-white bg-primary px-6 py-3.5 rounded-xl hover:bg-primary/90 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/30 transition-all group">
+            <Link href="/notices" className="hidden lg:inline-flex items-center gap-2 text-sm sm:text-base font-bold text-white bg-primary px-5 sm:px-6 py-3 sm:py-3.5 rounded-xl hover:bg-primary/90 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/30 transition-all group shrink-0">
               সকল নোটিশ দেখুন
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
@@ -60,17 +60,17 @@ export function NoticeBoardSection({ notices }: NoticeBoardSectionProps) {
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
+                transition={{ duration: 0.5, delay: 0.3 + index * 0.1 }}
               >
                 <Link href={`/notices/${notice.id}`} className="block group">
-                  <div className="bg-card border border-border/50 rounded-2xl p-6 sm:p-8 shadow-sm hover:shadow-xl transition-all duration-300 relative overflow-hidden flex flex-col sm:flex-row gap-6 sm:gap-8 items-start hover:-translate-y-1">
+                  <div className="bg-card border border-border/50 rounded-2xl p-5 sm:p-8 shadow-sm hover:shadow-xl transition-all duration-300 relative overflow-hidden flex flex-row gap-4 sm:gap-8 items-start hover:-translate-y-1">
                     
                     {/* Hover Glow */}
                     <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/5 to-primary/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
                     {/* Left Date Block */}
-                    <div className="flex-shrink-0 flex flex-col items-center justify-center p-4 bg-muted/50 rounded-xl border border-border/50 min-w-[100px] group-hover:bg-primary group-hover:border-primary transition-colors duration-300">
-                      <CalendarDays className="w-6 h-6 text-primary group-hover:text-white mb-2 transition-colors" />
+                    <div className="flex-shrink-0 flex flex-col items-center justify-center p-3 sm:p-4 bg-muted/50 rounded-xl border border-border/50 min-w-[72px] sm:min-w-[100px] group-hover:bg-primary group-hover:border-primary transition-colors duration-300">
+                      <CalendarDays className="w-6 h-6 text-primary group-hover:text-white mb-2 transition-colors hidden sm:block" />
                       <span className="text-2xl font-black text-foreground group-hover:text-white transition-colors">{formatDate(notice.created_at || new Date()).split(" ")[0]}</span>
                       <span className="text-sm font-bold text-muted-foreground uppercase group-hover:text-white/80 transition-colors">{formatDate(notice.created_at || new Date()).split(" ")[1]} {formatDate(notice.created_at || new Date()).split(" ")[2]}</span>
                     </div>
@@ -106,6 +106,19 @@ export function NoticeBoardSection({ notices }: NoticeBoardSectionProps) {
                 </Link>
               </motion.div>
             ))}
+            
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+              className="mt-4 flex justify-center lg:hidden"
+            >
+              <Link href="/notices" className="inline-flex items-center justify-center w-full sm:w-auto gap-2 text-base font-bold text-white bg-primary px-6 py-4 rounded-xl hover:bg-primary/90 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/30 transition-all group">
+                সকল নোটিশ দেখুন
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </motion.div>
           </div>
         </div>
       </div>

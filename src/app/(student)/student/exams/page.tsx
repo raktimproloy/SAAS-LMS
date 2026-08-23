@@ -9,8 +9,7 @@ import { format } from "date-fns";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-
-
+import { motion } from "framer-motion";
 
 export default function StudentExamsPage() {
   const [exams, setExams] = useState<any[]>([]);
@@ -96,18 +95,28 @@ export default function StudentExamsPage() {
 
   return (
     <div className="space-y-8 w-full max-w-[1920px] mx-auto pb-10">
-      <div className="flex flex-col gap-2 relative z-10" data-aos="fade-down">
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="flex flex-col gap-2 relative z-10"
+      >
         <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">My Exams</h1>
         <p className="text-muted-foreground text-lg">View and take your assigned exams below.</p>
-      </div>
+      </motion.div>
 
       {exams.length === 0 ? (
-        <div data-aos="fade-up" className="bg-card/90 dark:bg-card/40 backdrop-blur-2xl border border-border rounded-3xl p-16 text-center text-muted-foreground shadow-lg relative overflow-hidden">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="bg-card/90 dark:bg-card/40 backdrop-blur-2xl border border-border rounded-3xl p-16 text-center text-muted-foreground shadow-lg relative overflow-hidden"
+        >
            <div className="absolute top-0 left-0 w-64 h-64 bg-primary/10 rounded-full blur-[80px] -ml-20 -mt-20 pointer-events-none" />
           <FileQuestion className="w-16 h-16 mx-auto text-muted-foreground/30 mb-6 relative z-10" />
           <p className="text-xl font-bold text-foreground mb-2 relative z-10">No Exams Available</p>
           <p className="text-md relative z-10">There are currently no exams assigned to your batch.</p>
-        </div>
+        </motion.div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 md:gap-8">
           {exams.map((exam, index) => {
@@ -116,10 +125,11 @@ export default function StudentExamsPage() {
             const result = isAttempted ? exam.results[0] : null;
 
             return (
-              <div 
+              <motion.div 
                 key={exam.id} 
-                data-aos="fade-up"
-                data-aos-delay={(index % 6) * 100}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: (index % 6) * 0.1 }}
                 className={`group flex flex-col relative rounded-3xl overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl bg-card/90 dark:bg-card/60 backdrop-blur-3xl border border-border shadow-lg ${
                   status === 'active' ? 'ring-1 ring-primary/50 shadow-primary/20' : ''
                 }`}
@@ -252,7 +262,7 @@ export default function StudentExamsPage() {
                     </Button>
                   )}
                 </CardFooter>
-              </div>
+              </motion.div>
             );
           })}
         </div>

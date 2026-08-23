@@ -22,42 +22,14 @@ const navItems = [
 
 export function StudentBottomNav() {
   const pathname = usePathname();
-  const [isVisible, setIsVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
   const [optimisticPath, setOptimisticPath] = useState<string | null>(null);
 
   useEffect(() => {
     setOptimisticPath(null);
   }, [pathname]);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-
-      if (currentScrollY < 50) {
-        setIsVisible(true);
-      }
-      else if (currentScrollY > lastScrollY) {
-        setIsVisible(false); // Scrolling down
-      }
-      else {
-        setIsVisible(true); // Scrolling up
-      }
-
-      setLastScrollY(currentScrollY);
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [lastScrollY]);
-
   return (
-    <nav
-      className={cn(
-        "lg:hidden fixed bottom-0 left-0 right-0 z-50 transition-transform duration-200 ease-in-out",
-        isVisible ? "translate-y-0" : "translate-y-full"
-      )}
-    >
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50">
       <div className="bg-card/90 dark:bg-card/40 backdrop-blur-3xl border-t border-border rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.08)] dark:shadow-[0_-8px_30px_rgba(0,0,0,0.3)] px-2 py-2 md:pb-4 relative overflow-hidden">
         {/* Ambient Floating Gradients */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40 dark:opacity-100 dark:mix-blend-screen">
