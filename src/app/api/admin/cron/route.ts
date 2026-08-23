@@ -3,6 +3,7 @@ import prisma from "@/lib/db";
 import { verifyToken } from "@/lib/jwt";
 import { cookies } from "next/headers";
 
+export const dynamic = 'force-dynamic';
 async function checkPermission(permission: string) {
   const token = cookies().get("admin_token")?.value;
   if (!token) return false;

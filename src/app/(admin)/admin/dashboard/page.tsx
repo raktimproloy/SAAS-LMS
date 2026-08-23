@@ -62,15 +62,15 @@ export default async function AdminDashboard() {
   ];
 
   return (
-    <div className="flex flex-col gap-6">
-      <div>
+    <div className="flex flex-col gap-6" data-aos="fade-up">
+      <div data-aos="fade-down">
         <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
         <p className="text-muted-foreground mt-1">Overview of your institute&apos;s performance.</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat, i) => (
-          <Card key={i} className="border-none shadow-sm dark:bg-slate-800/50">
+          <Card key={i} className="border-none shadow-sm dark:bg-slate-800/50" data-aos="fade-up" data-aos-delay={i * 100}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
               <div className={`p-2 rounded-full ${stat.bg}`}>
@@ -85,7 +85,7 @@ export default async function AdminDashboard() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="col-span-4 border-none shadow-sm dark:bg-slate-800/50">
+        <Card className="col-span-4 border-none shadow-sm dark:bg-slate-800/50" data-aos="fade-right" data-aos-delay="400">
           <CardHeader>
             <CardTitle>Recent Enrollments</CardTitle>
           </CardHeader>
@@ -129,7 +129,7 @@ export default async function AdminDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="col-span-3 border-none shadow-sm dark:bg-slate-800/50">
+        <Card className="col-span-3 border-none shadow-sm dark:bg-slate-800/50" data-aos="fade-left" data-aos-delay="500">
           <CardHeader>
             <CardTitle>Upcoming Exams</CardTitle>
           </CardHeader>

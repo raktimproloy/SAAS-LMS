@@ -4,6 +4,7 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { PWAInstallProvider } from "@/components/public/PWAInstallContext";
+import { AosInitializer } from "@/components/public/AosInitializer";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -56,6 +57,7 @@ export default function RootLayout({
       <body className={`${inter.variable} antialiased min-h-screen bg-background`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <PWAInstallProvider>
+            <AosInitializer />
             {children}
           </PWAInstallProvider>
         </ThemeProvider>

@@ -38,6 +38,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Course {
   id: number;
@@ -274,8 +275,8 @@ export default function ExamsPage() {
   );
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col gap-6" data-aos="fade-up">
+      <div className="flex items-center justify-between" data-aos="fade-down">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Online Exams</h1>
           <p className="text-muted-foreground mt-1">Manage online exams, questions, and view results.</p>
@@ -424,18 +425,15 @@ export default function ExamsPage() {
         </Dialog>
       </div>
 
-      <Card className="border-none shadow-sm dark:bg-slate-800/50 overflow-hidden">
+      <Card className="border-none shadow-sm dark:bg-slate-800/50 overflow-hidden" data-aos="fade-up" data-aos-delay="100">
         <CardHeader>
           <CardTitle>All Exams</CardTitle>
         </CardHeader>
-        <CardContent>
-          {loading ? (
-            <p className="text-sm text-muted-foreground">Loading...</p>
-          ) : (
-            <>
-              <div className="overflow-x-auto">
+        <CardContent className="p-0">
+          <div className="p-6">
+              <div className="overflow-x-auto rounded-md border border-slate-100 dark:border-slate-800">
                 <Table>
-                  <TableHeader>
+                  <TableHeader className="bg-slate-50/50 dark:bg-slate-800/50">
                     <TableRow>
                       <TableHead>Title</TableHead>
                       <TableHead>Target (Course/Batch)</TableHead>
@@ -447,8 +445,42 @@ export default function ExamsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {exams.map((exam) => (
-                      <TableRow key={exam.id}>
+                    {loading ? (
+                      Array.from({ length: 5 }).map((_, i) => (
+                        <TableRow key={i}>
+                          <TableCell><Skeleton className="h-4 w-40" /></TableCell>
+                          <TableCell>
+                            <div className="flex flex-col gap-2">
+                              <Skeleton className="h-5 w-32 rounded-full" />
+                              <Skeleton className="h-5 w-24 rounded-full" />
+                            </div>
+                          </TableCell>
+                          <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                          <TableCell>
+                            <div className="flex flex-col gap-2">
+                              <Skeleton className="h-4 w-32" />
+                              <Skeleton className="h-4 w-16" />
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex flex-col gap-2">
+                              <Skeleton className="h-4 w-24" />
+                              <Skeleton className="h-4 w-20" />
+                            </div>
+                          </TableCell>
+                          <TableCell><Skeleton className="h-6 w-16 rounded-full" /></TableCell>
+                          <TableCell className="text-right"><Skeleton className="h-8 w-8 rounded-md ml-auto" /></TableCell>
+                        </TableRow>
+                      ))
+                    ) : exams.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                          No exams created yet.
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      exams.map((exam) => (
+                        <TableRow key={exam.id}>
                         <TableCell className="font-medium">{exam.title}</TableCell>
                         <TableCell>
                           <div className="flex flex-col gap-1 items-start">
@@ -537,21 +569,14 @@ export default function ExamsPage() {
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </TableCell>
-                      </TableRow>
-                    ))}
-                    {exams.length === 0 && (
-                      <TableRow>
-                        <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                          No exams created yet.
-                        </TableCell>
-                      </TableRow>
+                        </TableRow>
+                      ))
                     )}
                   </TableBody>
                 </Table>
               </div>
-              {exams.length > 0 && renderPagination()}
-            </>
-          )}
+              {!loading && exams.length > 0 && renderPagination()}
+          </div>
         </CardContent>
       </Card>
 

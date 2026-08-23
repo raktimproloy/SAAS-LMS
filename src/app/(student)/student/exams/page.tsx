@@ -10,31 +10,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const ScrollReveal = ({ children, delay = 0, className = "" }: { children: React.ReactNode, delay?: number, className?: string }) => {
-  const [isVisible, setIsVisible] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
-        setTimeout(() => setIsVisible(true), delay);
-        observer.disconnect();
-      }
-    }, { threshold: 0.1 });
-    
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [delay]);
-
-  return (
-    <div 
-      ref={ref} 
-      className={`transition-all duration-700 ease-out fill-mode-both ${isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'} ${className}`}
-    >
-      {children}
-    </div>
-  );
-};
 
 export default function StudentExamsPage() {
   const [exams, setExams] = useState<any[]>([]);
@@ -61,6 +37,7 @@ export default function StudentExamsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 md:gap-8">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="flex flex-col relative rounded-3xl overflow-hidden bg-card/90 dark:bg-card/60 backdrop-blur-3xl border border-border shadow-lg">
+              <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full blur-2xl pointer-events-none bg-muted" />
               <div className="p-6 pb-4 border-b border-border">
                 <div className="flex justify-between items-start mb-4">
                   <Skeleton className="h-6 w-20 rounded-full bg-muted" />
@@ -119,18 +96,18 @@ export default function StudentExamsPage() {
 
   return (
     <div className="space-y-8 w-full max-w-[1920px] mx-auto pb-10">
-      <ScrollReveal className="flex flex-col gap-2 relative z-10">
+      <div className="flex flex-col gap-2 relative z-10" data-aos="fade-down">
         <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">My Exams</h1>
         <p className="text-muted-foreground text-lg">View and take your assigned exams below.</p>
-      </ScrollReveal>
+      </div>
 
       {exams.length === 0 ? (
-        <ScrollReveal className="bg-card/90 dark:bg-card/40 backdrop-blur-2xl border border-border rounded-3xl p-16 text-center text-muted-foreground shadow-lg relative overflow-hidden">
+        <div data-aos="fade-up" className="bg-card/90 dark:bg-card/40 backdrop-blur-2xl border border-border rounded-3xl p-16 text-center text-muted-foreground shadow-lg relative overflow-hidden">
            <div className="absolute top-0 left-0 w-64 h-64 bg-primary/10 rounded-full blur-[80px] -ml-20 -mt-20 pointer-events-none" />
           <FileQuestion className="w-16 h-16 mx-auto text-muted-foreground/30 mb-6 relative z-10" />
           <p className="text-xl font-bold text-foreground mb-2 relative z-10">No Exams Available</p>
           <p className="text-md relative z-10">There are currently no exams assigned to your batch.</p>
-        </ScrollReveal>
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 md:gap-8">
           {exams.map((exam, index) => {
@@ -139,9 +116,10 @@ export default function StudentExamsPage() {
             const result = isAttempted ? exam.results[0] : null;
 
             return (
-              <ScrollReveal 
+              <div 
                 key={exam.id} 
-                delay={(index % 6) * 100}
+                data-aos="fade-up"
+                data-aos-delay={(index % 6) * 100}
                 className={`group flex flex-col relative rounded-3xl overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl bg-card/90 dark:bg-card/60 backdrop-blur-3xl border border-border shadow-lg ${
                   status === 'active' ? 'ring-1 ring-primary/50 shadow-primary/20' : ''
                 }`}
@@ -274,7 +252,7 @@ export default function StudentExamsPage() {
                     </Button>
                   )}
                 </CardFooter>
-              </ScrollReveal>
+              </div>
             );
           })}
         </div>

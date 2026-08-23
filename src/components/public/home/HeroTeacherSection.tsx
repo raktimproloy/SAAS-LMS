@@ -54,8 +54,8 @@ export function HeroTeacherSection({ teacher, hideButtons = false, showStatsCard
       <div className="max-w-7xl mx-auto w-full relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
 
-          {/* Left: Image */}
-          <div className="relative order-1 flex justify-center">
+          {/* Left: Image (on desktop) */}
+          <div className="relative order-2 lg:order-1 flex justify-center">
             <div className="relative max-w-sm w-full">
               <Image
                 src={image}
@@ -68,8 +68,8 @@ export function HeroTeacherSection({ teacher, hideButtons = false, showStatsCard
             </div>
           </div>
 
-          {/* Right: Bio & Info */}
-          <div className="order-2 space-y-5 text-center lg:text-left">
+          {/* Right: Bio & Info (on desktop) */}
+          <div className="order-1 lg:order-2 space-y-5 text-center lg:text-left">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}

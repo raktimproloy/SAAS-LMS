@@ -6,7 +6,6 @@ import { Navigation, Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useRef } from "react";
 
 type DemoVideo = {
   id: number;
@@ -14,9 +13,6 @@ type DemoVideo = {
 };
 
 export function DemoClassSection({ videos = [], sectionTitle }: { videos?: DemoVideo[], sectionTitle?: string }) {
-  const prevRef = useRef<HTMLButtonElement>(null);
-  const nextRef = useRef<HTMLButtonElement>(null);
-
   if (!videos || videos.length === 0) {
     return null;
   }
@@ -44,7 +40,7 @@ export function DemoClassSection({ videos = [], sectionTitle }: { videos?: DemoV
           </h2>
         </div>
 
-        <div className="relative group/slider px-12">
+        <div className="relative group/slider px-4 sm:px-12">
           <Swiper
             modules={[Navigation, Autoplay]}
             spaceBetween={30}
@@ -57,14 +53,8 @@ export function DemoClassSection({ videos = [], sectionTitle }: { videos?: DemoV
               disableOnInteraction: false,
             }}
             navigation={{
-              prevEl: prevRef.current,
-              nextEl: nextRef.current,
-            }}
-            onBeforeInit={(swiper) => {
-              // @ts-ignore
-              swiper.params.navigation.prevEl = prevRef.current;
-              // @ts-ignore
-              swiper.params.navigation.nextEl = nextRef.current;
+              prevEl: '.demo-swiper-prev',
+              nextEl: '.demo-swiper-next',
             }}
             breakpoints={{
               768: {
@@ -96,15 +86,13 @@ export function DemoClassSection({ videos = [], sectionTitle }: { videos?: DemoV
 
           {/* Custom Navigation Arrows */}
           <button 
-            ref={prevRef}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 border border-border shadow-md text-foreground hover:bg-slate-100 dark:hover:bg-slate-700 transition-all opacity-0 group-hover/slider:opacity-100 disabled:opacity-0"
+            className="demo-swiper-prev absolute left-0 sm:left-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 border border-border shadow-md text-foreground hover:bg-slate-100 dark:hover:bg-slate-700 transition-all opacity-100 sm:opacity-0 sm:group-hover/slider:opacity-100 disabled:opacity-50"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
           
           <button 
-            ref={nextRef}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 border border-border shadow-md text-foreground hover:bg-slate-100 dark:hover:bg-slate-700 transition-all opacity-0 group-hover/slider:opacity-100 disabled:opacity-0"
+            className="demo-swiper-next absolute right-0 sm:right-0 top-1/2 -translate-y-1/2 z-20 w-10 h-10 flex items-center justify-center rounded-full bg-white dark:bg-slate-800 border border-border shadow-md text-foreground hover:bg-slate-100 dark:hover:bg-slate-700 transition-all opacity-100 sm:opacity-0 sm:group-hover/slider:opacity-100 disabled:opacity-50"
           >
             <ChevronRight className="w-5 h-5" />
           </button>

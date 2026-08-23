@@ -1,3 +1,4 @@
+
 import { Building2, Target, History, Trophy, Users, GraduationCap, Quote } from "lucide-react";
 import Image from "next/image";
 import prisma from "@/lib/db";

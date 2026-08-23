@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { verifyToken } from "@/lib/jwt";
 import { cookies } from "next/headers";
 
+export const dynamic = 'force-dynamic';
 // Middleware equivalent to verify if super_admin
 async function checkSuperAdmin() {
   const token = cookies().get("admin_token")?.value;

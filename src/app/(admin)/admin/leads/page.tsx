@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Lead {
   id: number;
@@ -80,15 +81,15 @@ export default function LeadsAdminPage() {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="p-4 sm:p-6 space-y-6" data-aos="fade-up">
+      <div className="flex justify-between items-center" data-aos="fade-down">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Leads & Inquiries</h1>
-          <p className="text-muted-foreground">Manage form submissions from contact forms and marketing pages.</p>
+          <p className="text-muted-foreground text-sm sm:text-base mt-1">Manage form submissions from contact forms and marketing pages.</p>
         </div>
       </div>
 
-      <div className="bg-card rounded-xl border shadow-sm overflow-hidden">
+      <div className="bg-card rounded-xl border shadow-sm overflow-x-auto" data-aos="fade-up" data-aos-delay="100">
         <Table>
           <TableHeader className="bg-muted/50">
             <TableRow>
@@ -102,11 +103,27 @@ export default function LeadsAdminPage() {
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow>
-                <TableCell colSpan={6} className="h-32 text-center">
-                  <Loader2 className="w-6 h-6 animate-spin mx-auto text-muted-foreground" />
-                </TableCell>
-              </TableRow>
+              Array.from({ length: 5 }).map((_, i) => (
+                <TableRow key={i}>
+                  <TableCell>
+                    <div className="flex flex-col gap-2">
+                      <Skeleton className="h-5 w-32" />
+                      <Skeleton className="h-4 w-24" />
+                      <Skeleton className="h-3 w-40" />
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-col gap-2">
+                      <Skeleton className="h-4 w-32" />
+                      <Skeleton className="h-5 w-16 rounded" />
+                    </div>
+                  </TableCell>
+                  <TableCell><Skeleton className="h-4 w-40" /></TableCell>
+                  <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                  <TableCell><Skeleton className="h-8 w-[130px] rounded-md" /></TableCell>
+                  <TableCell className="text-right"><Skeleton className="h-8 w-8 rounded-md ml-auto" /></TableCell>
+                </TableRow>
+              ))
             ) : leads.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">

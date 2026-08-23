@@ -8,8 +8,6 @@ import { Clock, CheckCircle2, XCircle, AlertCircle, ChevronDown, ChevronUp } fro
 import { useRouter } from "next/navigation";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { StudentBottomNav } from "@/components/student/StudentBottomNav";
-import AOS from "aos";
-import "aos/dist/aos.css";
 
 interface Question {
   id: number;
@@ -76,12 +74,6 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
     
     setIsReady(true);
     
-    AOS.init({
-      duration: 400,
-      once: true,
-      easing: "ease-out-cubic",
-      offset: 0,
-    });
   }, [examId, durationMinutes]);
 
   // Save answers whenever they change (Auto-save)

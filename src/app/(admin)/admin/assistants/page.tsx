@@ -30,6 +30,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Assistant {
   id: number;
@@ -163,11 +164,11 @@ export default function AssistantsPage() {
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col gap-6 p-4 sm:p-6" data-aos="fade-up">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4" data-aos="fade-down">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Assistants Team</h1>
-          <p className="text-muted-foreground mt-1">Manage your team and their permissions.</p>
+          <p className="text-muted-foreground mt-1 text-sm sm:text-base">Manage your team and their permissions.</p>
         </div>
 
         <Dialog open={isDialogOpen} onOpenChange={(open) => {
@@ -175,12 +176,12 @@ export default function AssistantsPage() {
           if (!open) resetForm();
         }}>
           <DialogTrigger asChild>
-            <Button className="gap-2" onClick={resetForm}>
+            <Button className="gap-2 w-full sm:w-auto" onClick={resetForm}>
               <Plus className="h-4 w-4" />
               Add Assistant
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[500px]">
+          <DialogContent className="sm:max-w-[500px] w-[95vw] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editingId ? "Edit Assistant" : "Add New Assistant"}</DialogTitle>
             </DialogHeader>
@@ -242,19 +243,14 @@ export default function AssistantsPage() {
         </Dialog>
       </div>
 
-      <Card className="border-none shadow-sm dark:bg-slate-800/50">
+      <Card className="border-none shadow-sm dark:bg-slate-800/50" data-aos="fade-up" data-aos-delay="100">
         <CardHeader>
           <CardTitle>Team Members</CardTitle>
         </CardHeader>
-        <CardContent>
-          {loading ? (
-            <p className="text-sm text-muted-foreground">Loading...</p>
-          ) : assistants.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">No assistants found. Add one to get started.</p>
-          ) : (
-            <div className="overflow-x-auto">
+        <CardContent className="p-0 sm:p-6">
+            <div className="overflow-x-auto rounded-md border border-slate-100 dark:border-slate-800">
               <Table>
-                <TableHeader>
+                <TableHeader className="bg-slate-50/50 dark:bg-slate-800/50">
                   <TableRow>
                     <TableHead>Name</TableHead>
                     <TableHead>Email</TableHead>
@@ -264,8 +260,30 @@ export default function AssistantsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {assistants.map((assistant) => (
-                    <TableRow key={assistant.id}>
+                  {loading ? (
+                    Array.from({ length: 4 }).map((_, i) => (
+                      <TableRow key={i}>
+                        <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                        <TableCell><Skeleton className="h-4 w-40" /></TableCell>
+                        <TableCell>
+                          <div className="flex gap-1">
+                            <Skeleton className="h-5 w-16 rounded-full" />
+                            <Skeleton className="h-5 w-16 rounded-full" />
+                          </div>
+                        </TableCell>
+                        <TableCell><Skeleton className="h-5 w-16 rounded-full" /></TableCell>
+                        <TableCell className="text-right"><Skeleton className="h-8 w-8 rounded-md ml-auto" /></TableCell>
+                      </TableRow>
+                    ))
+                  ) : assistants.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                        No assistants found. Add one to get started.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    assistants.map((assistant) => (
+                      <TableRow key={assistant.id}>
                       <TableCell className="font-medium">{assistant.name}</TableCell>
                       <TableCell>{assistant.email}</TableCell>
                       <TableCell>
@@ -312,12 +330,12 @@ export default function AssistantsPage() {
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
-                    </TableRow>
-                  ))}
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </div>
-          )}
         </CardContent>
       </Card>
     </div>

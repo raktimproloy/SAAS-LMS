@@ -31,6 +31,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MoreHorizontal } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function ExpensesPage() {
   const [expenses, setExpenses] = useState<any[]>([]);
@@ -177,8 +178,8 @@ export default function ExpensesPage() {
   };
 
   return (
-    <div className="flex flex-col gap-8 pb-10">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+    <div className="flex flex-col gap-8 pb-10 p-4 sm:p-6" data-aos="fade-up">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6" data-aos="fade-down">
         <div>
           <h1 className="text-3xl font-bold tracking-tight mb-2">Expenses</h1>
           <p className="text-muted-foreground">Manage institute expenses and bills.</p>
@@ -189,12 +190,12 @@ export default function ExpensesPage() {
           setIsDialogOpen(open);
         }}>
           <DialogTrigger asChild>
-            <Button className="gap-2 bg-red-600 hover:bg-red-700 shadow-md">
+            <Button className="gap-2 bg-red-600 hover:bg-red-700 shadow-md w-full sm:w-auto">
               <Plus className="h-4 w-4" />
               Add Expense
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[500px]">
+          <DialogContent className="sm:max-w-[500px] w-[95vw] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editingExpenseId ? "Edit Expense" : "Add Expense"}</DialogTitle>
             </DialogHeader>
@@ -244,7 +245,7 @@ export default function ExpensesPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" data-aos="fade-up" data-aos-delay="100">
         <Card className="shadow-sm border-red-100 dark:border-red-900/50">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Expense</CardTitle>
@@ -269,7 +270,7 @@ export default function ExpensesPage() {
       </div>
 
       {/* Filter Bar */}
-      <Card className="shadow-sm">
+      <Card className="shadow-sm" data-aos="fade-up" data-aos-delay="200">
         <CardContent className="p-4">
           <div className="flex flex-col md:flex-row gap-4 items-center">
             <div className="relative flex-1 w-full">
@@ -293,8 +294,21 @@ export default function ExpensesPage() {
       </Card>
 
       {/* Accordion List */}
-      <div className="space-y-4">
-        {Object.keys(groupedExpenses).length === 0 ? (
+      <div className="space-y-4" data-aos="fade-up" data-aos-delay="300">
+        {loading ? (
+          Array.from({ length: 3 }).map((_, i) => (
+            <Card key={i} className="overflow-hidden shadow-sm border-red-100/50 dark:border-red-900/20">
+              <div className="bg-red-50/50 dark:bg-red-950/20 px-4 py-3 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Skeleton className="h-4 w-4" />
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-5 w-16 rounded-full" />
+                </div>
+                <Skeleton className="h-5 w-24" />
+              </div>
+            </Card>
+          ))
+        ) : Object.keys(groupedExpenses).length === 0 ? (
           <div className="text-center py-10 bg-slate-50 dark:bg-slate-900 rounded-lg border border-dashed">
             <p className="text-muted-foreground">No expenses found.</p>
           </div>
@@ -324,7 +338,7 @@ export default function ExpensesPage() {
                 </div>
                 
                 {isExpanded && (
-                  <div className="border-t border-red-100 dark:border-red-900/30">
+                  <div className="border-t border-red-100 dark:border-red-900/30 overflow-x-auto">
                     <Table>
                       <TableHeader>
                         <TableRow className="bg-slate-50/50 dark:bg-slate-900/50 hover:bg-slate-50/50 dark:hover:bg-slate-900/50">

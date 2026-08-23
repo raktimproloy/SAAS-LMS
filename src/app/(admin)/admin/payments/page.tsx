@@ -44,6 +44,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Check, ChevronsUpDown } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const MONTHS = [
   "January", "February", "March", "April", "May", "June",
@@ -224,8 +225,8 @@ export default function FinancialPage() {
   const selectedStudentObj = students.find((s) => s.id.toString() === studentId);
 
   return (
-    <div className="flex flex-col gap-8 pb-10">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+    <div className="flex flex-col gap-8 pb-10" data-aos="fade-up">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6" data-aos="fade-down">
         <div>
           <h1 className="text-3xl font-bold tracking-tight mb-2">Financials</h1>
           <p className="text-muted-foreground">Manage payments, invoices, and summaries.</p>
@@ -374,56 +375,68 @@ export default function FinancialPage() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="shadow-sm border-emerald-100 dark:border-emerald-900/50">
+        <Card className="shadow-sm border-emerald-100 dark:border-emerald-900/50" data-aos="fade-up" data-aos-delay="100">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Net Collection</CardTitle>
             <DollarSign className="h-4 w-4 text-emerald-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
-              ৳{summary?.netCollected?.toLocaleString() || 0}
-            </div>
-            <p className="text-xs text-muted-foreground">Total collected - discount</p>
+            {loading ? <Skeleton className="h-8 w-24" /> : (
+              <>
+                <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                  ৳{summary?.netCollected?.toLocaleString() || 0}
+                </div>
+                <p className="text-xs text-muted-foreground">Total collected - discount</p>
+              </>
+            )}
           </CardContent>
         </Card>
-        <Card className="shadow-sm">
+        <Card className="shadow-sm" data-aos="fade-up" data-aos-delay="200">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Discount</CardTitle>
             <CreditCard className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
-              ৳{summary?.totalDiscount?.toLocaleString() || 0}
-            </div>
+            {loading ? <Skeleton className="h-8 w-24" /> : (
+              <div className="text-2xl font-bold">
+                ৳{summary?.totalDiscount?.toLocaleString() || 0}
+              </div>
+            )}
           </CardContent>
         </Card>
-        <Card className="shadow-sm">
+        <Card className="shadow-sm" data-aos="fade-up" data-aos-delay="300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Unique Students</CardTitle>
             <Users className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{summary?.studentCount || 0}</div>
+            {loading ? <Skeleton className="h-8 w-16" /> : (
+              <div className="text-2xl font-bold">{summary?.studentCount || 0}</div>
+            )}
           </CardContent>
         </Card>
-        <Card className="shadow-sm border-primary/20 bg-primary/5 dark:bg-primary/10">
+        <Card className="shadow-sm border-primary/20 bg-primary/5 dark:bg-primary/10" data-aos="fade-up" data-aos-delay="400">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-primary">Final Balance</CardTitle>
             <DollarSign className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-primary">
-              ৳{balance?.balance?.toLocaleString() || 0}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1 text-primary/70">
-              Net Collection (৳{balance?.netCollected || 0}) - Expenses (৳{balance?.totalExpense || 0})
-            </p>
+            {loading ? <Skeleton className="h-8 w-24 mb-1" /> : (
+              <>
+                <div className="text-2xl font-bold text-primary">
+                  ৳{balance?.balance?.toLocaleString() || 0}
+                </div>
+                <p className="text-xs text-muted-foreground mt-1 text-primary/70">
+                  Net Collection (৳{balance?.netCollected || 0}) - Expenses (৳{balance?.totalExpense || 0})
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
 
       {/* Filter Bar */}
-      <Card className="shadow-sm">
+      <Card className="shadow-sm" data-aos="fade-up" data-aos-delay="500">
         <CardContent className="p-4">
           <div className="flex flex-col md:flex-row gap-4 items-center">
             <div className="relative flex-1 w-full">
@@ -470,8 +483,55 @@ export default function FinancialPage() {
       </Card>
 
       {/* Accordion List */}
-      <div className="space-y-4">
-        {Object.keys(groupedPayments).length === 0 ? (
+      <div className="space-y-4" data-aos="fade-up" data-aos-delay="600">
+        {loading ? (
+          <Card className="overflow-hidden shadow-sm">
+            <div className="bg-slate-100/50 dark:bg-slate-800/50 px-4 py-3 flex items-center justify-between border-b">
+              <Skeleton className="h-6 w-48" />
+              <Skeleton className="h-6 w-24" />
+            </div>
+            <div>
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-slate-50/50 dark:bg-slate-900/50 hover:bg-slate-50/50 dark:hover:bg-slate-900/50">
+                    <TableHead>Invoice</TableHead>
+                    <TableHead>Student</TableHead>
+                    <TableHead>Type & Month</TableHead>
+                    <TableHead className="text-right">Amount</TableHead>
+                    <TableHead className="text-right">Discount</TableHead>
+                    <TableHead className="text-right">Net</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <TableRow key={i}>
+                      <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                      <TableCell>
+                        <div className="space-y-2">
+                          <Skeleton className="h-4 w-32" />
+                          <Skeleton className="h-3 w-24" />
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-2">
+                          <Skeleton className="h-4 w-24" />
+                          <Skeleton className="h-3 w-20" />
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
+                      <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
+                      <TableCell className="text-right"><Skeleton className="h-4 w-16 ml-auto" /></TableCell>
+                      <TableCell><Skeleton className="h-6 w-16 rounded-full" /></TableCell>
+                      <TableCell className="text-right"><Skeleton className="h-8 w-8 rounded-md ml-auto" /></TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </Card>
+        ) : Object.keys(groupedPayments).length === 0 ? (
           <div className="text-center py-10 bg-slate-50 dark:bg-slate-900 rounded-lg border border-dashed">
             <p className="text-muted-foreground">No payments found.</p>
           </div>

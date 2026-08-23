@@ -11,6 +11,7 @@ export default function ExamsLoading() {
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 md:gap-8">
         {[1, 2, 3, 4].map((i) => (
           <div key={i} className="flex flex-col relative rounded-3xl overflow-hidden bg-card/90 dark:bg-card/60 backdrop-blur-3xl border border-border shadow-lg">
+            <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full blur-2xl pointer-events-none bg-muted" />
             <div className="p-6 pb-4 border-b border-border">
               <div className="flex justify-between items-start mb-4">
                 <Skeleton className="h-6 w-20 rounded-full bg-muted" />

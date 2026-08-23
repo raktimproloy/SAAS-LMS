@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Database, ExternalLink, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function QuestionBankPage() {
   const [embedUrl, setEmbedUrl] = useState<string | null>(null);
@@ -45,15 +46,30 @@ export default function QuestionBankPage() {
 
   if (loading) {
     return (
-      <div className="flex h-[calc(100vh-4rem)] items-center justify-center">
-        <p className="text-muted-foreground">Loading Question Bank...</p>
+      <div className="flex flex-col h-[calc(100vh-4rem)] p-4 sm:p-6 space-y-4">
+        <div className="flex items-center justify-between pb-4 border-b">
+          <Skeleton className="h-6 w-32" />
+          <Skeleton className="h-4 w-24" />
+        </div>
+        <div className="flex-1 flex flex-col sm:flex-row gap-4">
+          <div className="w-full sm:w-64 space-y-4 shrink-0">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+          <div className="flex-1 space-y-4">
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-32 w-full" />
+          </div>
+        </div>
       </div>
     );
   }
 
   if (status === "unconfigured") {
     return (
-      <div className="p-6 max-w-lg">
+      <div className="p-4 sm:p-6 max-w-lg" data-aos="fade-up">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -78,7 +94,7 @@ export default function QuestionBankPage() {
 
   if (status === "inactive" || error) {
     return (
-      <div className="p-6 max-w-lg">
+      <div className="p-4 sm:p-6 max-w-lg" data-aos="fade-up">
         <Card className="border-amber-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-amber-800">
@@ -100,7 +116,7 @@ export default function QuestionBankPage() {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] -m-4 md:-m-6">
+    <div className="flex flex-col h-[calc(100vh-4rem)] sm:-m-4 md:-m-6" data-aos="fade-in">
       <div className="flex items-center justify-between px-4 py-2 border-b bg-muted/30 shrink-0">
         <div className="flex items-center gap-2 text-sm font-medium">
           <Database className="h-4 w-4 text-primary" />

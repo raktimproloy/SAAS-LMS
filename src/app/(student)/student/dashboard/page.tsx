@@ -37,31 +37,7 @@ type DashboardData = {
   allResults?: any[];
 };
 
-const ScrollReveal = ({ children, delay = 0, className = "" }: { children: React.ReactNode, delay?: number, className?: string }) => {
-  const [isVisible, setIsVisible] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
-        setTimeout(() => setIsVisible(true), delay);
-        observer.disconnect();
-      }
-    }, { threshold: 0.1 });
-    
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [delay]);
-
-  return (
-    <div 
-      ref={ref} 
-      className={`transition-all duration-700 ease-out fill-mode-both ${isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'} ${className}`}
-    >
-      {children}
-    </div>
-  );
-};
 
 export default function StudentDashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
@@ -102,9 +78,12 @@ export default function StudentDashboard() {
         : [];
 
   return (
-    <div className="flex flex-col gap-4 w-full animate-in fade-in duration-300">
+    <div className="flex flex-col gap-4 w-full">
       {/* Welcome */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shrink-0 animate-in slide-in-from-top-4 fade-in duration-500">
+      <div 
+        className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 shrink-0"
+        data-aos="fade-down"
+      >
         <h1 className="text-xl md:text-2xl font-bold tracking-tight text-foreground">
           Welcome back, {student?.name}!
         </h1>
@@ -131,18 +110,18 @@ export default function StudentDashboard() {
       </div>
 
       {/* 1. Calendar */}
-      <ScrollReveal delay={80}>
+      <div data-aos="fade-up" data-aos-delay="100">
         <AttendanceCalendar
           attendanceData={data?.attendance || []}
           reports={data?.reports || []}
           allResults={data?.allResults || []}
           readOnly={true}
         />
-      </ScrollReveal>
+      </div>
 
       {/* 2. Notices */}
-      <ScrollReveal
-        delay={160}
+      <div
+        data-aos="fade-up" data-aos-delay="200"
         className="bg-card/90 dark:bg-card/40 backdrop-blur-2xl border border-border rounded-2xl p-4 md:p-5 shadow-lg flex flex-col min-h-[220px]"
       >
         <div className="flex justify-between items-center mb-3 shrink-0">
@@ -174,11 +153,11 @@ export default function StudentDashboard() {
             </div>
           )}
         </div>
-      </ScrollReveal>
+      </div>
 
       {/* 3. Recent 5 Results */}
-      <ScrollReveal
-        delay={240}
+      <div
+        data-aos="fade-up" data-aos-delay="300"
         className="bg-card/90 dark:bg-card/40 backdrop-blur-2xl border border-border rounded-2xl p-4 md:p-5 shadow-xl flex flex-col"
       >
         <div className="flex justify-between items-center mb-3 shrink-0">
@@ -264,11 +243,11 @@ export default function StudentDashboard() {
             <p className="text-muted-foreground font-medium text-sm">No results yet.</p>
           </div>
         )}
-      </ScrollReveal>
+      </div>
 
       {/* 4. Next Exam */}
-      <ScrollReveal
-        delay={320}
+      <div
+        data-aos="fade-up" data-aos-delay="400"
         className="bg-card/90 dark:bg-card/40 backdrop-blur-3xl border border-border rounded-2xl p-4 md:p-5 shadow-xl relative overflow-hidden group flex flex-col"
       >
         <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/20 rounded-full blur-2xl pointer-events-none group-hover:scale-150 transition-transform duration-700" />
@@ -322,7 +301,7 @@ export default function StudentDashboard() {
             </Button>
           )}
         </div>
-      </ScrollReveal>
+      </div>
     </div>
   );
 }
