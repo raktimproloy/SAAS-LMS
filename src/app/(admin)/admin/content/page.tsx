@@ -56,6 +56,11 @@ export default function ContentManagementPage() {
   const [teacherBio, setTeacherBio] = useState("");
   const [teacherQualifications, setTeacherQualifications] = useState("");
   const [teacherPhoto, setTeacherPhoto] = useState("");
+  const [teacherVideoUrl, setTeacherVideoUrl] = useState("");
+  const [teacherStats, setTeacherStats] = useState([
+    { label: "সর্বমোট শিক্ষার্থী", value: "৫০০০+" },
+    { label: "সাফল্যের হার", value: "৯৮%" }
+  ]);
   const [isUploadingHero, setIsUploadingHero] = useState(false);
 
   // Payment Types states
@@ -78,6 +83,20 @@ export default function ContentManagementPage() {
           setTeacherBio(heroData.bio || "");
           setTeacherQualifications(heroData.qualifications || "");
           setTeacherPhoto(heroData.photo || "");
+          setTeacherVideoUrl(heroData.video_url || "");
+          if (heroData.stats) {
+            try {
+              const parsedStats = typeof heroData.stats === 'string' ? JSON.parse(heroData.stats) : heroData.stats;
+              if (Array.isArray(parsedStats) && parsedStats.length > 0) {
+                // Ensure we only keep 2 stats in admin UI as well, padding if necessary
+                const displayStats = parsedStats.slice(0, 2);
+                while (displayStats.length < 2) {
+                  displayStats.push({ label: "", value: "" });
+                }
+                setTeacherStats(displayStats);
+              }
+            } catch(e) {}
+          }
         }
       }
       if (ptRes.ok) setPaymentTypes(await ptRes.json());
@@ -104,7 +123,9 @@ export default function ContentManagementPage() {
           name: teacherName,
           bio: teacherBio,
           qualifications: teacherQualifications,
-          photo: teacherPhoto
+          photo: teacherPhoto,
+          video_url: teacherVideoUrl,
+          stats: JSON.stringify(teacherStats)
         }),
       });
       if (res.ok) alert("Hero banner updated successfully!");
@@ -302,6 +323,47 @@ export default function ContentManagementPage() {
                       </div>
                     )}
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Intro Video URL (YouTube Embed)</Label>
+                  <Input 
+                    value={teacherVideoUrl} 
+                    onChange={(e) => setTeacherVideoUrl(e.target.value)} 
+                    placeholder="https://www.youtube.com/embed/..." 
+                  />
+                </div>
+
+                <div className="space-y-4 border p-4 rounded-md">
+                  <Label className="font-semibold text-base">Stats (e.g. Total Students, Success Rate)</Label>
+                  {teacherStats.map((stat, idx) => (
+                    <div key={idx} className="flex gap-4 items-center">
+                      <div className="flex-1 space-y-1">
+                        <Label className="text-xs text-muted-foreground">Label</Label>
+                        <Input 
+                          value={stat.label}
+                          onChange={(e) => {
+                            const newStats = [...teacherStats];
+                            newStats[idx].label = e.target.value;
+                            setTeacherStats(newStats);
+                          }}
+                          placeholder="e.g. সর্বমোট শিক্ষার্থী"
+                        />
+                      </div>
+                      <div className="flex-1 space-y-1">
+                        <Label className="text-xs text-muted-foreground">Value</Label>
+                        <Input 
+                          value={stat.value}
+                          onChange={(e) => {
+                            const newStats = [...teacherStats];
+                            newStats[idx].value = e.target.value;
+                            setTeacherStats(newStats);
+                          }}
+                          placeholder="e.g. ৫০০০+"
+                        />
+                      </div>
+                    </div>
+                  ))}
                 </div>
 
                 <div className="pt-4 border-t mt-6">

@@ -3,8 +3,15 @@
 import { useState } from "react";
 import { Play, BookOpen, HeartPulse } from "lucide-react";
 
-export function TeacherBioSection() {
+export function TeacherBioSection({ teacher }: { teacher: any }) {
   const [isPlaying, setIsPlaying] = useState(false);
+
+  // Parse stats safely
+  let stats: any[] = [];
+  try {
+    stats = typeof teacher?.stats === 'string' ? JSON.parse(teacher.stats) : (teacher?.stats || []);
+    if (!Array.isArray(stats)) stats = [];
+  } catch(e) {}
 
   return (
     <section className="py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
@@ -18,36 +25,33 @@ export function TeacherBioSection() {
           {/* Left: Bio Section */}
           <div data-aos="fade-right">
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4 leading-tight">
-              ডাঃ রাকিবুল ইসলাম
+              {teacher?.name || "ডাঃ রাকিবুল ইসলাম"}
             </h2>
             <h3 className="text-xl text-primary font-medium mb-6">
-              MBBS (DMC), FCPS (Medicine)
+              {teacher?.qualifications || "MBBS (DMC), FCPS (Medicine)"}
             </h3>
 
             <p className="text-foreground text-lg leading-relaxed mb-8">
-              বিগত ১০ বছর ধরে শিক্ষার্থীদের বাংলা ভাষার প্রতি ভালোবাসা তৈরি করতে ও পরীক্ষায় সেরা ফলাফল অর্জনে কাজ করে যাচ্ছি। আমার লক্ষ্য হলো প্রতিটি শিক্ষার্থী যেন শুধু মুখস্থ না করে, বরং বাংলা ভাষার সৌন্দর্য ও গভীরতা হৃদয় দিয়ে অনুভব করে শিখতে পারে। আমার ক্লাসে আপনি পাবেন সাহিত্য ও ব্যাকরণের এক অপূর্ব সমন্বয়।
+              {teacher?.bio || "বিগত ১০ বছর ধরে শিক্ষার্থীদের বাংলা ভাষার প্রতি ভালোবাসা তৈরি করতে ও পরীক্ষায় সেরা ফলাফল অর্জনে কাজ করে যাচ্ছি।"}
             </p>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-              <div className="flex items-center gap-4 p-4 rounded-lg bg-card border border-border hover:border-primary/30 transition-colors shadow-sm">
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                  <HeartPulse className="w-6 h-6" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-foreground text-lg">১০,০০০+</h4>
-                  <p className="text-sm text-foreground/90">সফল শিক্ষার্থী</p>
-                </div>
+            {stats.length > 0 && (
+              <div className="flex flex-col sm:flex-row gap-4 mb-8">
+                {stats.slice(0, 2).map((stat: any, index: number) => (
+                  <div 
+                    key={index} 
+                    className="flex-1 px-6 py-5 rounded-xl bg-card border border-border shadow-sm hover:border-primary/30 hover:shadow-md transition-all duration-300"
+                  >
+                    <h4 className="text-3xl font-bold mb-1 text-foreground">
+                      {stat.value}
+                    </h4>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      {stat.label}
+                    </p>
+                  </div>
+                ))}
               </div>
-              <div className="flex items-center gap-4 p-4 rounded-lg bg-card border border-border hover:border-sky-500/30 transition-colors shadow-sm">
-                <div className="w-12 h-12 rounded-full bg-sky-500/10 flex items-center justify-center text-sky-500 shrink-0">
-                  <BookOpen className="w-6 h-6" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-foreground text-lg">১০+ বছর</h4>
-                  <p className="text-sm text-foreground/90">শিক্ষকতার অভিজ্ঞতা</p>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
 
           {/* Right: Video Player */}
@@ -66,7 +70,7 @@ export function TeacherBioSection() {
                   {/* Thumbnail Image */}
                   <div
                     className="absolute inset-0 bg-cover bg-center opacity-70 group-hover:opacity-50 transition-all duration-700 group-hover:scale-105"
-                    style={{ backgroundImage: `url('https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80')` }}
+                    style={{ backgroundImage: `url('${teacher?.photo || 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80'}')` }}
                   />
 
                   {/* Play Button */}
@@ -84,7 +88,7 @@ export function TeacherBioSection() {
                   <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 bg-gradient-to-t from-black/90 via-black/50 to-transparent transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300 z-10 pointer-events-none">
                     <div className="flex items-center gap-3">
                       <span className="px-2.5 py-1 bg-primary text-white text-xs font-bold rounded-md tracking-wider">INTRO</span>
-                      <span className="text-white font-medium text-sm sm:text-base">Institute Web সম্পর্কে জানুন</span>
+                      <span className="text-white font-medium text-sm sm:text-base">{teacher?.name ? `${teacher.name} সম্পর্কে জানুন` : 'Institute Web সম্পর্কে জানুন'}</span>
                     </div>
                   </div>
                 </div>
@@ -92,8 +96,8 @@ export function TeacherBioSection() {
                 <div className="absolute inset-0 w-full h-full bg-black">
                   <iframe
                     className="w-full h-full"
-                    src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0&modestbranding=1"
-                    title="Institute Web Intro"
+                    src={teacher?.video_url || "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0&modestbranding=1"}
+                    title="Intro"
                     frameBorder="0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen

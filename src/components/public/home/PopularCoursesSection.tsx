@@ -3,8 +3,16 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, ChevronDown, Clock, Calendar, Users } from "lucide-react";
+import { ArrowRight, ChevronDown, Clock, Calendar, Users, Loader2, Send, CheckCircle2 } from "lucide-react";
 import { formatTimeRangeBengali, translateDayToBengali } from "@/lib/bengali";
+import { submitContactForm } from "./actions";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 export interface CourseBatch {
   id: number;
@@ -26,6 +34,7 @@ export interface CompactCourse {
 
 interface PopularCoursesSectionProps {
   courses?: CompactCourse[];
+  showAll?: boolean; // If true, shows all courses without "see all" link
 }
 
 const fallbackCourses: CompactCourse[] = [
@@ -87,7 +96,111 @@ function formatPrice(fee: number | null, discountFee: number | null) {
   return null;
 }
 
-export function PopularCoursesSection({ courses }: PopularCoursesSectionProps) {
+function EnrollDialog({ courseId, courseName }: { courseId: number | string; courseName: string }) {
+  const [formData, setFormData] = useState({ name: "", phone: "", message: "" });
+  const [submitting, setSubmitting] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    const res = await submitContactForm({
+      name: formData.name,
+      phone: formData.phone,
+      course_id: typeof courseId === "number" ? courseId : parseInt(courseId as string) || undefined,
+      message: formData.message,
+    });
+
+    if (res.success) {
+      setSuccess(true);
+      setFormData({ name: "", phone: "", message: "" });
+      setTimeout(() => {
+        setSuccess(false);
+        setOpen(false);
+      }, 3000);
+    } else {
+      alert("Something went wrong. Please try again.");
+    }
+    setSubmitting(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <button
+          type="button"
+          className="shrink-0 px-4 py-1.5 rounded-lg text-xs font-bold bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
+        >
+          ভর্তি হোন
+        </button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>ভর্তির জন্য যোগাযোগ করুন</DialogTitle>
+          <p className="text-sm text-muted-foreground mt-1">{courseName}</p>
+        </DialogHeader>
+
+        {success ? (
+          <div className="flex flex-col items-center justify-center py-8 text-center">
+            <div className="w-16 h-16 bg-green-100 dark:bg-green-500/10 rounded-full flex items-center justify-center mb-5">
+              <CheckCircle2 className="w-8 h-8 text-green-600 dark:text-green-500" />
+            </div>
+            <h4 className="text-xl font-bold text-foreground mb-2">ধন্যবাদ!</h4>
+            <p className="text-muted-foreground text-sm max-w-[280px] mx-auto">
+              আপনার তথ্য সফলভাবে জমা হয়েছে। আমাদের প্রতিনিধি দ্রুত আপনার সাথে যোগাযোগ করবেন।
+            </p>
+          </div>
+        ) : (
+          <form className="space-y-4 mt-2" onSubmit={handleSubmit}>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">শিক্ষার্থীর নাম *</label>
+              <input
+                type="text"
+                placeholder="আপনার পূর্ণ নাম"
+                value={formData.name}
+                onChange={e => setFormData({ ...formData, name: e.target.value })}
+                className="w-full px-4 py-2.5 rounded-xl bg-background border border-input focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">ফোন নম্বর *</label>
+              <input
+                type="tel"
+                placeholder="01XXXXXXXXX"
+                value={formData.phone}
+                onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                className="w-full px-4 py-2.5 rounded-xl bg-background border border-input focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">মেসেজ (ঐচ্ছিক)</label>
+              <textarea
+                rows={2}
+                placeholder="আপনার কিছু জানার থাকলে এখানে লিখুন..."
+                value={formData.message}
+                onChange={e => setFormData({ ...formData, message: e.target.value })}
+                className="w-full px-4 py-2.5 rounded-xl bg-background border border-input focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all resize-none"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="w-full flex items-center justify-center gap-2 py-3 mt-2 bg-primary text-primary-foreground font-bold text-base rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              {submitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
+              {submitting ? "সাবমিট হচ্ছে..." : "সাবমিট করুন"}
+            </button>
+          </form>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function PopularCoursesSection({ courses, showAll = false }: PopularCoursesSectionProps) {
   const displayCourses = courses && courses.length > 0 ? courses : fallbackCourses;
   const [openId, setOpenId] = useState<number | string | null>(null);
 
@@ -110,13 +223,6 @@ export function PopularCoursesSection({ courses }: PopularCoursesSectionProps) {
               আমাদের কোর্সসমূহ
             </h2>
           </div>
-          <Link
-            href="/courses"
-            className="group flex items-center gap-2 text-primary font-bold hover:text-primary/80 transition-colors text-sm"
-          >
-            সব কোর্স দেখুন
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </Link>
         </motion.div>
 
         <div className="flex flex-col gap-3">
@@ -161,9 +267,12 @@ export function PopularCoursesSection({ courses }: PopularCoursesSectionProps) {
                     >
                       <div className="px-5 pb-4 pt-1 border-t border-border/50">
                         {batches.length === 0 ? (
-                          <p className="text-sm text-muted-foreground py-4">
-                            এই কোর্সে এখন কোনো ব্যাচ নেই।
-                          </p>
+                          <div className="flex items-center justify-between py-4">
+                            <p className="text-sm text-muted-foreground">
+                              এই কোর্সে এখন কোনো ব্যাচ নেই।
+                            </p>
+                            <EnrollDialog courseId={c.id} courseName={c.title} />
+                          </div>
                         ) : (
                           <ul className="divide-y divide-border/40">
                             {batches.map((batch) => {
@@ -191,14 +300,9 @@ export function PopularCoursesSection({ courses }: PopularCoursesSectionProps) {
                                       ) : null}
                                     </div>
                                   </div>
-                                  <span
-                                    className={`self-start sm:self-center text-[10px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider border ${batch.status === "active" || batch.status === "PUBLISHED"
-                                        ? "bg-green-500/10 text-green-600 border-green-500/20"
-                                        : "bg-muted text-muted-foreground border-border"
-                                      }`}
-                                  >
-                                    {batch.status === "active" || batch.status === "PUBLISHED" ? "Open" : "Closed"}
-                                  </span>
+                                  <div className="flex items-center gap-3">
+                                    <EnrollDialog courseId={c.id} courseName={c.title} />
+                                  </div>
                                 </li>
                               );
                             })}

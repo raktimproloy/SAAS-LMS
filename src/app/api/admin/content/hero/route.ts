@@ -33,7 +33,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { name, bio, qualifications, photo } = body;
+    const { name, bio, qualifications, photo, video_url, stats } = body;
 
     const existingTeacher = await prisma.teacher.findFirst({
       orderBy: { created_at: "asc" }
@@ -47,7 +47,9 @@ export async function POST(request: Request) {
           name: name || existingTeacher.name, 
           bio, 
           qualifications, 
-          photo 
+          photo,
+          video_url,
+          stats: stats ? (typeof stats === 'string' ? JSON.parse(stats) : stats) : undefined
         }
       });
     } else {
@@ -56,7 +58,9 @@ export async function POST(request: Request) {
           name: name || "Teacher", 
           bio, 
           qualifications, 
-          photo 
+          photo,
+          video_url,
+          stats: stats ? (typeof stats === 'string' ? JSON.parse(stats) : stats) : undefined
         }
       });
     }

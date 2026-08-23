@@ -62,7 +62,7 @@ export function ContactSection() {
         {/* Header */}
         <div className="text-center mb-10" data-aos="fade-up">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground">
-            অ্যাডমিশন ও কন্টাক্ট
+            {config.contact_section_title || "অ্যাডমিশন ও কন্টাক্ট"}
           </h2>
         </div>
 
@@ -138,14 +138,22 @@ export function ContactSection() {
             <div className="bg-card border border-border rounded-xl p-6 sm:p-8 shadow-xl shadow-black/5 relative overflow-hidden h-full">
               <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-[50px]" />
 
-              <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-2">অনলাইনে ভর্তি / যোগাযোগ ফর্ম</h3>
-              <p className="text-foreground text-sm mb-6">নিচের ফর্মটি পূরণ করুন। আমাদের টিম খুব দ্রুত আপনার সাথে যোগাযোগ করবে।</p>
+              <h3 className="text-xl sm:text-2xl font-bold text-foreground mb-2">
+                {config.contact_form_title || "অনলাইনে ভর্তি / যোগাযোগ ফর্ম"}
+              </h3>
+              <p className="text-foreground text-sm mb-6">
+                {config.contact_form_description || "নিচের ফর্মটি পূরণ করুন। আমাদের টিম খুব দ্রুত আপনার সাথে যোগাযোগ করবে।"}
+              </p>
 
               {success ? (
-                <div className="flex flex-col items-center justify-center h-64 text-center space-y-4">
-                  <CheckCircle2 className="w-16 h-16 text-green-500 animate-bounce" />
-                  <h4 className="text-xl font-bold text-foreground">ধন্যবাদ!</h4>
-                  <p className="text-muted-foreground">আপনার তথ্য সফলভাবে জমা হয়েছে। আমরা শীঘ্রই আপনার সাথে যোগাযোগ করবো।</p>
+                <div className="flex flex-col items-center justify-center h-64 text-center">
+                  <div className="w-16 h-16 bg-green-100 dark:bg-green-500/10 rounded-full flex items-center justify-center mb-6">
+                    <CheckCircle2 className="w-8 h-8 text-green-600 dark:text-green-500" />
+                  </div>
+                  <h4 className="text-xl font-bold text-foreground mb-2">ধন্যবাদ!</h4>
+                  <p className="text-muted-foreground text-sm max-w-sm mx-auto">
+                    আপনার তথ্য সফলভাবে জমা হয়েছে। আমাদের প্রতিনিধি দ্রুত আপনার সাথে যোগাযোগ করবেন।
+                  </p>
                 </div>
               ) : (
                 <form className="space-y-5 relative z-10" onSubmit={handleSubmit}>

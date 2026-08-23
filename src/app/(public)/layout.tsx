@@ -37,7 +37,7 @@ export default async function PublicLayout({
       <div className="relative z-10 flex flex-col flex-1 min-h-screen">
         <Navbar initialLoginState={initialLoginState} siteName={siteName} siteLogo={siteLogo} />
         <main className="flex-1">{children}</main>
-        <Footer siteName={siteName} siteLogo={siteLogo} />
+        <Footer siteName={siteName} siteLogo={siteLogo} config={config} />
       </div>
       <FloatingActions />
       <PWAInstallPrompt />

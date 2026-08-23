@@ -1,36 +1,32 @@
-"use client";
-
-import { useEffect } from "react";
-import AOS from "aos";
-import "aos/dist/aos.css";
 import { Building2, Target, History, Trophy, Users, GraduationCap, Quote } from "lucide-react";
 import Image from "next/image";
+import prisma from "@/lib/db";
 
-import { HeroTeacherSection } from "@/components/public/home/HeroTeacherSection";
 import { TeacherBioSection } from "@/components/public/home/TeacherBioSection";
 import { GallerySection } from "@/components/public/home/GallerySection";
 import { MapSection } from "@/components/public/home/MapSection";
 import { ContactSection } from "@/components/public/home/ContactSection";
+import { AboutStatsCards } from "@/components/public/about/AboutStatsCards";
+import { AOSInit } from "./AOSInit";
 
-const stats = [
-  { id: 1, label: "সর্বমোট শিক্ষার্থী", value: "৫০০০+", icon: Users, color: "text-blue-500" },
-  { id: 2, label: "সাফল্যের হার", value: "৯৮%", icon: Trophy, color: "text-emerald-500" },
-  { id: 3, label: "অভিজ্ঞ শিক্ষক", value: "১৫+", icon: GraduationCap, color: "text-purple-500" },
-  { id: 4, label: "প্রতিষ্ঠা সাল", value: "২০১৫", icon: History, color: "text-rose-500" },
-];
+export default async function AboutPage() {
+  const teacher = await prisma.teacher.findFirst({
+    orderBy: { created_at: "asc" }
+  });
 
-export default function AboutPage() {
-  useEffect(() => {
-    AOS.init({ duration: 700, easing: "ease-out-cubic", once: true, offset: 50 });
-  }, []);
+  // Parse stats safely
+  let stats: any[] = [];
+  try {
+    stats = typeof teacher?.stats === 'string' ? JSON.parse(teacher.stats) : (teacher?.stats || []);
+    if (!Array.isArray(stats)) stats = [];
+  } catch(e) {}
 
   return (
     <div>
-      <HeroTeacherSection teacher={null} hideButtons={true} showStatsCards={true} />
-
-
+      <AOSInit />
+      
       {/* 4. Teacher Bio Section */}
-      <TeacherBioSection />
+      <TeacherBioSection teacher={teacher} />
 
       {/* 5. Gallery Section */}
       <GallerySection />
@@ -40,7 +36,6 @@ export default function AboutPage() {
 
       {/* 7. Contact Section */}
       <ContactSection />
-
     </div>
   );
 }

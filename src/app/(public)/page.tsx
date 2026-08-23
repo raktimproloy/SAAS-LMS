@@ -22,8 +22,7 @@ async function fetchHomeData() {
       orderBy: { created_at: 'desc' }
     }),
     prisma.course.findMany({
-      take: 8,
-      orderBy: { created_at: 'desc' },
+      orderBy: { sort_order: 'asc' },
       where: { status: { in: ['PUBLISHED', 'active'] } },
       select: {
         id: true,
@@ -32,7 +31,7 @@ async function fetchHomeData() {
         discount_fee: true,
         batches: {
           where: { status: { in: ['active', 'PUBLISHED'] } },
-          orderBy: { created_at: 'desc' },
+          orderBy: { sort_order: 'asc' },
           select: {
             id: true,
             name: true,

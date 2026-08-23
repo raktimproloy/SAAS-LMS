@@ -262,6 +262,8 @@ model Teacher {
   specialist_subjects Json?
   experience          String?
   photo               String?  @db.Text
+  video_url           String?  @db.Text
+  stats               Json?
   sort_order          Int      @default(0)
   created_at          DateTime @default(now())
 

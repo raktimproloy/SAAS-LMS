@@ -18,35 +18,7 @@ const YoutubeIcon = () => (
 );
 
 
-const footerLinks = [
-  { label: "Home", href: "/" },
-  { label: "Courses", href: "/courses" },
-  { label: "About", href: "/about" },
-  { label: "Contact", href: "/contact" },
-  { label: "Student Login", href: "/student/login" },
-  { label: "Admin Login", href: "/admin/login" },
-];
 
-const socialLinks = [
-  {
-    label: "Facebook",
-    href: "https://facebook.com/instituteweb",
-    icon: FacebookIcon,
-    color: "hover:text-blue-500",
-  },
-  {
-    label: "YouTube",
-    href: "https://youtube.com/@instituteweb",
-    icon: YoutubeIcon,
-    color: "hover:text-red-500",
-  },
-  {
-    label: "WhatsApp",
-    href: "https://wa.me/8801XXXXXXXXX",
-    icon: WhatsAppIcon,
-    color: "hover:text-green-500",
-  },
-];
 
 const fadeUp: Variants = {
   hidden: { opacity: 0, y: 24 },
@@ -59,11 +31,29 @@ const fadeUp: Variants = {
 
 export function Footer({
   siteName = "DoctorBiology",
-  siteLogo = null
+  siteLogo = null,
+  config = {}
 }: {
   siteName?: string,
-  siteLogo?: string | null
+  siteLogo?: string | null,
+  config?: Record<string, string>
 }) {
+  const dynamicFooterLinks = [
+    { label: "Home", href: "/" },
+    { label: "Courses", href: "/courses" },
+    { label: "Student Login", href: "/student/login" },
+  ];
+
+  const dynamicSocialLinks = [];
+  if (config.social_facebook) {
+    dynamicSocialLinks.push({ label: "Facebook", href: config.social_facebook, icon: FacebookIcon, color: "hover:text-blue-500" });
+  }
+  if (config.social_youtube) {
+    dynamicSocialLinks.push({ label: "YouTube", href: config.social_youtube, icon: YoutubeIcon, color: "hover:text-red-500" });
+  }
+  if (config.contact_whatsapp) {
+    dynamicSocialLinks.push({ label: "WhatsApp", href: `https://wa.me/${config.contact_whatsapp.replace(/[^0-9]/g, '')}`, icon: WhatsAppIcon, color: "hover:text-green-500" });
+  }
   return (
     <footer className="relative bg-card border-t border-border text-card-foreground overflow-hidden">
       {/* Decorative top glow with animation */}
@@ -107,12 +97,12 @@ export function Footer({
               )}
             </Link>
             <p className="text-sm text-foreground/90 leading-relaxed max-w-xs">
-              মেডিকেল ভর্তি পরীক্ষা ও একাডেমিক প্রস্তুতির জন্য বাংলাদেশের সেরা অনলাইন প্ল্যাটফর্ম।
+              {config.footer_description || "মেডিকেল ভর্তি পরীক্ষা ও একাডেমিক প্রস্তুতির জন্য বাংলাদেশের সেরা অনলাইন প্ল্যাটফর্ম।"}
             </p>
 
             {/* Social Icons */}
             <div className="flex items-center gap-3 pt-2">
-              {socialLinks.map((s) => {
+              {dynamicSocialLinks.map((s) => {
                 const Icon = s.icon;
                 return (
                   <a
@@ -144,7 +134,7 @@ export function Footer({
           >
             <h3 className="text-foreground font-semibold text-sm uppercase tracking-wider">Quick Links</h3>
             <ul className="space-y-2.5">
-              {footerLinks.map((link) => (
+              {dynamicFooterLinks.map((link) => (
                 <li key={link.label}>
                   <Link
                     href={link.href}
@@ -171,24 +161,24 @@ export function Footer({
             <ul className="space-y-3">
               <li className="flex items-start gap-3 text-sm text-foreground/90">
                 <MapPin className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                <span>ঢাকা, বাংলাদেশ</span>
+                <span>{config.contact_address || "ঢাকা, বাংলাদেশ"}</span>
               </li>
               <li className="flex items-center gap-3 text-sm text-foreground/90">
                 <Phone className="h-4 w-4 text-primary shrink-0" />
-                <a href="tel:+8801XXXXXXXXX" className="hover:text-foreground transition-colors">
-                  +880 1XXXXXXXXX
+                <a href={`tel:${config.contact_phone || "+8801XXXXXXXXX"}`} className="hover:text-foreground transition-colors">
+                  {config.contact_phone || "+880 1XXXXXXXXX"}
                 </a>
               </li>
               <li className="flex items-center gap-3 text-sm text-foreground/90">
                 <Mail className="h-4 w-4 text-primary shrink-0" />
-                <a href="mailto:info@instituteweb.com" className="hover:text-foreground transition-colors">
-                  info@instituteweb.com
+                <a href={`mailto:${config.contact_email || "info@instituteweb.com"}`} className="hover:text-foreground transition-colors">
+                  {config.contact_email || "info@instituteweb.com"}
                 </a>
               </li>
               <li className="flex items-center gap-3 text-sm text-foreground/90">
                 <WhatsAppIcon className="h-4 w-4 text-green-500 shrink-0" />
                 <a
-                  href="https://wa.me/8801XXXXXXXXX"
+                  href={`https://wa.me/${(config.contact_whatsapp || "8801XXXXXXXXX").replace(/[^0-9]/g, '')}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-green-500 transition-colors"
@@ -199,11 +189,17 @@ export function Footer({
             </ul>
           </motion.div>
         </div>
+      </div>
 
-        {/* Bottom bar */}
-        <div className="mt-12 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-foreground/90">
-          <p>© {new Date().getFullYear()} Institute Web LMS. All rights reserved.</p>
-          <p>Made with ❤️ for Medical Students</p>
+      {/* Bottom bar - Full width border */}
+      <div className="border-t border-border bg-card/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-foreground/70">
+          <p>© {new Date().getFullYear()} {siteName}. All rights reserved.</p>
+          <div className="flex items-center flex-wrap gap-2 justify-center sm:justify-start font-medium text-foreground/80">
+            <span>Made with ❤️ for Students</span>
+            <span className="hidden sm:inline text-border">•</span>
+            <span className="text-foreground">Developed by Sudipto</span>
+          </div>
         </div>
       </div>
     </footer>
