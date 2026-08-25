@@ -22,7 +22,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     if (isNaN(id)) return NextResponse.json({ error: "Invalid ID" }, { status: 400 });
 
     const body = await request.json();
-    const { amount, discount, payment_type, due_amount, status, note, receipt_number, month, year } = body;
+    const { amount, discount, payment_type, due_amount, status, note, receipt_number, month, year, paid_at } = body;
 
     const existingPayment = await prisma.payment.findUnique({ where: { id } });
     if (!existingPayment) return NextResponse.json({ error: "Payment not found" }, { status: 404 });
@@ -38,6 +38,9 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     if (receipt_number !== undefined) updateData.receipt_number = receipt_number || null;
     if (month !== undefined) updateData.month = parseInt(month);
     if (year !== undefined) updateData.year = parseInt(year);
+    if (paid_at !== undefined) {
+      updateData.paid_at = paid_at ? new Date(`${paid_at}T12:00:00.000Z`) : null;
+    }
 
     // Update paid_at if status becomes paid or partial and wasn't before (simple logic)
     if ((status === "paid" || status === "partial") && existingPayment.status === "due") {

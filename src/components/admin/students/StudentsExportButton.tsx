@@ -80,7 +80,7 @@ function downloadCsv(rows: PrintRow[], filename: string) {
   URL.revokeObjectURL(url);
 }
 
-function openPrintWindow(rows: PrintRow[], orientation: "portrait" | "landscape", subtitle: string) {
+function openPrintWindow(rows: PrintRow[], orientation: "portrait" | "landscape", subtitle: string, instituteName: string) {
   if (!rows.length) {
     alert("No data available to print for this selection.");
     return;
@@ -145,7 +145,7 @@ function openPrintWindow(rows: PrintRow[], orientation: "portrait" | "landscape"
       </head>
       <body>
         <div class="date-time">Printed on: ${escapeHtml(new Date().toLocaleString())}</div>
-        <div class="institute">${escapeHtml(siteConfig.instituteName)}</div>
+        <div class="institute">${escapeHtml(instituteName)}</div>
         <h1>Students</h1>
         ${subtitle ? `<div class="subtitle">${escapeHtml(subtitle)}</div>` : ""}
         <div class="meta">Total: ${rows.length} student${rows.length === 1 ? "" : "s"}</div>
@@ -196,6 +196,16 @@ export function StudentsExportButton({
   const [orientation, setOrientation] = useState<"portrait" | "landscape">("portrait");
   const [printCourseId, setPrintCourseId] = useState("");
   const [printBatchId, setPrintBatchId] = useState("");
+  const [siteName, setSiteName] = useState(siteConfig.instituteName);
+
+  useEffect(() => {
+    fetch('/api/admin/content/site-settings')
+      .then(res => res.json())
+      .then(data => {
+        if (data.site_name) setSiteName(data.site_name);
+      })
+      .catch(console.error);
+  }, []);
 
   useEffect(() => {
     if (!modalOpen) return;
@@ -238,7 +248,7 @@ export function StudentsExportButton({
     setIsWorking(true);
     try {
       const list = await fetchPrintStudents(printCourseId, printBatchId);
-      openPrintWindow(toPrintRows(list), orientation, buildSubtitle());
+      openPrintWindow(toPrintRows(list), orientation, buildSubtitle(), siteName);
       setModalOpen(false);
     } catch (err) {
       alert(err instanceof Error ? err.message : "Failed to prepare print data.");
@@ -250,7 +260,7 @@ export function StudentsExportButton({
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border border-border bg-background px-2.5 text-sm font-medium hover:bg-muted hover:text-foreground disabled:opacity-50">
+        <DropdownMenuTrigger className="inline-flex h-8 cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-border bg-background px-2.5 text-sm font-medium hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50">
           <Download className="h-4 w-4" />
           Export / Print
           <ChevronDown className="h-4 w-4 opacity-70" />

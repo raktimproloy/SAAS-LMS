@@ -12,7 +12,6 @@ import {
   GraduationCap,
   MessageSquare,
   MoreHorizontal,
-  Pencil,
   Power,
   QrCode,
   Search,
@@ -170,11 +169,6 @@ export default function StudentsPage() {
 
   const handleAddClick = () => {
     setEditingStudent(null);
-    setIsDialogOpen(true);
-  };
-
-  const handleEditClick = (student: Student) => {
-    setEditingStudent(student);
     setIsDialogOpen(true);
   };
 
@@ -396,6 +390,7 @@ export default function StudentsPage() {
           </div>
         )}
 
+        <div className="overflow-x-auto">
         <Table>
           <TableHeader className="bg-muted/50">
             <TableRow className="hover:bg-transparent">
@@ -464,7 +459,7 @@ export default function StudentsPage() {
                       <TableCell className="w-10">
                         <button
                           type="button"
-                          className="rounded p-1.5 transition-colors hover:bg-muted"
+                          className="cursor-pointer rounded p-1.5 transition-colors hover:bg-muted"
                           onClick={(e) => {
                             e.stopPropagation();
                             toggleRow(student.id);
@@ -482,45 +477,55 @@ export default function StudentsPage() {
                           aria-label={`Select ${student.name}`}
                         />
                       </TableCell>
-                      <TableCell>
-                        <span className="font-mono text-xs text-muted-foreground">{student.student_id}</span>
+                      <TableCell className="max-w-[100px]">
+                        <span className="block truncate font-mono text-xs text-muted-foreground" title={student.student_id}>
+                          {student.student_id}
+                        </span>
                       </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
+                      <TableCell className="max-w-[180px]">
+                        <div className="flex min-w-0 items-center gap-3">
                           {student.photo ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
                               src={student.photo}
                               alt={student.name}
-                              className="h-12 w-12 rounded-full border-2 border-background object-cover shadow-sm ring-1 ring-border"
+                              className="h-12 w-12 shrink-0 rounded-full border-2 border-background object-cover shadow-sm ring-1 ring-border"
                             />
                           ) : (
-                            <div className="flex h-12 w-12 items-center justify-center rounded-full border border-primary/20 bg-primary/10 text-sm font-semibold text-primary shadow-sm">
+                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-primary/20 bg-primary/10 text-sm font-semibold text-primary shadow-sm">
                               {student.name?.charAt(0).toUpperCase()}
                             </div>
                           )}
                           <Link
                             href={`/admin/students/${student.id}`}
-                            className="font-medium text-primary hover:underline"
+                            className="min-w-0 truncate font-medium text-primary hover:underline"
+                            title={student.name}
                             onClick={(e) => e.stopPropagation()}
                           >
                             {student.name}
                           </Link>
                         </div>
                       </TableCell>
-                      <TableCell>{student.phone || "—"}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="font-normal">
-                          {student.batch?.course?.title || "—"}
-                        </Badge>
+                      <TableCell className="max-w-[120px]">
+                        <span className="block truncate" title={student.phone || undefined}>
+                          {student.phone || "—"}
+                        </span>
                       </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className="border-primary/20 bg-primary/10 font-normal text-primary"
+                      <TableCell className="max-w-[140px]">
+                        <span
+                          className="inline-block max-w-full truncate rounded-full border border-border px-2 py-0.5 text-xs font-normal text-foreground"
+                          title={student.batch?.course?.title || undefined}
+                        >
+                          {student.batch?.course?.title || "—"}
+                        </span>
+                      </TableCell>
+                      <TableCell className="max-w-[120px]">
+                        <span
+                          className="inline-block max-w-full truncate rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-xs font-normal text-primary"
+                          title={student.batch?.name || undefined}
                         >
                           {student.batch?.name || "—"}
-                        </Badge>
+                        </span>
                       </TableCell>
                       <TableCell>
                         <Badge
@@ -536,23 +541,25 @@ export default function StudentsPage() {
                       </TableCell>
                       <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                         <DropdownMenu>
-                          <DropdownMenuTrigger className="flex h-8 w-8 items-center justify-center rounded-md p-0 text-muted-foreground transition-colors hover:bg-muted">
+                          <DropdownMenuTrigger className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-md p-0 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
                             <span className="sr-only">Open menu</span>
                             <MoreHorizontal className="h-4 w-4" />
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-44">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => router.push(`/admin/students/${student.id}`)}>
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                router.push(`/admin/students/${student.id}`);
+                              }}
+                            >
                               <User className="h-4 w-4" />
                               View profile
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleEditClick(student)}>
-                              <Pencil className="h-4 w-4" />
-                              Edit
-                            </DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 setSmsTargetId(student.id);
                                 setSmsTargetName(student.name);
                                 setIsSmsOpen(true);
@@ -561,14 +568,22 @@ export default function StudentsPage() {
                               <MessageSquare className="h-4 w-4" />
                               Send SMS
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleToggleStatus(student)}>
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleToggleStatus(student);
+                              }}
+                            >
                               <Power className="h-4 w-4" />
                               {student.status === "active" ? "Deactivate" : "Activate"}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
                               variant="destructive"
-                              onClick={() => handleDeleteClick(student.id)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteClick(student.id);
+                              }}
                             >
                               <Trash2 className="h-4 w-4" />
                               Delete
@@ -580,7 +595,12 @@ export default function StudentsPage() {
                     {isExpanded && (
                       <TableRow className="hover:bg-transparent">
                         <TableCell colSpan={colCount} className="overflow-x-hidden border-b p-0">
-                          <StudentExpandedRow student={student} />
+                          <StudentExpandedRow
+                            student={student}
+                            courses={courses}
+                            batches={batches}
+                            onRefresh={fetchStudents}
+                          />
                         </TableCell>
                       </TableRow>
                     )}
@@ -608,6 +628,7 @@ export default function StudentsPage() {
             )}
           </TableBody>
         </Table>
+        </div>
 
         {!loading && (
           <div className="flex flex-col gap-3 border-t border-border px-4 py-3 lg:flex-row lg:items-center lg:justify-between">

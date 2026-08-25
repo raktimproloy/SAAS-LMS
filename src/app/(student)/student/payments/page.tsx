@@ -11,6 +11,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function StudentPaymentsPage() {
   const [payments, setPayments] = useState<{ id: number; status: string; month: string; year: string; amount: number; created_at: string | Date; payment_method: string | null }[]>([]);
   const [loading, setLoading] = useState(true);
+  const [siteName, setSiteName] = useState("Institute");
+
+  useEffect(() => {
+    fetch('/api/admin/content/site-settings')
+      .then(res => res.json())
+      .then(data => {
+        if (data.site_name) setSiteName(data.site_name);
+      })
+      .catch(console.error);
+  }, []);
 
   useEffect(() => {
     fetch('/api/student/payments')
@@ -92,7 +102,8 @@ export default function StudentPaymentsPage() {
         <body>
           <div class="receipt-box">
             <div class="header">
-              <h2>Payment Receipt</h2>
+              <h2>${siteName}</h2>
+              <p>Payment Receipt</p>
               <p>Thank you for your payment!</p>
             </div>
             <div class="row"><span>Receipt ID:</span> <strong>#PAY-${payment.id.toString().padStart(6, '0')}</strong></div>

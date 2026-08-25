@@ -34,10 +34,13 @@ interface AttendanceCalendarProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   allResults?: Array<any>;
   studentId?: number;
+  batchId?: number | null;
   readOnly?: boolean;
   /** Tighter cells — useful inside tables / narrow panels */
   compact?: boolean;
   className?: string;
+  onAttendanceUpdated?: () => void;
+  onReportAdded?: () => void;
 }
 
 function toDateKey(value: string | Date): string {
@@ -63,9 +66,12 @@ export function AttendanceCalendar({
   reports = [],
   allResults = [],
   studentId,
+  batchId,
   readOnly = true,
   compact = false,
   className,
+  onAttendanceUpdated,
+  onReportAdded,
 }: AttendanceCalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState<DayDetails | null>(null);
@@ -127,6 +133,7 @@ export function AttendanceCalendar({
   };
 
   const handleReportAdded = () => {
+    onReportAdded?.();
     router.refresh();
   };
 
@@ -305,7 +312,9 @@ export function AttendanceCalendar({
         details={selectedDay}
         readOnly={readOnly}
         studentId={studentId}
+        batchId={batchId}
         onReportAdded={handleReportAdded}
+        onAttendanceUpdated={onAttendanceUpdated}
       />
     </div>
   );

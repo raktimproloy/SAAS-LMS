@@ -30,6 +30,9 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { useRouter } from "next/navigation";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 // Define the permissions mapping for sidebar links
 type SidebarLink = {
@@ -96,7 +99,8 @@ const SidebarContent = ({
   setIsMobileOpen,
   handleLogout,
   siteName,
-  siteLogo
+  siteLogo,
+  hasFinancialPassword
 }: {
   pathname: string;
   user: AdminUser | null;
@@ -104,6 +108,7 @@ const SidebarContent = ({
   handleLogout: () => void;
   siteName: string;
   siteLogo: string | null;
+  hasFinancialPassword?: boolean;
 }) => {
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {};
@@ -115,8 +120,50 @@ const SidebarContent = ({
     return initial;
   });
 
+  const [isFinancialUnlocked, setIsFinancialUnlocked] = useState(false);
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [passwordInput, setPasswordInput] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [isVerifying, setIsVerifying] = useState(false);
+
   const toggleMenu = (name: string) => {
+    if (name === "Financial" && hasFinancialPassword && !isFinancialUnlocked) {
+      if (openMenus[name]) {
+        setOpenMenus(prev => ({ ...prev, [name]: false }));
+      } else {
+        setShowPasswordDialog(true);
+      }
+      return;
+    }
     setOpenMenus(prev => ({ ...prev, [name]: !prev[name] }));
+  };
+
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsVerifying(true);
+    setPasswordError("");
+    
+    try {
+      const res = await fetch("/api/admin/settings/financial-password/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: passwordInput })
+      });
+      
+      if (res.ok) {
+        setIsFinancialUnlocked(true);
+        setShowPasswordDialog(false);
+        setPasswordInput("");
+        setOpenMenus(prev => ({ ...prev, Financial: true }));
+      } else {
+        const data = await res.json();
+        setPasswordError(data.error || "Incorrect password");
+      }
+    } catch {
+      setPasswordError("An error occurred");
+    } finally {
+      setIsVerifying(false);
+    }
   };
 
   return (
@@ -238,6 +285,38 @@ const SidebarContent = ({
           Logout
         </Button>
       </div>
+
+      <Dialog open={showPasswordDialog} onOpenChange={(open) => {
+        if (!open) {
+          setShowPasswordDialog(false);
+          setPasswordInput("");
+          setPasswordError("");
+        }
+      }}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Authentication Required</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handlePasswordSubmit} className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Enter Financial Password</Label>
+              <Input
+                type="password"
+                value={passwordInput}
+                onChange={e => setPasswordInput(e.target.value)}
+                placeholder="Password"
+                autoFocus
+              />
+              {passwordError && <p className="text-sm text-red-500">{passwordError}</p>}
+            </div>
+            <div className="flex justify-end pt-2">
+              <Button type="submit" disabled={isVerifying}>
+                {isVerifying ? "Verifying..." : "Unlock"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
@@ -245,11 +324,13 @@ const SidebarContent = ({
 export function AdminLayout({ 
   children,
   siteName = "Institute Web",
-  siteLogo = null
+  siteLogo = null,
+  hasFinancialPassword = false
 }: { 
   children: React.ReactNode;
   siteName?: string;
   siteLogo?: string | null;
+  hasFinancialPassword?: boolean;
 }) {
   const pathname = usePathname();
   const isQuestionBank = pathname.startsWith("/admin/question-bank");
@@ -333,6 +414,7 @@ export function AdminLayout({
           handleLogout={handleLogout}
           siteName={siteName}
           siteLogo={siteLogo}
+          hasFinancialPassword={hasFinancialPassword}
         />
       </div>
 
@@ -354,6 +436,7 @@ export function AdminLayout({
                 handleLogout={handleLogout}
                 siteName={siteName}
                 siteLogo={siteLogo}
+                hasFinancialPassword={hasFinancialPassword}
               />
             </SheetContent>
           </Sheet>

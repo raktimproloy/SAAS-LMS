@@ -89,7 +89,7 @@ export default function QuestionBankPage() {
             </ul>
           </CardContent>
         </Card>
-      </motion.div>
+      </div>
     );
   }
 
@@ -112,7 +112,7 @@ export default function QuestionBankPage() {
             </Button>
           </CardContent>
         </Card>
-      </motion.div>
+      </div>
     );
   }
 
@@ -142,6 +142,6 @@ export default function QuestionBankPage() {
           allow="clipboard-write"
         />
       )}
-    </motion.div>
+    </div>
   );
 }

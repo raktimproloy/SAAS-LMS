@@ -6,6 +6,7 @@ import { Printer, CreditCard, LayoutGrid } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { siteConfig } from "@/config/site.config";
 
 interface Course {
   id: number;
@@ -63,6 +64,16 @@ export default function QRCardsPage() {
   const [batches, setBatches] = useState<Batch[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(false);
+  const [sitePhone, setSitePhone] = useState(siteConfig.contact.phone);
+
+  useEffect(() => {
+    fetch('/api/admin/content/site-settings')
+      .then(res => res.json())
+      .then(data => {
+        if (data.contact_phone) setSitePhone(data.contact_phone);
+      })
+      .catch(console.error);
+  }, []);
 
   const [selectedCourse, setSelectedCourse] = useState<string>("");
   const [selectedBatch, setSelectedBatch] = useState<string>("");
@@ -208,7 +219,7 @@ export default function QRCardsPage() {
             Institute Contact
           </h4>
           <div className="font-bold text-[18px] tracking-widest" style={{ color: t.primary }}>
-            001 123 456 789
+            {sitePhone}
           </div>
         </div>
 

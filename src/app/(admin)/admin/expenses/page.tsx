@@ -32,6 +32,95 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MoreHorizontal } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { siteConfig } from "@/config/site.config";
+
+function escapeHtml(value: unknown) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function formatMoney(n: number | null | undefined) {
+  return `৳${(n || 0).toLocaleString()}`;
+}
+
+function printExpensesReport(expenses: any[], subtitle: string, instituteName: string) {
+  if (!expenses.length) {
+    alert("No expenses to print for the selected filters.");
+    return;
+  }
+
+  const win = window.open("", "_blank");
+  if (!win) {
+    alert("Please allow popups to print.");
+    return;
+  }
+
+  const totalAmount = expenses.reduce((s, e) => s + (e.amount || 0), 0);
+
+  const rows = expenses
+    .map((e) => {
+      const date = e.expense_date;
+      return `<tr>
+        <td>${escapeHtml(date ? new Date(date).toLocaleDateString() : "—")}</td>
+        <td>${escapeHtml(e.title || "—")}</td>
+        <td>${escapeHtml(e.description || "—")}</td>
+        <td>${escapeHtml(e.expended_by || "—")}</td>
+        <td>${escapeHtml(e.permitted_by || "—")}</td>
+        <td class="right">${escapeHtml(String(e.amount || 0))}</td>
+      </tr>`;
+    })
+    .join("");
+
+  win.document.open();
+  win.document.write(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Expenses Report</title>
+  <style>
+    body { font-family: system-ui, sans-serif; color: #111; padding: 24px; }
+    h1 { font-size: 20px; margin: 0 0 4px; }
+    .sub { color: #555; font-size: 13px; margin-bottom: 16px; }
+    .summary { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; font-size: 13px; }
+    .summary span { background: #f3f4f6; padding: 6px 10px; border-radius: 6px; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th, td { border: 1px solid #ddd; padding: 6px 8px; text-align: left; vertical-align: top; }
+    th { background: #f3f4f6; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .right { text-align: right; }
+    @media print { .no-print { display: none; } }
+  </style>
+</head>
+<body>
+  <h1>${escapeHtml(instituteName)} — Expenses Report</h1>
+  <div class="sub">${escapeHtml(subtitle)} · Printed ${escapeHtml(new Date().toLocaleString())}</div>
+  <div class="summary">
+    <span>Records: <strong>${expenses.length}</strong></span>
+    <span>Total Amount: <strong>${escapeHtml(formatMoney(totalAmount))}</strong></span>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Title</th>
+        <th>Description</th>
+        <th>Expended By</th>
+        <th>Permitted By</th>
+        <th class="right">Amount</th>
+      </tr>
+    </thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <div class="no-print" style="margin-top:20px;text-align:center">
+    <button onclick="window.print()" style="padding:10px 20px;cursor:pointer;background:#111;color:#fff;border:none;border-radius:6px">Print</button>
+  </div>
+  <script>setTimeout(function(){ window.print(); }, 300);</script>
+</body>
+</html>`);
+  win.document.close();
+}
 
 export default function ExpensesPage() {
   const [expenses, setExpenses] = useState<any[]>([]);
@@ -59,6 +148,21 @@ export default function ExpensesPage() {
   const [permittedBy, setPermittedBy] = useState("");
   const [expenseDate, setExpenseDate] = useState(new Date().toISOString().split("T")[0]);
   const [note, setNote] = useState("");
+  const [siteName, setSiteName] = useState(siteConfig.instituteName);
+
+  useEffect(() => {
+    fetch('/api/admin/content/site-settings')
+      .then(res => res.json())
+      .then(data => {
+        if (data.site_name) setSiteName(data.site_name);
+      })
+      .catch(console.error);
+  }, []);
+
+  const printSubtitle = [
+    searchQuery ? `Search: "${searchQuery}"` : "",
+    startDate && endDate ? `From: ${startDate} To: ${endDate}` : startDate ? `From: ${startDate}` : endDate ? `To: ${endDate}` : ""
+  ].filter(Boolean).join(" | ");
 
   const fetchData = async () => {
     setLoading(true);
@@ -186,7 +290,7 @@ export default function ExpensesPage() {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-          <Button variant="outline" className="gap-2 w-full sm:w-auto print:hidden" onClick={() => window.print()}>
+          <Button variant="outline" className="gap-2 w-full sm:w-auto print:hidden" onClick={() => printExpensesReport(expenses, printSubtitle, siteName)} disabled={loading || expenses.length === 0}>
             <Printer className="h-4 w-4" />
             Print
           </Button>
@@ -339,8 +443,22 @@ export default function ExpensesPage() {
                     </h3>
                     <Badge variant="outline" className="ml-2 font-normal text-red-600 bg-red-100/50 border-red-200 dark:bg-red-900/30 dark:border-red-900">{dayExpenses.length} entries</Badge>
                   </div>
-                  <div className="font-bold text-red-600 dark:text-red-400">
-                    ৳{dayTotal.toLocaleString()}
+                  <div className="flex items-center gap-3">
+                    <div className="font-bold text-red-600 dark:text-red-400">
+                      ৳{dayTotal.toLocaleString()}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 cursor-pointer gap-1"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        printExpensesReport(dayExpenses, `Date: ${date}`, siteName);
+                      }}
+                    >
+                      <Printer className="h-3.5 w-3.5" />
+                      Print day
+                    </Button>
                   </div>
                 </div>
                 

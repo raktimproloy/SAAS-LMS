@@ -16,6 +16,7 @@ export default async function Layout({
   
   const siteName = config.site_name || "Institute Web";
   const siteLogo = config.site_logo || null;
+  const hasFinancialPassword = !!config.financial_password;
 
-  return <AdminLayout siteName={siteName} siteLogo={siteLogo}>{children}</AdminLayout>;
+  return <AdminLayout siteName={siteName} siteLogo={siteLogo} hasFinancialPassword={hasFinancialPassword}>{children}</AdminLayout>;
 }

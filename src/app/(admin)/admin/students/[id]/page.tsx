@@ -128,59 +128,77 @@ export default function StudentProfilePage() {
 
   return (
     <div className="flex flex-col gap-6 w-full animate-in fade-in duration-500 pb-10">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-2">
-        <div className="flex items-center gap-4">
+      <div className="flex w-full flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex min-w-0 items-center gap-4">
           <Button variant="outline" size="icon" onClick={() => router.back()}>
             <ArrowLeft className="w-4 h-4" />
           </Button>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Student Profile</h1>
-            <p className="text-muted-foreground">Manage details, attendance, results, and reports for {student.name}</p>
+          <div className="min-w-0">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
+              Student Profile
+            </h1>
+            <p className="text-sm text-muted-foreground sm:text-base">
+              Manage details, attendance, results, and reports for {student.name}
+            </p>
           </div>
         </div>
-        
-        {/* Custom Tab Switcher */}
-        <div className="flex p-1 bg-slate-200/50 dark:bg-slate-800/50 rounded-lg max-w-sm w-full md:w-auto h-12">
-          <button
-            onClick={() => setActiveTab("reports")}
-            className={cn(
-              "flex-1 flex items-center justify-center gap-2 py-2 px-6 rounded-md text-sm font-medium transition-all duration-200",
-              activeTab === "reports" ? "bg-white dark:bg-slate-950 shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            <FileText className="w-4 h-4" />
-            <span className="hidden sm:inline">Reports</span>
-          </button>
-          <button
-            onClick={() => setActiveTab("exams")}
-            className={cn(
-              "flex-1 flex items-center justify-center gap-2 py-2 px-6 rounded-md text-sm font-medium transition-all duration-200",
-              activeTab === "exams" ? "bg-white dark:bg-slate-950 shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            <TrendingUp className="w-4 h-4" />
-            <span className="hidden sm:inline">Exams</span>
-          </button>
-          <button
-            onClick={() => setActiveTab("attendance")}
-            className={cn(
-              "flex-1 flex items-center justify-center gap-2 py-2 px-6 rounded-md text-sm font-medium transition-all duration-200",
-              activeTab === "attendance" ? "bg-white dark:bg-slate-950 shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            <Calendar className="w-4 h-4" />
-            <span className="hidden sm:inline">Attendance</span>
-          </button>
-          <button
-            onClick={() => setActiveTab("payments")}
-            className={cn(
-              "flex-1 flex items-center justify-center gap-2 py-2 px-6 rounded-md text-sm font-medium transition-all duration-200",
-              activeTab === "payments" ? "bg-white dark:bg-slate-950 shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            <CreditCard className="w-4 h-4" />
-            <span className="hidden sm:inline">Payments</span>
-          </button>
+
+        {/* Tab Switcher */}
+        <div className="w-full overflow-x-auto lg:w-auto lg:max-w-none">
+          <div className="inline-flex min-w-max gap-1 rounded-lg bg-slate-200/50 p-1 dark:bg-slate-800/50">
+            <button
+              type="button"
+              onClick={() => setActiveTab("reports")}
+              className={cn(
+                "flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-all duration-200 sm:px-4",
+                activeTab === "reports"
+                  ? "bg-white text-primary shadow-sm dark:bg-slate-950"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <FileText className="h-4 w-4 shrink-0" />
+              Reports
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("exams")}
+              className={cn(
+                "flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-all duration-200 sm:px-4",
+                activeTab === "exams"
+                  ? "bg-white text-primary shadow-sm dark:bg-slate-950"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <TrendingUp className="h-4 w-4 shrink-0" />
+              Exams
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("attendance")}
+              className={cn(
+                "flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-all duration-200 sm:px-4",
+                activeTab === "attendance"
+                  ? "bg-white text-primary shadow-sm dark:bg-slate-950"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <Calendar className="h-4 w-4 shrink-0" />
+              Attendance
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("payments")}
+              className={cn(
+                "flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-all duration-200 sm:px-4",
+                activeTab === "payments"
+                  ? "bg-white text-primary shadow-sm dark:bg-slate-950"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              <CreditCard className="h-4 w-4 shrink-0" />
+              Payments
+            </button>
+          </div>
         </div>
       </div>
 
@@ -377,10 +395,12 @@ export default function StudentProfilePage() {
             {/* ATTENDANCE TAB */}
             {activeTab === "attendance" && (
             <div className="space-y-6">
-              <AttendanceCalendar 
-                attendanceData={student.attendance || []} 
+              <AttendanceCalendar
+                attendanceData={student.attendance || []}
                 reports={student.reports || []}
+                allResults={student.exam_results || []}
                 studentId={student.id}
+                batchId={student.batch?.id}
                 readOnly={false}
               />
               

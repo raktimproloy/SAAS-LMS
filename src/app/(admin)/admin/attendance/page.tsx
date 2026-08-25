@@ -429,7 +429,7 @@ function statusCell(status?: string) {
   return { label: "—", className: "text-muted-foreground/40" };
 }
 
-function printMonthlyReport(report: MonthlyReport, month: string, year: string) {
+function printMonthlyReport(report: MonthlyReport, month: string, year: string, instituteName: string) {
   const sessions = report.sessionDates?.length
     ? report.sessionDates
     : Array.from({ length: report.daysInMonth }, (_, i) => ({
@@ -516,7 +516,7 @@ function printMonthlyReport(report: MonthlyReport, month: string, year: string) 
         </style>
       </head>
       <body>
-        <h1>${escapeHtml(siteConfig.instituteName)}</h1>
+        <h1>${escapeHtml(instituteName)}</h1>
         <div class="meta">
           Monthly Attendance — ${escapeHtml(monthLabel)}
           ${report.batch ? `<br/>${escapeHtml(report.batch.course)} · ${escapeHtml(report.batch.name)}` : ""}
@@ -552,6 +552,16 @@ function MonthlyTab({ batchId }: { batchId: string }) {
   const [year, setYear] = useState(currentYear.toString());
   const [report, setReport] = useState<MonthlyReport | null>(null);
   const [loading, setLoading] = useState(false);
+  const [siteName, setSiteName] = useState(siteConfig.instituteName);
+
+  useEffect(() => {
+    fetch('/api/admin/content/site-settings')
+      .then(res => res.json())
+      .then(data => {
+        if (data.site_name) setSiteName(data.site_name);
+      })
+      .catch(console.error);
+  }, []);
 
   useEffect(() => {
     fetchReport();
@@ -627,7 +637,7 @@ function MonthlyTab({ batchId }: { batchId: string }) {
           <Button
             variant="outline"
             disabled={!report?.students?.length}
-            onClick={() => report && printMonthlyReport(report, month, year)}
+            onClick={() => report && printMonthlyReport(report, month, year, siteName)}
           >
             <Printer className="mr-2 h-4 w-4" /> Print
           </Button>

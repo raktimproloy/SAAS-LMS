@@ -334,8 +334,6 @@ export default function ExamsPage() {
                   </label>
                 </div>
 
-                {!isPublic && (
-                  <>
                     <div className="space-y-2">
                       <Label htmlFor="course">Target Course</Label>
                       <select 
@@ -372,8 +370,6 @@ export default function ExamsPage() {
                         ))}
                       </select>
                     </div>
-                  </>
-                )}
                 
                 <div className="space-y-2">
                   <Label htmlFor="start_time">Start Time (Optional)</Label>

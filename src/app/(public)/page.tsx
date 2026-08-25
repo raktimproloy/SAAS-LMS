@@ -8,12 +8,13 @@ import { NoticeBoardSection } from "@/components/public/home/NoticeBoardSection"
 import { VideoCourseSection } from "@/components/public/home/VideoCourseSection";
 import { ContactSection } from "@/components/public/home/ContactSection";
 import { MapSection } from "@/components/public/home/MapSection";
+import { PublicMarketingSection } from "@/components/public/home/PublicMarketingSection";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const revalidate = 60; // Revalidate every minute
 
 async function fetchHomeData() {
-  const [teacher, notices, courses, videoCourses, gallery, demoVideos, demoSectionTitle] = await Promise.all([
+  const [teacher, notices, courses, videoCourses, gallery, demoVideos, demoSectionTitle, publicExams, publicMaterials] = await Promise.all([
     prisma.teacher.findFirst({
       orderBy: { created_at: 'asc' }
     }),
@@ -61,10 +62,28 @@ async function fetchHomeData() {
     }),
     prisma.siteSetting.findUnique({
       where: { setting_key: 'demo_class_section_title' }
+    }),
+    prisma.exam.findMany({
+      where: { is_public: true, status: 'active' },
+      include: {
+        course: { select: { title: true } },
+        batch: { select: { name: true, course: { select: { title: true } } } }
+      },
+      orderBy: { created_at: 'desc' },
+      take: 6
+    }),
+    prisma.noteMaterial.findMany({
+      where: { is_public: true, status: 'active' },
+      include: {
+        course: { select: { title: true } },
+        batch: { select: { name: true, course: { select: { title: true } } } }
+      },
+      orderBy: { created_at: 'desc' },
+      take: 6
     })
   ]);
 
-  return { teacher, notices, courses, videoCourses, gallery, demoVideos, demoSectionTitle: demoSectionTitle?.setting_value };
+  return { teacher, notices, courses, videoCourses, gallery, demoVideos, demoSectionTitle: demoSectionTitle?.setting_value, publicExams, publicMaterials };
 }
 
 export default async function HomePage() {
@@ -92,6 +111,8 @@ export default async function HomePage() {
         <Suspense fallback={<VideoCourseSkeleton />}>
           <VideoCourseSection videoCourses={data.videoCourses} />
         </Suspense>
+
+        <PublicMarketingSection publicExams={data.publicExams} publicMaterials={data.publicMaterials} />
 
         <Suspense fallback={<NoticeBoardSkeleton />}>
           <NoticeBoardSection notices={data.notices} />

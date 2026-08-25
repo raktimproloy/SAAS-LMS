@@ -35,3 +35,20 @@ export interface StudentsPagination {
   total: number;
   totalPages: number;
 }
+
+export interface StudentPayment {
+  id: number;
+  student_id: number;
+  amount: number;
+  discount: number;
+  due_amount: number;
+  month: number;
+  year: number;
+  status: string;
+  payment_type?: string | null;
+  invoice?: string | null;
+  receipt_number?: string | null;
+  paid_at?: string | null;
+  note?: string | null;
+  created_at: string;
+}

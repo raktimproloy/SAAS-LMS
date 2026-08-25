@@ -26,14 +26,6 @@ export async function GET(request: Request) {
     const end_date = searchParams.get("end_date");
 
     const where: any = {};
-    if (search) {
-      where.OR = [
-        { student: { name: { contains: search } } },
-        { student: { student_id: { contains: search } } },
-        { invoice: { contains: search } },
-        { receipt_number: { contains: search } },
-      ];
-    }
     if (month) {
       const [y, m] = month.split("-");
       where.year = parseInt(y);
@@ -42,13 +34,44 @@ export async function GET(request: Request) {
     if (type) {
       where.payment_type = type;
     }
+
+    const searchOr = search
+      ? [
+          { student: { name: { contains: search } } },
+          { student: { student_id: { contains: search } } },
+          { invoice: { contains: search } },
+          { receipt_number: { contains: search } },
+        ]
+      : null;
+
+    let dateOr = null;
     if (start_date && end_date) {
-      where.created_at = {
-        gte: new Date(`${start_date}T00:00:00.000Z`),
-        lte: new Date(`${end_date}T23:59:59.999Z`),
-      };
+      const gte = new Date(`${start_date}T00:00:00.000Z`);
+      const lte = new Date(`${end_date}T23:59:59.999Z`);
+      dateOr = [
+        { paid_at: { gte, lte } },
+        { AND: [{ paid_at: null }, { created_at: { gte, lte } }] },
+      ];
     } else if (start_date) {
-      where.created_at = { gte: new Date(`${start_date}T00:00:00.000Z`) };
+      const gte = new Date(`${start_date}T00:00:00.000Z`);
+      dateOr = [
+        { paid_at: { gte } },
+        { AND: [{ paid_at: null }, { created_at: { gte } }] },
+      ];
+    } else if (end_date) {
+      const lte = new Date(`${end_date}T23:59:59.999Z`);
+      dateOr = [
+        { paid_at: { lte } },
+        { AND: [{ paid_at: null }, { created_at: { lte } }] },
+      ];
+    }
+
+    if (searchOr && dateOr) {
+      where.AND = [{ OR: searchOr }, { OR: dateOr }];
+    } else if (searchOr) {
+      where.OR = searchOr;
+    } else if (dateOr) {
+      where.OR = dateOr;
     }
 
     const payments = await prisma.payment.findMany({
@@ -56,11 +79,13 @@ export async function GET(request: Request) {
       include: {
         student: {
           include: {
-            batch: true
-          }
+            batch: {
+              include: { course: true },
+            },
+          },
         },
       },
-      orderBy: { created_at: "desc" },
+      orderBy: [{ paid_at: "desc" }, { created_at: "desc" }],
     });
     return NextResponse.json(payments);
   } catch {
@@ -75,7 +100,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const {
-      student_id, amount, discount, payment_type, due_amount, month, year, status, note, receipt_number
+      student_id, amount, discount, payment_type, due_amount, month, year, status, note, receipt_number, paid_at
     } = body;
 
     if (!student_id || !amount || !month || !year || !status) {
@@ -115,7 +140,12 @@ export async function POST(request: Request) {
         receipt_number: receipt_number || null,
         invoice,
         note: note || "",
-        paid_at: status === "paid" || status === "partial" ? new Date() : null,
+        paid_at:
+          paid_at
+            ? new Date(`${paid_at}T12:00:00.000Z`)
+            : status === "paid" || status === "partial"
+              ? new Date()
+              : null,
       }
     });
 

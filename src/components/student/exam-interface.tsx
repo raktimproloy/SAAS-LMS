@@ -27,9 +27,10 @@ interface ExamInterfaceProps {
   title: string;
   durationMinutes: number;
   questions: Question[];
+  isPublic?: boolean;
 }
 
-export function ExamInterface({ examId, title, durationMinutes, questions }: ExamInterfaceProps) {
+export function ExamInterface({ examId, title, durationMinutes, questions, isPublic }: ExamInterfaceProps) {
   const router = useRouter();
   
   const [answers, setAnswers] = useState<Record<number, string>>({});
@@ -39,6 +40,12 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
   const [isReady, setIsReady] = useState(false);
   const [practiceResultData, setPracticeResultData] = useState<any>(null);
   const [expandedExplanations, setExpandedExplanations] = useState<Record<number, boolean>>({});
+
+  // Lead capture states for public exams
+  const [showLeadForm, setShowLeadForm] = useState(false);
+  const [leadName, setLeadName] = useState("");
+  const [leadPhone, setLeadPhone] = useState("");
+  const [leadLocation, setLeadLocation] = useState("");
 
   const autoSubmitTriggered = useRef(false);
 
@@ -112,9 +119,15 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
     return () => clearInterval(timerId);
   }, [timeLeft, isReady, isSubmitting]);
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (skipLeadForm: boolean = false) => {
     if (isSubmitting) return;
     
+    // For public exams, intercept submission to show lead form
+    if (isPublic && skipLeadForm !== true) {
+      setTimeout(() => setShowLeadForm(true), 150);
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -124,13 +137,22 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
       const elapsedSeconds = Math.floor((Date.now() - startTime) / 1000);
       const timeTaken = Math.min(elapsedSeconds, durationMinutes * 60);
 
-      const res = await fetch(`/api/student/exams/${examId}`, {
+      const endpoint = isPublic ? `/api/public/exams/${examId}/submit` : `/api/student/exams/${examId}`;
+      const payload: any = {
+        answers,
+        time_taken_seconds: timeTaken
+      };
+      
+      if (isPublic) {
+        payload.name = leadName;
+        payload.phone = leadPhone;
+        payload.location = leadLocation;
+      }
+
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          answers,
-          time_taken_seconds: timeTaken
-        })
+        body: JSON.stringify(payload)
       });
 
       const data = await res.json();
@@ -140,6 +162,7 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
         localStorage.removeItem(`lms_exam_${examId}_start`);
 
         if (data.is_practice && data.practice_result) {
+          if (isPublic) setShowLeadForm(false);
           setPracticeResultData(data.practice_result);
           setTimeout(() => {
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -150,6 +173,9 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
       } else {
         alert(data.error || "Failed to submit exam");
         setIsSubmitting(false);
+        if (isPublic && data.error?.includes("already attempted")) {
+          setShowLeadForm(false);
+        }
       }
     } catch (err) {
       console.error(err);
@@ -382,12 +408,18 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
           </div>
           
           <div className="pt-8 flex justify-center">
-            <Button size="lg" onClick={() => router.push('/student/exams')}>
-              Back to My Exams
-            </Button>
+            {isPublic ? (
+              <Button size="lg" onClick={() => router.push('/')}>
+                হোমপেজে ফিরে যান
+              </Button>
+            ) : (
+              <Button size="lg" onClick={() => router.push('/student/exams')}>
+                Back to My Exams
+              </Button>
+            )}
           </div>
         </div>
-        <StudentBottomNav />
+        {!isPublic && <StudentBottomNav />}
       </div>
     );
   }
@@ -634,6 +666,88 @@ export function ExamInterface({ examId, title, durationMinutes, questions }: Exa
                 }}
               >
                 Confirm Submit
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Public Exam Lead Capture Form */}
+      <Dialog open={showLeadForm} onOpenChange={setShowLeadForm}>
+        <DialogContent className="sm:max-w-md p-0 overflow-hidden border-0 shadow-2xl rounded-3xl" onInteractOutside={(e) => {
+          e.preventDefault(); // Prevent closing by clicking outside because they MUST submit
+        }}>
+          <div className="bg-background p-6 sm:p-8 relative">
+            <DialogHeader className="space-y-2 relative z-10 mb-6">
+              <DialogTitle className="text-2xl font-bold text-foreground">পরীক্ষা জমা দিন</DialogTitle>
+              <DialogDescription className="text-base text-muted-foreground/90">
+                ফলাফল দেখতে আপনার তথ্য প্রদান করুন।
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4 relative z-10">
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold text-foreground">আপনার নাম <span className="text-red-500">*</span></label>
+                <input 
+                  type="text" 
+                  value={leadName} 
+                  onChange={(e) => setLeadName(e.target.value)} 
+                  className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1" 
+                  placeholder="উদাঃ রাকিব হাসান"
+                  required
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold text-foreground">মোবাইল নম্বর <span className="text-red-500">*</span></label>
+                <input 
+                  type="tel" 
+                  value={leadPhone} 
+                  onChange={(e) => setLeadPhone(e.target.value.replace(/[^0-9+]/g, ''))} 
+                  className={`flex h-11 w-full rounded-xl border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 ${
+                    leadPhone && !/^(?:\+88|88)?(01[3-9]\d{8})$/.test(leadPhone) 
+                    ? "border-red-500 focus-visible:ring-red-500" 
+                    : "border-input focus-visible:ring-primary"
+                  }`}
+                  placeholder="উদাঃ 01700000000"
+                  required
+                />
+                {leadPhone && !/^(?:\+88|88)?(01[3-9]\d{8})$/.test(leadPhone) ? (
+                  <p className="text-xs text-red-500 mt-1">সঠিক ১১ ডিজিটের মোবাইল নম্বর দিন।</p>
+                ) : (
+                  <p className="text-xs text-muted-foreground mt-1">একটি মোবাইল নম্বর দিয়ে একবারই পরীক্ষা দেওয়া যাবে।</p>
+                )}
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-semibold text-foreground">ঠিকানা (ঐচ্ছিক)</label>
+                <input 
+                  type="text" 
+                  value={leadLocation} 
+                  onChange={(e) => setLeadLocation(e.target.value)} 
+                  className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1" 
+                  placeholder="উদাঃ ঢাকা"
+                />
+              </div>
+            </div>
+
+            <DialogFooter className="mt-8 flex-col sm:flex-col sm:space-x-0 gap-3 relative z-10">
+              <Button 
+                size="lg"
+                className="w-full rounded-xl h-12 font-bold shadow-md bg-primary hover:bg-primary/90"
+                disabled={isSubmitting || !leadName || !/^(?:\+88|88)?(01[3-9]\d{8})$/.test(leadPhone)}
+                onClick={() => {
+                  handleSubmit(true);
+                }}
+              >
+                {isSubmitting ? "জমা হচ্ছে..." : "ফলাফল দেখুন"}
+              </Button>
+              <Button 
+                variant="ghost"
+                size="lg"
+                className="w-full rounded-xl text-muted-foreground"
+                onClick={() => setShowLeadForm(false)}
+                disabled={isSubmitting}
+              >
+                ফিরে যান
               </Button>
             </DialogFooter>
           </div>

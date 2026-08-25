@@ -14,8 +14,9 @@ async function checkPermission(permission: string) {
 }
 
 export async function GET() {
-  const hasPerm = await checkPermission("content"); // Content or settings perm
-  if (!hasPerm) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+  const hasContent = await checkPermission("content");
+  const hasPayments = await checkPermission("payments");
+  if (!hasContent && !hasPayments) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
 
   try {
     const types = await prisma.paymentType.findMany({
