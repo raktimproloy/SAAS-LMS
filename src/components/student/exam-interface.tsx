@@ -674,9 +674,7 @@ export function ExamInterface({ examId, title, durationMinutes, questions, isPub
 
       {/* Public Exam Lead Capture Form */}
       <Dialog open={showLeadForm} onOpenChange={setShowLeadForm}>
-        <DialogContent className="sm:max-w-md p-0 overflow-hidden border-0 shadow-2xl rounded-3xl" onInteractOutside={(e) => {
-          e.preventDefault(); // Prevent closing by clicking outside because they MUST submit
-        }}>
+        <DialogContent className="sm:max-w-md p-0 overflow-hidden border-0 shadow-2xl rounded-3xl">
           <div className="bg-background p-6 sm:p-8 relative">
             <DialogHeader className="space-y-2 relative z-10 mb-6">
               <DialogTitle className="text-2xl font-bold text-foreground">পরীক্ষা জমা দিন</DialogTitle>
