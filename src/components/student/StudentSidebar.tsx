@@ -12,7 +12,8 @@ import {
   CreditCard,
   Bell,
   LogOut,
-  FileText
+  FileText,
+  Map
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ import { useRouter } from "next/navigation";
 const navItems = [
   { title: "Dashboard", href: "/student/dashboard", icon: LayoutDashboard },
   { title: "Profile", href: "/student/profile", icon: User },
+  { title: "Course Roadmap", href: "/student/roadmap", icon: Map },
   { title: "Online Exams", href: "/student/exams", icon: GraduationCap },
   { title: "Results", href: "/student/results", icon: FileText },
   { title: "Study Materials", href: "/student/notes", icon: BookOpen },

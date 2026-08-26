@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, GraduationCap, CreditCard, Activity, FileText } from "lucide-react";
+import { Users, GraduationCap, CreditCard, Activity, FileText, Calendar as CalendarIcon, BookOpen } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -52,6 +52,36 @@ export default async function AdminDashboard() {
     take: 5,
     orderBy: { start_time: "asc" },
     include: { batch: true, course: true }
+  });
+
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  const todayEnd = new Date();
+  todayEnd.setHours(23, 59, 59, 999);
+
+  const todaysClasses = await prisma.curriculumSession.findMany({
+    where: {
+      date: {
+        gte: todayStart,
+        lte: todayEnd,
+      },
+      is_cancelled: false,
+      session_type: { in: ["class", "exam"] },
+      curriculum: {
+        status: "active",
+      },
+    },
+    include: {
+      curriculum: {
+        include: {
+          batch: true,
+          course: true
+        }
+      },
+      topics: true
+    },
+    orderBy: { curriculum_id: "asc" },
+    take: 5
   });
 
   const stats = [
@@ -149,6 +179,62 @@ export default async function AdminDashboard() {
                     <p className="text-xs text-muted-foreground mt-0.5">
                       {exam.start_time ? format(new Date(exam.start_time), "dd MMM, h:mm a") : "TBA"} • {exam.batch?.name || exam.course?.title || "Global"}
                     </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+      
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2 mt-6">
+        <Card className="border-none shadow-sm dark:bg-slate-800/50" data-aos="fade-up" data-aos-delay="600">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CalendarIcon className="w-5 h-5 text-primary" />
+              Today's Classes
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {todaysClasses.length === 0 ? (
+                <div className="text-center text-muted-foreground py-8 border rounded-lg border-dashed">
+                  <div className="p-3 bg-primary/10 rounded-full w-fit mx-auto mb-3">
+                    <CalendarIcon className="h-6 w-6 text-primary" />
+                  </div>
+                  No classes scheduled for today
+                </div>
+              ) : todaysClasses.map((session) => (
+                <div key={session.id} className="flex items-start gap-4 border-b last:border-0 pb-4 last:pb-0">
+                  <div className="p-2 rounded-full bg-primary/10 mt-1">
+                    <BookOpen className="h-4 w-4 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start">
+                      <p className="text-sm font-bold text-primary">{session.curriculum?.batch?.name}</p>
+                      <Badge variant={session.is_completed ? "outline" : "default"} className="text-[10px]">
+                        {session.is_completed ? "Completed" : "Upcoming"}
+                      </Badge>
+                    </div>
+                    <p className="text-xs font-medium mt-0.5">
+                      Class {session.session_number}: {session.curriculum?.course?.title}
+                    </p>
+                    {session.is_holiday ? (
+                      <Badge variant="outline" className="mt-2 text-orange-500 border-orange-200">
+                        Holiday: {session.holiday_name}
+                      </Badge>
+                    ) : (
+                      <div className="mt-2 space-y-1">
+                        {session.topics.length > 0 ? session.topics.map((t, i) => (
+                          <p key={i} className="text-xs text-muted-foreground flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-primary/50" />
+                            {t.chapter_name} {t.topic_name ? `- ${t.topic_name}` : ''}
+                          </p>
+                        )) : (
+                          <p className="text-xs text-muted-foreground italic">No topics assigned</p>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}

@@ -40,6 +40,7 @@ model Course {
   exams         Exam[]
   notes         NoteMaterial[]
   form_submissions FormSubmission[]
+  curriculums   Curriculum[]
 }
 
 model Batch {
@@ -61,6 +62,9 @@ model Batch {
   exams        Exam[]
   notes        NoteMaterial[]
   videoCourses VideoCourse[]
+  curriculums  Curriculum[]
+  homeworks    Homework[]
+  exam_schedules ExamSchedule[]
 }
 
 model Student {
@@ -429,4 +433,147 @@ model FormSubmission {
   updated_at DateTime @updatedAt
   
   course     Course?  @relation(fields: [course_id], references: [id], onDelete: SetNull)
+}
+
+// ─── Curriculum Master ───────────────────────────────────────
+model Curriculum {
+  id          Int      @id @default(autoincrement())
+  title       String
+  course_id   Int
+  batch_id    Int
+  start_date  DateTime @db.Date
+  end_date    DateTime @db.Date
+  class_days  Json     // ["Sunday","Monday","Wednesday"]
+  is_public   Boolean  @default(false)
+  status      String   @default("draft") // "draft" | "active" | "archived"
+  books       Json?    // number[] of nctb_book ids
+  template_id Int?     // copied from another curriculum
+  revision    Int      @default(0) // optimistic concurrency for draft saves
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  course    Course              @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  batch     Batch               @relation(fields: [batch_id], references: [id], onDelete: Cascade)
+  sessions  CurriculumSession[]
+  holidays  CurriculumHoliday[]
+  exams     ExamSchedule[]
+  homeworks Homework[]
+}
+
+// ─── Each Class Date ─────────────────────────────────────────
+model CurriculumSession {
+  id              Int      @id @default(autoincrement())
+  curriculum_id   Int
+  date            DateTime @db.Date
+  session_number  Int      // 1, 2, 3... for ordering
+  session_type    String   @default("class") // class | exam | holiday | skipped
+  is_holiday      Boolean  @default(false)
+  holiday_name    String?
+  is_exam         Boolean  @default(false)
+  exam_title      String?
+  is_cancelled    Boolean  @default(false)
+  is_completed    Boolean  @default(false)
+  extra_days      Int      @default(0) // "need more days" count
+  notes           String?  @db.Text
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  curriculum Curriculum               @relation(fields: [curriculum_id], references: [id], onDelete: Cascade)
+  topics     CurriculumSessionTopic[]
+  homework   Homework[]
+  exams      ExamSchedule[]
+
+  @@index([curriculum_id, date])
+}
+
+// ─── Topics Assigned to Each Session ─────────────────────────
+model CurriculumSessionTopic {
+  id           Int     @id @default(autoincrement())
+  session_id   Int
+  nctb_book_id Int?
+  subject      String?
+  chapter_name String
+  topic_name   String?
+  sort_order   Int     @default(0)
+  size         Int     @default(1)
+  is_custom    Boolean @default(false)
+
+  session CurriculumSession @relation(fields: [session_id], references: [id], onDelete: Cascade)
+  book    NCTBBook?         @relation(fields: [nctb_book_id], references: [id], onDelete: SetNull)
+}
+
+// ─── Holiday Cache (per curriculum) ──────────────────────────
+model CurriculumHoliday {
+  id            Int      @id @default(autoincrement())
+  curriculum_id Int
+  date          DateTime @db.Date
+  name          String
+  is_custom     Boolean  @default(false) // manually added
+  is_removed    Boolean  @default(false) // teacher excluded it
+  source        String   @default("calendarific") // "calendarific"|"manual"
+  created_at    DateTime @default(now())
+
+  curriculum Curriculum @relation(fields: [curriculum_id], references: [id], onDelete: Cascade)
+}
+
+// ─── Global Holiday Cache (shared across curricula) ──────────
+model HolidayCache {
+  id         Int      @id @default(autoincrement())
+  country    String   @default("BD")
+  year       Int
+  date       DateTime @db.Date
+  name       String
+  type       String?
+  cached_at  DateTime @default(now())
+
+  @@unique([country, year, date])
+}
+
+// ─── NCTB Books (imported from JSON) ─────────────────────────
+model NCTBBook {
+  id         Int      @id @default(autoincrement())
+  class_name String
+  section    String
+  subject    String
+  chapters   Json     // [{name, size, topics:[{name, size}]}]
+  sort_order Int      @default(0)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  session_topics CurriculumSessionTopic[]
+}
+
+// ─── Homework ─────────────────────────────────────────────────
+model Homework {
+  id            Int      @id @default(autoincrement())
+  session_id    Int
+  curriculum_id Int
+  batch_id      Int
+  title         String
+  description   String?  @db.Text
+  due_date      DateTime @db.Date
+  created_at    DateTime @default(now())
+
+  session    CurriculumSession @relation(fields: [session_id], references: [id], onDelete: Cascade)
+  curriculum Curriculum        @relation(fields: [curriculum_id], references: [id], onDelete: Cascade)
+  batch      Batch             @relation(fields: [batch_id], references: [id], onDelete: Cascade)
+}
+
+// ─── Exam Schedule ────────────────────────────────────────────
+model ExamSchedule {
+  id            Int      @id @default(autoincrement())
+  session_id    Int?
+  curriculum_id Int
+  batch_id      Int
+  title         String
+  exam_date     DateTime @db.Date
+  duration_min  Int?
+  total_marks   Float    @default(100)
+  notes         String?  @db.Text
+  status        String   @default("upcoming") // "upcoming"|"done"
+  created_at    DateTime @default(now())
+
+  session    CurriculumSession? @relation(fields: [session_id], references: [id], onDelete: SetNull)
+  curriculum Curriculum         @relation(fields: [curriculum_id], references: [id], onDelete: Cascade)
+  batch      Batch              @relation(fields: [batch_id], references: [id], onDelete: Cascade)
 }

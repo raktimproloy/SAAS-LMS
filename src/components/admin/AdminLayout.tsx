@@ -21,6 +21,7 @@ import {
   Wallet,
   Globe,
   UserCog,
+  Calendar,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -54,6 +55,7 @@ const sidebarLinks: SidebarLink[] = [
   },
   { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
   { name: "Course & Batches", href: "/admin/courses", icon: BookOpen, perm: "courses" },
+  { name: "Curriculum Planner", href: "/admin/curriculum", icon: Calendar, perm: "curriculum" },
   {
     name: "Student",
     icon: Users,

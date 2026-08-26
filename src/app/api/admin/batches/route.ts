@@ -13,12 +13,16 @@ async function checkPermission(permission: string) {
   return adminPayload.permissions?.includes("all") || adminPayload.permissions?.includes(permission);
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   const hasPerm = await checkPermission("courses");
   if (!hasPerm) return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
 
   try {
+    const { searchParams } = new URL(request.url);
+    const courseId = searchParams.get("course_id");
+
     const batches = await prisma.batch.findMany({
+      where: courseId ? { course_id: parseInt(courseId) } : undefined,
       include: {
         course: true
       },

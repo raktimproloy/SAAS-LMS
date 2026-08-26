@@ -1,0 +1,139 @@
+"use client";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import {
+  ArrowLeft,
+  CalendarIcon,
+  Check,
+  Cloud,
+  CloudOff,
+  Loader2,
+  Settings2,
+} from "lucide-react";
+import Link from "next/link";
+import { format, parseISO } from "date-fns";
+import type { SaveStatus } from "@/hooks/useCurriculumDraft";
+
+type Props = {
+  curriculum: any;
+  progress: any;
+  saveStatus: SaveStatus;
+  onSettings: () => void;
+};
+
+export function RoadmapHeader({ curriculum, progress, saveStatus, onSettings }: Props) {
+  return (
+    <div className="bg-background p-5 rounded-xl border shadow-sm space-y-4">
+      <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+        <div className="flex items-start gap-3 min-w-0">
+          <Link href="/admin/curriculum">
+            <Button variant="outline" size="icon" className="h-10 w-10 shrink-0">
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+          </Link>
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="text-xl md:text-2xl font-bold tracking-tight truncate">
+                {curriculum.title}
+              </h1>
+              <Badge variant={curriculum.status === "active" ? "default" : "secondary"}>
+                {curriculum.status}
+              </Badge>
+              {curriculum.is_public && (
+                <Badge variant="outline" className="border-primary text-primary">
+                  Student visible
+                </Badge>
+              )}
+            </div>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5 text-sm text-muted-foreground">
+              <span className="font-medium text-foreground">{curriculum.course?.title}</span>
+              <span>·</span>
+              <span className="font-medium text-foreground">{curriculum.batch?.name}</span>
+              <span>·</span>
+              <span className="inline-flex items-center gap-1">
+                <CalendarIcon className="w-3.5 h-3.5" />
+                {format(parseISO(curriculum.start_date), "MMM d")} –{" "}
+                {format(parseISO(curriculum.end_date), "MMM d, yyyy")}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 shrink-0">
+          <SaveIndicator status={saveStatus} />
+          <Button variant="outline" size="sm" className="gap-2" onClick={onSettings}>
+            <Settings2 className="w-4 h-4" />
+            Settings
+          </Button>
+        </div>
+      </div>
+
+      {progress && (
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          <div className="col-span-2 md:col-span-2 space-y-1.5">
+            <div className="flex justify-between text-xs">
+              <span className="text-muted-foreground font-medium">Syllabus coverage</span>
+              <span className="font-bold">
+                {progress.assignedTopics}/{progress.poolTotal || "—"} ({progress.coveragePct}%)
+              </span>
+            </div>
+            <Progress value={progress.coveragePct} className="h-2" />
+          </div>
+          <MiniStat label="Exams" value={progress.exams} color="text-blue-600" />
+          <MiniStat label="Holidays" value={progress.holidays} color="text-orange-600" />
+          <MiniStat label="Skipped" value={progress.skipped} color="text-red-600" />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MiniStat({
+  label,
+  value,
+  color,
+}: {
+  label: string;
+  value: number;
+  color: string;
+}) {
+  return (
+    <div className="rounded-lg border bg-muted/20 px-3 py-2">
+      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">
+        {label}
+      </p>
+      <p className={`text-xl font-bold ${color}`}>{value}</p>
+    </div>
+  );
+}
+
+function SaveIndicator({ status }: { status: SaveStatus }) {
+  if (status === "saving") {
+    return (
+      <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+        <Loader2 className="w-3.5 h-3.5 animate-spin" /> Saving…
+      </span>
+    );
+  }
+  if (status === "saved") {
+    return (
+      <span className="inline-flex items-center gap-1.5 text-xs text-green-600">
+        <Check className="w-3.5 h-3.5" /> Saved
+      </span>
+    );
+  }
+  if (status === "error") {
+    return (
+      <span className="inline-flex items-center gap-1.5 text-xs text-destructive">
+        <CloudOff className="w-3.5 h-3.5" /> Save failed
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+      <Cloud className="w-3.5 h-3.5" /> Autosave on
+    </span>
+  );
+}
