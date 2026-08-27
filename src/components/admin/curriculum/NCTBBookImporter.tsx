@@ -72,16 +72,16 @@ export default function NCTBBookImporter({ onSuccess }: NCTBBookImporterProps) {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     toast({
-      title: "Downloaded!",
-      description: "Sample format JSON file downloaded.",
+      title: "ডাউনলোড হয়েছে",
+      description: "নমুনা JSON ফরম্যাট ফাইল ডাউনলোড হয়েছে।",
     });
   };
 
   const handleImport = async () => {
     if (!className || !subject || !jsonInput) {
       toast({
-        title: "Missing fields",
-        description: "Please select Class, Subject and paste the JSON.",
+        title: "তথ্য অসম্পূর্ণ",
+        description: "ক্লাস ও বিষয় সিলেক্ট করে JSON পেস্ট করুন।",
         variant: "destructive"
       });
       return;
@@ -95,8 +95,8 @@ export default function NCTBBookImporter({ onSuccess }: NCTBBookImporterProps) {
       }
     } catch (e) {
       toast({
-        title: "Invalid JSON",
-        description: "Please ensure the pasted content is valid JSON.",
+        title: "ভুল JSON",
+        description: "সঠিক JSON পেস্ট করেছেন কিনা দেখুন।",
         variant: "destructive"
       });
       return;
@@ -118,8 +118,8 @@ export default function NCTBBookImporter({ onSuccess }: NCTBBookImporterProps) {
       if (!res.ok) throw new Error("Failed to import book");
 
       toast({
-        title: "Success!",
-        description: `${className} - ${subject} imported successfully.`,
+        title: "সফল হয়েছে",
+        description: `${className} - ${subject} ইমপোর্ট হয়েছে।`,
       });
       
       setJsonInput("");
@@ -131,8 +131,8 @@ export default function NCTBBookImporter({ onSuccess }: NCTBBookImporterProps) {
       
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to import book. Please try again.",
+        title: "সমস্যা হয়েছে",
+        description: "বই ইমপোর্ট হয়নি। আবার চেষ্টা করুন।",
         variant: "destructive"
       });
     } finally {
@@ -145,20 +145,20 @@ export default function NCTBBookImporter({ onSuccess }: NCTBBookImporterProps) {
       <DialogTrigger asChild>
         <Button variant="outline" className="gap-2 border-primary/20 hover:bg-primary/5">
           <Upload className="w-4 h-4 text-primary" />
-          Import Curriculum JSON
+          কারিকুলাম JSON ইমপোর্ট
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between mt-2">
             <div>
-              <DialogTitle>Import Curriculum Database</DialogTitle>
+              <DialogTitle>কারিকুলাম ডেটাবেস ইমপোর্ট</DialogTitle>
               <DialogDescription>
-                Select a class and subject, then import the structured JSON.
+                ক্লাস ও বিষয় সিলেক্ট করে JSON ইমপোর্ট করুন।
               </DialogDescription>
             </div>
             <Button size="sm" variant="outline" onClick={downloadFormat} className="h-8 text-xs gap-1">
-              <Download className="w-3 h-3" /> Download Format
+              <Download className="w-3 h-3" /> ফরম্যাট ডাউনলোড
             </Button>
           </div>
         </DialogHeader>
@@ -168,15 +168,15 @@ export default function NCTBBookImporter({ onSuccess }: NCTBBookImporterProps) {
           <div className="space-y-4">
             <h4 className="text-sm font-semibold flex items-center gap-2">
               <BookOpen className="w-4 h-4 text-primary" />
-              Step 1: Select Class & Subject
+              ধাপ ১: ক্লাস ও বিষয় সিলেক্ট করুন
             </h4>
             
             <div className="grid grid-cols-2 gap-4 bg-muted/30 p-4 rounded-lg border">
               <div className="space-y-2">
-                <Label className="text-xs">Class Name</Label>
+                <Label className="text-xs">ক্লাসের নাম</Label>
                 <Select value={className || undefined} onValueChange={(val) => { setClassName(val || ""); setSubject(""); }}>
                   <SelectTrigger className="bg-background">
-                    <SelectValue placeholder="Select Class" />
+                    <SelectValue placeholder="ক্লাস সিলেক্ট করুন" />
                   </SelectTrigger>
                   <SelectContent>
                     {CLASSES_DATA.map((cls) => (
@@ -186,10 +186,10 @@ export default function NCTBBookImporter({ onSuccess }: NCTBBookImporterProps) {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="text-xs">Subject</Label>
+                <Label className="text-xs">বিষয়</Label>
                 <Select value={subject || undefined} onValueChange={(val) => setSubject(val || "")} disabled={!className}>
                   <SelectTrigger className="bg-background">
-                    <SelectValue placeholder="Select Subject" />
+                    <SelectValue placeholder="বিষয় সিলেক্ট করুন" />
                   </SelectTrigger>
                   <SelectContent>
                     {availableSubjects.map((sub) => (
@@ -204,7 +204,7 @@ export default function NCTBBookImporter({ onSuccess }: NCTBBookImporterProps) {
           <div className="space-y-4">
             <h4 className="text-sm font-semibold flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-primary" />
-              Step 2: Paste JSON Data
+              ধাপ ২: JSON ডেটা পেস্ট করুন
             </h4>
 
             <div className="space-y-2">
@@ -219,12 +219,12 @@ export default function NCTBBookImporter({ onSuccess }: NCTBBookImporterProps) {
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
+          <Button variant="outline" onClick={() => setIsOpen(false)}>বাতিল</Button>
           <Button onClick={handleImport} disabled={isSubmitting || !className || !subject || !jsonInput}>
             {isSubmitting ? (
-              <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Importing...</>
+              <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> ইমপোর্ট হচ্ছে...</>
             ) : (
-              <><Upload className="w-4 h-4 mr-2" /> Import Curriculum</>
+              <><Upload className="w-4 h-4 mr-2" /> কারিকুলাম ইমপোর্ট</>
             )}
           </Button>
         </DialogFooter>

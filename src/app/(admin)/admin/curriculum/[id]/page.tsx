@@ -4,8 +4,9 @@ import React, { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { DragDropContext, DropResult } from "@hello-pangea/dnd";
 import { Button } from "@/components/ui/button";
-import { Loader2, Undo2, Eye } from "lucide-react";
+import { Loader2, Undo2, Eye, BookOpen } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useCurriculumDraft } from "@/hooks/useCurriculumDraft";
 import { RoadmapHeader } from "@/components/admin/curriculum/roadmap/RoadmapHeader";
 import { RoadmapTimeline } from "@/components/admin/curriculum/roadmap/RoadmapTimeline";
@@ -36,6 +37,7 @@ export default function CurriculumPlannerPage() {
   } = useCurriculumDraft(id);
 
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [poolOpen, setPoolOpen] = useState(false);
   const [publishOpen, setPublishOpen] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [examTarget, setExamTarget] = useState<string | number | null>(null);
@@ -68,10 +70,10 @@ export default function CurriculumPlannerPage() {
     setIsPublishing(true);
     try {
       await publish();
-      toast({ title: "Published", description: "Curriculum is now active." });
+      toast({ title: "প্রকাশ হয়েছে", description: "কারিকুলাম এখন চালু আছে।" });
       setPublishOpen(false);
     } catch {
-      toast({ title: "Error", description: "Failed to publish.", variant: "destructive" });
+      toast({ title: "সমস্যা হয়েছে", description: "প্রকাশ করা যায়নি।", variant: "destructive" });
     } finally {
       setIsPublishing(false);
     }
@@ -93,7 +95,7 @@ export default function CurriculumPlannerPage() {
   if (!curriculum) return null;
 
   return (
-    <div className="w-full px-4 lg:px-8 py-6 space-y-5 pb-28">
+    <div className="w-full max-w-full px-2 sm:px-4 lg:px-6 xl:px-8 py-3 sm:py-6 space-y-4 sm:space-y-5 pb-36 sm:pb-32 lg:pb-28">
       <RoadmapHeader
         curriculum={curriculum}
         progress={progress}
@@ -102,16 +104,16 @@ export default function CurriculumPlannerPage() {
       />
 
       <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="flex flex-col lg:flex-row gap-6 items-start w-full">
-          <div className="flex-1 bg-background rounded-xl border shadow-sm p-5 w-full min-w-0">
+        <div className="flex flex-col xl:flex-row gap-4 sm:gap-6 items-start w-full">
+          <div className="flex-1 bg-background rounded-xl border shadow-sm p-3 sm:p-5 w-full min-w-0">
             <RoadmapTimeline
               sessions={curriculum.sessions}
               onRemoveTopic={actions.removeTopic}
               onSkip={(sid) =>
                 setImpact({
-                  title: "Skip this class?",
+                  title: "এই ক্লাস স্কিপ করবেন?",
                   description:
-                    "Ei diner topics + porer class gula next teachable dine chole jabe. Onno cuti untouched thakbe.",
+                    "এই দিনের টপিক আর পরের ক্লাসগুলো পরের খালি ক্লাসের দিনে চলে যাবে। অন্য ছুটি অপরিবর্তিত থাকবে।",
                   action: () => actions.skip(sid),
                 })
               }
@@ -119,15 +121,15 @@ export default function CurriculumPlannerPage() {
               onAddDay={actions.insertDay}
               onRemoveDay={(sid) =>
                 setImpact({
-                  title: "Remove this day?",
-                  description: "Ei diner topics next available class e chole jabe.",
+                  title: "এই দিনটা বাদ দেবেন?",
+                  description: "এই দিনের টপিক পরের খালি ক্লাসে চলে যাবে।",
                   action: () => actions.removeDay(sid),
                 })
               }
               onMarkCuti={(sid, name) =>
                 setImpact({
-                  title: "Ei din cuti diben?",
-                  description: `${name} hishebe mark hobe. Topics pore chole jabe; chaile pore \"Class hobe\" diye ferot ante parben.`,
+                  title: "এই দিন ছুটি দেবেন?",
+                  description: `${name} হিসেবে মার্ক হবে। টপিকগুলো পরে সরে যাবে; চাইলে পরে \"ক্লাস হবে\" দিয়ে ফিরিয়ে আনতে পারবেন।`,
                   action: () => actions.markHoliday(sid, name),
                 })
               }
@@ -136,81 +138,113 @@ export default function CurriculumPlannerPage() {
               onAddTopic={(sid) => setTopicTarget(sid)}
               onMoveTopicEarlier={(sid, tid) => actions.moveTopicEarlier(sid, tid)}
               onMoveTopicLater={(sid, tid) => actions.moveTopicLater(sid, tid)}
+              onShiftSessionEarlier={(sid) => actions.shiftSessionEarlier(sid)}
+              onShiftSessionLater={(sid) => actions.shiftSessionLater(sid)}
             />
           </div>
 
-          <div className="hidden lg:block w-[360px] shrink-0">
+          <aside className="hidden xl:block w-full xl:w-[320px] 2xl:w-[360px] shrink-0 sticky top-4 self-start z-20 max-h-[calc(100dvh-5rem)]">
             <SyllabusPoolPanel
               pool={pool}
               onAddToNext={actions.addFromPool}
               onAutoFillRemaining={() => {
                 setImpact({
-                  title: "Auto-fill remaining?",
+                  title: "বাকি টপিক অটো বসাবেন?",
                   description:
-                    "Clears current topics and redistributes all book topics with chapter exams.",
+                    "এখনকার টপিক মুছে বইয়ের সব টপিক আর অধ্যায় পরীক্ষা আবার সাজিয়ে বসবে।",
                   action: () => actions.autoFill(),
                 });
               }}
             />
-          </div>
+          </aside>
         </div>
+
+        {/* Mobile / tablet syllabus pool FAB */}
+        <Button
+          type="button"
+          size="lg"
+          className="xl:hidden fixed bottom-[5.25rem] right-3 sm:right-4 z-40 shadow-lg gap-2 rounded-full h-12 px-4"
+          onClick={() => setPoolOpen(true)}
+        >
+          <BookOpen className="w-4 h-4" />
+          <span className="text-sm font-medium">
+            সিলেবাস
+            {pool.remaining.length > 0 && (
+              <span className="ml-1.5 inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 rounded-full bg-primary-foreground/20 text-xs">
+                {pool.remaining.length}
+              </span>
+            )}
+          </span>
+        </Button>
+
+        <Sheet open={poolOpen} onOpenChange={setPoolOpen}>
+          <SheetContent side="bottom" className="h-[min(85vh,640px)] p-0 rounded-t-xl flex flex-col">
+            <SheetHeader className="px-4 pt-4 pb-2 border-b shrink-0">
+              <SheetTitle className="flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-primary" />
+                সিলেবাস পুল
+              </SheetTitle>
+            </SheetHeader>
+            <div className="flex-1 min-h-0 px-3 pb-4 pt-2">
+              <SyllabusPoolPanel
+                variant="embedded"
+                className="border-0 shadow-none h-full"
+                pool={pool}
+                onAddToNext={(t) => {
+                  actions.addFromPool(t);
+                }}
+                onAutoFillRemaining={() => {
+                  setPoolOpen(false);
+                  setImpact({
+                    title: "বাকি টপিক অটো বসাবেন?",
+                    description:
+                      "এখনকার টপিক মুছে বইয়ের সব টপিক আর অধ্যায় পরীক্ষা আবার সাজিয়ে বসবে।",
+                    action: () => actions.autoFill(),
+                  });
+                }}
+              />
+            </div>
+          </SheetContent>
+        </Sheet>
       </DragDropContext>
 
-      {/* Mobile remaining quick-add */}
-      <div className="lg:hidden">
-        <details className="border rounded-xl bg-background p-4">
-          <summary className="font-semibold cursor-pointer">
-            Remaining topics ({pool.remaining.length})
-          </summary>
-          <div className="mt-3 space-y-2 max-h-64 overflow-y-auto">
-            {pool.remaining.slice(0, 40).map((t) => (
-              <div
-                key={t.key}
-                className="flex items-center justify-between gap-2 text-sm border rounded-md p-2"
-              >
-                <span className="truncate">
-                  {t.chapter_name}
-                  {t.topic_name ? ` — ${t.topic_name}` : ""}
-                </span>
-                <Button size="sm" variant="outline" onClick={() => actions.addFromPool(t)}>
-                  Add
-                </Button>
-              </div>
-            ))}
-          </div>
-        </details>
-      </div>
-
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur border-t px-4 py-3 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-3">
-        <div className="flex gap-2 w-full sm:w-auto">
-          <Button variant="outline" size="sm" className="gap-1" onClick={actions.undo}>
-            <Undo2 className="w-4 h-4" /> Undo
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              setImpact({
-                title: "Clear all topics?",
-                description: "Removes topics from every session. Days stay intact.",
-                action: () => actions.clear(),
-              })
-            }
-          >
-            Clear
-          </Button>
-          {curriculum.is_public && curriculum.status === "active" && (
+      <div className="fixed bottom-0 left-0 right-0 md:left-[220px] lg:left-[260px] z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-t px-3 sm:px-4 lg:px-6 xl:px-8 py-2.5 sm:py-3 pb-[max(0.625rem,env(safe-area-inset-bottom))]">
+        <div className="flex flex-col-reverse sm:flex-row justify-between items-stretch sm:items-center gap-2 sm:gap-3 max-w-full">
+          <div className="flex flex-wrap gap-1.5 sm:gap-2 w-full sm:w-auto">
+            <Button variant="outline" size="sm" className="gap-1 flex-1 sm:flex-none" onClick={actions.undo}>
+              <Undo2 className="w-4 h-4" /> আনডু
+            </Button>
             <Button
               variant="outline"
               size="sm"
-              className="gap-1"
-              onClick={() => window.open(`/student/roadmap/${id}`, "_blank")}
+              className="flex-1 sm:flex-none"
+              onClick={() =>
+                setImpact({
+                  title: "সব টপিক মুছবেন?",
+                  description: "সব ক্লাস থেকে টপিক সরে যাবে। দিনগুলো থাকবে।",
+                  action: () => actions.clear(),
+                })
+              }
             >
-              <Eye className="w-4 h-4" /> Student view
+              সব মুছুন
             </Button>
-          )}
+            {curriculum.is_public && curriculum.status === "active" && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1 flex-1 sm:flex-none"
+                onClick={() => window.open(`/student/roadmap/${id}`, "_blank")}
+              >
+                <Eye className="w-4 h-4" />
+                <span className="hidden sm:inline">স্টুডেন্ট ভিউ</span>
+                <span className="sm:hidden">দেখুন</span>
+              </Button>
+            )}
+          </div>
+          <Button className="w-full sm:w-auto shrink-0" onClick={() => setPublishOpen(true)}>
+            কারিকুলাম প্রকাশ করুন
+          </Button>
         </div>
-        <Button onClick={() => setPublishOpen(true)}>Publish Curriculum</Button>
       </div>
 
       <CurriculumSettingsSheet
@@ -229,7 +263,7 @@ export default function CurriculumPlannerPage() {
               is_public: patch.is_public,
             });
           }
-          toast({ title: "Settings updated", description: "Saved in the background." });
+          toast({ title: "সেটিংস আপডেট হয়েছে", description: "ব্যাকগ্রাউন্ডে সেভ হয়েছে।" });
         }}
       />
 

@@ -482,8 +482,23 @@ model CurriculumSession {
   topics     CurriculumSessionTopic[]
   homework   Homework[]
   exams      ExamSchedule[]
+  sessionNotes CurriculumSessionNote[]
 
   @@index([curriculum_id, date])
+}
+
+// ─── Session Notes (multi notes + optional file) ─────────────
+model CurriculumSessionNote {
+  id         Int      @id @default(autoincrement())
+  session_id Int
+  title      String?
+  body       String   @db.Text
+  file_url   String?
+  created_at DateTime @default(now())
+
+  session CurriculumSession @relation(fields: [session_id], references: [id], onDelete: Cascade)
+
+  @@index([session_id])
 }
 
 // ─── Topics Assigned to Each Session ─────────────────────────

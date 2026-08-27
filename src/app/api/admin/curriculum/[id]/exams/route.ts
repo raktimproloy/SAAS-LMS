@@ -5,8 +5,6 @@ import { loadCurriculumFull, upsertSessionsFromDraft } from "@/lib/curriculum-sc
 import {
   addExamAtSession,
   DraftSession,
-  redistributeTopics,
-  isTeachable,
   toDateKey,
 } from "@/lib/curriculum-scheduler";
 
@@ -67,23 +65,13 @@ export async function POST(
         const idx = sessions.findIndex((s) => Number(s.id) === sid);
 
         if (idx >= 0) {
-          const groups: any[][] = [];
-          const regular = sessions[idx].topics.filter(
-            (t) => !String(t.chapter_name).startsWith("Exam:")
+          sessions = addExamAtSession(
+            sessions,
+            sid,
+            title,
+            classDays,
+            toDateKey(full.end_date as any)
           );
-          if (regular.length) groups.push(regular);
-
-          for (let i = idx + 1; i < sessions.length; i++) {
-            if (!isTeachable(sessions[i]) && sessions[i].session_type !== "exam") continue;
-            if (sessions[i].topics.length > 0) {
-              groups.push(sessions[i].topics.map((t) => ({ ...t })));
-            }
-          }
-
-          sessions = addExamAtSession(sessions, sid, title);
-          if (groups.length > 0) {
-            sessions = redistributeTopics(sessions, idx + 1, groups, classDays, toDateKey(full.end_date as any));
-          }
           await upsertSessionsFromDraft(curriculumId, sessions);
         }
       }

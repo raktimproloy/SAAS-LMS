@@ -1,11 +1,16 @@
 "use client";
 
-import React from "react";
-import { format, parseISO } from "date-fns";
+import React, { useState } from "react";
+import { format, parseISO, isToday } from "date-fns";
 import { Droppable, Draggable } from "@hello-pangea/dnd";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   AlertCircle,
   BookOpen,
@@ -27,6 +32,8 @@ type Props = {
   onRemoveTopic?: (sessionId: number | string, topicId: number | string) => void;
   onMoveTopicEarlier?: (sessionId: number | string, topicId: number | string) => void;
   onMoveTopicLater?: (sessionId: number | string, topicId: number | string) => void;
+  onShiftSessionEarlier?: (sessionId: number | string) => void;
+  onShiftSessionLater?: (sessionId: number | string) => void;
   onSkip?: (sessionId: number | string) => void;
   onUnskip?: (sessionId: number | string) => void;
   onAddDay?: (sessionId: number | string) => void;
@@ -43,6 +50,8 @@ export function RoadmapTimeline({
   onRemoveTopic,
   onMoveTopicEarlier,
   onMoveTopicLater,
+  onShiftSessionEarlier,
+  onShiftSessionLater,
   onSkip,
   onUnskip,
   onAddDay,
@@ -52,6 +61,15 @@ export function RoadmapTimeline({
   onAddExam,
   onAddTopic,
 }: Props) {
+  React.useEffect(() => {
+    const el = document.getElementById("today-session");
+    if (el) {
+      setTimeout(() => {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 500);
+    }
+  }, []);
+
   const grouped: Record<string, DraftSession[]> = {};
   sessions.forEach((session) => {
     const monthKey = format(parseISO(session.date), "MMMM yyyy");
@@ -60,17 +78,17 @@ export function RoadmapTimeline({
   });
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {Object.entries(grouped).map(([month, monthSessions]) => (
-        <div key={month} className="space-y-4">
-          <h3 className="text-lg font-bold border-b pb-2 flex items-center gap-2 sticky top-0 bg-background/95 backdrop-blur z-10 py-2">
-            <Calendar className="w-5 h-5 text-primary" />
-            {month}
-            <span className="text-xs font-normal text-muted-foreground ml-auto">
-              {monthSessions.length} days
+        <div key={month} className="space-y-3 sm:space-y-4">
+          <h3 className="text-base sm:text-lg font-bold border-b pb-2 flex items-center gap-2 py-2 -mx-1 px-1">
+            <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-primary shrink-0" />
+            <span className="truncate">{month}</span>
+            <span className="text-[10px] sm:text-xs font-normal text-muted-foreground ml-auto shrink-0">
+              {monthSessions.length} দিন
             </span>
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3 gap-3 sm:gap-4">
             {monthSessions.map((session) => (
               <SessionCard
                 key={String(session.id)}
@@ -79,6 +97,8 @@ export function RoadmapTimeline({
                 onRemoveTopic={onRemoveTopic}
                 onMoveTopicEarlier={onMoveTopicEarlier}
                 onMoveTopicLater={onMoveTopicLater}
+                onShiftSessionEarlier={onShiftSessionEarlier}
+                onShiftSessionLater={onShiftSessionLater}
                 onSkip={onSkip}
                 onUnskip={onUnskip}
                 onAddDay={onAddDay}
@@ -94,7 +114,7 @@ export function RoadmapTimeline({
       ))}
       {sessions.length === 0 && (
         <p className="text-center text-muted-foreground py-16">
-          No sessions yet. Adjust dates or class days in Settings.
+          এখনো কোনো ক্লাস নেই। সেটিংস থেকে তারিখ বা ক্লাসের দিন ঠিক করুন।
         </p>
       )}
     </div>
@@ -107,6 +127,8 @@ function SessionCard({
   onRemoveTopic,
   onMoveTopicEarlier,
   onMoveTopicLater,
+  onShiftSessionEarlier,
+  onShiftSessionLater,
   onSkip,
   onUnskip,
   onAddDay,
@@ -135,13 +157,32 @@ function SessionCard({
 
   const droppable = !readOnly && canTeach;
   const topicCount = session.topics?.length || 0;
-  const primaryTopic = session.topics?.[0];
+  const isTodayClass = isToday(parseISO(session.date));
 
   const inner = (
-    <Card className={`min-h-[200px] border-2 transition-all shadow-sm ${border}`}>
-      <CardHeader className="py-3 px-4 border-b bg-muted/15 space-y-2">
-        <div className="space-y-1 min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
+    <Card id={isTodayClass ? "today-session" : undefined} className={`min-h-[140px] sm:min-h-[160px] border-2 transition-all shadow-sm ${border} ${isTodayClass ? 'ring-2 ring-primary ring-offset-2' : ''}`}>
+      <CardHeader className="py-2.5 sm:py-3 px-3 sm:px-4 border-b bg-muted/15 space-y-2">
+        <div className="flex flex-wrap items-center justify-between gap-2 min-w-0">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-xs sm:text-sm text-foreground">
+              {format(parseISO(session.date), "EEE, MMM d")}
+            </span>
+            {isTodayClass && (
+              <Badge className="bg-primary text-primary-foreground text-[10px] sm:text-xs px-2">
+                Today
+              </Badge>
+            )}
+            {softHoliday && (
+              <Badge
+                variant="outline"
+                className="text-amber-700 border-amber-400 bg-amber-50 dark:bg-amber-950/40 text-[10px]"
+              >
+                {session.holiday_name || "সরকারি ছুটি"}
+              </Badge>
+            )}
+          </div>
+
+          <div className="flex items-center gap-1.5 shrink-0">
             <Badge
               variant={
                 type === "holiday" || type === "skipped"
@@ -150,80 +191,62 @@ function SessionCard({
                     ? "default"
                     : "secondary"
               }
+              className="text-[10px] sm:text-xs font-semibold"
             >
               {type === "exam"
-                ? "Exam"
+                ? "পরীক্ষা"
                 : type === "holiday"
-                  ? "Cuti"
+                  ? "ছুটি"
                   : type === "skipped"
-                    ? "Skipped"
-                    : `Class ${session.session_number}`}
+                    ? "স্কিপ"
+                    : `ক্লাস ${session.session_number}`}
             </Badge>
-            <span className="font-semibold text-sm">
-              {format(parseISO(session.date), "EEE, MMM d")}
-            </span>
             {session.is_completed && (
-              <Badge variant="outline" className="text-green-600 border-green-500">
-                Done
-              </Badge>
-            )}
-            {softHoliday && (
-              <Badge
-                variant="outline"
-                className="text-amber-700 border-amber-400 bg-amber-50 dark:bg-amber-950/40 text-[10px]"
-              >
-                Public holiday
+              <Badge variant="outline" className="text-green-600 border-green-500 text-[10px] sm:text-xs">
+                সম্পন্ন (Done)
               </Badge>
             )}
           </div>
-          {primaryTopic && type !== "holiday" && type !== "skipped" && (
-            <p className="text-xs text-muted-foreground truncate">
-              {primaryTopic.subject ? `${primaryTopic.subject} · ` : ""}
-              {primaryTopic.chapter_name}
-              {primaryTopic.topic_name ? ` — ${primaryTopic.topic_name}` : ""}
-              {topicCount > 1 ? ` (+${topicCount - 1} more)` : ""}
-            </p>
-          )}
         </div>
 
         {!readOnly && (
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-0.5 sm:gap-1 pt-1.5 border-t border-border/40 -mx-1">
             {type === "class" && onSkip && (
               <ActionBtn onClick={() => onSkip(session.id)} className="text-orange-600">
-                <XCircle className="w-3 h-3" /> Skip
+                <XCircle className="w-3 h-3" /> স্কিপ
               </ActionBtn>
             )}
             {type === "class" && onMarkCuti && (
               <ActionBtn
-                onClick={() => onMarkCuti(session.id, session.holiday_name || "Cuti")}
+                onClick={() => onMarkCuti(session.id, session.holiday_name || "ছুটি")}
                 className="text-amber-700"
               >
-                <Umbrella className="w-3 h-3" /> Cuti
+                <Umbrella className="w-3 h-3" /> ছুটি
               </ActionBtn>
             )}
             {type === "skipped" && onUnskip && (
               <ActionBtn onClick={() => onUnskip(session.id)} className="text-green-600">
-                Restore
+                ফিরিয়ে আনুন
               </ActionBtn>
             )}
             {type === "holiday" && onTeachHoliday && (
               <ActionBtn onClick={() => onTeachHoliday(session.id)} className="text-primary">
-                Class hobe
+                ক্লাস হবে
               </ActionBtn>
             )}
             {canTeach && onAddDay && (
               <ActionBtn onClick={() => onAddDay(session.id)}>
-                <Plus className="w-3 h-3" /> Day
+                <Plus className="w-3 h-3" /> দিন
               </ActionBtn>
             )}
             {type === "class" && onAddExam && (
               <ActionBtn onClick={() => onAddExam(session.id)} className="text-blue-600">
-                <FileSignature className="w-3 h-3" /> Exam
+                <FileSignature className="w-3 h-3" /> পরীক্ষা
               </ActionBtn>
             )}
             {canTeach && onAddTopic && (
               <ActionBtn onClick={() => onAddTopic(session.id)}>
-                <Plus className="w-3 h-3" /> Topic
+                <Plus className="w-3 h-3" /> টপিক
               </ActionBtn>
             )}
             {onRemoveDay && type !== "holiday" && (
@@ -235,32 +258,29 @@ function SessionCard({
         )}
       </CardHeader>
 
-      <CardContent className="p-4 space-y-2">
+      <CardContent className="p-3 sm:p-4 space-y-2">
         {softHoliday && type === "class" && (
-          <div className="text-xs text-amber-800 dark:text-amber-300 flex items-start gap-1.5 rounded-md bg-amber-100/60 dark:bg-amber-950/40 px-2 py-1.5">
-            <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-            <span>
-              <strong>{session.holiday_name}</strong> — default e class ache. Cuti dite
-              &quot;Cuti&quot; chapun; topics pore chole jabe.
-            </span>
+          <div className="text-xs font-semibold text-amber-800 dark:text-amber-300 flex items-center gap-1.5 rounded-lg bg-amber-100/70 dark:bg-amber-950/40 px-2.5 py-1.5 border border-amber-300/60 dark:border-amber-900/50">
+            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+            <span>{session.holiday_name || "সরকারি ছুটি"}</span>
           </div>
         )}
         {type === "holiday" && (
-          <div className="text-sm text-orange-600 dark:text-orange-400 flex items-center gap-1">
-            <Umbrella className="w-4 h-4" />
-            Cuti: {session.holiday_name || "Holiday"}
+          <div className="text-sm font-semibold text-orange-600 dark:text-orange-400 flex items-center gap-1.5 py-1">
+            <Umbrella className="w-4 h-4 shrink-0" />
+            <span>{session.holiday_name || "ছুটির দিন"}</span>
           </div>
         )}
         {type === "skipped" && (
-          <div className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
-            <AlertCircle className="w-4 h-4" />
-            Skipped — topics next class e chole geche
+          <div className="text-sm font-medium text-red-600 dark:text-red-400 flex items-center gap-1.5 py-1">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>স্কিপ করা হয়েছে</span>
           </div>
         )}
         {type === "exam" && session.exam_title && (
-          <div className="text-sm text-blue-700 dark:text-blue-300 font-medium flex items-center gap-1">
-            <FileSignature className="w-4 h-4" />
-            {session.exam_title}
+          <div className="text-sm text-blue-700 dark:text-blue-300 font-bold flex items-center gap-1.5 py-1">
+            <FileSignature className="w-4 h-4 shrink-0" />
+            <span>{session.exam_title}</span>
           </div>
         )}
 
@@ -284,38 +304,50 @@ function SessionCard({
                     ref={provided.innerRef}
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
-                    className={`flex items-center justify-between gap-1 p-2 rounded-md text-sm border ${
+                    className={`flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2 rounded-md text-sm border ${
                       snapshot.isDragging
                         ? "shadow-lg bg-background border-primary"
                         : "bg-muted/30 hover:bg-muted/50"
                     }`}
                   >
                     <TopicRow topic={topic} />
-                    <div className="flex items-center gap-0.5 shrink-0">
+                    <div className="flex items-center justify-end gap-0.5 shrink-0 self-end sm:self-auto">
                       {(onMoveTopicEarlier || onMoveTopicLater) && (
                         <div className="flex items-center rounded-md border bg-background/90 mr-0.5">
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onMoveTopicEarlier?.(session.id, topic.id);
-                            }}
-                            className="p-1 text-muted-foreground hover:text-primary disabled:opacity-30"
-                            title="Ager class e nao (merge)"
-                          >
-                            <ChevronLeft className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onMoveTopicLater?.(session.id, topic.id);
-                            }}
-                            className="p-1 text-muted-foreground hover:text-primary"
-                            title="Porer class e nao (merge)"
-                          >
-                            <ChevronRight className="w-3.5 h-3.5" />
-                          </button>
+                          {onMoveTopicEarlier && (
+                            <TopicMovePopover
+                              direction="earlier"
+                              onMerge={() => onMoveTopicEarlier(session.id, topic.id)}
+                              onShift={() => onShiftSessionEarlier?.(session.id)}
+                              shiftDisabled={!onShiftSessionEarlier}
+                            >
+                              <button
+                                type="button"
+                                onClick={(e) => e.stopPropagation()}
+                                className="p-1 text-muted-foreground hover:text-primary disabled:opacity-30"
+                                title="আগের দিকে — অপশন দেখুন"
+                              >
+                                <ChevronLeft className="w-3.5 h-3.5" />
+                              </button>
+                            </TopicMovePopover>
+                          )}
+                          {onMoveTopicLater && (
+                            <TopicMovePopover
+                              direction="later"
+                              onMerge={() => onMoveTopicLater(session.id, topic.id)}
+                              onShift={() => onShiftSessionLater?.(session.id)}
+                              shiftDisabled={!onShiftSessionLater}
+                            >
+                              <button
+                                type="button"
+                                onClick={(e) => e.stopPropagation()}
+                                className="p-1 text-muted-foreground hover:text-primary"
+                                title="পরের দিকে — অপশন দেখুন"
+                              >
+                                <ChevronRight className="w-3.5 h-3.5" />
+                              </button>
+                            </TopicMovePopover>
+                          )}
                         </div>
                       )}
                       {onRemoveTopic && (
@@ -338,7 +370,7 @@ function SessionCard({
           )}
           {topicCount === 0 && canTeach && !readOnly && (
             <p className="text-xs text-muted-foreground text-center py-3 border border-dashed rounded-md">
-              Topic drag kore anun ba + Topic
+              টপিক ড্র্যাগ করে আনুন বা + টপিক চাপুন
             </p>
           )}
         </div>
@@ -369,13 +401,10 @@ function TopicRow({ topic }: { topic: any }) {
     <div className="flex items-start gap-2 flex-1 min-w-0">
       <BookOpen className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
       <div className="min-w-0">
-        <p className="break-words leading-tight font-medium">
+        <p className="break-words leading-snug font-medium text-foreground">
           {topic.chapter_name}
           {topic.topic_name ? ` — ${topic.topic_name}` : ""}
         </p>
-        {topic.subject && (
-          <p className="text-[10px] text-muted-foreground mt-0.5">{topic.subject}</p>
-        )}
       </div>
       {topic.size > 1 && (
         <Badge variant="outline" className="text-[10px] shrink-0">
@@ -383,6 +412,84 @@ function TopicRow({ topic }: { topic: any }) {
         </Badge>
       )}
     </div>
+  );
+}
+
+function TopicMovePopover({
+  direction,
+  onMerge,
+  onShift,
+  shiftDisabled,
+  children,
+}: {
+  direction: "earlier" | "later";
+  onMerge: () => void;
+  onShift: () => void;
+  shiftDisabled?: boolean;
+  children: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(false);
+  const isEarlier = direction === "earlier";
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>{children}</PopoverTrigger>
+      <PopoverContent
+        className="w-[min(18rem,calc(100vw-2rem))] p-2"
+        align="end"
+        side="top"
+        sideOffset={6}
+      >
+        <p className="text-xs font-semibold px-1 pb-1.5">
+          {isEarlier ? "টপিক আগের দিকে" : "টপিক পরের দিকে"}
+        </p>
+        <div className="grid gap-1">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-auto py-2 px-2 justify-start text-left whitespace-normal"
+            onClick={(e) => {
+              e.stopPropagation();
+              onMerge();
+              setOpen(false);
+            }}
+          >
+            <div>
+              <p className="font-medium text-xs">
+                {isEarlier ? "আগের দিনে একসাথে রাখুন" : "পরের দিনে একসাথে রাখুন"}
+              </p>
+              <p className="text-[10px] text-muted-foreground font-normal mt-0.5 leading-snug">
+                একই দিনে দুইটা টপিক থাকবে
+              </p>
+            </div>
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-auto py-2 px-2 justify-start text-left whitespace-normal"
+            disabled={shiftDisabled}
+            onClick={(e) => {
+              e.stopPropagation();
+              onShift();
+              setOpen(false);
+            }}
+          >
+            <div>
+              <p className="font-medium text-xs">
+                {isEarlier ? "ক্লাস আগে সরান" : "ক্লাস পরে সরান"}
+              </p>
+              <p className="text-[10px] text-muted-foreground font-normal mt-0.5 leading-snug">
+                {isEarlier
+                  ? "উপরে ক্যাসকেড; ফাঁকা থাকলে ভরবে, নাহলে বাকি টপিকে যাবে"
+                  : "এই দিন ফাঁকা; ক্লাসগুলো এক ধাপ পরে যাবে। শেষে জায়গা না থাকলে বাকি টপিকে যাবে"}
+              </p>
+            </div>
+          </Button>
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 }
 
@@ -400,7 +507,7 @@ function ActionBtn({
       type="button"
       variant="ghost"
       size="sm"
-      className={`h-7 px-2 text-xs gap-1 ${className}`}
+      className={`h-6 sm:h-7 px-1.5 sm:px-2 text-[10px] sm:text-xs gap-0.5 sm:gap-1 ${className}`}
       onClick={onClick}
     >
       {children}

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { MapPin, Calendar, Clock, ArrowRight, Loader2, Send, CheckCircle2 } from "lucide-react";
+import Link from "next/link";
+import { MapPin, Calendar, Clock, ArrowRight, Loader2, Send, CheckCircle2, BookOpen } from "lucide-react";
 import { motion } from "framer-motion";
 import { submitContactForm } from "@/components/public/home/actions";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -100,7 +101,16 @@ export function CourseList({ courses }: { courses: any[] }) {
                     </div>
                   </div>
 
-                  <div className="shrink-0 flex items-center sm:border-l border-border sm:pl-6 mt-2 sm:mt-0 pt-4 sm:pt-0 border-t sm:border-t-0">
+                  <div className="shrink-0 flex flex-wrap items-center gap-2.5 sm:border-l border-border sm:pl-6 mt-2 sm:mt-0 pt-4 sm:pt-0 border-t sm:border-t-0">
+                    {batch.curriculums && batch.curriculums.length > 0 ? (
+                      <Link
+                        href={`/courses/${course.id}?batch=${batch.id}`}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold border border-primary/30 text-primary bg-primary/5 hover:bg-primary hover:text-primary-foreground transition-all duration-200 shadow-sm"
+                      >
+                        <BookOpen className="w-3.5 h-3.5" />
+                        Course Details দেখুন
+                      </Link>
+                    ) : null}
                     <Dialog 
                       open={openDialogCourseId === batch.id} 
                       onOpenChange={(open) => {

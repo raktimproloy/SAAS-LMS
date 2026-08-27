@@ -295,6 +295,84 @@ export function redistributeTopics(
   return renumberSessions(next);
 }
 
+/** Apply one topic group onto a session (handles exam vs class). */
+function applyGroupToSession(session: DraftSession, group: DraftTopic[]): DraftSession {
+  const isExamGroup =
+    group.length === 1 &&
+    (group[0].is_custom || String(group[0].chapter_name).startsWith("Exam:"));
+
+  if (group.length === 0) {
+    return applySessionTypeFlags({
+      ...session,
+      session_type: session.session_type === "exam" ? "class" : session.session_type,
+      is_exam: false,
+      exam_title: null,
+      topics: [],
+    });
+  }
+
+  let updated = applySessionTypeFlags({
+    ...session,
+    session_type: isExamGroup
+      ? "exam"
+      : session.session_type === "exam"
+        ? "class"
+        : session.session_type,
+    is_exam: isExamGroup,
+    exam_title: isExamGroup ? group[0].topic_name || group[0].chapter_name : null,
+    topics: group.map((t, j) => ({ ...t, sort_order: j })),
+  });
+
+  if (!isExamGroup && updated.session_type === "exam") {
+    updated = applySessionTypeFlags({
+      ...updated,
+      session_type: "class",
+      is_exam: false,
+      exam_title: null,
+    });
+  }
+
+  return updated;
+}
+
+/** One aligned group per teachable slot from startTeachablePos (inclusive). */
+function collectAlignedTeachableGroups(
+  sessions: DraftSession[],
+  startTeachablePos: number,
+  indices: number[],
+  trimTrailingEmpty = false
+): DraftTopic[][] {
+  const groups = indices
+    .slice(startTeachablePos)
+    .map((absIdx) => (sessions[absIdx].topics || []).map((t) => ({ ...t })));
+
+  if (!trimTrailingEmpty || groups.length === 0) return groups;
+
+  let last = groups.length - 1;
+  while (last > 0 && groups[last].length === 0) last--;
+  return groups.slice(0, last + 1);
+}
+
+/**
+ * Place groups onto existing teachable slots only — no append, no drop.
+ * Applies exactly groups.length slots starting at startTeachablePos.
+ */
+function applyGroupsToTeachableSlots(
+  sessions: DraftSession[],
+  startTeachablePos: number,
+  groups: DraftTopic[][],
+  indices: number[]
+): DraftSession[] {
+  const next = cloneSessions(sessions);
+  const slotIndices = indices.slice(startTeachablePos, startTeachablePos + groups.length);
+
+  for (let g = 0; g < slotIndices.length; g++) {
+    next[slotIndices[g]] = applyGroupToSession(next[slotIndices[g]], groups[g] || []);
+  }
+
+  return renumberSessions(next);
+}
+
 function makeExamTopic(prev: DraftTopic, chapter: string): DraftTopic {
   return {
     id: nextTempId(),
@@ -552,34 +630,113 @@ function collectGroupsFrom(sessions: DraftSession[], fromSessionIndex: number): 
 }
 
 /**
- * Move this class (and all following classes) one teachable slot earlier.
- * Previous day's content rotates to the end of the shifted block.
+ * Move this class one teachable slot earlier.
+ * If an empty day exists just above (e.g. 25 filled, 27 empty, 30 target):
+ *   only fill from that empty — 30→27, 25 stays put (NOT Remaining).
+ * If no empty above: cascade from block start; top group → Remaining.
+ * Then later classes compact forward into the hole at t.
  */
 export function shiftSessionEarlier(
   sessions: DraftSession[],
   sessionId: number | string,
-  classDays: string[],
+  classDays?: string[],
   endDate?: string
 ): DraftSession[] {
-  const next = cloneSessions(sessions);
+  let next = cloneSessions(sessions);
   const indices = teachableIndices(next);
   const absIndex = next.findIndex((s) => String(s.id) === String(sessionId));
   if (absIndex < 0) return sessions;
 
   const t = indices.indexOf(absIndex);
-  if (t <= 0) return sessions;
+  if (t < 0) return sessions;
 
-  const startAbs = indices[t - 1];
-  const suffix = collectGroupsFrom(next, startAbs);
-  if (suffix.length === 0) return sessions;
+  // Cannot overwrite completed classes — cascade starts after last completed before t
+  let blockStart = 0;
+  for (let i = 0; i < t; i++) {
+    if (next[indices[i]].is_completed) blockStart = i + 1;
+  }
 
-  const rotated = [...suffix.slice(1), suffix[0]];
-  return redistributeTopics(next, startAbs, rotated, classDays, endDate);
+  if (blockStart >= t) {
+    // No room above → this day's topics → Remaining
+    next[absIndex] = applyGroupToSession(next[absIndex], []);
+  } else {
+    // Nearest empty teachable slot in [blockStart .. t-1]
+    let emptyPos = -1;
+    for (let i = t - 1; i >= blockStart; i--) {
+      if ((next[indices[i]].topics || []).length === 0) {
+        emptyPos = i;
+        break;
+      }
+    }
+
+    if (emptyPos >= 0) {
+      // Only shift [emptyPos+1 .. t] into [emptyPos .. t-1]; leave days before empty alone
+      const moving = collectAlignedTeachableGroups(next, emptyPos + 1, indices).slice(
+        0,
+        t - emptyPos
+      );
+      next = applyGroupsToTeachableSlots(next, emptyPos, [...moving, []], indices);
+    } else {
+      // No gap — full left-shift; first group falls off → Remaining
+      const aligned = collectAlignedTeachableGroups(next, blockStart, indices).slice(
+        0,
+        t - blockStart + 1
+      );
+      next = applyGroupsToTeachableSlots(
+        next,
+        blockStart,
+        [...aligned.slice(1), []],
+        indices
+      );
+    }
+  }
+
+  // Compact later classes forward into the hole at t
+  const indicesAfter = teachableIndices(next);
+  const tAfter = indicesAfter.indexOf(
+    next.findIndex((s) => String(s.id) === String(sessionId))
+  );
+  if (tAfter < 0 || tAfter >= indicesAfter.length - 1) {
+    return renumberSessions(next);
+  }
+
+  const tailGroups: DraftTopic[][] = [];
+  for (let i = tAfter; i < indicesAfter.length; i++) {
+    const topics = next[indicesAfter[i]].topics || [];
+    if (topics.length > 0) {
+      tailGroups.push(topics.map((x) => ({ ...x })));
+    }
+  }
+
+  const clearGroups = indicesAfter.slice(tAfter).map(() => [] as DraftTopic[]);
+  next = applyGroupsToTeachableSlots(next, tAfter, clearGroups, indicesAfter);
+
+  if (tailGroups.length === 0) {
+    return renumberSessions(next);
+  }
+
+  let fillIndices = teachableIndices(next);
+  let fillStart = fillIndices.indexOf(
+    next.findIndex((s) => String(s.id) === String(sessionId))
+  );
+  while (fillIndices.length - fillStart < tailGroups.length && classDays) {
+    const before = next.length;
+    next = appendNextSession(next, classDays, undefined, endDate);
+    if (next.length === before) break;
+    fillIndices = teachableIndices(next);
+    fillStart = fillIndices.indexOf(
+      next.findIndex((s) => String(s.id) === String(sessionId))
+    );
+  }
+
+  return applyGroupsToTeachableSlots(next, fillStart, tailGroups, fillIndices);
 }
 
 /**
- * Move this class (and all following classes) one teachable slot later.
- * Leaves the current slot empty; appends a day only if still within endDate.
+ * Move this class one teachable slot later (not merge):
+ * [5, 7, 9, 11] shift 5 → [empty, 5, 7, 9] on those days
+ * (5 faka, 5→7, 7→9, 9→11). Gaps in between are filled.
+ * If no day left past endDate, the last overflowing group → Remaining.
  */
 export function shiftSessionLater(
   sessions: DraftSession[],
@@ -595,25 +752,29 @@ export function shiftSessionLater(
   const t = indices.indexOf(absIndex);
   if (t < 0) return sessions;
 
-  const groups = collectGroupsFrom(next, absIndex);
+  // Non-empty groups from this day onward (gaps ignored so they get filled)
+  const groups = collectAlignedTeachableGroups(next, t, indices, true);
+  if (groups.length === 0) return sessions;
 
-  if (t >= indices.length - 1) {
+  // [empty, ...groups] — everything shifts one slot later
+  const shifted: DraftTopic[][] = [[], ...groups];
+  let slotsFromT = indices.length - t;
+
+  while (slotsFromT < shifted.length) {
     const before = next.length;
     next = appendNextSession(next, classDays, undefined, endDate);
-    if (next.length === before) {
-      // No room past end — cannot shift later
-      return sessions;
-    }
+    if (next.length === before) break;
     indices = teachableIndices(next);
+    slotsFromT = indices.length - t;
   }
 
-  if (teachableIndices(next)[t + 1] === undefined) {
-    const before = next.length;
-    next = appendNextSession(next, classDays, undefined, endDate);
-    if (next.length === before) return sessions;
-  }
-
-  return redistributeTopics(next, absIndex, [[], ...groups], classDays, endDate);
+  // Fit what we can; overflow (last items) → Remaining
+  const fit = shifted.slice(0, slotsFromT);
+  // Clear any teachable slots from t that we won't rewrite beyond fit
+  const clearCount = indices.length - t;
+  const cleared = Array.from({ length: clearCount }, () => [] as DraftTopic[]);
+  next = applyGroupsToTeachableSlots(next, t, cleared, indices);
+  return applyGroupsToTeachableSlots(next, t, fit, indices);
 }
 
 export function moveTopic(
@@ -822,27 +983,53 @@ export function removeTopic(
 export function addExamAtSession(
   sessions: DraftSession[],
   sessionId: number | string,
-  title: string
+  title: string,
+  classDays: string[],
+  endDate?: string
 ): DraftSession[] {
-  return cloneSessions(sessions).map((s) => {
-    if (String(s.id) !== String(sessionId)) return s;
-    return applySessionTypeFlags({
-      ...s,
-      session_type: "exam",
-      is_exam: true,
-      exam_title: title,
-      topics: [
-        {
-          id: nextTempId(),
-          chapter_name: `Exam: ${title}`,
-          topic_name: title,
-          size: 1,
-          is_custom: true,
-          sort_order: 0,
-        },
-      ],
-    });
+  const next = cloneSessions(sessions);
+  const index = next.findIndex((s) => String(s.id) === String(sessionId));
+  if (index < 0) return sessions;
+
+  const target = next[index];
+  if (target.session_type === "holiday" || target.session_type === "skipped") {
+    return sessions;
+  }
+
+  const displacedTopics = target.topics.filter(
+    (t) => !String(t.chapter_name).startsWith("Exam:")
+  );
+
+  const examTopic: DraftTopic = {
+    id: nextTempId(),
+    chapter_name: `Exam: ${title}`,
+    topic_name: title,
+    size: 1,
+    is_custom: true,
+    sort_order: 0,
+  };
+
+  next[index] = applySessionTypeFlags({
+    ...next[index],
+    session_type: "exam",
+    is_exam: true,
+    exam_title: title,
+    topics: [examTopic],
   });
+
+  if (displacedTopics.length === 0) {
+    return renumberSessions(next);
+  }
+
+  const groups: DraftTopic[][] = [displacedTopics.map((t) => ({ ...t }))];
+  for (let i = index + 1; i < next.length; i++) {
+    if (!isTeachable(next[i]) && next[i].session_type !== "exam") continue;
+    if (next[i].topics.length > 0) {
+      groups.push(next[i].topics.map((t) => ({ ...t })));
+    }
+  }
+
+  return redistributeTopics(next, index + 1, groups, classDays, endDate);
 }
 
 export function addCustomTopic(

@@ -16,6 +16,16 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
+const DAY_BN: Record<string, string> = {
+  Sunday: "রবি",
+  Monday: "সোম",
+  Tuesday: "মঙ্গল",
+  Wednesday: "বুধ",
+  Thursday: "বৃহঃ",
+  Friday: "শুক্র",
+  Saturday: "শনি",
+};
+
 type Props = {
   open: boolean;
   onOpenChange: (o: boolean) => void;
@@ -56,27 +66,27 @@ export function CurriculumSettingsSheet({ open, onOpenChange, curriculum, onSave
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Curriculum Settings</DialogTitle>
-          <DialogDescription>Update title, dates, class days, and visibility.</DialogDescription>
+          <DialogTitle>কারিকুলাম সেটিংস</DialogTitle>
+          <DialogDescription>নাম, তারিখ, ক্লাসের দিন আর দৃশ্যমানতা আপডেট করুন।</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
           <div className="grid gap-2">
-            <Label>Title</Label>
+            <Label>নাম</Label>
             <Input value={title} onChange={(e) => setTitle(e.target.value)} />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="grid gap-2">
-              <Label>Start</Label>
+              <Label>শুরু</Label>
               <Input type="date" value={start} onChange={(e) => setStart(e.target.value)} />
             </div>
             <div className="grid gap-2">
-              <Label>End</Label>
+              <Label>শেষ</Label>
               <Input type="date" value={end} onChange={(e) => setEnd(e.target.value)} />
             </div>
           </div>
           <div className="space-y-2">
-            <Label>Class Days</Label>
+            <Label>ক্লাসের দিন</Label>
             <div className="flex flex-wrap gap-2">
               {DAYS.map((d) => {
                 const active = days.includes(d);
@@ -95,7 +105,7 @@ export function CurriculumSettingsSheet({ open, onOpenChange, curriculum, onSave
                         : "bg-background"
                     }`}
                   >
-                    {d.slice(0, 3)}
+                    {DAY_BN[d] || d.slice(0, 3)}
                   </button>
                 );
               })}
@@ -106,20 +116,20 @@ export function CurriculumSettingsSheet({ open, onOpenChange, curriculum, onSave
             <label className="flex items-start gap-2 text-sm border rounded-md p-3 bg-amber-50/50 dark:bg-amber-950/20">
               <Checkbox checked={remap} onCheckedChange={(c) => setRemap(!!c)} />
               <span>
-                Remap schedule to new class days (keeps topic order, regenerates dates).
+                নতুন ক্লাসের দিন অনুযায়ী সময়সূচি আবার সাজান (টপিকের ক্রম থাকবে, তারিখ নতুন হবে)।
               </span>
             </label>
           )}
 
           <label className="flex items-center gap-2 text-sm">
             <Checkbox checked={isPublic} onCheckedChange={(c) => setIsPublic(!!c)} />
-            Visible to students when published
+            প্রকাশের পর স্টুডেন্টরা দেখতে পারবে
           </label>
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            বাতিল
           </Button>
           <Button
             onClick={() => {
@@ -134,7 +144,7 @@ export function CurriculumSettingsSheet({ open, onOpenChange, curriculum, onSave
               onOpenChange(false);
             }}
           >
-            Save
+            সেভ করুন
           </Button>
         </DialogFooter>
       </DialogContent>

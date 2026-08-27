@@ -16,6 +16,16 @@ import { estimateScheduleStats, resetTempIds } from "@/lib/curriculum-scheduler"
 
 const DAYS_OF_WEEK = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
+const DAY_BN: Record<string, string> = {
+  Sunday: "রবি",
+  Monday: "সোম",
+  Tuesday: "মঙ্গল",
+  Wednesday: "বুধ",
+  Thursday: "বৃহঃ",
+  Friday: "শুক্র",
+  Saturday: "শনি",
+};
+
 export default function NewCurriculumPage() {
   const router = useRouter();
   const { toast } = useToast();
@@ -70,9 +80,9 @@ export default function NewCurriculumPage() {
     if (formData.batch_id && batches.length > 0) {
       const selectedBatch = batches.find((b) => b.id.toString() === formData.batch_id);
       if (
-        selectedBatch?.class_days &&
+       selectedBatch?.class_days &&
         Array.isArray(selectedBatch.class_days) &&
-        selectedBatch.class_days.length > 0
+       selectedBatch.class_days.length > 0
       ) {
         const DAY_MAP: Record<string, string> = {
           Sun: "Sunday",
@@ -106,7 +116,7 @@ export default function NewCurriculumPage() {
         class_days: formData.class_days,
         holidays: new Map(),
       },
-      selectedBooks
+    selectedBooks
     );
   }, [formData.start_date, formData.end_date, formData.class_days, selectedBooks]);
 
@@ -130,15 +140,15 @@ export default function NewCurriculumPage() {
 
   const validateStep1 = () => {
     if (!formData.title || !formData.course_id || !formData.batch_id || !formData.start_date || !formData.end_date) {
-      toast({ title: "Missing fields", description: "Fill title, course, batch, and dates.", variant: "destructive" });
+      toast({ title: "তথ্য অসম্পূর্ণ", description: "নাম, কোর্স, ব্যাচ আর তারিখ পূরণ করুন।", variant: "destructive" });
       return false;
     }
     if (formData.class_days.length === 0) {
-      toast({ title: "Class days", description: "Select at least one class day.", variant: "destructive" });
+      toast({ title: "ক্লাসের দিন", description: "অন্তত একটা ক্লাসের দিন সিলেক্ট করুন।", variant: "destructive" });
       return false;
     }
     if (new Date(formData.start_date) >= new Date(formData.end_date)) {
-      toast({ title: "Dates", description: "End date must be after start date.", variant: "destructive" });
+      toast({ title: "তারিখ", description: "শেষ তারিখ শুরুর তারিখের পরে হতে হবে।", variant: "destructive" });
       return false;
     }
     return true;
@@ -161,10 +171,10 @@ export default function NewCurriculumPage() {
       });
       if (!res.ok) throw new Error("Failed to create curriculum");
       const created = await res.json();
-      toast({ title: "Roadmap ready", description: "Opening your curriculum planner…" });
+      toast({ title: "রোডম্যাপ তৈরি হয়েছে", description: "প্ল্যানার খোলা হচ্ছে…" });
       router.push(`/admin/curriculum/${created.id}`);
     } catch {
-      toast({ title: "Error", description: "Failed to create curriculum.", variant: "destructive" });
+      toast({ title: "সমস্যা হয়েছে", description: "কারিকুলাম তৈরি করা যায়নি।", variant: "destructive" });
       setIsSubmitting(false);
     }
   };
@@ -188,9 +198,9 @@ export default function NewCurriculumPage() {
           </Button>
         </Link>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Create Curriculum Roadmap</h1>
+          <h1 className="text-3xl font-bold tracking-tight">নতুন কারিকুলাম তৈরি</h1>
           <p className="text-muted-foreground mt-1">
-            Build a teachable roadmap with classes, chapter exams, and holidays.
+            ক্লাস, অধ্যায় শেষে পরীক্ষা আর ছুটির দিন দিয়ে রোডম্যাপ বানান।
           </p>
         </div>
       </div>
@@ -212,7 +222,7 @@ export default function NewCurriculumPage() {
               <span className="w-5 h-5 rounded-full bg-background/20 flex items-center justify-center text-xs">
                 {s}
               </span>
-              {s === 1 ? "Basics" : s === 2 ? "Content" : "Generate"}
+              {s === 1 ? "মূল তথ্য" : s === 2 ? "বিষয়বস্তু" : "তৈরি"}
             </button>
             {s < 3 && <div className="flex-1 h-px bg-border" />}
           </React.Fragment>
@@ -225,18 +235,18 @@ export default function NewCurriculumPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <CalendarDays className="w-5 h-5 text-primary" />
-                Basics
+                মূল তথ্য
               </CardTitle>
-              <CardDescription>Name, course, batch, and class schedule.</CardDescription>
+              <CardDescription>নাম, কোর্স, ব্যাচ আর কোন কোন দিন ক্লাস হবে।</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid gap-2">
                 <Label htmlFor="title">
-                  Curriculum Title <span className="text-destructive">*</span>
+                  কারিকুলামের নাম <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="title"
-                  placeholder="e.g. Class 10 Physics Masterplan 2026"
+                  placeholder="যেমন: ক্লাস ১০ পদার্থবিজ্ঞান ২০২৬"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 />
@@ -244,7 +254,7 @@ export default function NewCurriculumPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="grid gap-2">
-                  <Label>Course <span className="text-destructive">*</span></Label>
+                  <Label>কোর্স <span className="text-destructive">*</span></Label>
                   <Select
                     value={formData.course_id || undefined}
                     onValueChange={(val) =>
@@ -252,9 +262,9 @@ export default function NewCurriculumPage() {
                     }
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a course">
+                      <SelectValue placeholder="কোর্স সিলেক্ট করুন">
                         {courses.find((c) => c.id.toString() === formData.course_id)?.title ||
-                          "Select a course"}
+                          "কোর্স সিলেক্ট করুন"}
                       </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
@@ -267,7 +277,7 @@ export default function NewCurriculumPage() {
                   </Select>
                 </div>
                 <div className="grid gap-2">
-                  <Label>Batch <span className="text-destructive">*</span></Label>
+                  <Label>ব্যাচ <span className="text-destructive">*</span></Label>
                   <Select
                     value={formData.batch_id || undefined}
                     onValueChange={(val) => setFormData({ ...formData, batch_id: val as string })}
@@ -278,13 +288,13 @@ export default function NewCurriculumPage() {
                         placeholder={
                           formData.course_id
                             ? batches.length > 0
-                              ? "Select a batch"
-                              : "No batches found"
-                            : "Select a course first"
+                              ? "ব্যাচ সিলেক্ট করুন"
+                              : "কোনো ব্যাচ পাওয়া যায়নি"
+                            : "কোর্স সিলেক্ট করুন first"
                         }
                       >
                         {batches.find((b) => b.id.toString() === formData.batch_id)?.name ||
-                          (formData.course_id ? "Select a batch" : "Select a course first")}
+                          (formData.course_id ? "ব্যাচ সিলেক্ট করুন" : "কোর্স সিলেক্ট করুন first")}
                       </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
@@ -300,7 +310,7 @@ export default function NewCurriculumPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="start_date">Start Date *</Label>
+                  <Label htmlFor="start_date">শুরুর তারিখ *</Label>
                   <Input
                     id="start_date"
                     type="date"
@@ -309,7 +319,7 @@ export default function NewCurriculumPage() {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="end_date">End Date *</Label>
+                  <Label htmlFor="end_date">শেষ তারিখ *</Label>
                   <Input
                     id="end_date"
                     type="date"
@@ -320,7 +330,7 @@ export default function NewCurriculumPage() {
               </div>
 
               <div className="space-y-3">
-                <Label>Class Days *</Label>
+                <Label>ক্লাসের দিন *</Label>
                 <div className="flex flex-wrap gap-2">
                   {DAYS_OF_WEEK.map((day) => {
                     const active = formData.class_days.includes(day);
@@ -335,7 +345,7 @@ export default function NewCurriculumPage() {
                             : "bg-background hover:bg-muted"
                         }`}
                       >
-                        {day.slice(0, 3)}
+                        {DAY_BN[day] || day.slice(0, 3)}
                       </button>
                     );
                   })}
@@ -348,7 +358,7 @@ export default function NewCurriculumPage() {
                   if (validateStep1()) setStep(2);
                 }}
               >
-                Next <ArrowRight className="w-4 h-4 ml-2" />
+                পরের ধাপ <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </CardFooter>
           </>
@@ -359,29 +369,29 @@ export default function NewCurriculumPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <BookOpen className="w-5 h-5 text-primary" />
-                Content
+                বিষয়বস্তু
               </CardTitle>
               <CardDescription>
-                Select NCTB books and optionally copy from a previous curriculum.
+                এনসিটিবি বই সিলেক্ট করুন। চাইলে আগের কোনো কারিকুলাম থেকেও কপি করতে পারেন।
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid gap-2">
-                <Label>Copy from existing curriculum</Label>
+                <Label>আগের কারিকুলাম থেকে কপি</Label>
                 <Select
                   value={formData.template_id}
                   onValueChange={(val) => setFormData({ ...formData, template_id: val as string })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="None — generate fresh">
+                    <SelectValue placeholder="কপি নয় — নতুন করে বানাব">
                       {formData.template_id === "none"
-                        ? "None — generate fresh"
+                        ? "কপি নয় — নতুন করে বানাব"
                         : curriculums.find((c) => c.id.toString() === formData.template_id)?.title ||
-                          "Select template"}
+                          "টেমপ্লেট সিলেক্ট করুন"}
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">None — generate fresh</SelectItem>
+                    <SelectItem value="none">কপি নয় — নতুন করে বানাব</SelectItem>
                     {curriculums.map((c) => (
                       <SelectItem key={c.id} value={c.id.toString()}>
                         {c.title}
@@ -390,14 +400,14 @@ export default function NewCurriculumPage() {
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground">
-                  Template copies sessions & topics, remapped to your new start date.
+                  টেমপ্লেট নিলে ক্লাস ও টপিক কপি হবে, নতুন শুরুর তারিখ অনুযায়ী সাজানো হবে।
                 </p>
               </div>
 
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <Label>NCTB Books</Label>
-                  <Badge variant="secondary">{formData.books.length} selected</Badge>
+                  <Label>এনসিটিবি বই</Label>
+                  <Badge variant="secondary">{formData.books.length} টি বেছে নেওয়া</Badge>
                 </div>
                 <div className="max-h-[320px] overflow-y-auto border rounded-lg divide-y">
                   {booksBySubject.map(([subject, books]) => (
@@ -419,7 +429,7 @@ export default function NewCurriculumPage() {
                               {book.class_name} — {book.subject}
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              {Array.isArray(book.chapters) ? book.chapters.length : 0} chapters
+                              {Array.isArray(book.chapters) ? book.chapters.length : 0}টি অধ্যায়
                             </p>
                           </div>
                         </label>
@@ -428,7 +438,7 @@ export default function NewCurriculumPage() {
                   ))}
                   {nctbBooks.length === 0 && (
                     <p className="p-6 text-sm text-muted-foreground text-center">
-                      No NCTB books imported yet.
+                      এখনো কোনো এনসিটিবি বই ইমপোর্ট করা হয়নি।
                     </p>
                   )}
                 </div>
@@ -440,19 +450,19 @@ export default function NewCurriculumPage() {
                   onCheckedChange={(c) => setFormData({ ...formData, is_public: !!c })}
                 />
                 <div>
-                  <p className="text-sm font-medium">Make public for students</p>
+                  <p className="text-sm font-medium">স্টুডেন্টদের দেখানোর জন্য খোলা রাখুন</p>
                   <p className="text-xs text-muted-foreground">
-                    Students in this batch can view the roadmap after you publish.
+                    প্রকাশ করার পর এই ব্যাচের স্টুডেন্টরা রোডম্যাপ দেখতে পারবে।
                   </p>
                 </div>
               </label>
             </CardContent>
             <CardFooter className="justify-between">
               <Button variant="outline" onClick={() => setStep(1)}>
-                Back
+                পেছনে
               </Button>
               <Button onClick={() => setStep(3)}>
-                Next <ArrowRight className="w-4 h-4 ml-2" />
+                পরের ধাপ <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </CardFooter>
           </>
@@ -463,44 +473,42 @@ export default function NewCurriculumPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-primary" />
-                Generate Roadmap
+                রোডম্যাপ তৈরি
               </CardTitle>
               <CardDescription>
-                We will create class days, mark holidays, place one topic per class, and insert a
-                chapter exam after each chapter.
+                ক্লাসের দিন তৈরি হবে, ছুটির দিন মার্ক হবে, প্রতি ক্লাসে একটা টপিক বসবে, আর প্রতি অধ্যায় শেষে পরীক্ষা যোগ হবে।
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <Stat label="Class days" value={preview?.teachable ?? "—"} />
-                <Stat label="Holidays*" value={preview?.holidays ?? "—"} hint="BD holidays added on create" />
-                <Stat label="Topics" value={preview?.topics ?? "—"} />
-                <Stat label="Chapter exams" value={preview?.exams ?? "—"} />
+                <Stat label="ক্লাসের দিন" value={preview?.teachable ?? "—"} />
+                <Stat label="ছুটি*" value={preview?.holidays ?? "—"} hint="তৈরির সময় বাংলাদেশের সরকারি ছুটি যোগ হবে" />
+                <Stat label="টপিক" value={preview?.topics ?? "—"} />
+                <Stat label="অধ্যায় পরীক্ষা" value={preview?.exams ?? "—"} />
               </div>
               {preview && !preview.willFit && (
                 <p className="text-sm text-amber-600 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded-md p-3">
-                  Syllabus needs ~{preview.overflow} more class slots than available. Extra topics
-                  will stay in the Remaining panel for you to place later.
+                  সিলেবাসের জন্য প্রায় {preview.overflow}টি ক্লাস কম পড়ছে। বাড়তি টপিক ডান পাশের বাকি টপিক প্যানেলে থাকবে — পরে বসিয়ে নিতে পারবেন।
                 </p>
               )}
               {formData.template_id !== "none" && (
                 <p className="text-sm text-primary bg-primary/5 border border-primary/20 rounded-md p-3">
-                  Using template — schedule will be cloned and remapped to your start date.
+                  টেমপ্লেট ব্যবহার হচ্ছে — সময়সূচি কপি হয়ে নতুন শুরুর তারিখ অনুযায়ী সাজবে।
                 </p>
               )}
               <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-5">
-                <li>Status starts as <strong>draft</strong> — edit freely, then Publish.</li>
-                <li>Holidays stay on the calendar; skip any day in one click.</li>
-                <li>Remaining topics appear in the right panel for quick add.</li>
+                <li>শুরুতে স্ট্যাটাস থাকবে <strong>খসড়া</strong> — ইচ্ছেমতো এডিট করুন, শেষে প্রকাশ করুন।</li>
+                <li>ছুটির দিন ক্যালেন্ডারে থাকবে; যেকোনো দিন এক ক্লিকে স্কিপ করতে পারবেন।</li>
+                <li>বাকি টপিক ডান পাশের প্যানেল থেকে সহজে যোগ করতে পারবেন।</li>
               </ul>
             </CardContent>
             <CardFooter className="justify-between">
               <Button variant="outline" onClick={() => setStep(2)} disabled={isSubmitting}>
-                Back
+                পেছনে
               </Button>
               <Button onClick={handleSubmit} disabled={isSubmitting}>
                 {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                Create & Open Planner
+                তৈরি করে প্ল্যানার খুলুন
               </Button>
             </CardFooter>
           </>

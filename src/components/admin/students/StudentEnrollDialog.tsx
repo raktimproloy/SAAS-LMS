@@ -269,11 +269,6 @@ export function StudentEnrollDialog({
           <DialogTitle>{editingStudentId ? "Edit Student" : "Enroll New Student"}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-6 py-4">
-          {formError && (
-            <div className="rounded-md border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
-              {formError}
-            </div>
-          )}
 
           <div className="flex flex-col items-center gap-2">
             <div className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border bg-muted">
@@ -566,16 +561,23 @@ export function StudentEnrollDialog({
             </div>
           )}
 
-          <div className="flex justify-end border-t pt-4">
-            <Button type="submit" disabled={isSubmitting || isUploadingPhoto}>
-              {isSubmitting
-                ? editingStudentId
-                  ? "Saving..."
-                  : "Enrolling..."
-                : editingStudentId
-                  ? "Save Changes"
-                  : "Enroll Student"}
-            </Button>
+          <div className="flex flex-col gap-4 border-t pt-4">
+            {formError && (
+              <div className="rounded-md border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
+                {formError}
+              </div>
+            )}
+            <div className="flex justify-end">
+              <Button type="submit" disabled={isSubmitting || isUploadingPhoto}>
+                {isSubmitting
+                  ? editingStudentId
+                    ? "Saving..."
+                    : "Enrolling..."
+                  : editingStudentId
+                    ? "Save Changes"
+                    : "Enroll Student"}
+              </Button>
+            </div>
           </div>
         </form>
       </DialogContent>

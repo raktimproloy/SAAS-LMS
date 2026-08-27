@@ -33,18 +33,27 @@ async function fetchHomeData() {
         batches: {
           where: { status: { in: ['active', 'PUBLISHED'] } },
           orderBy: { sort_order: 'asc' },
-          select: {
-            id: true,
-            name: true,
-            start_time: true,
-            end_time: true,
-            status: true,
-            max_students: true,
-            class_days: true,
+            select: {
+              id: true,
+              name: true,
+              start_time: true,
+              end_time: true,
+              status: true,
+              max_students: true,
+              class_days: true,
+              curriculums: {
+                select: {
+                  id: true,
+                  title: true,
+                  is_public: true,
+                  status: true,
+                },
+                take: 1,
+              },
+            },
           },
         },
-      },
-    }),
+      }),
     prisma.videoCourse.findMany({
       take: 4,
       orderBy: { created_at: 'desc' },

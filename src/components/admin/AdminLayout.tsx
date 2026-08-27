@@ -55,7 +55,7 @@ const sidebarLinks: SidebarLink[] = [
   },
   { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
   { name: "Course & Batches", href: "/admin/courses", icon: BookOpen, perm: "courses" },
-  { name: "Curriculum Planner", href: "/admin/curriculum", icon: Calendar, perm: "curriculum" },
+  { name: "কারিকুলাম প্ল্যানার", href: "/admin/curriculum", icon: Calendar, perm: "curriculum" },
   {
     name: "Student",
     icon: Users,

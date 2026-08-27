@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { CalendarClock, CheckCircle2, XCircle, FileText, AlertTriangle, Play, ChevronRight } from "lucide-react";
 import { AttendanceCalendar } from "@/components/student/attendance-calendar";
+import { StudentCurriculumStrip } from "@/components/student/dashboard/StudentCurriculumStrip";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -107,6 +108,11 @@ export default function StudentDashboard() {
             )}
           </Button>
         </Link>
+      </div>
+
+      {/* Curriculum Strip */}
+      <div data-aos="fade-up" data-aos-delay="50">
+        <StudentCurriculumStrip />
       </div>
 
       {/* 1. Calendar */}

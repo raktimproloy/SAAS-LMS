@@ -21,21 +21,21 @@ export function AddExamDialog({
   onOpenChange: (o: boolean) => void;
   onConfirm: (title: string) => void;
 }) {
-  const [title, setTitle] = useState("Chapter Final Exam");
+  const [title, setTitle] = useState("অধ্যায় শেষ পরীক্ষা");
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add Exam</DialogTitle>
+          <DialogTitle>পরীক্ষা যোগ করুন</DialogTitle>
         </DialogHeader>
         <div className="grid gap-2 py-2">
-          <Label>Exam title</Label>
+          <Label>পরীক্ষার নাম</Label>
           <Input value={title} onChange={(e) => setTitle(e.target.value)} />
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            বাতিল
           </Button>
           <Button
             onClick={() => {
@@ -44,7 +44,7 @@ export function AddExamDialog({
               onOpenChange(false);
             }}
           >
-            Add Exam
+            পরীক্ষা যোগ করুন
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -68,21 +68,21 @@ export function AddTopicDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add Custom Topic</DialogTitle>
+          <DialogTitle>কাস্টম টপিক যোগ</DialogTitle>
         </DialogHeader>
         <div className="space-y-3 py-2">
           <div className="grid gap-2">
-            <Label>Chapter</Label>
+            <Label>অধ্যায়</Label>
             <Input value={chapter} onChange={(e) => setChapter(e.target.value)} />
           </div>
           <div className="grid gap-2">
-            <Label>Topic (optional)</Label>
+            <Label>টপিক (ঐচ্ছিক)</Label>
             <Input value={topic} onChange={(e) => setTopic(e.target.value)} />
           </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            বাতিল
           </Button>
           <Button
             onClick={() => {
@@ -93,7 +93,7 @@ export function AddTopicDialog({
               onOpenChange(false);
             }}
           >
-            Add Topic
+            টপিক যোগ করুন
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -123,7 +123,7 @@ export function ImpactPreviewDialog({
         <p className="text-sm text-muted-foreground py-2">{description}</p>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Cancel
+            বাতিল
           </Button>
           <Button
             onClick={() => {
@@ -131,7 +131,7 @@ export function ImpactPreviewDialog({
               onOpenChange(false);
             }}
           >
-            Confirm
+            নিশ্চিত করুন
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -156,23 +156,23 @@ export function PublishConfirmDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Publish Curriculum</DialogTitle>
+          <DialogTitle>কারিকুলাম প্রকাশ</DialogTitle>
         </DialogHeader>
         <div className="text-sm space-y-2 py-2">
-          <p>Students (if public) will see this roadmap. Summary:</p>
+          <p>পাবলিক থাকলে স্টুডেন্টরা এই রোডম্যাপ দেখতে পারবে। সারাংশ:</p>
           <ul className="list-disc pl-5 text-muted-foreground">
-            <li>{stats.classes} class sessions</li>
-            <li>{stats.exams} exams</li>
-            <li>{stats.holidays} holidays</li>
-            <li>{stats.skipped} skipped days</li>
+            <li>{stats.classes}টি ক্লাস</li>
+            <li>{stats.exams}টি পরীক্ষা</li>
+            <li>{stats.holidays}টি ছুটি</li>
+            <li>{stats.skipped}টি স্কিপ করা দিন</li>
           </ul>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isPublishing}>
-            Cancel
+            বাতিল
           </Button>
           <Button onClick={onConfirm} disabled={isPublishing}>
-            {isPublishing ? "Publishing…" : "Publish Now"}
+            {isPublishing ? "প্রকাশ হচ্ছে…" : "এখনই প্রকাশ করুন"}
           </Button>
         </DialogFooter>
       </DialogContent>

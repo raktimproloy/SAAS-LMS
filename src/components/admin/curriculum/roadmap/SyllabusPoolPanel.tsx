@@ -14,9 +14,18 @@ type Props = {
   pool: SyllabusPool;
   onAddToNext: (topic: PoolTopic) => void;
   onAutoFillRemaining: () => void;
+  /** sidebar = sticky desktop panel; embedded = sheet / inline mobile */
+  variant?: "sidebar" | "embedded";
+  className?: string;
 };
 
-export function SyllabusPoolPanel({ pool, onAddToNext, onAutoFillRemaining }: Props) {
+export function SyllabusPoolPanel({
+  pool,
+  onAddToNext,
+  onAutoFillRemaining,
+  variant = "sidebar",
+  className = "",
+}: Props) {
   const [search, setSearch] = useState("");
 
   const filterFn = (t: PoolTopic) => {
@@ -32,29 +41,35 @@ export function SyllabusPoolPanel({ pool, onAddToNext, onAutoFillRemaining }: Pr
   const remaining = useMemo(() => pool.remaining.filter(filterFn), [pool.remaining, search]);
   const assigned = useMemo(() => pool.assigned.filter(filterFn), [pool.assigned, search]);
 
+  const isSidebar = variant === "sidebar";
+
   return (
-    <Card className="h-[calc(100vh-11rem)] flex flex-col sticky top-24">
+    <Card
+      className={`flex flex-col min-h-0 ${
+        isSidebar ? "h-full max-h-[calc(100dvh-5rem)]" : "h-full min-h-0"
+      } ${className}`}
+    >
       <CardHeader className="pb-3 border-b space-y-3">
         <CardTitle className="flex items-center gap-2 text-lg">
           <BookOpen className="w-5 h-5 text-primary" />
-          Syllabus Pool
+          সিলেবাস পুল
         </CardTitle>
         <div className="relative">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search topics…"
+            placeholder="টপিক খুঁজুন…"
             className="pl-8"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
         <div className="flex gap-2 text-xs">
-          <Badge variant="secondary">{pool.assigned.length} added</Badge>
-          <Badge variant="outline">{pool.remaining.length} remaining</Badge>
+          <Badge variant="secondary">{pool.assigned.length} টি যোগ</Badge>
+          <Badge variant="outline">{pool.remaining.length} টি বাকি</Badge>
         </div>
         {pool.remaining.length > 0 && (
           <Button size="sm" variant="outline" className="w-full" onClick={onAutoFillRemaining}>
-            Auto-fill remaining
+            বাকিগুলো অটো বসান
           </Button>
         )}
       </CardHeader>
@@ -62,8 +77,8 @@ export function SyllabusPoolPanel({ pool, onAddToNext, onAutoFillRemaining }: Pr
       <CardContent className="flex-1 overflow-hidden p-0">
         <Tabs defaultValue="remaining" className="h-full flex flex-col">
           <TabsList className="mx-3 mt-3 grid grid-cols-2">
-            <TabsTrigger value="remaining">Remaining</TabsTrigger>
-            <TabsTrigger value="added">Added</TabsTrigger>
+            <TabsTrigger value="remaining">বাকি</TabsTrigger>
+            <TabsTrigger value="added">যোগ করা</TabsTrigger>
           </TabsList>
 
           <TabsContent value="remaining" className="flex-1 overflow-y-auto mt-0 p-3 space-y-2">
@@ -109,7 +124,7 @@ export function SyllabusPoolPanel({ pool, onAddToNext, onAutoFillRemaining }: Pr
                             size="icon"
                             variant="ghost"
                             className="h-7 w-7 shrink-0"
-                            title="Add to next empty class"
+                            title="পরের খালি ক্লাসে যোগ করুন"
                             onClick={(e) => {
                               e.stopPropagation();
                               onAddToNext(topic);
@@ -125,8 +140,8 @@ export function SyllabusPoolPanel({ pool, onAddToNext, onAutoFillRemaining }: Pr
                   {remaining.length === 0 && (
                     <p className="text-center text-sm text-muted-foreground py-8">
                       {pool.remaining.length === 0
-                        ? "All syllabus topics are on the roadmap."
-                        : "No matches."}
+                        ? "সব সিলেবাস টপিক রোডম্যাপে বসে গেছে।"
+                        : "কোনো মিল পাওয়া যায়নি।"}
                     </p>
                   )}
                 </div>
@@ -150,7 +165,7 @@ export function SyllabusPoolPanel({ pool, onAddToNext, onAutoFillRemaining }: Pr
               </div>
             ))}
             {assigned.length === 0 && (
-              <p className="text-center text-sm text-muted-foreground py-8">Nothing assigned yet.</p>
+              <p className="text-center text-sm text-muted-foreground py-8">এখনো কিছু যোগ করা হয়নি।</p>
             )}
           </TabsContent>
         </Tabs>

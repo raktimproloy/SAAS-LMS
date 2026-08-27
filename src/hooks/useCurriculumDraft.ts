@@ -25,6 +25,8 @@ import {
   changeClassDays,
   moveTopicEarlier,
   moveTopicLater,
+  shiftSessionEarlier,
+  shiftSessionLater,
   clampSessionsToEndDate,
   normalizeLoadedSessions,
   toDateKey,
@@ -267,7 +269,7 @@ export function useCurriculumDraft(curriculumId: string) {
       clear: () => applySessions((s) => clearTopics(s)),
       autoFill: () => applySessions((s) => autoFillFromBooks(s, books)),
       addExam: (sessionId: number | string, title: string) =>
-        applySessions((s) => addExamAtSession(s, sessionId, title)),
+        applySessions((s) => addExamAtSession(s, sessionId, title, classDays, endDate)),
       addCustomTopic: (
         sessionId: number | string,
         topic: Omit<DraftTopic, "id"> & { id?: number | string }
@@ -282,6 +284,10 @@ export function useCurriculumDraft(curriculumId: string) {
         applySessions((s) => moveTopicEarlier(s, sessionId, topicId, classDays, endDate)),
       moveTopicLater: (sessionId: number | string, topicId: number | string) =>
         applySessions((s) => moveTopicLater(s, sessionId, topicId, classDays, endDate)),
+      shiftSessionEarlier: (sessionId: number | string) =>
+        applySessions((s) => shiftSessionEarlier(s, sessionId, classDays, endDate)),
+      shiftSessionLater: (sessionId: number | string) =>
+        applySessions((s) => shiftSessionLater(s, sessionId, classDays, endDate)),
       changeClassDays: (days: string[], start: string, end: string) => {
         applySessions((s) =>
           changeClassDays(

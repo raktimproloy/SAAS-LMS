@@ -25,6 +25,15 @@ export default async function CoursesPage() {
           status: true,
           max_students: true,
           class_days: true,
+          curriculums: {
+            select: {
+              id: true,
+              title: true,
+              is_public: true,
+              status: true,
+            },
+            take: 1,
+          },
         },
       },
     },

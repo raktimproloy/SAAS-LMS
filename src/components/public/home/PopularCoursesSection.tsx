@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, ChevronDown, Clock, Calendar, Users, Loader2, Send, CheckCircle2 } from "lucide-react";
+import { ArrowRight, ChevronDown, Clock, Calendar, Users, Loader2, Send, CheckCircle2, BookOpen } from "lucide-react";
 import { formatTimeRangeBengali, translateDayToBengali } from "@/lib/bengali";
 import { submitContactForm } from "./actions";
 import {
@@ -22,6 +22,12 @@ export interface CourseBatch {
   status: string;
   max_students: number | null;
   class_days: unknown;
+  curriculums?: Array<{
+    id: number;
+    title?: string;
+    is_public?: boolean;
+    status?: string;
+  }>;
 }
 
 export interface CompactCourse {
@@ -300,7 +306,16 @@ export function PopularCoursesSection({ courses, showAll = false }: PopularCours
                                       ) : null}
                                     </div>
                                   </div>
-                                  <div className="flex items-center gap-3">
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    {batch.curriculums && batch.curriculums.length > 0 ? (
+                                      <Link
+                                        href={`/courses/${c.id}?batch=${batch.id}`}
+                                        className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-primary/30 text-primary bg-primary/5 hover:bg-primary hover:text-primary-foreground transition-all duration-200 shadow-sm"
+                                      >
+                                        <BookOpen className="w-3.5 h-3.5" />
+                                        Course Details দেখুন
+                                      </Link>
+                                    ) : null}
                                     <EnrollDialog courseId={c.id} courseName={c.title} />
                                   </div>
                                 </li>

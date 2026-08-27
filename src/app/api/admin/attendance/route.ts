@@ -28,10 +28,18 @@ export async function GET(request: Request) {
   try {
     const date = new Date(dateStr);
     
+    const includeQuery = {
+      batch: {
+        include: {
+          course: true
+        }
+      }
+    };
+
     // 1. Get all students in this batch
     const batchStudents = await prisma.student.findMany({
       where: { batch_id: parseInt(batch_id), status: "active" },
-      select: { id: true, student_id: true, name: true, photo: true }
+      include: includeQuery
     });
 
     // 2. Get all attendance records for this batch on this date (including cross-batch students)
@@ -41,7 +49,7 @@ export async function GET(request: Request) {
         date: date
       },
       include: {
-        student: { select: { id: true, student_id: true, name: true, photo: true } }
+        student: { include: includeQuery }
       }
     });
 
@@ -64,7 +72,12 @@ export async function GET(request: Request) {
       }
     });
 
-    const studentsArray = Array.from(mergedStudents.values()).sort((a, b) => a.name.localeCompare(b.name));
+    const studentsArray = Array.from(mergedStudents.values())
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map(s => {
+        const { password, ...rest } = s;
+        return rest;
+      });
 
     return NextResponse.json({ students: studentsArray });
   } catch (error) {
