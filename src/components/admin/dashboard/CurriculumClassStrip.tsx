@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, UIEvent } from "react";
+import { useCallback, useEffect, useRef, useState, UIEvent, MouseEvent } from "react";
 import Link from "next/link";
 import { format, parseISO } from "date-fns";
 import {
@@ -71,6 +71,34 @@ export function CurriculumClassStrip() {
   const trackRef = useRef<HTMLDivElement>(null);
   const userPicked = useRef(false);
 
+  // Drag to scroll logic
+  const [isDragging, setIsDragging] = useState(false);
+  const startX = useRef(0);
+  const scrollLeft = useRef(0);
+
+  const handleMouseDown = (e: MouseEvent<HTMLDivElement>) => {
+    setIsDragging(true);
+    if (!trackRef.current) return;
+    startX.current = e.pageX - trackRef.current.offsetLeft;
+    scrollLeft.current = trackRef.current.scrollLeft;
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
+    if (!isDragging || !trackRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - trackRef.current.offsetLeft;
+    const walk = (x - startX.current) * 1; // 1 to 1 mouse movement to scroll ratio
+    trackRef.current.scrollLeft = scrollLeft.current - walk;
+  };
+
   const applyLocalDone = (list: DashClass[]) => {
     const map: Record<number, boolean> = {};
     for (const c of list) {
@@ -82,28 +110,24 @@ export function CurriculumClassStrip() {
   };
 
   const pickAutoIndex = (list: DashClass[], locDone: Record<number, boolean>) => {
-    // Only auto-focus curriculum batches that are currently running
     const runningCurriculum = list.findIndex((c) => {
       const st = c.has_curriculum ? c.status : (locDone[c.batch_id] ? "done" : c.status);
       return st === "running";
     });
     if (runningCurriculum >= 0) return runningCurriculum;
     
-    // Else first upcoming curriculum
     const upcomingCur = list.findIndex((c) => {
       const st = c.has_curriculum ? c.status : (locDone[c.batch_id] ? "done" : c.status);
       return st === "upcoming";
     });
     if (upcomingCur >= 0) return upcomingCur;
     
-    // else first incomplete
     const anyUpcoming = list.findIndex((c) => {
       const st = c.has_curriculum ? c.status : (locDone[c.batch_id] ? "done" : c.status);
       return st === "upcoming" || st === "running";
     });
     if (anyUpcoming >= 0) return anyUpcoming;
     
-    // if all done, focus the last one
     if (list.length > 0) return list.length - 1;
     return 0;
   };
@@ -114,7 +138,7 @@ export function CurriculumClassStrip() {
     const item = container.children[idx] as HTMLElement;
     if (item) {
       container.scrollTo({
-        left: item.offsetLeft - container.offsetLeft - (container.offsetWidth * 0.05), // slightly offset to show it's left aligned
+        left: item.offsetLeft - container.offsetLeft - (container.offsetWidth * 0.05),
         behavior: smooth ? "smooth" : "auto",
       });
     }
@@ -140,7 +164,6 @@ export function CurriculumClassStrip() {
       if (!opts?.keepIndex && !userPicked.current) {
         const autoIdx = list.length ? pickAutoIndex(list, locDone) : 0;
         setIndex(autoIdx);
-        // Scroll immediately
         setTimeout(() => scrollTo(autoIdx, false), 50);
       } else if (opts?.keepIndex) {
         setIndex((i) => Math.min(i, Math.max(0, list.length - 1)));
@@ -172,7 +195,6 @@ export function CurriculumClassStrip() {
     if (!trackRef.current) return;
     const container = trackRef.current;
     const scrollLeft = container.scrollLeft;
-    // Calculate current index based on scroll position
     let newIdx = 0;
     let minDiff = Infinity;
     for (let i = 0; i < container.children.length; i++) {
@@ -226,7 +248,7 @@ export function CurriculumClassStrip() {
 
   if (loading) {
     return (
-      <div className="rounded-2xl border bg-card shadow-sm p-6 flex items-center justify-center gap-2 text-muted-foreground text-sm">
+      <div className="rounded-2xl border bg-card/80 backdrop-blur-sm shadow-sm p-6 flex items-center justify-center gap-2 text-muted-foreground text-sm">
         <Loader2 className="w-4 h-4 animate-spin" /> Loading today&apos;s classes…
       </div>
     );
@@ -298,7 +320,14 @@ export function CurriculumClassStrip() {
       <div
         ref={trackRef}
         onScroll={handleScroll}
-        className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 -mx-1 px-1 hide-scrollbar"
+        onMouseDown={handleMouseDown}
+        onMouseLeave={handleMouseLeave}
+        onMouseUp={handleMouseUp}
+        onMouseMove={handleMouseMove}
+        className={cn(
+          "flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 -mx-1 px-1 hide-scrollbar",
+          isDragging ? "cursor-grabbing snap-none" : "cursor-grab"
+        )}
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {classes.map((c) => {
@@ -322,7 +351,7 @@ export function CurriculumClassStrip() {
             <div
               key={`${c.batch_id}-${c.date}`}
               className={cn(
-                "w-[70%] sm:w-[45%] md:w-[28%] shrink-0 snap-start rounded-2xl border bg-card p-4 sm:p-5 flex flex-col justify-between transition-all duration-200 hover:shadow-md",
+                "w-[75%] sm:w-[45%] md:w-[32%] lg:w-[28%] shrink-0 snap-start rounded-2xl border bg-card/80 backdrop-blur-sm p-4 sm:p-5 flex flex-col justify-between transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5",
                 cardStatusClass(st)
               )}
             >
@@ -461,3 +490,4 @@ export function CurriculumClassStrip() {
     </div>
   );
 }
+

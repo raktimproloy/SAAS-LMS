@@ -40,6 +40,7 @@ export type PoolTopic = {
 };
 
 export type SyllabusPool = {
+  all: PoolTopic[];
   remaining: PoolTopic[];
   assigned: PoolTopic[];
   total: number;

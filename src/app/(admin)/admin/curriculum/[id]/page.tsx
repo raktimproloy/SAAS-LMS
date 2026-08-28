@@ -7,7 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Undo2, Eye, BookOpen } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useCurriculumDraft } from "@/hooks/useCurriculumDraft";
+import { topicKey } from "@/lib/curriculum-scheduler/types";
 import { RoadmapHeader } from "@/components/admin/curriculum/roadmap/RoadmapHeader";
 import { RoadmapTimeline } from "@/components/admin/curriculum/roadmap/RoadmapTimeline";
 import { SyllabusPoolPanel } from "@/components/admin/curriculum/roadmap/SyllabusPoolPanel";
@@ -40,6 +42,8 @@ export default function CurriculumPlannerPage() {
   const [poolOpen, setPoolOpen] = useState(false);
   const [publishOpen, setPublishOpen] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
+  const [showFullCalendar, setShowFullCalendar] = useState(false);
+  const [selectedSessionId, setSelectedSessionId] = useState<number | string | null>(null);
   const [examTarget, setExamTarget] = useState<string | number | null>(null);
   const [topicTarget, setTopicTarget] = useState<string | number | null>(null);
   const [impact, setImpact] = useState<{
@@ -79,10 +83,82 @@ export default function CurriculumPlannerPage() {
     }
   };
 
+  const handleToggleFullCalendar = (checked: boolean) => {
+    const cards = Array.from(document.querySelectorAll('.session-card-wrapper'));
+    const topmost = cards.find(card => {
+      const rect = card.getBoundingClientRect();
+      return rect.top >= 100;
+    });
+    const topmostId = topmost ? topmost.id : null;
+
+    setShowFullCalendar(checked);
+
+    if (topmostId) {
+      setTimeout(() => {
+        const el = document.getElementById(topmostId);
+        if (el) {
+          el.scrollIntoView({ behavior: 'instant', block: 'start' });
+          window.scrollBy(0, -140);
+        }
+      }, 0);
+    }
+  };
+
+  const selectedTopicKeys = React.useMemo(() => {
+    if (!selectedSessionId || !curriculum) return [];
+    const session = curriculum.sessions.find(s => s.id === selectedSessionId);
+    return (session?.topics || []).map(t => topicKey(t as any));
+  }, [selectedSessionId, curriculum]);
+
   if (isLoading) {
     return (
-      <div className="flex h-[calc(100vh-100px)] items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="w-full max-w-full px-2 sm:px-4 lg:px-6 xl:px-8 py-3 sm:py-6 space-y-4 sm:space-y-5 pb-36 sm:pb-32 lg:pb-28">
+        {/* Header Skeleton */}
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-card/60 backdrop-blur-md p-4 sm:p-6 rounded-2xl border shadow-sm">
+          <div className="space-y-3 w-full lg:w-1/2">
+            <Skeleton className="h-8 w-3/4 rounded-lg" />
+            <Skeleton className="h-4 w-1/2 rounded-md" />
+            <div className="pt-2">
+              <Skeleton className="h-2 w-full rounded-full" />
+            </div>
+          </div>
+          <div className="flex gap-4">
+            <Skeleton className="h-[72px] w-[90px] rounded-xl" />
+            <Skeleton className="h-[72px] w-[70px] rounded-xl" />
+            <Skeleton className="h-[72px] w-[70px] rounded-xl" />
+          </div>
+        </div>
+
+        <div className="flex flex-col xl:flex-row gap-4 sm:gap-6 items-start w-full">
+          <div className="flex-1 bg-background rounded-xl border shadow-sm p-3 sm:p-5 w-full min-w-0 space-y-6 sm:space-y-8">
+            {/* Timeline Skeleton */}
+            {[1, 2].map((month) => (
+              <div key={month} className="space-y-3 sm:space-y-4">
+                <Skeleton className="h-7 w-48 rounded-md" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3 gap-3 sm:gap-4 items-start">
+                  {[1, 2, 3, 4, 5, 6].map((card) => (
+                    <div
+                      key={card}
+                      className="h-[250px] flex flex-col border rounded-xl overflow-hidden shadow-sm bg-card"
+                    >
+                      <div className="py-3 px-4 border-b bg-muted/10 flex justify-between items-center">
+                        <Skeleton className="h-5 w-28 rounded-md" />
+                        <Skeleton className="h-5 w-16 rounded-md" />
+                      </div>
+                      <div className="p-4 space-y-3 flex-1 flex flex-col">
+                        <Skeleton className="h-10 w-full rounded-lg" />
+                        <Skeleton className="h-10 w-full rounded-lg" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          <aside className="hidden xl:block w-full xl:w-[320px] 2xl:w-[360px] shrink-0 sticky top-4 self-start">
+            <Skeleton className="h-[600px] w-full rounded-2xl" />
+          </aside>
+        </div>
       </div>
     );
   }
@@ -96,18 +172,26 @@ export default function CurriculumPlannerPage() {
 
   return (
     <div className="w-full max-w-full px-2 sm:px-4 lg:px-6 xl:px-8 py-3 sm:py-6 space-y-4 sm:space-y-5 pb-36 sm:pb-32 lg:pb-28">
-      <RoadmapHeader
-        curriculum={curriculum}
-        progress={progress}
-        saveStatus={saveStatus}
-        onSettings={() => setSettingsOpen(true)}
-      />
+      <div className="sticky top-0 sm:top-2 z-40">
+        <RoadmapHeader
+          curriculum={curriculum}
+          progress={progress}
+          saveStatus={saveStatus}
+          onSettings={() => setSettingsOpen(true)}
+          showFullCalendar={showFullCalendar}
+          onToggleFullCalendar={handleToggleFullCalendar}
+        />
+      </div>
 
       <DragDropContext onDragEnd={handleDragEnd}>
         <div className="flex flex-col xl:flex-row gap-4 sm:gap-6 items-start w-full">
           <div className="flex-1 bg-background rounded-xl border shadow-sm p-3 sm:p-5 w-full min-w-0">
             <RoadmapTimeline
               sessions={curriculum.sessions}
+              curriculum={curriculum}
+              showFullCalendar={showFullCalendar}
+              selectedSessionId={selectedSessionId}
+              onSelectSession={setSelectedSessionId}
               onRemoveTopic={actions.removeTopic}
               onSkip={(sid) =>
                 setImpact({
@@ -118,6 +202,7 @@ export default function CurriculumPlannerPage() {
                 })
               }
               onUnskip={actions.unskip}
+              onDuplicateDay={actions.duplicateToNextRoutineDay}
               onAddDay={actions.insertDay}
               onRemoveDay={(sid) =>
                 setImpact({
@@ -143,9 +228,10 @@ export default function CurriculumPlannerPage() {
             />
           </div>
 
-          <aside className="hidden xl:block w-full xl:w-[320px] 2xl:w-[360px] shrink-0 sticky top-4 self-start z-20 max-h-[calc(100dvh-5rem)]">
+          <aside className="hidden xl:block w-full xl:w-[320px] 2xl:w-[360px] shrink-0 sticky top-24 self-start z-20 max-h-[calc(100dvh-7rem)]">
             <SyllabusPoolPanel
               pool={pool}
+              selectedTopicKeys={selectedTopicKeys}
               onAddToNext={actions.addFromPool}
               onAutoFillRemaining={() => {
                 setImpact({
@@ -190,6 +276,7 @@ export default function CurriculumPlannerPage() {
                 variant="embedded"
                 className="border-0 shadow-none h-full"
                 pool={pool}
+                selectedTopicKeys={selectedTopicKeys}
                 onAddToNext={(t) => {
                   actions.addFromPool(t);
                 }}

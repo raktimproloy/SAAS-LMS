@@ -29,6 +29,7 @@ import {
   shiftSessionLater,
   clampSessionsToEndDate,
   normalizeLoadedSessions,
+  duplicateSessionToNextRoutineDay,
   toDateKey,
 } from "@/lib/curriculum-scheduler";
 
@@ -73,7 +74,7 @@ export function useCurriculumDraft(curriculumId: string) {
     : undefined;
 
   const pool = useMemo(() => {
-    if (!curriculum) return { remaining: [], assigned: [], total: 0 } as SyllabusPool;
+    if (!curriculum) return { all: [], remaining: [], assigned: [], total: 0 } as SyllabusPool;
     return buildSyllabusPool(curriculum.sessions, books);
   }, [curriculum, books]);
 
@@ -252,6 +253,8 @@ export function useCurriculumDraft(curriculumId: string) {
         applySessions((s) => skipSession(s, sessionId, classDays, endDate)),
       unskip: (sessionId: number | string) =>
         applySessions((s) => unskipSession(s, sessionId, classDays, endDate)),
+      duplicateToNextRoutineDay: (sessionId: number | string) =>
+        applySessions((s) => duplicateSessionToNextRoutineDay(s, sessionId, classDays, endDate)),
       insertDay: (sessionId: number | string, dateKey?: string) =>
         applySessions((s) => insertClassDate(s, sessionId, dateKey, endDate)),
       removeDay: (sessionId: number | string) =>

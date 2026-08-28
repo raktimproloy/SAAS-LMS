@@ -11,9 +11,12 @@ import {
   CloudOff,
   Loader2,
   Settings2,
+  CalendarDays,
 } from "lucide-react";
 import Link from "next/link";
 import { format, parseISO } from "date-fns";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import type { SaveStatus } from "@/hooks/useCurriculumDraft";
 
 type Props = {
@@ -21,12 +24,14 @@ type Props = {
   progress: any;
   saveStatus: SaveStatus;
   onSettings: () => void;
+  showFullCalendar?: boolean;
+  onToggleFullCalendar?: (checked: boolean) => void;
 };
 
-export function RoadmapHeader({ curriculum, progress, saveStatus, onSettings }: Props) {
+export function RoadmapHeader({ curriculum, progress, saveStatus, onSettings, showFullCalendar, onToggleFullCalendar }: Props) {
   return (
     <div className="bg-background p-3 sm:p-5 rounded-xl border shadow-sm space-y-3 sm:space-y-4">
-      <div className="flex flex-col gap-3 sm:gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4">
         <div className="flex items-start gap-2 sm:gap-3 min-w-0">
           <Link href="/admin/curriculum">
             <Button variant="outline" size="icon" className="h-9 w-9 sm:h-10 sm:w-10 shrink-0">
@@ -65,8 +70,19 @@ export function RoadmapHeader({ curriculum, progress, saveStatus, onSettings }: 
           </div>
         </div>
 
-        <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3 pl-11 sm:pl-0">
+        <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 shrink-0 mt-1 sm:mt-0">
           <SaveIndicator status={saveStatus} />
+          <div className="flex items-center gap-2">
+            <Switch 
+              id="full-calendar-mode" 
+              checked={showFullCalendar} 
+              onCheckedChange={onToggleFullCalendar} 
+            />
+            <Label htmlFor="full-calendar-mode" className="text-sm font-medium cursor-pointer flex items-center gap-1.5 hidden sm:flex">
+              <CalendarDays className="w-4 h-4 text-muted-foreground" />
+              Full Calendar
+            </Label>
+          </div>
           <Button variant="outline" size="sm" className="gap-2 shrink-0" onClick={onSettings}>
             <Settings2 className="w-4 h-4" />
             <span className="hidden sm:inline">সেটিংস</span>
@@ -83,7 +99,7 @@ export function RoadmapHeader({ curriculum, progress, saveStatus, onSettings }: 
                 {progress.assignedTopics}/{progress.poolTotal || "—"} ({progress.coveragePct}%)
               </span>
             </div>
-            <Progress value={progress.coveragePct} className="h-2" />
+            <Progress value={progress.coveragePct} className="h-2" indicatorClassName="bg-green-500" />
           </div>
           <MiniStat label="পরীক্ষা" value={progress.exams} color="text-blue-600" />
           <MiniStat label="ছুটি" value={progress.holidays} color="text-orange-600" />

@@ -97,7 +97,7 @@ export function buildSyllabusPool(
   }
   const assigned = all.filter((p) => assignedKeys.has(p.key));
   const remaining = all.filter((p) => !assignedKeys.has(p.key));
-  return { remaining, assigned, total: all.length };
+  return { all, remaining, assigned, total: all.length };
 }
 
 /** Build empty class-day sessions. Public holidays stay as CLASS with a tip name — teacher can mark cuti later. */
@@ -1236,4 +1236,50 @@ export function estimateScheduleStats(
     willFit: items.length <= teachable,
     overflow: Math.max(0, items.length - teachable),
   };
+}
+
+/**
+ * Duplicates a session's topics to the next routine day and pushes all subsequent sessions down by one routine day.
+ */
+export function duplicateSessionToNextRoutineDay(
+  sessions: DraftSession[],
+  sessionId: number | string,
+  classDays: string[],
+  endDate?: string
+): DraftSession[] {
+  let next = cloneSessions(sessions);
+  let indices = teachableIndices(next);
+  const absIndex = next.findIndex((s) => String(s.id) === String(sessionId));
+  if (absIndex < 0) return sessions;
+  
+  const t = indices.indexOf(absIndex);
+  if (t < 0) return sessions;
+
+  if (t === indices.length - 1) {
+    const before = next.length;
+    next = appendNextSession(next, classDays, undefined, endDate);
+    if (next.length === before) {
+      return sessions; // Reached end date
+    }
+    indices = teachableIndices(next);
+  }
+
+  const nextSessionId = next[indices[t + 1]].id;
+  
+  next = shiftSessionLater(next, nextSessionId, classDays, endDate);
+  
+  indices = teachableIndices(next);
+  const newAbsIndex = next.findIndex((s) => String(s.id) === String(sessionId));
+  const newT = indices.indexOf(newAbsIndex);
+  
+  if (newT >= 0 && newT < indices.length - 1) {
+    const srcTopics = next[indices[newT]].topics || [];
+    const clonedTopics = srcTopics.map(topic => ({
+      ...topic,
+      id: nextTempId()
+    }));
+    next[indices[newT + 1]] = applyGroupToSession(next[indices[newT + 1]], clonedTopics);
+  }
+  
+  return renumberSessions(next);
 }

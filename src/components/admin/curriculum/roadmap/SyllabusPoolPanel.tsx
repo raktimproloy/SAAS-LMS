@@ -7,13 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Droppable, Draggable } from "@hello-pangea/dnd";
-import { BookOpen, Check, GripVertical, Plus, Search } from "lucide-react";
+import { BookOpen, Check, GripVertical, Plus, Search, CheckCircle2 } from "lucide-react";
 import type { PoolTopic, SyllabusPool } from "@/lib/curriculum-scheduler";
 
 type Props = {
   pool: SyllabusPool;
   onAddToNext: (topic: PoolTopic) => void;
   onAutoFillRemaining: () => void;
+  selectedTopicKeys?: string[];
   /** sidebar = sticky desktop panel; embedded = sheet / inline mobile */
   variant?: "sidebar" | "embedded";
   className?: string;
@@ -23,6 +24,7 @@ export function SyllabusPoolPanel({
   pool,
   onAddToNext,
   onAutoFillRemaining,
+  selectedTopicKeys = [],
   variant = "sidebar",
   className = "",
 }: Props) {
@@ -38,8 +40,12 @@ export function SyllabusPoolPanel({
     );
   };
 
-  const remaining = useMemo(() => pool.remaining.filter(filterFn), [pool.remaining, search]);
-  const assigned = useMemo(() => pool.assigned.filter(filterFn), [pool.assigned, search]);
+  const displayTopics = useMemo(() => {
+    return (pool.all || []).filter(filterFn);
+  }, [pool.all, search]);
+
+  const assignedKeys = useMemo(() => new Set(pool.assigned.map(t => t.key)), [pool.assigned]);
+  const activeKeys = useMemo(() => new Set(selectedTopicKeys), [selectedTopicKeys]);
 
   const isSidebar = variant === "sidebar";
 
@@ -74,18 +80,16 @@ export function SyllabusPoolPanel({
         )}
       </CardHeader>
 
-      <CardContent className="flex-1 overflow-hidden p-0">
-        <Tabs defaultValue="remaining" className="h-full flex flex-col">
-          <TabsList className="mx-3 mt-3 grid grid-cols-2">
-            <TabsTrigger value="remaining">বাকি</TabsTrigger>
-            <TabsTrigger value="added">যোগ করা</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="remaining" className="flex-1 overflow-y-auto mt-0 p-3 space-y-2">
-            <Droppable droppableId="pool-remaining" isDropDisabled>
-              {(provided) => (
-                <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2">
-                  {remaining.map((topic, index) => (
+      <CardContent className="flex-1 overflow-hidden p-0 flex flex-col">
+        <div className="flex-1 overflow-y-auto p-3">
+          <Droppable droppableId="pool-remaining" isDropDisabled>
+            {(provided) => (
+              <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2">
+                {displayTopics.map((topic, index) => {
+                  const isAssigned = assignedKeys.has(topic.key);
+                  const isActive = activeKeys.has(topic.key);
+                  
+                  return (
                     <Draggable
                       key={topic.key}
                       draggableId={JSON.stringify({
@@ -104,71 +108,66 @@ export function SyllabusPoolPanel({
                           ref={p.innerRef}
                           {...p.draggableProps}
                           {...p.dragHandleProps}
-                          className={`flex items-start gap-2 p-2 border rounded-md bg-background text-sm ${
-                            snapshot.isDragging ? "shadow-lg border-primary" : ""
+                          className={`flex items-start gap-2 p-2.5 border rounded-lg transition-all duration-200 text-sm ${
+                            snapshot.isDragging 
+                              ? "shadow-lg border-primary bg-background scale-[1.02] z-50" 
+                              : isActive
+                                ? "border-green-500 bg-green-500/10 shadow-sm ring-1 ring-green-500/50 dark:bg-green-500/20 dark:border-green-400 dark:ring-green-400"
+                                : isAssigned
+                                  ? "border-emerald-200 bg-emerald-50/40 dark:border-emerald-900/40 dark:bg-emerald-950/30 hover:border-emerald-300 shadow-sm opacity-80 hover:opacity-100"
+                                  : "bg-background hover:border-primary/40 hover:bg-muted/30"
                           }`}
                         >
-                          <GripVertical className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
+                          <GripVertical className="w-4 h-4 text-muted-foreground/50 mt-0.5 shrink-0" />
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium truncate">{topic.chapter_name}</p>
+                            <p className={`font-bold truncate ${isActive ? 'text-green-700 dark:text-green-300' : isAssigned ? 'text-emerald-700 dark:text-emerald-400/80' : 'text-foreground dark:text-gray-100'}`}>
+                              {topic.chapter_name}
+                            </p>
                             {topic.topic_name && (
-                              <p className="text-xs text-muted-foreground truncate">
+                              <p className={`text-xs font-medium truncate ${isActive ? 'text-green-600 dark:text-green-200/80' : isAssigned ? 'text-emerald-600/80 dark:text-emerald-500/70' : 'text-muted-foreground dark:text-gray-300'}`}>
                                 {topic.topic_name}
                               </p>
                             )}
-                            <p className="text-[10px] text-muted-foreground mt-0.5">
+                            <p className="text-[10px] text-muted-foreground dark:text-gray-400 mt-1 opacity-90 font-medium">
                               {topic.book_label || topic.subject}
                             </p>
                           </div>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-7 w-7 shrink-0"
-                            title="পরের খালি ক্লাসে যোগ করুন"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onAddToNext(topic);
-                            }}
-                          >
-                            <Plus className="w-4 h-4" />
-                          </Button>
+                          
+                          {isAssigned ? (
+                            <div className="h-7 w-7 flex items-center justify-center shrink-0">
+                              <CheckCircle2 className={`w-5 h-5 ${isActive ? 'text-green-500' : 'text-emerald-500/70'}`} />
+                            </div>
+                          ) : (
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-7 w-7 shrink-0 hover:bg-primary/10 hover:text-primary"
+                              title="পরের খালি ক্লাসে যোগ করুন"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onAddToNext(topic);
+                              }}
+                            >
+                              <Plus className="w-4 h-4" />
+                            </Button>
+                          )}
                         </div>
                       )}
                     </Draggable>
-                  ))}
-                  {provided.placeholder}
-                  {remaining.length === 0 && (
-                    <p className="text-center text-sm text-muted-foreground py-8">
-                      {pool.remaining.length === 0
-                        ? "সব সিলেবাস টপিক রোডম্যাপে বসে গেছে।"
-                        : "কোনো মিল পাওয়া যায়নি।"}
-                    </p>
-                  )}
-                </div>
-              )}
-            </Droppable>
-          </TabsContent>
-
-          <TabsContent value="added" className="flex-1 overflow-y-auto mt-0 p-3 space-y-2">
-            {assigned.map((topic) => (
-              <div
-                key={topic.key}
-                className="flex items-start gap-2 p-2 border rounded-md bg-muted/20 text-sm"
-              >
-                <Check className="w-4 h-4 text-green-600 mt-0.5 shrink-0" />
-                <div className="min-w-0">
-                  <p className="font-medium truncate">{topic.chapter_name}</p>
-                  {topic.topic_name && (
-                    <p className="text-xs text-muted-foreground truncate">{topic.topic_name}</p>
-                  )}
-                </div>
+                  );
+                })}
+                {provided.placeholder}
+                {displayTopics.length === 0 && (
+                  <p className="text-center text-sm text-muted-foreground py-12 px-4 border-2 border-dashed rounded-lg bg-muted/20">
+                    {pool.all?.length === 0
+                      ? "সিলেবাসে কোনো টপিক নেই।"
+                      : "খুঁজে পাওয়া যায়নি।"}
+                  </p>
+                )}
               </div>
-            ))}
-            {assigned.length === 0 && (
-              <p className="text-center text-sm text-muted-foreground py-8">এখনো কিছু যোগ করা হয়নি।</p>
             )}
-          </TabsContent>
-        </Tabs>
+          </Droppable>
+        </div>
       </CardContent>
     </Card>
   );

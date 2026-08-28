@@ -6,9 +6,11 @@ import { cn } from "@/lib/utils";
 export function Progress({
   value = 0,
   className,
+  indicatorClassName,
 }: {
   value?: number;
   className?: string;
+  indicatorClassName?: string;
 }) {
   const pct = Math.max(0, Math.min(100, value));
   return (
@@ -20,7 +22,7 @@ export function Progress({
       aria-valuemax={100}
     >
       <div
-        className="h-full bg-primary transition-all duration-300 ease-out"
+        className={cn("h-full bg-primary transition-all duration-300 ease-out", indicatorClassName)}
         style={{ width: `${pct}%` }}
       />
     </div>
