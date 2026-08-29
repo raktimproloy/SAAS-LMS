@@ -17,6 +17,7 @@ import Link from "next/link";
 import { format, parseISO } from "date-fns";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 import type { SaveStatus } from "@/hooks/useCurriculumDraft";
 
 type Props = {
@@ -30,20 +31,24 @@ type Props = {
 
 export function RoadmapHeader({ curriculum, progress, saveStatus, onSettings, showFullCalendar, onToggleFullCalendar }: Props) {
   return (
-    <div className="bg-background p-3 sm:p-5 rounded-xl border shadow-sm space-y-3 sm:space-y-4">
-      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4">
-        <div className="flex items-start gap-2 sm:gap-3 min-w-0">
+    <div className="bg-background/95 backdrop-blur-md p-4 sm:p-5 rounded-2xl border shadow-sm flex flex-col gap-5 sm:gap-6 transition-all duration-300">
+      
+      {/* TOP ROW */}
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 lg:gap-6">
+        
+        {/* Top Left: Title & Info */}
+        <div className="flex items-start gap-3 lg:w-1/2 min-w-0">
           <Link href="/admin/curriculum">
-            <Button variant="outline" size="icon" className="h-9 w-9 sm:h-10 sm:w-10 shrink-0">
-              <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+            <Button variant="outline" size="icon" className="h-10 w-10 shrink-0 shadow-sm rounded-xl hover:bg-primary/5 hover:text-primary hover:border-primary/30 transition-colors">
+              <ArrowLeft className="h-5 w-5" />
             </Button>
           </Link>
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-              <h1 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight break-words">
+          <div className="min-w-0 flex-1 space-y-1">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight break-words text-foreground/90">
                 {curriculum.title}
               </h1>
-              <Badge variant={curriculum.status === "active" ? "default" : "secondary"}>
+              <Badge variant={curriculum.status === "active" ? "default" : "secondary"} className="shadow-sm">
                 {curriculum.status === "active"
                   ? "চালু"
                   : curriculum.status === "draft"
@@ -51,18 +56,18 @@ export function RoadmapHeader({ curriculum, progress, saveStatus, onSettings, sh
                     : curriculum.status}
               </Badge>
               {curriculum.is_public && (
-                <Badge variant="outline" className="border-primary text-primary">
+                <Badge variant="outline" className="border-primary/50 text-primary bg-primary/5 shadow-sm">
                   স্টুডেন্ট দেখতে পারবে
                 </Badge>
               )}
             </div>
-            <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-x-3 gap-y-0.5 mt-1.5 text-xs sm:text-sm text-muted-foreground">
-              <span className="font-medium text-foreground">{curriculum.course?.title}</span>
-              <span className="hidden sm:inline">·</span>
-              <span className="font-medium text-foreground">{curriculum.batch?.name}</span>
-              <span className="hidden sm:inline">·</span>
-              <span className="inline-flex items-center gap-1">
-                <CalendarIcon className="w-3.5 h-3.5 shrink-0" />
+            <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-x-3 gap-y-1 mt-2 text-xs sm:text-sm text-muted-foreground font-medium">
+              <span className="text-foreground/80 font-bold">{curriculum.course?.title}</span>
+              <span className="hidden sm:inline opacity-50">•</span>
+              <span className="text-foreground/80">{curriculum.batch?.name}</span>
+              <span className="hidden sm:inline opacity-50">•</span>
+              <span className="inline-flex items-center gap-1.5 opacity-80">
+                <CalendarIcon className="w-4 h-4 shrink-0" />
                 {format(parseISO(curriculum.start_date), "MMM d")} –{" "}
                 {format(parseISO(curriculum.end_date), "MMM d, yyyy")}
               </span>
@@ -70,42 +75,71 @@ export function RoadmapHeader({ curriculum, progress, saveStatus, onSettings, sh
           </div>
         </div>
 
-        <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-4 shrink-0 mt-1 sm:mt-0">
-          <SaveIndicator status={saveStatus} />
-          <div className="flex items-center gap-2">
-            <Switch 
-              id="full-calendar-mode" 
-              checked={showFullCalendar} 
-              onCheckedChange={onToggleFullCalendar} 
-            />
-            <Label htmlFor="full-calendar-mode" className="text-sm font-medium cursor-pointer flex items-center gap-1.5 hidden sm:flex">
-              <CalendarDays className="w-4 h-4 text-muted-foreground" />
-              Full Calendar
-            </Label>
+        {/* Top Right: Mini Stats */}
+        {progress && (
+          <div className="flex items-center gap-3 w-full lg:w-1/2 mt-2 lg:mt-0">
+            <MiniStat label="ক্লাস" value={progress.classes} color="text-green-600 dark:text-green-500" />
+            <MiniStat label="পরীক্ষা" value={progress.exams} color="text-blue-600 dark:text-blue-500" />
+            <MiniStat label="ছুটি" value={progress.holidays} color="text-orange-600 dark:text-orange-500" />
+            <MiniStat label="স্কিপ" value={progress.skipped} color="text-red-600 dark:text-red-500" />
           </div>
-          <Button variant="outline" size="sm" className="gap-2 shrink-0" onClick={onSettings}>
-            <Settings2 className="w-4 h-4" />
-            <span className="hidden sm:inline">সেটিংস</span>
-          </Button>
-        </div>
+        )}
       </div>
 
-      {progress && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
-          <div className="col-span-2 sm:col-span-3 lg:col-span-2 space-y-1.5">
-            <div className="flex justify-between text-xs">
-              <span className="text-muted-foreground font-medium">সিলেবাস কভারেজ</span>
-              <span className="font-bold">
+      {/* BOTTOM ROW */}
+      <div className="flex flex-col lg:flex-row justify-between items-center gap-5 lg:gap-6">
+        
+        {/* Bottom Left: Progress */}
+        {progress ? (
+          <div className="w-full lg:w-1/2 pl-0 lg:pl-[3.25rem] space-y-2.5">
+            <div className="flex justify-between items-center text-xs sm:text-sm">
+              <span className="text-muted-foreground font-semibold tracking-wide">সিলেবাস কভারেজ</span>
+              <span className="font-bold text-foreground">
                 {progress.assignedTopics}/{progress.poolTotal || "—"} ({progress.coveragePct}%)
               </span>
             </div>
-            <Progress value={progress.coveragePct} className="h-2" indicatorClassName="bg-green-500" />
+            <Progress value={progress.coveragePct} className="h-2 shadow-sm" indicatorClassName="bg-green-500" />
           </div>
-          <MiniStat label="পরীক্ষা" value={progress.exams} color="text-blue-600" />
-          <MiniStat label="ছুটি" value={progress.holidays} color="text-orange-600" />
-          <MiniStat label="স্কিপ" value={progress.skipped} color="text-red-600" />
+        ) : <div className="hidden lg:block lg:w-1/2" />}
+
+        {/* Bottom Right: Controls */}
+        <div className="flex flex-wrap items-center justify-start lg:justify-end gap-4 sm:gap-6 w-full lg:w-1/2">
+          <SaveIndicator status={saveStatus} />
+          
+          <div className="flex items-center bg-muted/30 p-1 rounded-xl border shadow-sm">
+            <button
+              type="button"
+              onClick={() => onToggleFullCalendar?.(false)}
+              className={cn(
+                "px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition-all duration-300",
+                !showFullCalendar 
+                  ? "bg-background shadow-sm text-foreground ring-1 ring-border/50" 
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Routine Calendar
+            </button>
+            <button
+              type="button"
+              onClick={() => onToggleFullCalendar?.(true)}
+              className={cn(
+                "px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition-all duration-300",
+                showFullCalendar 
+                  ? "bg-primary text-primary-foreground shadow-md" 
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+            >
+              Full Calendar
+            </button>
+          </div>
+          
+          <Button variant="outline" size="sm" className="gap-2 h-9 shadow-sm hover:bg-muted/50 rounded-lg" onClick={onSettings}>
+            <Settings2 className="w-4 h-4" />
+            <span className="font-semibold">সেটিংস</span>
+          </Button>
         </div>
-      )}
+      </div>
+      
     </div>
   );
 }
@@ -120,11 +154,11 @@ function MiniStat({
   color: string;
 }) {
   return (
-    <div className="rounded-lg border bg-muted/20 px-2.5 sm:px-3 py-1.5 sm:py-2">
-      <p className="text-[9px] sm:text-[10px] uppercase tracking-wider text-muted-foreground font-bold">
+    <div className="flex-1 min-w-[80px] rounded-xl border bg-card/60 px-3 sm:px-4 py-2 sm:py-3 flex flex-col justify-center gap-1 shadow-sm transition-all hover:bg-muted/40 hover:shadow-md">
+      <p className="text-[10px] sm:text-xs text-muted-foreground font-semibold">
         {label}
       </p>
-      <p className={`text-lg sm:text-xl font-bold ${color}`}>{value}</p>
+      <p className={`text-xl sm:text-2xl font-bold leading-none ${color}`}>{value}</p>
     </div>
   );
 }

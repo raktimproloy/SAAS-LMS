@@ -269,8 +269,8 @@ export function useCurriculumDraft(curriculumId: string) {
         applySessions((s) => continueTopic(s, sessionId, topicId, classDays, endDate)),
       removeTopic: (sessionId: number | string, topicId: number | string) =>
         applySessions((s) => removeTopic(s, sessionId, topicId)),
-      clear: () => applySessions((s) => clearTopics(s)),
-      autoFill: () => applySessions((s) => autoFillFromBooks(s, books)),
+      clear: () => applySessions((s) => clearTopics(s, classDays)),
+      autoFill: () => applySessions((s) => autoFillFromBooks(s, books, classDays)),
       addExam: (sessionId: number | string, title: string) =>
         applySessions((s) => addExamAtSession(s, sessionId, title, classDays, endDate)),
       addCustomTopic: (

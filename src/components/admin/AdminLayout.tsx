@@ -336,6 +336,7 @@ export function AdminLayout({
 }) {
   const pathname = usePathname();
   const isQuestionBank = pathname.startsWith("/admin/question-bank");
+  const isCurriculumPlanner = pathname.match(/^\/admin\/curriculum\/\d+/);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const router = useRouter();
 
@@ -466,7 +467,7 @@ export function AdminLayout({
         </header>
 
         {/* Main Content */}
-        <main className={cn("flex flex-1 flex-col bg-slate-50/50 dark:bg-transparent relative print:p-0 print:m-0 print:bg-transparent", isQuestionBank ? "overflow-hidden" : "gap-4 p-4 lg:gap-6 lg:p-6 overflow-auto")}>
+        <main className={cn("flex flex-1 flex-col bg-slate-50/50 dark:bg-transparent relative print:p-0 print:m-0 print:bg-transparent", isQuestionBank ? "overflow-hidden" : isCurriculumPlanner ? "overflow-auto" : "gap-4 p-4 lg:gap-6 lg:p-6 overflow-auto")}>
           {!hasAccess ? (
             <div className="flex flex-col items-center justify-center flex-1 h-[60vh]">
               <div className="text-center space-y-4">

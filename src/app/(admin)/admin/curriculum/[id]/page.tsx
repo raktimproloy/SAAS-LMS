@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { DragDropContext, DropResult } from "@hello-pangea/dnd";
 import { Button } from "@/components/ui/button";
@@ -42,6 +42,65 @@ export default function CurriculumPlannerPage() {
   const [poolOpen, setPoolOpen] = useState(false);
   const [publishOpen, setPublishOpen] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
+
+  const [headerHeight, setHeaderHeight] = useState(160);
+  const [windowHeight, setWindowHeight] = useState(800);
+  const headerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setWindowHeight(window.innerHeight);
+    }
+    
+    const handleResize = () => setWindowHeight(window.innerHeight);
+    window.addEventListener('resize', handleResize);
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  const asideRef = useRef<HTMLElement>(null);
+  const placeholderRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isLoading) return;
+    
+    const syncPos = () => {
+      if (placeholderRef.current && asideRef.current) {
+        const rect = placeholderRef.current.getBoundingClientRect();
+        asideRef.current.style.left = `${rect.left}px`;
+        asideRef.current.style.width = `${rect.width}px`;
+      }
+    };
+    syncPos();
+    window.addEventListener('resize', syncPos);
+    
+    const timer = setTimeout(() => {
+      if (!headerRef.current) return;
+      
+      const observer = new ResizeObserver(() => {
+        if (headerRef.current) {
+          setHeaderHeight(headerRef.current.offsetHeight);
+          syncPos();
+        }
+      });
+      observer.observe(headerRef.current);
+      
+      setHeaderHeight(headerRef.current.offsetHeight);
+      
+      (headerRef as any)._observer = observer;
+    }, 50);
+    
+    return () => {
+      window.removeEventListener('resize', syncPos);
+      clearTimeout(timer);
+      if ((headerRef as any)._observer) {
+        (headerRef as any)._observer.disconnect();
+      }
+    };
+  }, [isLoading]);
+
   const [showFullCalendar, setShowFullCalendar] = useState(false);
   const [selectedSessionId, setSelectedSessionId] = useState<number | string | null>(null);
   const [examTarget, setExamTarget] = useState<string | number | null>(null);
@@ -85,9 +144,13 @@ export default function CurriculumPlannerPage() {
 
   const handleToggleFullCalendar = (checked: boolean) => {
     const cards = Array.from(document.querySelectorAll('.session-card-wrapper'));
+    const headerEl = document.getElementById('curriculum-sticky-header');
+    const headerBottom = headerEl ? headerEl.getBoundingClientRect().bottom : 208;
+    const targetTop = headerBottom + 24;
+
     const topmost = cards.find(card => {
       const rect = card.getBoundingClientRect();
-      return rect.top >= 100;
+      return rect.top >= targetTop - 40; // -40 for a little leeway
     });
     const topmostId = topmost ? topmost.id : null;
 
@@ -96,11 +159,34 @@ export default function CurriculumPlannerPage() {
     if (topmostId) {
       setTimeout(() => {
         const el = document.getElementById(topmostId);
-        if (el) {
-          el.scrollIntoView({ behavior: 'instant', block: 'start' });
-          window.scrollBy(0, -140);
+        const mainScroll = document.querySelector('main');
+        if (el && mainScroll) {
+          const rect = el.getBoundingClientRect();
+          const distance = rect.top - targetTop;
+          
+          if (distance !== 0) {
+            const startScroll = mainScroll.scrollTop;
+            const duration = 600; // 600ms smooth animation
+            let startTime: number | null = null;
+            
+            const easeInOutQuad = (t: number) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+            
+            const animation = (currentTime: number) => {
+              if (startTime === null) startTime = currentTime;
+              const timeElapsed = currentTime - startTime;
+              const progress = Math.min(timeElapsed / duration, 1);
+              
+              mainScroll.scrollTop = startScroll + distance * easeInOutQuad(progress);
+              
+              if (timeElapsed < duration) {
+                requestAnimationFrame(animation);
+              }
+            };
+            
+            requestAnimationFrame(animation);
+          }
         }
-      }, 0);
+      }, 50); // slight delay to ensure DOM is updated
     }
   };
 
@@ -171,8 +257,8 @@ export default function CurriculumPlannerPage() {
   if (!curriculum) return null;
 
   return (
-    <div className="w-full max-w-full px-2 sm:px-4 lg:px-6 xl:px-8 py-3 sm:py-6 space-y-4 sm:space-y-5 pb-36 sm:pb-32 lg:pb-28">
-      <div className="sticky top-0 sm:top-2 z-40">
+    <div className="w-full max-w-full px-2 sm:px-4 lg:px-6 xl:px-6 pt-0 pb-[180px] sm:pb-[200px]">
+      <div id="curriculum-sticky-header" ref={headerRef} className="sticky top-0 z-40 bg-background/95 backdrop-blur pb-2 pt-2 -mx-2 px-2 sm:-mx-4 sm:px-4 lg:-mx-6 lg:px-6 xl:-mx-6 xl:px-6 border-b">
         <RoadmapHeader
           curriculum={curriculum}
           progress={progress}
@@ -184,7 +270,7 @@ export default function CurriculumPlannerPage() {
       </div>
 
       <DragDropContext onDragEnd={handleDragEnd}>
-        <div className="flex flex-col xl:flex-row gap-4 sm:gap-6 items-start w-full">
+        <div className="flex flex-col xl:flex-row gap-4 sm:gap-6 items-start w-full pt-2">
           <div className="flex-1 bg-background rounded-xl border shadow-sm p-3 sm:p-5 w-full min-w-0">
             <RoadmapTimeline
               sessions={curriculum.sessions}
@@ -228,7 +314,19 @@ export default function CurriculumPlannerPage() {
             />
           </div>
 
-          <aside className="hidden xl:block w-full xl:w-[320px] 2xl:w-[360px] shrink-0 sticky top-24 self-start z-20 max-h-[calc(100dvh-7rem)]">
+          {/* Placeholder to maintain flex layout space */}
+          <div ref={placeholderRef} className="hidden xl:block w-full xl:w-[360px] 2xl:w-[400px] shrink-0" />
+
+          {/* Fixed Aside */}
+          <aside 
+            ref={asideRef}
+            className="hidden xl:block shrink-0 z-20" 
+            style={{ 
+              position: 'fixed',
+              top: `${headerHeight + 68}px`, // 60px Admin header + 8px gap
+              bottom: `70px` // ~60px footer + 10px gap
+            }}
+          >
             <SyllabusPoolPanel
               pool={pool}
               selectedTopicKeys={selectedTopicKeys}

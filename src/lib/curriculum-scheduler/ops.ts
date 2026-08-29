@@ -423,8 +423,27 @@ export function buildFillItems(books: NctbBookLike[]): DraftTopic[] {
   return items;
 }
 
-export function clearTopics(sessions: DraftSession[]): DraftSession[] {
-  return cloneSessions(sessions).map((s) =>
+export function clearTopics(
+  sessions: DraftSession[],
+  classDays?: string[]
+): DraftSession[] {
+  let next = cloneSessions(sessions);
+
+  // If classDays are provided, remove manually added extra classes
+  if (classDays && classDays.length > 0) {
+    const targetDays = classDays.map((d) => DAY_NAME_TO_INDEX[d]).filter((n) => n !== undefined);
+    next = next.filter((s) => {
+      const date = parseDateUTC(s.date);
+      // Keep it if it's a routine class day, or if it's a holiday (since holidays are preserved)
+      if (targetDays.includes(date.getUTCDay()) || s.session_type === "holiday" || s.is_holiday) {
+        return true;
+      }
+      return false;
+    });
+    next = renumberSessions(next);
+  }
+
+  return next.map((s) =>
     applySessionTypeFlags({
       ...s,
       topics: [],
@@ -442,9 +461,10 @@ export function clearTopics(sessions: DraftSession[]): DraftSession[] {
 
 export function autoFillFromBooks(
   sessions: DraftSession[],
-  books: NctbBookLike[]
+  books: NctbBookLike[],
+  classDays?: string[]
 ): DraftSession[] {
-  const next = clearTopics(sessions);
+  const next = clearTopics(sessions, classDays);
   const items = buildFillItems(books);
   const teachableIdx = next
     .map((s, i) => ({ s, i }))
@@ -553,6 +573,31 @@ export function insertClassDate(
   endDate?: string
 ): DraftSession[] {
   const next = cloneSessions(sessions);
+  
+  if (String(afterSessionId).startsWith("empty-") && dateKey) {
+    const date = parseDateUTC(dateKey);
+    const newKey = date.toISOString().slice(0, 10);
+    if (endDate && newKey > toDateKey(endDate)) {
+      return sessions;
+    }
+    
+    next.push(
+      applySessionTypeFlags({
+        id: nextTempId(),
+        date: date.toISOString(),
+        session_number: 1, // temporary
+        session_type: "class",
+        is_holiday: false,
+        holiday_name: null,
+        topics: [],
+        extra_days: 1,
+      })
+    );
+    
+    next.sort((a, b) => parseDateUTC(a.date).getTime() - parseDateUTC(b.date).getTime());
+    return renumberSessions(next);
+  }
+
   const index = next.findIndex((s) => String(s.id) === String(afterSessionId));
   if (index < 0) return sessions;
 
@@ -797,6 +842,30 @@ export function moveTopic(
         topics: next[srcIdx].topics.filter((t) => String(t.id) !== String(topic.id)),
       };
     }
+  }
+
+  // Handle dropping onto an empty calendar day
+  if (String(destSessionId).startsWith("empty-")) {
+    const dateStr = String(destSessionId).replace("empty-", "");
+    const date = parseDateUTC(dateStr);
+    
+    const newSession = applySessionTypeFlags({
+      id: nextTempId(),
+      date: date.toISOString(),
+      session_number: 1, // temporary
+      session_type: "class",
+      is_holiday: false,
+      holiday_name: null,
+      topics: [],
+      extra_days: 1,
+    });
+    
+    next.push(newSession);
+    next.sort((a, b) => parseDateUTC(a.date).getTime() - parseDateUTC(b.date).getTime());
+    renumberSessions(next);
+    
+    // Now the destination is the newly created session
+    destSessionId = newSession.id;
   }
 
   const destIdx = next.findIndex((s) => String(s.id) === String(destSessionId));
@@ -1155,21 +1224,26 @@ export function computeProgress(sessions: DraftSession[], poolTotal: number) {
     (s) => isTeachable(s) || s.session_type === "exam"
   );
   const completed = teachable.filter((s) => s.is_completed).length;
-  const assignedTopics = sessions.reduce(
-    (acc, s) =>
-      acc +
-      (s.topics || []).filter(
-        (t) => !(t.is_custom && String(t.chapter_name).startsWith("Exam:"))
-      ).length,
-    0
-  );
+  const assignedKeys = new Set<string>();
+
+  sessions.forEach((s) => {
+    (s.topics || []).forEach((t) => {
+      if (!(t.is_custom && String(t.chapter_name).startsWith("Exam:"))) {
+        assignedKeys.add(topicKey(t));
+      }
+    });
+  });
+
+  const assignedTopics = assignedKeys.size;
   const exams = sessions.filter((s) => s.session_type === "exam").length;
+  const classes = sessions.filter((s) => s.session_type === "class").length;
   const holidays = sessions.filter((s) => s.session_type === "holiday").length;
   const skipped = sessions.filter((s) => s.session_type === "skipped").length;
 
   return {
     totalSessions: sessions.length,
     teachable: teachable.length,
+    classes,
     completed,
     completionPct: teachable.length
       ? Math.round((completed / teachable.length) * 100)

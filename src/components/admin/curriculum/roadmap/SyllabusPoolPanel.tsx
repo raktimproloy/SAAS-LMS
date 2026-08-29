@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -49,17 +49,72 @@ export function SyllabusPoolPanel({
 
   const isSidebar = variant === "sidebar";
 
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (selectedTopicKeys.length > 0 && scrollContainerRef.current) {
+      const firstKey = selectedTopicKeys[0];
+      const timer = setTimeout(() => {
+        const container = scrollContainerRef.current;
+        if (!container) return;
+        
+        // Escape key to handle spaces or special characters safely
+        const escapedKey = CSS.escape(firstKey);
+        const el = container.querySelector(`[data-topic-key="${escapedKey}"]`) as HTMLElement;
+        
+        if (el) {
+          // Precise scrolling within the container ONLY to avoid page jumps
+          const containerRect = container.getBoundingClientRect();
+          const elRect = el.getBoundingClientRect();
+          
+          // Guarantee smooth scroll behavior with a custom animation function
+          const startScroll = container.scrollTop;
+          const targetScroll = startScroll + (elRect.top - containerRect.top) - (containerRect.height / 2) + (elRect.height / 2);
+          const distance = targetScroll - startScroll;
+          const duration = 800; // 800ms for a pronounced motion animation
+          let startTime: number | null = null;
+          
+          const easeInOutQuad = (t: number) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+          
+          const animation = (currentTime: number) => {
+            if (startTime === null) startTime = currentTime;
+            const timeElapsed = currentTime - startTime;
+            const progress = Math.min(timeElapsed / duration, 1);
+            
+            container.scrollTop = startScroll + distance * easeInOutQuad(progress);
+            
+            if (timeElapsed < duration) {
+              requestAnimationFrame(animation);
+            }
+          };
+          
+          requestAnimationFrame(animation);
+          
+          el.classList.add("ring-2", "ring-primary", "ring-offset-2", "transition-all", "duration-500", "scale-[1.02]", "bg-primary/10");
+          setTimeout(() => el.classList.remove("ring-2", "ring-primary", "ring-offset-2", "scale-[1.02]", "bg-primary/10"), 1800);
+        }
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedTopicKeys]);
+
   return (
     <Card
       className={`flex flex-col min-h-0 ${
-        isSidebar ? "h-full max-h-[calc(100dvh-5rem)]" : "h-full min-h-0"
+        isSidebar ? "h-full" : "h-full min-h-0"
       } ${className}`}
     >
-      <CardHeader className="pb-3 border-b space-y-3">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <BookOpen className="w-5 h-5 text-primary" />
-          সিলেবাস পুল
-        </CardTitle>
+      <CardHeader className="pb-3 border-b space-y-3 sticky top-0 z-30 bg-card/90 backdrop-blur-md rounded-t-xl shadow-[0_2px_10px_-4px_rgba(0,0,0,0.1)] transition-all">
+        <div className="flex justify-between items-center">
+          <CardTitle className="flex items-center gap-2 text-base font-bold text-foreground/90">
+            <BookOpen className="w-4 h-4 text-primary" />
+            সিলেবাস পুল
+          </CardTitle>
+          <div className="flex gap-1.5">
+            <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-5">{pool.assigned.length} টি যোগ</Badge>
+            <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5">{pool.remaining.length} টি বাকি</Badge>
+          </div>
+        </div>
         <div className="relative">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
@@ -69,10 +124,7 @@ export function SyllabusPoolPanel({
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <div className="flex gap-2 text-xs">
-          <Badge variant="secondary">{pool.assigned.length} টি যোগ</Badge>
-          <Badge variant="outline">{pool.remaining.length} টি বাকি</Badge>
-        </div>
+
         {pool.remaining.length > 0 && (
           <Button size="sm" variant="outline" className="w-full" onClick={onAutoFillRemaining}>
             বাকিগুলো অটো বসান
@@ -80,8 +132,8 @@ export function SyllabusPoolPanel({
         )}
       </CardHeader>
 
-      <CardContent className="flex-1 overflow-hidden p-0 flex flex-col">
-        <div className="flex-1 overflow-y-auto p-3">
+      <CardContent className="flex-1 overflow-hidden p-0 flex flex-col relative z-0">
+        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto p-3 scroll-smooth">
           <Droppable droppableId="pool-remaining" isDropDisabled>
             {(provided) => (
               <div ref={provided.innerRef} {...provided.droppableProps} className="space-y-2">
@@ -108,6 +160,7 @@ export function SyllabusPoolPanel({
                           ref={p.innerRef}
                           {...p.draggableProps}
                           {...p.dragHandleProps}
+                          data-topic-key={topic.key}
                           className={`flex items-start gap-2 p-2.5 border rounded-lg transition-all duration-200 text-sm ${
                             snapshot.isDragging 
                               ? "shadow-lg border-primary bg-background scale-[1.02] z-50" 

@@ -17,6 +17,8 @@ import {
   Calendar,
   ChevronLeft,
   ChevronRight,
+  ChevronUp,
+  ChevronDown,
   FileSignature,
   Plus,
   Trash2,
@@ -132,7 +134,7 @@ export function RoadmapTimeline({
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-3 gap-3 sm:gap-4 items-start">
               {monthSessions.map((session) => (
-                <div key={String(session.id)} className="session-card-wrapper" id={`wrapper-${String(session.id)}`}>
+                <div key={String(session.id)} className="session-card-wrapper scroll-mt-[12rem] xl:scroll-mt-[10rem] transition-all duration-300" id={`wrapper-${String(session.id)}`}>
                   <SessionCard
                     session={session}
                     readOnly={readOnly}
@@ -209,6 +211,7 @@ function SessionCard({
   onTeachHoliday,
   onAddExam,
   onAddTopic,
+  onAddDay,
 }: {
   session: DraftSession;
   readOnly?: boolean;
@@ -230,7 +233,7 @@ function SessionCard({
 }) {
   const type = session.session_type;
   const softHoliday = isSoftHoliday(session);
-  const canTeach = type === "class" || type === "exam";
+  const canTeach = type === "class" || type === "exam" || type === "empty-calendar-day";
 
   const border = isSelected 
     ? "border-primary ring-2 ring-primary/20 bg-primary/5" 
@@ -250,14 +253,62 @@ function SessionCard({
   const topicCount = session.topics?.length || 0;
   const isTodayClass = isToday(parseISO(session.date));
 
+  React.useEffect(() => {
+    if (isSelected) {
+      const timer = setTimeout(() => {
+        const el = document.getElementById(`wrapper-${session.id}`);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          
+          // Find the sticky header dynamically for perfect visual alignment
+          const headerEl = document.getElementById('curriculum-sticky-header');
+          const headerBottom = headerEl ? headerEl.getBoundingClientRect().bottom : 208;
+          
+          // Align perfectly with Syllabus Pool top edge which uses headerHeight + 24px
+          const targetTop = headerBottom + 24;
+          
+          const mainScroll = document.querySelector('main');
+          
+          if (rect.top < targetTop || rect.bottom > window.innerHeight) {
+            const distance = rect.top - targetTop;
+            const duration = 800;
+            let startTime: number | null = null;
+            
+            const easeInOutQuad = (t: number) => t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+            
+            const animation = (currentTime: number) => {
+              if (startTime === null) startTime = currentTime;
+              const timeElapsed = currentTime - startTime;
+              const progress = Math.min(timeElapsed / duration, 1);
+              
+              if (mainScroll) {
+                mainScroll.scrollTop = startScroll + distance * easeInOutQuad(progress);
+              } else {
+                window.scrollTo(0, startScroll + distance * easeInOutQuad(progress));
+              }
+              
+              if (timeElapsed < duration) {
+                requestAnimationFrame(animation);
+              }
+            };
+            
+            const startScroll = mainScroll ? mainScroll.scrollTop : window.scrollY;
+            requestAnimationFrame(animation);
+          }
+        }
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [isSelected, session.id]);
+
   const inner = (
     <Card 
       id={isTodayClass ? "today-session" : undefined} 
       className={cn(
-        "flex flex-col border transition-all duration-300 shadow-sm cursor-pointer overflow-hidden relative", 
+        "flex flex-col border transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] shadow-sm cursor-pointer overflow-hidden relative", 
         border, 
         isTodayClass && !isSelected ? 'ring-2 ring-primary/60 shadow-md' : '',
-        isSelected ? 'h-auto shadow-lg scale-[1.01] z-10 ring-1 ring-primary/40' : 'h-[250px] hover:-translate-y-0.5'
+        isSelected ? 'h-[360px] sm:h-auto shadow-2xl z-10 ring-1 ring-primary/50' : 'h-[250px] hover:-translate-y-1 hover:shadow-md'
       )}
       onClick={onClick}
     >
@@ -266,48 +317,68 @@ function SessionCard({
         isSelected ? "bg-primary/10" : "bg-muted/10"
       )}>
         <div className="flex flex-wrap items-center justify-between gap-2 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className={cn("font-extrabold text-sm sm:text-base", isSelected ? "text-primary" : "text-foreground dark:text-gray-100")}>
-              {format(parseISO(session.date), "EEE, MMM d")}
-            </span>
-            {isTodayClass && (
-              <Badge className="bg-primary text-primary-foreground text-xs px-2 shadow-sm font-bold">
-                Today
-              </Badge>
-            )}
-            {softHoliday && (
-              <Badge
-                variant="outline"
-                className="text-amber-800 dark:text-amber-300 border-amber-500 bg-amber-100 dark:bg-amber-950/60 text-[10px] font-bold"
-              >
-                {session.holiday_name || "সরকারি ছুটি"}
-              </Badge>
+          <div className="flex flex-col gap-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <span className={cn(
+                "font-extrabold text-sm sm:text-base", 
+                isSelected ? "text-primary" : "text-foreground dark:text-gray-100",
+                type === "empty-calendar-day" ? "opacity-70 font-medium" : ""
+              )}>
+                {format(parseISO(session.date), "EEE, MMM d")}
+              </span>
+              {isTodayClass && (
+                <Badge className="bg-primary text-primary-foreground text-xs px-2 shadow-sm font-bold">
+                  Today
+                </Badge>
+              )}
+              {softHoliday && (
+                <Badge
+                  variant="outline"
+                  className="text-amber-800 dark:text-amber-300 border-amber-500 bg-amber-100 dark:bg-amber-950/60 text-[10px] font-bold"
+                >
+                  {session.holiday_name || "সরকারি ছুটি"}
+                </Badge>
+              )}
+            </div>
+            {type === "empty-calendar-day" && (
+              <span className="text-xs text-muted-foreground italic">খালি দিন</span>
             )}
           </div>
 
           <div className="flex items-center gap-1.5 shrink-0">
-            <Badge
-              variant={
-                type === "holiday" || type === "skipped"
-                  ? "destructive"
-                  : type === "exam"
-                    ? "default"
-                    : "secondary"
-              }
-              className="text-xs font-bold shadow-sm"
-            >
-              {type === "exam"
-                ? "পরীক্ষা"
-                : type === "holiday"
-                  ? "ছুটি"
-                  : type === "skipped"
-                    ? "স্কিপ"
-                    : `ক্লাস ${session.session_number}`}
-            </Badge>
+            {type !== "empty-calendar-day" && (
+              <Badge
+                variant={
+                  type === "holiday" || type === "skipped"
+                    ? "destructive"
+                    : type === "exam"
+                      ? "default"
+                      : "secondary"
+                }
+                className="text-xs font-bold shadow-sm"
+              >
+                {type === "exam"
+                  ? "পরীক্ষা"
+                  : type === "holiday"
+                    ? "ছুটি"
+                    : type === "skipped"
+                      ? "স্কিপ"
+                      : `ক্লাস ${session.session_number}`}
+              </Badge>
+            )}
             {session.is_completed && (
               <Badge variant="outline" className="text-green-700 dark:text-green-400 border-green-600 bg-green-50 dark:bg-green-950/50 text-[10px] sm:text-xs font-bold">
                 সম্পন্ন (Done)
               </Badge>
+            )}
+            
+            {!readOnly && (
+              <div className={cn(
+                "w-6 h-6 rounded-full flex items-center justify-center transition-all shrink-0 border ml-1",
+                isSelected ? "bg-primary/20 border-primary/30 text-primary" : "bg-background border-border text-muted-foreground group-hover:border-primary/30"
+              )}>
+                {isSelected ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </div>
             )}
           </div>
         </div>
@@ -437,8 +508,8 @@ function SessionCard({
         {!readOnly && (
           <div 
             className={cn(
-              "grid transition-all duration-300 ease-in-out",
-              isSelected ? "grid-rows-[1fr] opacity-100 mt-4" : "grid-rows-[0fr] opacity-0 mt-0"
+              "grid transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]",
+              isSelected ? "grid-rows-[1fr] opacity-100 mt-4 translate-y-0" : "grid-rows-[0fr] opacity-0 mt-0 -translate-y-4"
             )}
             onClick={(e) => e.stopPropagation()} // Prevent clicking controls from toggling the card
           >
@@ -446,11 +517,6 @@ function SessionCard({
               <div className="pt-4 border-t border-border/60">
                 <h5 className="text-[11px] font-bold text-muted-foreground/80 uppercase tracking-wider mb-3 px-1">দিন কন্ট্রোল প্যানেল</h5>
                 <div className="grid grid-cols-2 gap-2.5">
-                  {type === "class" && onSkip && (
-                    <ControlBtn onClick={() => onSkip(session.id)} className="text-orange-600 dark:text-white hover:bg-orange-500/15 hover:border-orange-500/40">
-                      <XCircle className="w-4 h-4 mr-1.5" /> স্কিপ করুন
-                    </ControlBtn>
-                  )}
                   {type === "class" && onMarkCuti && (
                     <ControlBtn
                       onClick={() => onMarkCuti(session.id, session.holiday_name || "ছুটি")}
