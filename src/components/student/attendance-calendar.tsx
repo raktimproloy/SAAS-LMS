@@ -225,12 +225,12 @@ export function AttendanceCalendar({
             });
 
             const tone = isPresent
-              ? "bg-emerald-50 border-emerald-300 text-emerald-800 dark:bg-emerald-950/40 dark:border-emerald-700 dark:text-emerald-200"
+              ? "bg-emerald-50/80 border-emerald-300 text-emerald-800 dark:bg-emerald-950/40 dark:border-emerald-700 dark:text-emerald-200 backdrop-blur-[2px]"
               : isAbsent
-                ? "bg-rose-50 border-rose-300 text-rose-800 dark:bg-rose-950/40 dark:border-rose-700 dark:text-rose-200"
+                ? "bg-rose-50/80 border-rose-300 text-rose-800 dark:bg-rose-950/40 dark:border-rose-700 dark:text-rose-200 backdrop-blur-[2px]"
                 : isLate
-                  ? "bg-amber-50 border-amber-300 text-amber-800 dark:bg-amber-950/40 dark:border-amber-700 dark:text-amber-200"
-                  : "bg-background border-border text-muted-foreground";
+                  ? "bg-amber-50/80 border-amber-300 text-amber-800 dark:bg-amber-950/40 dark:border-amber-700 dark:text-amber-200 backdrop-blur-[2px]"
+                  : "bg-background/80 border-border text-muted-foreground backdrop-blur-[2px]";
 
             return (
               <button
@@ -239,7 +239,7 @@ export function AttendanceCalendar({
                 title={`${dateStr}${status ? ` · ${status}` : ""}`}
                 onClick={() => handleDayClick(date)}
                 className={cn(
-                  "relative flex flex-col items-center justify-between rounded-[6px] border px-0.5 py-1 text-xs font-semibold transition-colors sm:px-1 sm:py-1.5 sm:text-sm",
+                  "relative flex items-center justify-center overflow-hidden rounded-[6px] border px-0.5 py-1 text-xs font-semibold transition-colors sm:px-1 sm:py-1.5 sm:text-sm",
                   compact
                     ? "min-h-[2.5rem] sm:min-h-[2.75rem]"
                     : "min-h-[2.75rem] sm:min-h-[4.25rem] md:min-h-[4.75rem]",
@@ -249,23 +249,23 @@ export function AttendanceCalendar({
                   "cursor-pointer hover:brightness-[0.98] active:scale-[0.98]"
                 )}
               >
-                <span className="leading-none">{format(date, "d")}</span>
+                <span className="relative z-10 text-sm font-bold sm:text-base leading-none">{format(date, "d")}</span>
 
-                {/* Status: icons on sm+, dots on mobile (and always when compact) */}
+                {/* Status: background icons on sm+, dots on mobile (and always when compact) */}
                 {!compact && isPresent && (
-                  <CheckCircle2 className="hidden h-4 w-4 text-emerald-500 sm:block" />
+                  <CheckCircle2 className="absolute top-1/2 left-1/2 hidden h-8 w-8 -translate-x-1/2 -translate-y-1/2 text-emerald-500/25 sm:block md:h-10 md:w-10" strokeWidth={1.5} />
                 )}
                 {!compact && isAbsent && (
-                  <XCircle className="hidden h-4 w-4 text-rose-500 sm:block" />
+                  <XCircle className="absolute top-1/2 left-1/2 hidden h-8 w-8 -translate-x-1/2 -translate-y-1/2 text-rose-500/25 sm:block md:h-10 md:w-10" strokeWidth={1.5} />
                 )}
                 {!compact && isLate && (
-                  <Clock className="hidden h-4 w-4 text-amber-500 sm:block" />
+                  <Clock className="absolute top-1/2 left-1/2 hidden h-8 w-8 -translate-x-1/2 -translate-y-1/2 text-amber-500/25 sm:block md:h-10 md:w-10" strokeWidth={1.5} />
                 )}
 
                 {(isPresent || isAbsent || isLate) && (
                   <span
                     className={cn(
-                      "mb-0.5 h-1 w-1 rounded-full",
+                      "absolute bottom-1.5 h-1.5 w-1.5 rounded-full",
                       isPresent && "bg-emerald-500",
                       isAbsent && "bg-rose-500",
                       isLate && "bg-amber-500",

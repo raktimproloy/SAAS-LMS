@@ -54,11 +54,29 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="Institute Web" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
-      <body className={`${inter.variable} antialiased min-h-screen bg-background`}>
+      <body className={`${inter.variable} antialiased min-h-screen bg-background relative overflow-x-hidden`}>
+        {/* Global Animated Background Orbs */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none z-[0] bg-background">
+          <div 
+            className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] max-w-[800px] max-h-[800px] rounded-full blur-[100px] sm:blur-[140px] opacity-50 dark:opacity-30 animate-blob" 
+            style={{ background: 'hsl(var(--gradient-1) / 0.4)' }}
+          />
+          <div 
+            className="absolute top-[20%] right-[-10%] w-[40vw] h-[40vw] max-w-[600px] max-h-[600px] rounded-full blur-[100px] sm:blur-[140px] opacity-50 dark:opacity-30 animate-blob animation-delay-4000" 
+            style={{ background: 'hsl(var(--gradient-2) / 0.4)' }}
+          />
+          <div 
+            className="absolute bottom-[-10%] left-[20%] w-[60vw] h-[60vw] max-w-[900px] max-h-[900px] rounded-full blur-[100px] sm:blur-[140px] opacity-50 dark:opacity-30 animate-blob animation-delay-6000" 
+            style={{ background: 'hsl(var(--gradient-3) / 0.4)' }}
+          />
+        </div>
+
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <PWAInstallProvider>
             <AosInitializer />
-            {children}
+            <div className="relative z-10 flex flex-col min-h-screen">
+              {children}
+            </div>
           </PWAInstallProvider>
         </ThemeProvider>
       </body>

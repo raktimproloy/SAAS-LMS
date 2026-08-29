@@ -16,190 +16,200 @@
     --font-sans: var(--font-sans);
   }
   :root {
-    --background: 210 40% 98%; /* slate-50 */
-    --foreground: 222.2 47.4% 11.2%; /* slate-900 */
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 47.4% 11.2%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 47.4% 11.2%;
-    --primary: 243 75% 59%; /* indigo-600 */
+    --background: 0 0% 100%;
+    --foreground: 209 100% 6%; /* #00101f */
+    --card: 213 20% 94%;
+    --card-foreground: 209 100% 6%;
+    --popover: 213 20% 94%;
+    --popover-foreground: 209 100% 6%;
+    --primary: 201 94% 54%; /* #19AAF8 */
     --primary-foreground: 0 0% 100%;
-    --secondary: 214.3 31.8% 91.4%; /* slate-200 */
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%; /* slate-100 */
-    --muted-foreground: 215.4 16.3% 46.9%; /* slate-500 */
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%; /* red-500 */
+    --secondary: 0 0% 100%;
+    --secondary-foreground: 209 100% 6%;
+    --muted: 0 0% 100%;
+    --muted-foreground: 213 30% 25%;
+    --accent: 0 0% 100%;
+    --accent-foreground: 209 100% 6%;
+    --destructive: 0 84.2% 60.2%; 
     --destructive-foreground: 0 0% 100%;
-    --border: 214.3 31.8% 91.4%; /* slate-200 */
-    --input: 214.3 31.8% 91.4%;
-    --ring: 243 75% 59%;
+    --border: 213 20% 86%;
+    --input: 213 20% 86%;
+    --ring: 201 94% 54%;
     --radius: 0.4rem;
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-    --sidebar: 210 40% 98%;
-    --sidebar-foreground: 222.2 47.4% 11.2%;
-    --sidebar-primary: 243 75% 59%;
+    --sidebar: 213 20% 94%;
+    --sidebar-foreground: 209 100% 6%;
+    --sidebar-primary: 201 94% 54%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 40% 96.1%;
-    --sidebar-accent-foreground: 222.2 47.4% 11.2%;
-    --sidebar-border: 214.3 31.8% 91.4%;
-    --sidebar-ring: 243 75% 59%;
+    --sidebar-accent: 0 0% 100%;
+    --sidebar-accent-foreground: 209 100% 6%;
+    --sidebar-border: 213 20% 86%;
+    --sidebar-ring: 201 94% 54%;
 
-    --gradient-1: 243 75% 59%;
-    --gradient-2: 280 70% 65%;
-    --gradient-3: 200 90% 60%;
+    --gradient-1: 201 94% 54%;
+    --gradient-2: 201 80% 45%;
+    --gradient-3: 201 90% 65%;
     --hero-bg-start: 0 0% 100%;
-    --hero-bg-mid: 214.3 31.8% 91.4%;
-    --hero-bg-end: 210 40% 98%;
+    --hero-bg-mid: 213 22% 98%;
+    --hero-bg-end: 213 20% 94%;
   }
 
   .dark {
-    --background: 224 15% 10%; /* Slightly lighter dark slate */
-    --foreground: 210 20% 98%;
-    --card: 224 15% 16%; /* Brighter cards for question chunks */
-    --card-foreground: 210 20% 98%;
-    --popover: 224 15% 16%;
-    --popover-foreground: 210 20% 98%;
-    --primary: 243 75% 67%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 224 15% 20%;
-    --secondary-foreground: 210 20% 98%;
-    --muted: 224 15% 20%;
-    --muted-foreground: 224 10% 70%;
-    --accent: 224 15% 20%;
-    --accent-foreground: 210 20% 98%;
+    --background: 209 100% 6%; /* #00101f */
+    --foreground: 213 22% 81%; /* #c3cdd9 */
+    --card: 209 95% 9%;
+    --card-foreground: 213 22% 81%;
+    --popover: 209 95% 9%;
+    --popover-foreground: 213 22% 81%;
+    --primary: 201 94% 54%; /* #19AAF8 */
+    --primary-foreground: 209 100% 6%;
+    --secondary: 209 85% 14%;
+    --secondary-foreground: 213 22% 81%;
+    --muted: 209 85% 14%;
+    --muted-foreground: 213 15% 60%;
+    --accent: 209 85% 14%;
+    --accent-foreground: 213 22% 81%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 20% 98%;
-    --border: 224 15% 22%; /* Brighter subtle borders */
-    --input: 224 15% 22%;
-    --ring: 243 75% 67%;
+    --destructive-foreground: 213 22% 81%;
+    --border: 209 85% 19%;
+    --input: 209 85% 19%;
+    --ring: 201 94% 54%;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
-    --sidebar: 224 15% 12%;
-    --sidebar-foreground: 210 20% 98%;
-    --sidebar-primary: 243 75% 67%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 224 15% 20%;
-    --sidebar-accent-foreground: 210 20% 98%;
-    --sidebar-border: 224 15% 18%;
-    --sidebar-ring: 243 75% 67%;
-    --sidebar-ring: 243 75% 67%;
+    --sidebar: 209 95% 9%;
+    --sidebar-foreground: 213 22% 81%;
+    --sidebar-primary: 201 94% 54%;
+    --sidebar-primary-foreground: 209 100% 6%;
+    --sidebar-accent: 209 85% 14%;
+    --sidebar-accent-foreground: 213 22% 81%;
+    --sidebar-border: 209 85% 19%;
+    --sidebar-ring: 201 94% 54%;
+    --sidebar-ring: 201 94% 54%;
     
-    --gradient-1: 220 40% 40%;
-    --gradient-2: 220 45% 45%;
-    --gradient-3: 220 35% 35%;
-    --hero-bg-start: 15 12% 16%;
-    --hero-bg-mid: 243 75% 20%;
-    --hero-bg-end: 224 15% 10%;
+    --gradient-1: 201 94% 54%;
+    --gradient-2: 201 80% 40%;
+    --gradient-3: 201 90% 60%;
+    --hero-bg-start: 209 100% 9%;
+    --hero-bg-mid: 209 100% 7%;
+    --hero-bg-end: 209 100% 6%;
   }
 
   /* Student Portal Scoped Theme */
   .student-portal {
-    --background: 220 33% 98%; /* Cool icy blue-white */
-    --foreground: 222.2 47.4% 11.2%; 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 47.4% 11.2%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 47.4% 11.2%;
-    --primary: 220 25% 45%; /* Dark low saturated premium blue */
+    --background: 0 0% 100%;
+    --foreground: 209 100% 6%; /* #00101f */
+    --card: 213 20% 94%;
+    --card-foreground: 209 100% 6%;
+    --popover: 213 20% 94%;
+    --popover-foreground: 209 100% 6%;
+    --primary: 201 94% 54%; /* #19AAF8 */
     --primary-foreground: 0 0% 100%;
-    --secondary: 220 25% 92%; 
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 220 25% 94%; 
-    --muted-foreground: 215.4 16.3% 46.9%; 
-    --accent: 220 25% 94%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --secondary: 0 0% 100%;
+    --secondary-foreground: 209 100% 6%;
+    --muted: 0 0% 100%; 
+    --muted-foreground: 213 30% 25%;
+    --accent: 0 0% 100%;
+    --accent-foreground: 209 100% 6%;
     --destructive: 0 84.2% 60.2%; 
     --destructive-foreground: 0 0% 100%;
-    --border: 220 25% 90%; 
-    --input: 220 25% 90%;
-    --ring: 220 25% 45%;
+    --border: 213 20% 86%; 
+    --input: 213 20% 86%;
+    --ring: 201 94% 54%;
     --radius: 1rem;
-    --sidebar: 220 33% 96%; 
-    --sidebar-foreground: 222.2 47.4% 11.2%;
-    --sidebar-primary: 220 25% 45%;
+    --sidebar: 213 20% 94%; 
+    --sidebar-foreground: 209 100% 6%;
+    --sidebar-primary: 201 94% 54%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 25% 92%;
-    --sidebar-accent-foreground: 222.2 47.4% 11.2%;
-    --sidebar-border: 220 25% 90%;
-    --sidebar-ring: 220 25% 45%;
-    --gradient-1: 220 45% 55%;
-    --gradient-2: 210 50% 62%;
-    --gradient-3: 230 40% 58%;
-    --motif-color: 220 30% 42%;
-    --motif-glow: 220 65% 72%;
+    --sidebar-accent: 0 0% 100%;
+    --sidebar-accent-foreground: 209 100% 6%;
+    --sidebar-border: 213 20% 86%;
+    --sidebar-ring: 201 94% 54%;
+    --gradient-1: 201 94% 54%;
+    --gradient-2: 201 80% 45%;
+    --gradient-3: 201 90% 65%;
+    --motif-color: 201 94% 54%;
+    --motif-glow: 201 90% 65%;
   }
 
   .dark .student-portal {
-    --background: 225 40% 13%; /* Balanced deep blue-slate */
-    --foreground: 210 20% 98%;
-    --card: 225 35% 20%; /* Balanced glassy cards */
-    --card-foreground: 210 20% 98%;
-    --popover: 225 35% 20%;
-    --popover-foreground: 210 20% 98%;
-    --primary: 220 25% 50%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 225 30% 26%;
-    --secondary-foreground: 210 20% 98%;
-    --muted: 225 30% 26%;
-    --muted-foreground: 215 20% 77%;
-    --accent: 225 30% 26%;
-    --accent-foreground: 210 20% 98%;
+    --background: 209 100% 6%; /* #00101f */
+    --foreground: 213 22% 81%; /* #c3cdd9 */
+    --card: 209 95% 9%;
+    --card-foreground: 213 22% 81%;
+    --popover: 209 95% 9%;
+    --popover-foreground: 213 22% 81%;
+    --primary: 201 94% 54%; /* #19AAF8 */
+    --primary-foreground: 209 100% 6%;
+    --secondary: 209 85% 14%;
+    --secondary-foreground: 213 22% 81%;
+    --muted: 209 85% 14%;
+    --muted-foreground: 213 15% 60%;
+    --accent: 209 85% 14%;
+    --accent-foreground: 213 22% 81%;
     --destructive: 0 62.8% 40.6%;
     --destructive-foreground: 0 0% 100%;
-    --border: 225 35% 28%; 
-    --input: 225 35% 28%;
-    --ring: 220 25% 50%;
-    --sidebar: 225 35% 18%; 
-    --sidebar-foreground: 210 20% 98%;
-    --sidebar-primary: 220 25% 50%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 225 30% 30%;
-    --sidebar-accent-foreground: 210 20% 98%;
-    --sidebar-border: 225 30% 26%;
-    --sidebar-ring: 220 25% 50%;
+    --border: 209 85% 19%; 
+    --input: 209 85% 19%;
+    --ring: 201 94% 54%;
+    --sidebar: 209 95% 9%; 
+    --sidebar-foreground: 213 22% 81%;
+    --sidebar-primary: 201 94% 54%;
+    --sidebar-primary-foreground: 209 100% 6%;
+    --sidebar-accent: 209 85% 14%;
+    --sidebar-accent-foreground: 213 22% 81%;
+    --sidebar-border: 209 85% 19%;
+    --sidebar-ring: 201 94% 54%;
     
     /* Nav Bar Floating Gradients - Strictly Blue */
-    --gradient-1: 220 35% 40%; /* Primary blue */
-    --gradient-2: 220 45% 48%; /* Less dark blue */
-    --gradient-3: 220 30% 32%; /* Dark blue */
-    --motif-color: 210 30% 82%;
-    --motif-glow: 220 80% 64%;
+    --gradient-1: 201 94% 54%;
+    --gradient-2: 201 80% 40%;
+    --gradient-3: 201 90% 60%;
+    --motif-color: 201 90% 40%;
+    --motif-glow: 201 80% 60%;
   }
 
   @keyframes blob {
     0% { transform: translate(0px, 0px) scale(1); }
-    33% { transform: translate(30px, -50px) scale(1.1); }
-    66% { transform: translate(-20px, 20px) scale(0.9); }
+    33% { transform: translate(20vw, -15vh) scale(1.15); }
+    66% { transform: translate(-15vw, 20vh) scale(0.85); }
     100% { transform: translate(0px, 0px) scale(1); }
   }
 
   @keyframes blob-y {
     0% { transform: translateY(0px) scale(1); }
-    33% { transform: translateY(-80px) scale(1.1); }
-    66% { transform: translateY(40px) scale(0.9); }
+    33% { transform: translateY(-20vh) scale(1.15); }
+    66% { transform: translateY(20vh) scale(0.85); }
     100% { transform: translateY(0px) scale(1); }
   }
 
   .animate-blob {
-    animation: blob 7s infinite;
+    animation: blob 10s infinite cubic-bezier(0.4, 0, 0.2, 1);
   }
   .animate-blob-y {
-    animation: blob-y 7s infinite;
+    animation: blob-y 10s infinite cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  @keyframes blob-local {
+    0% { transform: translate(0%, 0%) scale(1); }
+    33% { transform: translate(15%, -15%) scale(1.1); }
+    66% { transform: translate(-15%, 15%) scale(0.9); }
+    100% { transform: translate(0%, 0%) scale(1); }
   }
   .animation-delay-2000 {
     animation-delay: 2s;
   }
   .animation-delay-4000 {
     animation-delay: 4s;
+  }
+  .animation-delay-6000 {
+    animation-delay: 6s;
   }
 
   * {
@@ -302,6 +312,89 @@
   /* Soft glass panels for student portal cards */
   .student-portal .portal-panel {
     @apply bg-card/80 dark:bg-card/40 backdrop-blur-xl border border-border shadow-sm;
+  }
+
+  /* Universal Background Blobs for Cards & Panels */
+  .bg-card, .portal-panel {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .bg-card > *, .portal-panel > * {
+    position: relative;
+    z-index: 10;
+  }
+
+  .bg-card::before, .portal-panel::before,
+  .bg-card::after, .portal-panel::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    z-index: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    filter: blur(40px);
+  }
+
+  .bg-card::before, .portal-panel::before {
+    top: -10%;
+    left: -10%;
+    width: 60%;
+    height: 60%;
+    background: radial-gradient(circle, hsl(var(--gradient-1) / 0.12) 0%, transparent 65%);
+    animation: blob-local 10s infinite alternate ease-in-out;
+  }
+
+  .bg-card::after, .portal-panel::after {
+    bottom: -20%;
+    right: -20%;
+    width: 80%;
+    height: 80%;
+    background: radial-gradient(circle, hsl(var(--gradient-2) / 0.12) 0%, transparent 65%);
+    animation: blob-local 8s infinite alternate-reverse cubic-bezier(0.4, 0, 0.2, 1);
+    animation-delay: -4s;
+  }
+
+  /* Variations for randomized floating across siblings */
+  .bg-card:nth-child(even)::before, .portal-panel:nth-child(even)::before {
+    animation-duration: 12s;
+    animation-delay: -3s;
+    animation-direction: alternate-reverse;
+  }
+  .bg-card:nth-child(even)::after, .portal-panel:nth-child(even)::after {
+    animation-duration: 9s;
+    animation-delay: -6s;
+    animation-direction: alternate;
+  }
+  .bg-card:nth-child(3n)::before, .portal-panel:nth-child(3n)::before {
+    animation-duration: 11s;
+    animation-delay: -7s;
+  }
+  .bg-card:nth-child(3n)::after, .portal-panel:nth-child(3n)::after {
+    animation-duration: 13s;
+    animation-delay: -2s;
+  }
+
+  .dark .bg-card::before, .dark .portal-panel::before {
+    background: radial-gradient(circle, hsl(var(--gradient-1) / 0.2) 0%, transparent 65%);
+  }
+
+  .dark .bg-card::after, .dark .portal-panel::after {
+    background: radial-gradient(circle, hsl(var(--gradient-2) / 0.2) 0%, transparent 65%);
+  }
+
+  /* Slight glow/color boost on hover for interactivity */
+  .bg-card:hover::before, .portal-panel:hover::before {
+    background: radial-gradient(circle, hsl(var(--gradient-1) / 0.18) 0%, transparent 65%);
+  }
+  .bg-card:hover::after, .portal-panel:hover::after {
+    background: radial-gradient(circle, hsl(var(--gradient-2) / 0.18) 0%, transparent 65%);
+  }
+  .dark .bg-card:hover::before, .dark .portal-panel:hover::before {
+    background: radial-gradient(circle, hsl(var(--gradient-1) / 0.25) 0%, transparent 65%);
+  }
+  .dark .bg-card:hover::after, .dark .portal-panel:hover::after {
+    background: radial-gradient(circle, hsl(var(--gradient-2) / 0.25) 0%, transparent 65%);
   }
 
   /* Custom Scrollbars */

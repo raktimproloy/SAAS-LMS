@@ -18,6 +18,7 @@ type Props = {
   /** sidebar = sticky desktop panel; embedded = sheet / inline mobile */
   variant?: "sidebar" | "embedded";
   className?: string;
+  onClose?: () => void;
 };
 
 export function SyllabusPoolPanel({
@@ -27,6 +28,7 @@ export function SyllabusPoolPanel({
   selectedTopicKeys = [],
   variant = "sidebar",
   className = "",
+  onClose,
 }: Props) {
   const [search, setSearch] = useState("");
 
@@ -110,9 +112,15 @@ export function SyllabusPoolPanel({
             <BookOpen className="w-4 h-4 text-primary" />
             সিলেবাস পুল
           </CardTitle>
-          <div className="flex gap-1.5">
+          <div className="flex gap-1.5 items-center">
             <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-5">{pool.assigned.length} টি যোগ</Badge>
             <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5">{pool.remaining.length} টি বাকি</Badge>
+            {onClose && (
+              <Button variant="ghost" size="icon" className="h-6 w-6 ml-1 hover:bg-destructive/10 hover:text-destructive" onClick={onClose} title="সিলেবাস পুল বন্ধ করুন">
+                <Check className="w-3 h-3 hidden" />
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+              </Button>
+            )}
           </div>
         </div>
         <div className="relative">
@@ -165,37 +173,38 @@ export function SyllabusPoolPanel({
                             snapshot.isDragging 
                               ? "shadow-lg border-primary bg-background scale-[1.02] z-50" 
                               : isActive
-                                ? "border-green-500 bg-green-500/10 shadow-sm ring-1 ring-green-500/50 dark:bg-green-500/20 dark:border-green-400 dark:ring-green-400"
+                                ? "border-green-400 bg-green-50 shadow-sm ring-1 ring-green-400/50 dark:bg-green-900/40 dark:border-green-600 dark:ring-green-600"
                                 : isAssigned
-                                  ? "border-emerald-200 bg-emerald-50/40 dark:border-emerald-900/40 dark:bg-emerald-950/30 hover:border-emerald-300 shadow-sm opacity-80 hover:opacity-100"
+                                  ? "border-emerald-200 bg-emerald-50 dark:border-emerald-800/60 dark:bg-emerald-950/40 hover:border-emerald-300 dark:hover:border-emerald-700 shadow-sm transition-opacity"
                                   : "bg-background hover:border-primary/40 hover:bg-muted/30"
                           }`}
                         >
                           <GripVertical className="w-4 h-4 text-muted-foreground/50 mt-0.5 shrink-0" />
                           <div className="flex-1 min-w-0">
-                            <p className={`font-bold truncate ${isActive ? 'text-green-700 dark:text-green-300' : isAssigned ? 'text-emerald-700 dark:text-emerald-400/80' : 'text-foreground dark:text-gray-100'}`}>
+                            <p className={`font-bold truncate ${isActive ? 'text-green-950 dark:text-green-300' : isAssigned ? 'text-emerald-950 dark:text-emerald-300' : 'text-foreground'}`}>
                               {topic.chapter_name}
                             </p>
                             {topic.topic_name && (
-                              <p className={`text-xs font-medium truncate ${isActive ? 'text-green-600 dark:text-green-200/80' : isAssigned ? 'text-emerald-600/80 dark:text-emerald-500/70' : 'text-muted-foreground dark:text-gray-300'}`}>
+                              <p className={`text-xs font-medium truncate mt-0.5 ${isActive ? 'text-green-900 dark:text-green-400' : isAssigned ? 'text-emerald-900 dark:text-emerald-400' : 'text-muted-foreground'}`}>
                                 {topic.topic_name}
                               </p>
                             )}
-                            <p className="text-[10px] text-muted-foreground dark:text-gray-400 mt-1 opacity-90 font-medium">
+                            <p className={`text-[10px] font-medium mt-1.5 ${isActive ? 'text-green-700 dark:text-green-500' : isAssigned ? 'text-emerald-700 dark:text-emerald-500' : 'text-muted-foreground/70 dark:text-muted-foreground'}`}>
                               {topic.book_label || topic.subject}
                             </p>
                           </div>
                           
-                          {isAssigned ? (
-                            <div className="h-7 w-7 flex items-center justify-center shrink-0">
-                              <CheckCircle2 className={`w-5 h-5 ${isActive ? 'text-green-500' : 'text-emerald-500/70'}`} />
-                            </div>
-                          ) : (
+                          <div className="flex items-center gap-1 shrink-0">
+                            {isAssigned && (
+                              <div className="flex items-center justify-center">
+                                <CheckCircle2 className={`w-4 h-4 ${isActive ? 'text-green-500 dark:text-green-400' : 'text-emerald-500 dark:text-emerald-400'}`} title="ইতিমধ্যে যোগ করা হয়েছে" />
+                              </div>
+                            )}
                             <Button
                               size="icon"
                               variant="ghost"
                               className="h-7 w-7 shrink-0 hover:bg-primary/10 hover:text-primary"
-                              title="পরের খালি ক্লাসে যোগ করুন"
+                              title="যোগ করুন"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 onAddToNext(topic);
@@ -203,7 +212,7 @@ export function SyllabusPoolPanel({
                             >
                               <Plus className="w-4 h-4" />
                             </Button>
-                          )}
+                          </div>
                         </div>
                       )}
                     </Draggable>

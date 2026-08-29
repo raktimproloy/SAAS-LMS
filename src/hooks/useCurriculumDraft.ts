@@ -20,6 +20,7 @@ import {
   addExamAtSession,
   addCustomTopic,
   addPoolTopicToNextClass,
+  addPoolTopicToSession,
   markHoliday,
   teachOnHoliday,
   changeClassDays,
@@ -277,8 +278,12 @@ export function useCurriculumDraft(curriculumId: string) {
         sessionId: number | string,
         topic: Omit<DraftTopic, "id"> & { id?: number | string }
       ) => applySessions((s) => addCustomTopic(s, sessionId, topic)),
-      addFromPool: (topic: PoolTopic) =>
-        applySessions((s) => addPoolTopicToNextClass(s, topic)),
+      addFromPool: (topic: PoolTopic, targetSessionId?: number | string) =>
+        applySessions((s) =>
+          targetSessionId
+            ? addPoolTopicToSession(s, targetSessionId, topic)
+            : addPoolTopicToNextClass(s, topic)
+        ),
       markHoliday: (sessionId: number | string, name: string) =>
         applySessions((s) => markHoliday(s, sessionId, name, classDays, endDate)),
       teachOnHoliday: (sessionId: number | string) =>

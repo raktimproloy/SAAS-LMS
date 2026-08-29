@@ -36,38 +36,36 @@ export default function StudentExamsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6 md:gap-8">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="flex flex-col relative rounded-3xl overflow-hidden bg-card/90 dark:bg-card/60 backdrop-blur-3xl border border-border shadow-lg">
-              <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full blur-2xl pointer-events-none bg-muted" />
-              <div className="p-6 pb-4 border-b border-border">
+              <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full blur-2xl pointer-events-none bg-primary/10" />
+              
+              <div className="p-6 pb-4 border-b border-border relative z-10">
                 <div className="flex justify-between items-start mb-4">
-                  <Skeleton className="h-6 w-20 rounded-full bg-muted" />
-                  <Skeleton className="h-6 w-24 rounded-full bg-muted" />
+                  <Skeleton className="h-[26px] w-[70px] rounded-full bg-primary/10 border border-primary/20" />
+                  <Skeleton className="h-[26px] w-[80px] rounded-full bg-primary/10 border border-primary/20" />
                 </div>
-                <Skeleton className="h-7 w-3/4 mb-1 bg-muted rounded-lg" />
+                <Skeleton className="h-7 w-[60%] bg-foreground/10 rounded-lg" />
               </div>
 
-              <div className="p-6 flex-1 space-y-6">
+              <div className="p-6 flex-1 relative z-10">
                 <div className="grid grid-cols-2 gap-y-4 gap-x-2">
                   <div className="flex items-center gap-2">
-                    <Skeleton className="w-4 h-4 rounded bg-muted shrink-0" />
-                    <Skeleton className="h-4 w-24 bg-muted/50 rounded-md" />
+                    <Skeleton className="w-4 h-4 rounded-sm bg-primary/20 shrink-0" />
+                    <Skeleton className="h-4 w-[120px] bg-foreground/10 rounded-md" />
                   </div>
                   <div className="flex items-center justify-end gap-2 text-right">
-                    <Skeleton className="h-4 w-20 bg-muted/50 rounded-md" />
-                    <Skeleton className="w-4 h-4 rounded bg-muted shrink-0" />
+                    <Skeleton className="h-4 w-[60px] bg-foreground/10 rounded-md" />
+                    <Skeleton className="w-4 h-4 rounded-sm bg-primary/20 shrink-0" />
                   </div>
                   <div className="flex items-center gap-2">
-                    <Skeleton className="w-4 h-4 rounded bg-muted shrink-0" />
-                    <Skeleton className="h-4 w-16 bg-muted/50 rounded-md" />
-                  </div>
-                  <div className="flex items-center justify-end gap-2 text-right">
-                    <Skeleton className="h-6 w-28 bg-muted rounded-lg ml-auto" />
+                    <Skeleton className="w-4 h-4 rounded-sm bg-primary/20 shrink-0" />
+                    <Skeleton className="h-4 w-[40px] bg-foreground/10 rounded-md" />
                   </div>
                 </div>
               </div>
 
-              <div className="p-6 pt-0 mt-auto flex flex-col gap-3">
-                <Skeleton className="w-full h-14 rounded-2xl bg-muted" />
-                <Skeleton className="w-full h-12 rounded-2xl bg-muted/50" />
+              <div className="p-6 pt-0 mt-auto flex flex-col gap-3 relative z-10">
+                <Skeleton className="w-full h-14 rounded-2xl bg-primary/20 border-0" />
+                <Skeleton className="w-full h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20" />
               </div>
             </div>
           ))}
@@ -141,15 +139,15 @@ export default function StudentExamsPage() {
                 <CardHeader className="p-6 pb-4 border-b border-border relative z-10">
                   <div className="flex justify-between items-start mb-4">
                     <Badge variant="outline" className={`capitalize px-3 py-1 text-xs font-bold rounded-full shadow-sm backdrop-blur-md
-                      ${status === 'completed' ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : ''}
-                      ${status === 'active' ? 'bg-primary/20 text-blue-300 border-primary/40' : ''}
-                      ${status === 'missed' ? 'bg-destructive/20 text-red-300 border-destructive/30' : ''}
-                      ${status === 'upcoming' ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' : ''}
+                      ${status === 'completed' ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30' : ''}
+                      ${status === 'active' ? 'bg-primary/10 text-primary dark:text-primary border-primary/30' : ''}
+                      ${status === 'missed' ? 'bg-destructive/10 text-destructive dark:text-red-400 border-destructive/30' : ''}
+                      ${status === 'upcoming' ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30' : ''}
                       ${status !== 'active' && status !== 'completed' && status !== 'missed' && status !== 'upcoming' ? 'bg-background/50 text-foreground border-border' : ''}
                     `}>
                       {status}
                     </Badge>
-                    <span className="text-xs font-bold px-3 py-1 rounded-full bg-primary/10 text-blue-300 border border-primary/20 backdrop-blur-md shadow-sm">
+                    <span className="text-xs font-bold px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 backdrop-blur-md shadow-sm">
                       {exam.total_marks} Marks
                     </span>
                   </div>
@@ -161,19 +159,19 @@ export default function StudentExamsPage() {
                 <CardContent className="p-6 flex-1 space-y-6 relative z-10">
                   <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm font-medium text-foreground">
                     <div className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4 shrink-0 text-blue-300" />
+                      <Calendar className="w-4 h-4 shrink-0 text-primary" />
                       <span className="truncate text-foreground">{exam.start_time ? format(new Date(exam.start_time), "MMM d, h:mm a") : 'No Start Time'}</span>
                     </div>
                     <div className="flex items-center justify-end gap-2 text-right">
                       <span className="text-foreground font-semibold">{exam.duration_minutes} Mins</span>
-                      <Clock className="w-4 h-4 shrink-0 text-blue-300" />
+                      <Clock className="w-4 h-4 shrink-0 text-primary" />
                     </div>
                     <div className="flex items-center gap-2">
-                      <FileQuestion className="w-4 h-4 shrink-0 text-blue-300" />
+                      <FileQuestion className="w-4 h-4 shrink-0 text-primary" />
                       <span className="text-foreground font-semibold">{exam._count?.questions || 0} Qs</span>
                     </div>
                     {exam.negative_marking > 0 && (
-                      <div className="flex items-center justify-end gap-2 text-red-300 font-bold bg-red-500/10 px-2 py-1 rounded-lg border border-red-500/20 w-fit ml-auto">
+                      <div className="flex items-center justify-end gap-2 text-destructive dark:text-red-400 font-bold bg-destructive/10 px-2 py-1 rounded-lg border border-destructive/20 w-fit ml-auto">
                         <span>-{exam.negative_marking} / wrong</span>
                         <Target className="w-4 h-4 shrink-0" />
                       </div>
@@ -191,7 +189,7 @@ export default function StudentExamsPage() {
                         </div>
                         <div className="text-right">
                           <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider mb-1">Accuracy</p>
-                          <p className="text-lg font-black text-emerald-300 leading-none">
+                          <p className="text-lg font-black text-emerald-600 dark:text-emerald-400 leading-none">
                             {result.correct_count + result.wrong_count > 0
                               ? Math.round((result.correct_count / (result.correct_count + result.wrong_count)) * 100)
                               : 0}%
@@ -201,8 +199,8 @@ export default function StudentExamsPage() {
                       <div className="flex justify-between items-center text-xs pt-3 border-t border-border text-muted-foreground font-medium">
                         <span>Time: {formatTime(result.time_taken_seconds || 0)}</span>
                         <span className="flex gap-3">
-                          <span className="text-emerald-300 flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> {result.correct_count}</span>
-                          <span className="text-red-300 flex items-center gap-1"><XCircle className="w-3 h-3" /> {result.wrong_count}</span>
+                          <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> {result.correct_count}</span>
+                          <span className="text-destructive dark:text-red-400 flex items-center gap-1"><XCircle className="w-3 h-3" /> {result.wrong_count}</span>
                         </span>
                       </div>
                     </div>
@@ -213,23 +211,23 @@ export default function StudentExamsPage() {
                   {status === 'completed' && (
                     <div className="grid grid-cols-2 gap-3 w-full">
                       <Link href={`/student/exams/${exam.id}/questions`}>
-                        <Button variant="outline" className="w-full h-11 rounded-xl bg-background/50 border-border hover:bg-primary/10 hover:text-blue-300 text-foreground transition-colors">
+                        <Button variant="outline" className="w-full h-11 rounded-xl bg-background/50 border-border hover:bg-primary/10 hover:text-primary text-foreground transition-colors">
                           <FileQuestion className="w-4 h-4 mr-2" /> Questions
                         </Button>
                       </Link>
                       <Link href={`/student/exams/${exam.id}/take`}>
-                        <Button variant="outline" className="w-full h-11 rounded-xl bg-background/50 border-border hover:bg-primary/10 hover:text-blue-300 text-foreground transition-colors">
+                        <Button variant="outline" className="w-full h-11 rounded-xl bg-background/50 border-border hover:bg-primary/10 hover:text-primary text-foreground transition-colors">
                           <Play className="w-4 h-4 mr-2" /> Retake
                         </Button>
                       </Link>
                       <Link href={`/student/exams/${exam.id}/result`}>
-                        <Button variant="outline" className="w-full h-11 rounded-xl bg-emerald-500/10 border-emerald-500/20 text-emerald-300 hover:bg-emerald-500/20 hover:text-emerald-200 transition-colors">
+                        <Button variant="outline" className="w-full h-11 rounded-xl bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-800 dark:hover:text-emerald-300 transition-colors">
                           <Eye className="w-4 h-4 mr-2" /> Result
                         </Button>
                       </Link>
                       <Link href={`/student/exams/${exam.id}/leaderboard`}>
-                        <Button variant="outline" className="w-full h-11 rounded-xl bg-amber-500/10 border-amber-500/20 hover:bg-amber-500/20 hover:border-amber-500/40 text-amber-300 hover:text-amber-200 transition-all font-semibold shadow-[0_0_10px_rgba(245,158,11,0.1)]">
-                          <Medal className="w-4 h-4 mr-2 drop-shadow-[0_0_8px_rgba(245,158,11,0.8)]" /> Rank
+                        <Button variant="outline" className="w-full h-11 rounded-xl bg-amber-500/10 border-amber-500/20 hover:bg-amber-500/20 hover:border-amber-500/40 text-amber-700 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 transition-all font-semibold shadow-sm">
+                          <Medal className="w-4 h-4 mr-2" /> Rank
                         </Button>
                       </Link>
                     </div>
@@ -238,21 +236,21 @@ export default function StudentExamsPage() {
                   {status === 'active' && (
                     <>
                       <Link href={`/student/exams/${exam.id}/take`} className="w-full">
-                        <Button className="w-full h-14 rounded-2xl bg-gradient-to-r from-blue-500 via-cyan-500 to-blue-500 bg-[length:200%_auto] animate-gradient text-white hover:scale-[1.02] transition-all font-bold shadow-[0_0_20px_rgba(6,182,212,0.4)] text-lg border-0 group-hover:shadow-[0_0_30px_rgba(6,182,212,0.6)]">
+                        <Button className="w-full h-14 rounded-2xl bg-gradient-to-r from-primary to-blue-500 text-white hover:scale-[1.02] transition-all font-bold shadow-lg shadow-primary/20 text-lg border-0">
                           {isAttempted ? "Take Exam Again" : "Start Exam"}
                           <Play className="w-5 h-5 ml-2 fill-current" />
                         </Button>
                       </Link>
                       <Link href={`/student/exams/${exam.id}/leaderboard`} className="w-full">
-                        <Button variant="outline" className="w-full h-12 rounded-2xl bg-amber-500/10 border-amber-500/20 hover:bg-amber-500/20 hover:border-amber-500/40 text-amber-300 hover:text-amber-200 transition-all backdrop-blur-md shadow-[0_0_15px_rgba(245,158,11,0.15)] font-semibold">
-                          <Medal className="w-4 h-4 mr-2 drop-shadow-[0_0_8px_rgba(245,158,11,0.8)]" /> View Leaderboard
+                        <Button variant="outline" className="w-full h-12 rounded-2xl bg-amber-500/10 border-amber-500/20 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 font-semibold transition-all shadow-sm">
+                          <Medal className="w-4 h-4 mr-2" /> View Leaderboard
                         </Button>
                       </Link>
                     </>
                   )}
 
                   {status === 'missed' && (
-                    <Button variant="secondary" className="w-full h-12 rounded-xl bg-destructive/10 text-red-300 hover:bg-destructive/10 cursor-not-allowed border border-destructive/20" disabled>
+                    <Button variant="secondary" className="w-full h-12 rounded-xl bg-destructive/10 text-destructive dark:text-red-400 hover:bg-destructive/10 cursor-not-allowed border border-destructive/20" disabled>
                       Missed Time Limit
                     </Button>
                   )}

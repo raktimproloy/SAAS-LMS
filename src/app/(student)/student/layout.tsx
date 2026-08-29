@@ -23,22 +23,7 @@ export default function StudentLayout({
 
   return (
     <div className="student-portal flex min-h-screen bg-background relative text-foreground">
-      {/* Background Container */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none z-[-1] bg-background">
-        {/* Animated Background Orbs */}
-        <div 
-          className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] max-w-[800px] max-h-[800px] rounded-full blur-[100px] sm:blur-[140px] opacity-60 dark:opacity-30 animate-blob" 
-          style={{ background: 'hsl(var(--gradient-1) / 0.4)' }}
-        />
-        <div 
-          className="absolute top-[20%] right-[-10%] w-[40vw] h-[40vw] max-w-[600px] max-h-[600px] rounded-full blur-[100px] sm:blur-[140px] opacity-60 dark:opacity-30 animate-blob animation-delay-2000" 
-          style={{ background: 'hsl(var(--gradient-2) / 0.4)' }}
-        />
-        <div 
-          className="absolute bottom-[-10%] left-[20%] w-[60vw] h-[60vw] max-w-[900px] max-h-[900px] rounded-full blur-[100px] sm:blur-[140px] opacity-60 dark:opacity-30 animate-blob animation-delay-4000" 
-          style={{ background: 'hsl(var(--gradient-3) / 0.4)' }}
-        />
-      </div>
+
       
       {!isTakeExamPage && (
         <div className="hidden lg:block z-10 sticky top-0 h-screen">

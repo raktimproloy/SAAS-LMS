@@ -1148,6 +1148,27 @@ export function addPoolTopicToNextClass(
   return next;
 }
 
+export function addPoolTopicToSession(
+  sessions: DraftSession[],
+  sessionId: number | string,
+  poolTopic: PoolTopic
+): DraftSession[] {
+  const next = cloneSessions(sessions);
+  const targetIdx = next.findIndex((s) => s.id === sessionId);
+  if (targetIdx < 0) return sessions;
+  
+  if (!isTeachable(next[targetIdx])) return sessions;
+
+  next[targetIdx] = {
+    ...next[targetIdx],
+    topics: [
+      ...next[targetIdx].topics,
+      { ...poolToTopic(poolTopic), sort_order: next[targetIdx].topics.length },
+    ],
+  };
+  return next;
+}
+
 export function markHoliday(
   sessions: DraftSession[],
   sessionId: number | string,

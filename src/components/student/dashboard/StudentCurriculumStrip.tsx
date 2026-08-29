@@ -123,16 +123,20 @@ export function StudentCurriculumStrip() {
     scrollTo(newIdx);
   };
 
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+
   const handleScroll = (e: UIEvent<HTMLDivElement>) => {
     if (!trackRef.current) return;
     const container = trackRef.current;
-    const scrollLeft = container.scrollLeft;
+    const currentScroll = container.scrollLeft;
     let newIdx = 0;
     let minDiff = Infinity;
     for (let i = 0; i < container.children.length; i++) {
       const child = container.children[i] as HTMLElement;
       const childCenter = child.offsetLeft - container.offsetLeft;
-      const diff = Math.abs(childCenter - scrollLeft);
+      const diff = Math.abs(childCenter - currentScroll);
       if (diff < minDiff) {
         minDiff = diff;
         newIdx = i;
@@ -141,6 +145,29 @@ export function StudentCurriculumStrip() {
     if (newIdx !== index) {
       setIndex(newIdx);
     }
+  };
+
+  const onMouseDown = (e: React.MouseEvent) => {
+    if (!trackRef.current) return;
+    setIsDragging(true);
+    setStartX(e.pageX - trackRef.current.offsetLeft);
+    setScrollLeft(trackRef.current.scrollLeft);
+  };
+
+  const onMouseLeave = () => {
+    setIsDragging(false);
+  };
+
+  const onMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const onMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !trackRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - trackRef.current.offsetLeft;
+    const walk = (x - startX) * 2; // Scroll-fast
+    trackRef.current.scrollLeft = scrollLeft - walk;
   };
 
   if (loading) {
@@ -158,8 +185,8 @@ export function StudentCurriculumStrip() {
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
             Schedule
           </h2>
-          <Link href="/student/roadmap" className="text-xs font-semibold text-primary hover:underline flex items-center gap-1">
-            <BookOpen className="w-3.5 h-3.5" />
+          <Link href="/student/roadmap" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors text-sm font-bold">
+            <BookOpen className="w-4 h-4" />
             Full Roadmap
           </Link>
         </div>
@@ -190,9 +217,9 @@ export function StudentCurriculumStrip() {
           </h2>
           <Link 
             href={classes.find((c) => c.curriculum_id)?.curriculum_id ? `/student/roadmap/${classes.find((c) => c.curriculum_id)?.curriculum_id}` : "/student/roadmap"} 
-            className="text-xs font-semibold text-primary hover:underline flex items-center gap-1"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors text-sm font-bold"
           >
-            <BookOpen className="w-3.5 h-3.5" />
+            <BookOpen className="w-4 h-4" />
             Full Roadmap
           </Link>
         </div>
@@ -226,7 +253,14 @@ export function StudentCurriculumStrip() {
       <div
         ref={trackRef}
         onScroll={handleScroll}
-        className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 -mx-1 px-1 hide-scrollbar"
+        onMouseDown={onMouseDown}
+        onMouseLeave={onMouseLeave}
+        onMouseUp={onMouseUp}
+        onMouseMove={onMouseMove}
+        className={cn(
+          "flex overflow-x-auto snap-x snap-mandatory gap-4 pb-4 -mx-1 px-1 hide-scrollbar",
+          isDragging ? "cursor-grabbing snap-none select-none" : "cursor-grab"
+        )}
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {classes.map((c) => {
@@ -243,8 +277,9 @@ export function StudentCurriculumStrip() {
             <Wrapper
               key={`${c.id}-${c.date}`}
               href={sessionHref as string}
+              draggable={false}
               className={cn(
-                "w-[85%] sm:w-[45%] md:w-[28%] shrink-0 snap-start rounded-2xl border bg-card p-4 sm:p-5 flex flex-col justify-between transition-all duration-200",
+                "w-[85%] sm:w-[45%] md:w-[28%] shrink-0 snap-start rounded-2xl border portal-panel p-4 sm:p-5 flex flex-col justify-between transition-all duration-200",
                 cardStatusClass(c.status),
                 sessionHref ? "hover:shadow-md cursor-pointer group relative" : "cursor-default relative opacity-80"
               )}
@@ -290,7 +325,7 @@ export function StudentCurriculumStrip() {
                 </div>
                 
                 {c.has_session ? (
-                  <p className="text-xs text-foreground/80 mt-1.5 line-clamp-2 min-h-[2rem]">
+                  <p className="text-xs text-foreground/80 mt-1.5 line-clamp-2 min-h-[2rem] pr-10">
                     {topics || c.exam_title || c.curriculum_title || "No specific topics added."}
                   </p>
                 ) : (
@@ -301,7 +336,7 @@ export function StudentCurriculumStrip() {
               </div>
               
               {sessionHref && (
-                <div className="absolute bottom-4 right-4 shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                <div className="!absolute bottom-4 right-4 shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
                   <ChevronRightIcon className="w-4 h-4 text-primary" />
                 </div>
               )}

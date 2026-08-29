@@ -31,10 +31,10 @@ type Props = {
 
 export function RoadmapHeader({ curriculum, progress, saveStatus, onSettings, showFullCalendar, onToggleFullCalendar }: Props) {
   return (
-    <div className="bg-background/95 backdrop-blur-md p-4 sm:p-5 rounded-2xl border shadow-sm flex flex-col gap-5 sm:gap-6 transition-all duration-300">
+    <div className="bg-background/95 backdrop-blur-md p-3 sm:p-5 rounded-xl sm:rounded-2xl border shadow-sm flex flex-col gap-3 sm:gap-6 transition-all duration-300">
       
       {/* TOP ROW */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 lg:gap-6">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 lg:gap-6">
         
         {/* Top Left: Title & Info */}
         <div className="flex items-start gap-3 lg:w-1/2 min-w-0">
@@ -77,7 +77,7 @@ export function RoadmapHeader({ curriculum, progress, saveStatus, onSettings, sh
 
         {/* Top Right: Mini Stats */}
         {progress && (
-          <div className="flex items-center gap-3 w-full lg:w-1/2 mt-2 lg:mt-0">
+          <div className="grid grid-cols-4 gap-2 w-full lg:w-1/2 mt-1 lg:mt-0">
             <MiniStat label="ক্লাস" value={progress.classes} color="text-green-600 dark:text-green-500" />
             <MiniStat label="পরীক্ষা" value={progress.exams} color="text-blue-600 dark:text-blue-500" />
             <MiniStat label="ছুটি" value={progress.holidays} color="text-orange-600 dark:text-orange-500" />
@@ -87,7 +87,7 @@ export function RoadmapHeader({ curriculum, progress, saveStatus, onSettings, sh
       </div>
 
       {/* BOTTOM ROW */}
-      <div className="flex flex-col lg:flex-row justify-between items-center gap-5 lg:gap-6">
+      <div className="flex flex-col lg:flex-row justify-between items-center gap-3 lg:gap-6">
         
         {/* Bottom Left: Progress */}
         {progress ? (
@@ -103,27 +103,29 @@ export function RoadmapHeader({ curriculum, progress, saveStatus, onSettings, sh
         ) : <div className="hidden lg:block lg:w-1/2" />}
 
         {/* Bottom Right: Controls */}
-        <div className="flex flex-wrap items-center justify-start lg:justify-end gap-4 sm:gap-6 w-full lg:w-1/2">
-          <SaveIndicator status={saveStatus} />
+        <div className="flex items-center justify-between lg:justify-end gap-2 sm:gap-6 w-full lg:w-1/2">
+          <div className="hidden sm:block shrink-0">
+            <SaveIndicator status={saveStatus} />
+          </div>
           
-          <div className="flex items-center bg-muted/30 p-1 rounded-xl border shadow-sm">
+          <div className="flex items-center bg-muted/30 p-1 rounded-xl border shadow-sm flex-1 sm:flex-none justify-center">
             <button
               type="button"
               onClick={() => onToggleFullCalendar?.(false)}
               className={cn(
-                "px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition-all duration-300",
+                "px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition-all duration-300 flex-1 sm:flex-none",
                 !showFullCalendar 
                   ? "bg-background shadow-sm text-foreground ring-1 ring-border/50" 
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
-              Routine Calendar
+              Routine
             </button>
             <button
               type="button"
               onClick={() => onToggleFullCalendar?.(true)}
               className={cn(
-                "px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition-all duration-300",
+                "px-2 sm:px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition-all duration-300 flex-1 sm:flex-none",
                 showFullCalendar 
                   ? "bg-primary text-primary-foreground shadow-md" 
                   : "text-muted-foreground hover:text-foreground"
@@ -133,9 +135,9 @@ export function RoadmapHeader({ curriculum, progress, saveStatus, onSettings, sh
             </button>
           </div>
           
-          <Button variant="outline" size="sm" className="gap-2 h-9 shadow-sm hover:bg-muted/50 rounded-lg" onClick={onSettings}>
+          <Button variant="outline" size="sm" className="gap-2 h-9 shadow-sm hover:bg-muted/50 rounded-lg shrink-0 px-2 sm:px-3" onClick={onSettings}>
             <Settings2 className="w-4 h-4" />
-            <span className="font-semibold">সেটিংস</span>
+            <span className="hidden sm:inline font-semibold">সেটিংস</span>
           </Button>
         </div>
       </div>
@@ -154,11 +156,11 @@ function MiniStat({
   color: string;
 }) {
   return (
-    <div className="flex-1 min-w-[80px] rounded-xl border bg-card/60 px-3 sm:px-4 py-2 sm:py-3 flex flex-col justify-center gap-1 shadow-sm transition-all hover:bg-muted/40 hover:shadow-md">
-      <p className="text-[10px] sm:text-xs text-muted-foreground font-semibold">
+    <div className="w-full rounded-xl border bg-card/60 px-2 sm:px-4 py-1.5 sm:py-3 flex flex-col justify-center items-center sm:items-start gap-0.5 sm:gap-1 shadow-sm transition-all hover:bg-muted/40 hover:shadow-md">
+      <p className="text-[9px] sm:text-[10px] md:text-xs text-muted-foreground font-semibold uppercase tracking-wider text-center sm:text-left">
         {label}
       </p>
-      <p className={`text-xl sm:text-2xl font-bold leading-none ${color}`}>{value}</p>
+      <p className={`text-base sm:text-xl md:text-2xl font-black leading-none ${color}`}>{value}</p>
     </div>
   );
 }

@@ -4,12 +4,13 @@ import React, { useState, useRef, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { DragDropContext, DropResult } from "@hello-pangea/dnd";
 import { Button } from "@/components/ui/button";
-import { Loader2, Undo2, Eye, BookOpen } from "lucide-react";
+import { Loader2, Undo2, Eye, BookOpen, X } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCurriculumDraft } from "@/hooks/useCurriculumDraft";
 import { topicKey } from "@/lib/curriculum-scheduler/types";
+import { cn } from "@/lib/utils";
 import { RoadmapHeader } from "@/components/admin/curriculum/roadmap/RoadmapHeader";
 import { RoadmapTimeline } from "@/components/admin/curriculum/roadmap/RoadmapTimeline";
 import { SyllabusPoolPanel } from "@/components/admin/curriculum/roadmap/SyllabusPoolPanel";
@@ -40,6 +41,8 @@ export default function CurriculumPlannerPage() {
 
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [poolOpen, setPoolOpen] = useState(false);
+  const [showDesktopSyllabus, setShowDesktopSyllabus] = useState(true);
+  const [poolTargetSessionId, setPoolTargetSessionId] = useState<number | string | null>(null);
   const [publishOpen, setPublishOpen] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
 
@@ -278,6 +281,10 @@ export default function CurriculumPlannerPage() {
               showFullCalendar={showFullCalendar}
               selectedSessionId={selectedSessionId}
               onSelectSession={setSelectedSessionId}
+              onAddFromPool={(sessionId) => {
+                setPoolTargetSessionId(sessionId);
+                setPoolOpen(true);
+              }}
               onRemoveTopic={actions.removeTopic}
               onSkip={(sid) =>
                 setImpact({
@@ -318,65 +325,92 @@ export default function CurriculumPlannerPage() {
           <div ref={placeholderRef} className="hidden xl:block w-full xl:w-[360px] 2xl:w-[400px] shrink-0" />
 
           {/* Fixed Aside */}
-          <aside 
-            ref={asideRef}
-            className="hidden xl:block shrink-0 z-20" 
-            style={{ 
-              position: 'fixed',
-              top: `${headerHeight + 68}px`, // 60px Admin header + 8px gap
-              bottom: `70px` // ~60px footer + 10px gap
-            }}
-          >
-            <SyllabusPoolPanel
-              pool={pool}
-              selectedTopicKeys={selectedTopicKeys}
-              onAddToNext={actions.addFromPool}
-              onAutoFillRemaining={() => {
-                setImpact({
-                  title: "বাকি টপিক অটো বসাবেন?",
-                  description:
-                    "এখনকার টপিক মুছে বইয়ের সব টপিক আর অধ্যায় পরীক্ষা আবার সাজিয়ে বসবে।",
-                  action: () => actions.autoFill(),
-                });
+          {showDesktopSyllabus && (
+            <aside 
+              ref={asideRef}
+              className="hidden xl:block shrink-0 z-20" 
+              style={{ 
+                position: 'fixed',
+                top: `${headerHeight + 68}px`, // 60px Admin header + 8px gap
+                bottom: `70px` // ~60px footer + 10px gap
               }}
-            />
-          </aside>
+            >
+              <SyllabusPoolPanel
+                pool={pool}
+                selectedTopicKeys={selectedTopicKeys}
+                onAddToNext={actions.addFromPool}
+                onClose={() => setShowDesktopSyllabus(false)}
+                onAutoFillRemaining={() => {
+                  setImpact({
+                    title: "বাকি টপিক অটো বসাবেন?",
+                    description:
+                      "এখনকার টপিক মুছে বইয়ের সব টপিক আর অধ্যায় পরীক্ষা আবার সাজিয়ে বসবে।",
+                    action: () => actions.autoFill(),
+                  });
+                }}
+              />
+            </aside>
+          )}
         </div>
 
         {/* Mobile / tablet syllabus pool FAB */}
         <Button
           type="button"
           size="lg"
-          className="xl:hidden fixed bottom-[5.25rem] right-3 sm:right-4 z-40 shadow-lg gap-2 rounded-full h-12 px-4"
-          onClick={() => setPoolOpen(true)}
+          className={cn(
+            "fixed bottom-[4rem] sm:bottom-[5.25rem] right-3 sm:right-4 z-40 shadow-lg gap-2 rounded-full h-10 sm:h-12 px-3 sm:px-4",
+            showDesktopSyllabus ? "xl:hidden" : ""
+          )}
+          onClick={() => {
+            if (window.innerWidth >= 1280) {
+              setShowDesktopSyllabus(true);
+            } else {
+              setPoolOpen(true);
+            }
+          }}
         >
           <BookOpen className="w-4 h-4" />
-          <span className="text-sm font-medium">
+          <span className="text-xs sm:text-sm font-medium">
             সিলেবাস
             {pool.remaining.length > 0 && (
-              <span className="ml-1.5 inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 rounded-full bg-primary-foreground/20 text-xs">
+              <span className="ml-1 sm:ml-1.5 inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 rounded-full bg-primary-foreground/20 text-[10px] sm:text-xs">
                 {pool.remaining.length}
               </span>
             )}
           </span>
         </Button>
 
-        <Sheet open={poolOpen} onOpenChange={setPoolOpen}>
-          <SheetContent side="bottom" className="h-[min(85vh,640px)] p-0 rounded-t-xl flex flex-col">
-            <SheetHeader className="px-4 pt-4 pb-2 border-b shrink-0">
-              <SheetTitle className="flex items-center gap-2">
+        <Sheet 
+          open={poolOpen} 
+          onOpenChange={(o) => {
+            setPoolOpen(o);
+            if (!o) setPoolTargetSessionId(null);
+          }}
+        >
+          <SheetContent side="bottom" className="h-[85vh] max-h-[85vh] p-0 rounded-t-xl flex flex-col overflow-hidden">
+            <SheetHeader className="px-4 pt-4 pb-2 border-b shrink-0 flex flex-row items-center justify-between bg-card z-10">
+              <SheetTitle className="flex items-center gap-2 m-0">
                 <BookOpen className="w-5 h-5 text-primary" />
-                সিলেবাস পুল
+                সিলেবাস পুল {poolTargetSessionId && <span className="text-xs font-normal text-muted-foreground ml-2">(নির্দিষ্ট দিনে যোগ হচ্ছে)</span>}
               </SheetTitle>
+              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={() => setPoolOpen(false)}>
+                <X className="w-4 h-4" />
+              </Button>
             </SheetHeader>
-            <div className="flex-1 min-h-0 px-3 pb-4 pt-2">
+            <div className="flex-1 min-h-0 px-3 pb-4 pt-2 overflow-hidden flex flex-col relative">
               <SyllabusPoolPanel
                 variant="embedded"
                 className="border-0 shadow-none h-full"
                 pool={pool}
                 selectedTopicKeys={selectedTopicKeys}
                 onAddToNext={(t) => {
-                  actions.addFromPool(t);
+                  if (poolTargetSessionId) {
+                    actions.addFromPool(t, poolTargetSessionId);
+                    // Automatically close the sheet when a topic is added to a specific day
+                    setPoolOpen(false);
+                  } else {
+                    actions.addFromPool(t);
+                  }
                 }}
                 onAutoFillRemaining={() => {
                   setPoolOpen(false);
@@ -393,16 +427,16 @@ export default function CurriculumPlannerPage() {
         </Sheet>
       </DragDropContext>
 
-      <div className="fixed bottom-0 left-0 right-0 md:left-[220px] lg:left-[260px] z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-t px-3 sm:px-4 lg:px-6 xl:px-8 py-2.5 sm:py-3 pb-[max(0.625rem,env(safe-area-inset-bottom))]">
-        <div className="flex flex-col-reverse sm:flex-row justify-between items-stretch sm:items-center gap-2 sm:gap-3 max-w-full">
-          <div className="flex flex-wrap gap-1.5 sm:gap-2 w-full sm:w-auto">
-            <Button variant="outline" size="sm" className="gap-1 flex-1 sm:flex-none" onClick={actions.undo}>
-              <Undo2 className="w-4 h-4" /> আনডু
+      <div className="fixed bottom-0 left-0 right-0 md:left-[220px] lg:left-[260px] z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-t px-2 sm:px-4 lg:px-6 xl:px-8 py-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+        <div className="flex justify-between items-center gap-2 max-w-full">
+          <div className="flex gap-1.5 sm:gap-2">
+            <Button variant="outline" size="sm" className="gap-1 h-9 px-2.5 sm:px-3" onClick={actions.undo}>
+              <Undo2 className="w-4 h-4" /> <span className="hidden sm:inline">আনডু</span>
             </Button>
             <Button
               variant="outline"
               size="sm"
-              className="flex-1 sm:flex-none"
+              className="h-9 px-2.5 sm:px-3 text-destructive hover:text-destructive hover:bg-destructive/10"
               onClick={() =>
                 setImpact({
                   title: "সব টপিক মুছবেন?",
@@ -411,23 +445,24 @@ export default function CurriculumPlannerPage() {
                 })
               }
             >
-              সব মুছুন
+              <span className="hidden sm:inline">সব মুছুন</span>
+              <span className="sm:hidden font-bold">মুছুন</span>
             </Button>
             {curriculum.is_public && curriculum.status === "active" && (
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-1 flex-1 sm:flex-none"
+                className="gap-1 h-9 px-2.5 sm:px-3"
                 onClick={() => window.open(`/student/roadmap/${id}`, "_blank")}
               >
                 <Eye className="w-4 h-4" />
-                <span className="hidden sm:inline">স্টুডেন্ট ভিউ</span>
-                <span className="sm:hidden">দেখুন</span>
+                <span className="hidden md:inline">স্টুডেন্ট ভিউ</span>
               </Button>
             )}
           </div>
-          <Button className="w-full sm:w-auto shrink-0" onClick={() => setPublishOpen(true)}>
-            কারিকুলাম প্রকাশ করুন
+          <Button size="sm" className="h-9 shrink-0 flex-1 sm:flex-none" onClick={() => setPublishOpen(true)}>
+            <span className="hidden sm:inline">কারিকুলাম প্রকাশ করুন</span>
+            <span className="sm:hidden">পাবলিশ করুন</span>
           </Button>
         </div>
       </div>

@@ -53,38 +53,35 @@ export default function ResultsLoading() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
         {[1, 2, 3, 4, 5].map((i) => (
           <div key={i} className="relative bg-card/90 dark:bg-card/40 backdrop-blur-2xl border border-border rounded-3xl p-6 md:p-8 flex flex-col shadow-xl overflow-hidden">
-            <div className="absolute -top-10 -right-10 w-32 h-32 bg-muted rounded-full blur-2xl pointer-events-none" />
-            <div className="relative z-10 flex justify-between items-start gap-4 border-b border-border/60 mb-4 pb-4">
-              <div className="flex-1 min-w-0">
-                <Skeleton className="h-6 w-24 mb-3 bg-muted rounded-full" />
-                <Skeleton className="h-7 w-3/4 bg-muted rounded-md" />
-                <Skeleton className="h-4 w-1/2 mt-2 bg-muted/50 rounded-md" />
-              </div>
-              <div className="flex flex-col items-end gap-3 shrink-0">
-                <div className="flex flex-col items-end bg-background/40 px-3 py-2 rounded-xl border border-border/60">
-                  <Skeleton className="h-2 w-10 mb-1 bg-muted rounded-full" />
-                  <Skeleton className="h-4 w-16 bg-muted/50 rounded-md" />
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/10 rounded-full blur-2xl pointer-events-none" />
+            
+            <div className="relative z-10 flex flex-col h-full">
+              <div className="mb-4 pb-4 border-b border-border/60">
+                <div className="flex-1 min-w-0">
+                  <Skeleton className="h-[26px] w-[100px] mb-3 bg-background/50 border border-border rounded-full" />
+                  <Skeleton className="h-7 w-3/4 bg-foreground/10 rounded-lg mb-3" />
+                  <div className="flex items-center gap-2 mt-2">
+                    <Skeleton className="w-4 h-4 rounded-sm bg-primary/20 shrink-0" />
+                    <Skeleton className="h-4 w-[140px] bg-foreground/5 rounded-md" />
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="relative z-10 flex items-center justify-between mb-8 mt-2">
-              <div className="flex flex-col">
-                <Skeleton className="h-3 w-12 mb-2 bg-muted/50 rounded-md" />
-                <Skeleton className="h-10 w-24 bg-muted rounded-xl" />
-              </div>
-              <div className="flex items-center gap-6">
-                <div className="flex flex-col items-center mr-2">
-                  <Skeleton className="h-3 w-10 mb-2 bg-muted/50 rounded-md" />
-                  <Skeleton className="h-10 w-8 bg-muted rounded-xl" />
+              <div className="flex items-center justify-between mb-8 mt-2">
+                <div className="flex flex-col">
+                  <Skeleton className="h-3 w-[50px] mb-3 bg-foreground/10 rounded-md" />
+                  <div className="flex items-baseline gap-1.5">
+                    <Skeleton className="h-8 w-[36px] bg-foreground/20 rounded-md" />
+                    <Skeleton className="h-5 w-[28px] bg-foreground/10 rounded-md" />
+                  </div>
                 </div>
-                <div className="flex flex-col items-center">
-                  <Skeleton className="h-3 w-12 mb-2 bg-muted/50 rounded-md" />
-                  <Skeleton className="h-10 w-16 bg-muted rounded-2xl" />
+                <div className="flex flex-col items-end gap-3">
+                  <Skeleton className="w-10 h-12 bg-amber-500/20 rounded-t-full rounded-b-md" />
+                  <Skeleton className="h-[24px] w-[40px] bg-emerald-500/10 rounded-lg" />
                 </div>
               </div>
-            </div>
-            <div className="relative z-10 mt-auto pt-4 border-t border-border/60">
-              <Skeleton className="w-full h-12 bg-muted rounded-xl" />
+              <div className="mt-auto pt-4 border-t border-border/60">
+                <Skeleton className="w-full h-12 bg-background/50 border border-border/50 rounded-xl" />
+              </div>
             </div>
           </div>
         ))}

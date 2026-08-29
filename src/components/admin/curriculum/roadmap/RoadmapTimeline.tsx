@@ -52,6 +52,7 @@ type Props = {
   onTeachHoliday?: (sessionId: number | string) => void;
   onAddExam?: (sessionId: number | string) => void;
   onAddTopic?: (sessionId: number | string) => void;
+  onAddFromPool?: (sessionId: number | string) => void;
 };
 
 export function RoadmapTimeline({
@@ -74,6 +75,7 @@ export function RoadmapTimeline({
   onTeachHoliday,
   onAddExam,
   onAddTopic,
+  onAddFromPool,
 }: Props) {
   React.useEffect(() => {
     const el = document.getElementById("today-session");
@@ -155,7 +157,8 @@ export function RoadmapTimeline({
                   onMarkCuti={onMarkCuti}
                   onTeachHoliday={onTeachHoliday}
                   onAddExam={onAddExam}
-                    onAddTopic={onAddTopic}
+                  onAddTopic={onAddTopic}
+                  onAddFromPool={onAddFromPool}
                   />
                 </div>
               ))}
@@ -185,7 +188,7 @@ function ControlBtn({
     <Button
       type="button"
       variant="outline"
-      className={cn("w-full justify-start h-9 px-3 text-sm font-medium transition-colors", className)}
+      className={cn("w-full justify-start h-8 px-2 sm:px-3 text-xs sm:text-sm font-medium transition-colors", className)}
       onClick={onClick}
     >
       {children}
@@ -211,6 +214,7 @@ function SessionCard({
   onTeachHoliday,
   onAddExam,
   onAddTopic,
+  onAddFromPool,
   onAddDay,
 }: {
   session: DraftSession;
@@ -229,6 +233,7 @@ function SessionCard({
   onMarkCuti?: (sessionId: number | string, name: string) => void;
   onTeachHoliday?: (sessionId: number | string) => void;
   onAddTopic?: (sessionId: number | string) => void;
+  onAddFromPool?: (sessionId: number | string) => void;
   onAddDay?: (sessionId: number | string, dateKey?: string) => void;
 }) {
   const type = session.session_type;
@@ -497,8 +502,9 @@ function SessionCard({
               )
             )}
             {topicCount === 0 && canTeach && !readOnly && (
-              <p className="text-sm font-medium text-muted-foreground text-center py-4 border-2 border-dashed rounded-lg bg-muted/10">
-                টপিক ড্র্যাগ করে আনুন বা দিন সিলেক্ট করে + টপিক চাপুন
+              <p className="text-xs sm:text-sm font-medium text-muted-foreground text-center py-2 sm:py-4 px-2 border-2 border-dashed rounded-lg bg-muted/10 leading-tight">
+                <span className="hidden sm:inline">টপিক ড্র্যাগ করে আনুন বা দিন সিলেক্ট করে + টপিক চাপুন</span>
+                <span className="sm:hidden">ড্র্যাগ করুন বা টপিক যোগ করুন</span>
               </p>
             )}
           </div>
@@ -514,9 +520,9 @@ function SessionCard({
             onClick={(e) => e.stopPropagation()} // Prevent clicking controls from toggling the card
           >
             <div className="overflow-hidden">
-              <div className="pt-4 border-t border-border/60">
-                <h5 className="text-[11px] font-bold text-muted-foreground/80 uppercase tracking-wider mb-3 px-1">দিন কন্ট্রোল প্যানেল</h5>
-                <div className="grid grid-cols-2 gap-2.5">
+              <div className="pt-2 sm:pt-4 border-t border-border/60">
+                <h5 className="text-[10px] sm:text-[11px] font-bold text-muted-foreground/80 uppercase tracking-wider mb-2 sm:mb-3 px-1">দিন কন্ট্রোল প্যানেল</h5>
+                <div className="grid grid-cols-2 gap-2 sm:gap-2.5">
                   {type === "class" && onMarkCuti && (
                     <ControlBtn
                       onClick={() => onMarkCuti(session.id, session.holiday_name || "ছুটি")}
@@ -538,6 +544,11 @@ function SessionCard({
                   {(type === "class" || type === "exam") && onDuplicateDay && (
                     <ControlBtn onClick={() => onDuplicateDay(session.id)} className="hover:bg-accent/50 text-foreground dark:text-white">
                       <Plus className="w-4 h-4 mr-1.5 opacity-70" /> <span>নতুন দিন</span>
+                    </ControlBtn>
+                  )}
+                  {type === "class" && onAddFromPool && (
+                    <ControlBtn onClick={() => onAddFromPool(session.id)} className="text-primary dark:text-white hover:bg-primary/15 hover:border-primary/40 col-span-2 sm:col-span-1">
+                      <BookOpen className="w-4 h-4 mr-1.5" /> সিলেবাস থেকে যোগ
                     </ControlBtn>
                   )}
                   {type === "class" && onAddExam && (
