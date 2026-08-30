@@ -196,8 +196,8 @@ export function SyllabusPoolPanel({
                           
                           <div className="flex items-center gap-1 shrink-0">
                             {isAssigned && (
-                              <div className="flex items-center justify-center">
-                                <CheckCircle2 className={`w-4 h-4 ${isActive ? 'text-green-500 dark:text-green-400' : 'text-emerald-500 dark:text-emerald-400'}`} title="ইতিমধ্যে যোগ করা হয়েছে" />
+                              <div className="flex items-center justify-center" title="ইতিমধ্যে যোগ করা হয়েছে">
+                                <CheckCircle2 className={`w-4 h-4 ${isActive ? 'text-green-500 dark:text-green-400' : 'text-emerald-500 dark:text-emerald-400'}`} />
                               </div>
                             )}
                             <Button

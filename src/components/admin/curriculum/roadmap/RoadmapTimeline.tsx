@@ -53,6 +53,7 @@ type Props = {
   onAddExam?: (sessionId: number | string) => void;
   onAddTopic?: (sessionId: number | string) => void;
   onAddFromPool?: (sessionId: number | string) => void;
+  onAddDay?: (sessionId: number | string, dateKey?: string) => void;
 };
 
 export function RoadmapTimeline({
@@ -76,6 +77,7 @@ export function RoadmapTimeline({
   onAddExam,
   onAddTopic,
   onAddFromPool,
+  onAddDay,
 }: Props) {
   React.useEffect(() => {
     const el = document.getElementById("today-session");
@@ -159,6 +161,7 @@ export function RoadmapTimeline({
                   onAddExam={onAddExam}
                   onAddTopic={onAddTopic}
                   onAddFromPool={onAddFromPool}
+                  onAddDay={onAddDay}
                   />
                 </div>
               ))}
@@ -232,17 +235,18 @@ function SessionCard({
   onRemoveDay?: (sessionId: number | string) => void;
   onMarkCuti?: (sessionId: number | string, name: string) => void;
   onTeachHoliday?: (sessionId: number | string) => void;
+  onAddExam?: (sessionId: number | string) => void;
   onAddTopic?: (sessionId: number | string) => void;
   onAddFromPool?: (sessionId: number | string) => void;
   onAddDay?: (sessionId: number | string, dateKey?: string) => void;
 }) {
   const type = session.session_type;
   const softHoliday = isSoftHoliday(session);
-  const canTeach = type === "class" || type === "exam" || type === "empty-calendar-day";
+  const canTeach = type === "class" || type === "exam" || (type as string) === "empty-calendar-day";
 
   const border = isSelected 
     ? "border-primary ring-2 ring-primary/20 bg-primary/5" 
-    : type === "empty-calendar-day"
+    : (type as string) === "empty-calendar-day"
       ? "border-border/50 bg-muted/20 opacity-70 grayscale-[0.5]"
       : softHoliday
         ? "border-amber-400/80 dark:border-amber-600/80 bg-amber-50/60 dark:bg-amber-950/20 hover:border-amber-500"
@@ -310,7 +314,7 @@ function SessionCard({
     <Card 
       id={isTodayClass ? "today-session" : undefined} 
       className={cn(
-        "flex flex-col border transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] shadow-sm cursor-pointer overflow-hidden relative", 
+        "flex flex-col border transition-all duration-500 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)] shadow-sm cursor-pointer overflow-hidden relative", 
         border, 
         isTodayClass && !isSelected ? 'ring-2 ring-primary/60 shadow-md' : '',
         isSelected ? 'h-[360px] sm:h-auto shadow-2xl z-10 ring-1 ring-primary/50' : 'h-[250px] hover:-translate-y-1 hover:shadow-md'
@@ -327,7 +331,7 @@ function SessionCard({
               <span className={cn(
                 "font-extrabold text-sm sm:text-base", 
                 isSelected ? "text-primary" : "text-foreground dark:text-gray-100",
-                type === "empty-calendar-day" ? "opacity-70 font-medium" : ""
+                (type as string) === "empty-calendar-day" ? "opacity-70 font-medium" : ""
               )}>
                 {format(parseISO(session.date), "EEE, MMM d")}
               </span>
@@ -345,13 +349,13 @@ function SessionCard({
                 </Badge>
               )}
             </div>
-            {type === "empty-calendar-day" && (
+            {(type as string) === "empty-calendar-day" && (
               <span className="text-xs text-muted-foreground italic">খালি দিন</span>
             )}
           </div>
 
           <div className="flex items-center gap-1.5 shrink-0">
-            {type !== "empty-calendar-day" && (
+            {(type as string) !== "empty-calendar-day" && (
               <Badge
                 variant={
                   type === "holiday" || type === "skipped"
@@ -514,7 +518,7 @@ function SessionCard({
         {!readOnly && (
           <div 
             className={cn(
-              "grid transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]",
+              "grid transition-all duration-500 [transition-timing-function:cubic-bezier(0.23,1,0.32,1)]",
               isSelected ? "grid-rows-[1fr] opacity-100 mt-4 translate-y-0" : "grid-rows-[0fr] opacity-0 mt-0 -translate-y-4"
             )}
             onClick={(e) => e.stopPropagation()} // Prevent clicking controls from toggling the card
@@ -556,12 +560,12 @@ function SessionCard({
                       <FileSignature className="w-4 h-4 mr-1.5" /> পরীক্ষা যোগ
                     </ControlBtn>
                   )}
-                  {type === "empty-calendar-day" && onAddDay && (
+                  {(type as string) === "empty-calendar-day" && onAddDay && (
                     <ControlBtn onClick={() => onAddDay(session.id, session.date.substring(0, 10))} className="text-primary dark:text-white hover:bg-primary/15 hover:border-primary/40 col-span-2">
                       <Plus className="w-4 h-4 mr-1.5" /> ক্লাস যোগ করুন
                     </ControlBtn>
                   )}
-                  {onRemoveDay && type !== "holiday" && type !== "empty-calendar-day" && (
+                  {onRemoveDay && type !== "holiday" && (type as string) !== "empty-calendar-day" && (
                     <ControlBtn onClick={() => {
                         onRemoveDay(session.id);
                       }} 
