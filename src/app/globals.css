@@ -60,21 +60,21 @@
 
   .dark {
     --background: 209 100% 6%; /* #00101f */
-    --foreground: 213 22% 81%; /* #c3cdd9 */
+    --foreground: 0 0% 100%;
     --card: 209 95% 9%;
-    --card-foreground: 213 22% 81%;
+    --card-foreground: 0 0% 100%;
     --popover: 209 95% 9%;
-    --popover-foreground: 213 22% 81%;
+    --popover-foreground: 0 0% 100%;
     --primary: 201 94% 54%; /* #19AAF8 */
     --primary-foreground: 209 100% 6%;
     --secondary: 209 85% 14%;
-    --secondary-foreground: 213 22% 81%;
+    --secondary-foreground: 0 0% 100%;
     --muted: 209 85% 14%;
-    --muted-foreground: 213 15% 60%;
+    --muted-foreground: 0 0% 100%;
     --accent: 209 85% 14%;
-    --accent-foreground: 213 22% 81%;
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 213 22% 81%;
+    --destructive-foreground: 0 0% 100%;
     --border: 209 85% 19%;
     --input: 209 85% 19%;
     --ring: 201 94% 54%;
@@ -84,11 +84,11 @@
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
     --sidebar: 209 95% 9%;
-    --sidebar-foreground: 213 22% 81%;
+    --sidebar-foreground: 0 0% 100%;
     --sidebar-primary: 201 94% 54%;
     --sidebar-primary-foreground: 209 100% 6%;
     --sidebar-accent: 209 85% 14%;
-    --sidebar-accent-foreground: 213 22% 81%;
+    --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 209 85% 19%;
     --sidebar-ring: 201 94% 54%;
     --sidebar-ring: 201 94% 54%;
@@ -140,30 +140,30 @@
 
   .dark .student-portal {
     --background: 209 100% 6%; /* #00101f */
-    --foreground: 213 22% 81%; /* #c3cdd9 */
+    --foreground: 0 0% 100%;
     --card: 209 95% 9%;
-    --card-foreground: 213 22% 81%;
+    --card-foreground: 0 0% 100%;
     --popover: 209 95% 9%;
-    --popover-foreground: 213 22% 81%;
+    --popover-foreground: 0 0% 100%;
     --primary: 201 94% 54%; /* #19AAF8 */
     --primary-foreground: 209 100% 6%;
     --secondary: 209 85% 14%;
-    --secondary-foreground: 213 22% 81%;
+    --secondary-foreground: 0 0% 100%;
     --muted: 209 85% 14%;
-    --muted-foreground: 213 15% 60%;
+    --muted-foreground: 0 0% 100%;
     --accent: 209 85% 14%;
-    --accent-foreground: 213 22% 81%;
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 62.8% 40.6%;
     --destructive-foreground: 0 0% 100%;
     --border: 209 85% 19%; 
     --input: 209 85% 19%;
     --ring: 201 94% 54%;
     --sidebar: 209 95% 9%; 
-    --sidebar-foreground: 213 22% 81%;
+    --sidebar-foreground: 0 0% 100%;
     --sidebar-primary: 201 94% 54%;
     --sidebar-primary-foreground: 209 100% 6%;
     --sidebar-accent: 209 85% 14%;
-    --sidebar-accent-foreground: 213 22% 81%;
+    --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 209 85% 19%;
     --sidebar-ring: 201 94% 54%;
     

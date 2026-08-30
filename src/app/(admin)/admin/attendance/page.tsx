@@ -12,10 +12,18 @@ import {
   FileBarChart2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { siteConfig } from "@/config/site.config";
 
@@ -137,42 +145,52 @@ export default function AttendancePage() {
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div className="space-y-1.5">
               <Label htmlFor="course">Course</Label>
-              <select
-                id="course"
-                className={selectClass}
+              <Select
                 value={selectedCourse}
-                onChange={(e) => {
-                  setSelectedCourse(e.target.value);
+                onValueChange={(val) => {
+                  setSelectedCourse(val);
                   setSelectedBatch("");
                 }}
               >
-                <option value="">All / Choose course…</option>
-                {courses.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.title}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger id="course" className="w-full bg-background hover:bg-muted/30 focus:ring-primary/20 shadow-sm">
+                  <SelectValue placeholder="All / Choose course…">
+                    {courses.find((c) => c.id.toString() === selectedCourse)?.title || "All / Choose course…"}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">All / Choose course…</SelectItem>
+                  {courses.map((c) => (
+                    <SelectItem key={c.id} value={c.id.toString()}>
+                      {c.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="batch">Batch</Label>
-              <select
-                id="batch"
-                className={selectClass}
-                value={selectedBatch}
-                onChange={(e) => setSelectedBatch(e.target.value)}
+              <Select
                 disabled={!selectedCourse}
+                value={selectedBatch}
+                onValueChange={setSelectedBatch}
               >
-                <option value="">Choose batch…</option>
-                {filteredBatches.map((b) => (
-                  <option key={b.id} value={b.id}>
-                    {b.name}
-                    {parseClassDays(b.class_days).length
-                      ? ` (${parseClassDays(b.class_days).join("/")})`
-                      : ""}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger id="batch" className="w-full bg-background hover:bg-muted/30 focus:ring-primary/20 shadow-sm">
+                  <SelectValue placeholder="Choose batch…">
+                    {filteredBatches.find((b) => b.id.toString() === selectedBatch)?.name || "Choose batch…"}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Choose batch…</SelectItem>
+                  {filteredBatches.map((b) => (
+                    <SelectItem key={b.id} value={b.id.toString()}>
+                      {b.name}
+                      {parseClassDays(b.class_days).length
+                        ? ` (${parseClassDays(b.class_days).join("/")})`
+                        : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
           {selectedBatchData && (
@@ -267,11 +285,10 @@ function DailyTab({
             <div>
               <CardTitle className="text-xl">Daily Roster</CardTitle>
               <div className="mt-3 flex flex-wrap items-center gap-3">
-                <Input
-                  type="date"
+                <DatePicker
                   value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="h-9 w-[160px]"
+                  onChange={setDate}
+                  className="h-9 w-[180px]"
                 />
                 {isClassDay ? (
                   <span className="inline-flex items-center rounded-md border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
@@ -608,31 +625,33 @@ function MonthlyTab({ batchId }: { batchId: string }) {
         <div className="flex flex-wrap items-end gap-3">
           <div className="grid gap-1.5">
             <Label className="text-xs text-muted-foreground">Month</Label>
-            <select
-              value={month}
-              onChange={(e) => setMonth(e.target.value)}
-              className={cn(selectClass, "h-9 w-36")}
-            >
-              {[...Array(12)].map((_, i) => (
-                <option key={i + 1} value={i + 1}>
-                  {new Date(2000, i, 1).toLocaleString("default", { month: "long" })}
-                </option>
-              ))}
-            </select>
+            <Select value={month} onValueChange={setMonth}>
+              <SelectTrigger className="h-9 w-36">
+                <SelectValue placeholder="Select month" />
+              </SelectTrigger>
+              <SelectContent>
+                {[...Array(12)].map((_, i) => (
+                  <SelectItem key={i + 1} value={(i + 1).toString()}>
+                    {new Date(2000, i, 1).toLocaleString("default", { month: "long" })}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <div className="grid gap-1.5">
             <Label className="text-xs text-muted-foreground">Year</Label>
-            <select
-              value={year}
-              onChange={(e) => setYear(e.target.value)}
-              className={cn(selectClass, "h-9 w-24")}
-            >
-              {[currentYear - 1, currentYear, currentYear + 1].map((y) => (
-                <option key={y} value={y}>
-                  {y}
-                </option>
-              ))}
-            </select>
+            <Select value={year} onValueChange={setYear}>
+              <SelectTrigger className="h-9 w-24">
+                <SelectValue placeholder="Select year" />
+              </SelectTrigger>
+              <SelectContent>
+                {[currentYear - 1, currentYear, currentYear + 1].map((y) => (
+                  <SelectItem key={y} value={y.toString()}>
+                    {y}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <Button
             variant="outline"

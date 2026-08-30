@@ -3,6 +3,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { Plus, Pencil, Trash2, Search, Calendar as CalendarIcon, ChevronDown, ChevronRight, TrendingDown, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -324,7 +326,7 @@ export default function ExpensesPage() {
                 </div>
                 <div className="space-y-2">
                   <Label>Date</Label>
-                  <Input type="date" value={expenseDate} onChange={(e) => setExpenseDate(e.target.value)} required />
+                  <DatePicker value={expenseDate} onChange={setExpenseDate} className="w-full h-10 border border-input" />
                 </div>
               </div>
 
@@ -394,11 +396,12 @@ export default function ExpensesPage() {
               />
             </div>
             <div className="flex items-center gap-2 w-full md:w-auto">
-              <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-md">
-                <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="h-8 text-sm" />
-                <span className="text-muted-foreground">-</span>
-                <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="h-8 text-sm" />
-              </div>
+              <DateRangePicker
+                startDate={startDate}
+                endDate={endDate}
+                onStartDateChange={setStartDate}
+                onEndDateChange={setEndDate}
+              />
             </div>
           </div>
         </CardContent>

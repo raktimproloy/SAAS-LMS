@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
 
 const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
@@ -75,15 +76,15 @@ export function CurriculumSettingsSheet({ open, onOpenChange, curriculum, onSave
             <Label>নাম</Label>
             <Input value={title} onChange={(e) => setTitle(e.target.value)} />
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="grid gap-2">
-              <Label>শুরু</Label>
-              <Input type="date" value={start} onChange={(e) => setStart(e.target.value)} />
-            </div>
-            <div className="grid gap-2">
-              <Label>শেষ</Label>
-              <Input type="date" value={end} onChange={(e) => setEnd(e.target.value)} />
-            </div>
+          <div className="grid gap-2">
+            <Label>শুরু এবং শেষ তারিখ</Label>
+            <DateRangePicker
+              startDate={start}
+              endDate={end}
+              onStartDateChange={setStart}
+              onEndDateChange={setEnd}
+              className="w-full"
+            />
           </div>
           <div className="space-y-2">
             <Label>ক্লাসের দিন</Label>

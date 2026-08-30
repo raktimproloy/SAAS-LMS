@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Loader2, Wallet, X } from "lucide-react";
+import { DatePicker } from "@/components/ui/date-picker";
 import type { StudentPayment } from "./types";
 
 interface PayDueModalProps {
@@ -141,11 +142,10 @@ export function PayDueModal({ open, payment, onClose, onSuccess }: PayDueModalPr
 
           <div>
             <label className="mb-1 block text-sm font-medium text-foreground">Payment date</label>
-            <input
-              type="date"
+            <DatePicker
               value={paidAt}
-              onChange={(e) => setPaidAt(e.target.value)}
-              className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm"
+              onChange={setPaidAt}
+              className="w-full h-10 border border-border"
             />
           </div>
 

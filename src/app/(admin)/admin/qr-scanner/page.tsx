@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface Course {
@@ -244,7 +245,7 @@ function ScannerTool({ batchId, date, setDate }: { batchId: string, date: string
           </div>
           <div className="mt-2">
             <Label>Session Date</Label>
-            <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="h-8 mt-1 bg-white dark:bg-slate-950" />
+            <DatePicker value={date} onChange={setDate} className="h-8 mt-1 w-full" />
           </div>
         </CardHeader>
         <CardContent className="flex-1 p-0 overflow-y-auto max-h-[400px] lg:max-h-none">

@@ -124,6 +124,7 @@ export function StudentCurriculumStrip() {
   };
 
   const [isDragging, setIsDragging] = useState(false);
+  const [hasDragged, setHasDragged] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
 
@@ -150,6 +151,7 @@ export function StudentCurriculumStrip() {
   const onMouseDown = (e: React.MouseEvent) => {
     if (!trackRef.current) return;
     setIsDragging(true);
+    setHasDragged(false);
     setStartX(e.pageX - trackRef.current.offsetLeft);
     setScrollLeft(trackRef.current.scrollLeft);
   };
@@ -160,12 +162,17 @@ export function StudentCurriculumStrip() {
 
   const onMouseUp = () => {
     setIsDragging(false);
+    // Note: We don't reset hasDragged here so that the upcoming click event can read it
+    // We'll reset it on the next onMouseDown or in a short timeout if needed, but it's safe to just leave it and reset onMouseDown.
   };
 
   const onMouseMove = (e: React.MouseEvent) => {
     if (!isDragging || !trackRef.current) return;
     e.preventDefault();
     const x = e.pageX - trackRef.current.offsetLeft;
+    if (Math.abs(x - startX) > 5) {
+      setHasDragged(true);
+    }
     const walk = (x - startX) * 2; // Scroll-fast
     trackRef.current.scrollLeft = scrollLeft - walk;
   };
@@ -278,6 +285,11 @@ export function StudentCurriculumStrip() {
               key={`${c.id}-${c.date}`}
               href={sessionHref as string}
               draggable={false}
+              onClick={(e: React.MouseEvent) => {
+                if (hasDragged) {
+                  e.preventDefault();
+                }
+              }}
               className={cn(
                 "w-[85%] sm:w-[45%] md:w-[28%] shrink-0 snap-start rounded-2xl border portal-panel p-4 sm:p-5 flex flex-col justify-between transition-all duration-200",
                 cardStatusClass(c.status),

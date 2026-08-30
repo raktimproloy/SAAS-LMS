@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { StudentExpandedCalendar } from "./StudentExpandedCalendar";
 import { PayDueModal } from "./PayDueModal";
+import { DatePicker } from "@/components/ui/date-picker";
 import type { Batch, Course, Student, StudentPayment } from "./types";
 
 const inputClass =
@@ -631,10 +632,9 @@ export function StudentExpandedRow({
               <label className="mb-1.5 block text-xs font-medium text-gray-600 dark:text-gray-400">
                 Payment Date *
               </label>
-              <input
-                type="date"
+              <DatePicker
                 value={paymentForm.paid_at}
-                onChange={(e) => setPaymentForm({ ...paymentForm, paid_at: e.target.value })}
+                onChange={(val) => setPaymentForm({ ...paymentForm, paid_at: val })}
                 className={inputClass}
               />
             </div>

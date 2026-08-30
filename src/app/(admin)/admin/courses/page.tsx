@@ -5,6 +5,7 @@ import { Plus, Pencil, BookOpen, Layers, Trash2, CheckCircle, XCircle, MessageSq
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import { formatTimeBengali, translateDayToBengali } from "@/lib/bengali";
 import { Button } from "@/components/ui/button";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -459,15 +460,15 @@ export default function CoursesBatchesPage() {
                         <Input id="discountFee" type="number" value={discountFee} onChange={(e) => setDiscountFee(e.target.value)} placeholder="e.g. 4000 (Optional)" />
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="grid gap-2">
-                        <Label htmlFor="startDate">Start Date</Label>
-                        <Input id="startDate" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label htmlFor="endDate">End Date</Label>
-                        <Input id="endDate" type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-                      </div>
+                    <div className="grid gap-2">
+                      <Label>Start and End Date</Label>
+                      <DateRangePicker
+                        startDate={startDate}
+                        endDate={endDate}
+                        onStartDateChange={setStartDate}
+                        onEndDateChange={setEndDate}
+                        className="w-full"
+                      />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="grid gap-2">

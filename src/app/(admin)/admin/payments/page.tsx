@@ -19,6 +19,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -667,11 +669,9 @@ export default function FinancialPage() {
                 <Label>
                   Payment Date <span className="text-red-500">*</span>
                 </Label>
-                <Input
-                  type="date"
+                <DatePicker
                   value={paidAt}
-                  onChange={(e) => {
-                    const d = e.target.value;
+                  onChange={(d) => {
                     setPaidAt(d);
                     if (d) {
                       const dt = new Date(`${d}T12:00:00`);
@@ -864,23 +864,12 @@ export default function FinancialPage() {
                   </option>
                 ))}
               </select>
-              <div className="flex items-center gap-1 rounded-md bg-slate-100 p-1 dark:bg-slate-800">
-                <Input
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  className="h-8 text-sm"
-                  title="From date"
-                />
-                <span className="text-muted-foreground">–</span>
-                <Input
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  className="h-8 text-sm"
-                  title="To date"
-                />
-              </div>
+              <DateRangePicker
+                startDate={startDate}
+                endDate={endDate}
+                onStartDateChange={setStartDate}
+                onEndDateChange={setEndDate}
+              />
               <Button
                 variant="outline"
                 size="sm"

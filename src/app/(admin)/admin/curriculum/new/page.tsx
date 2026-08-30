@@ -11,6 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
 import { ArrowLeft, ArrowRight, Loader2, BookOpen, CalendarDays, Sparkles } from "lucide-react";
 import { estimateScheduleStats, resetTempIds } from "@/lib/curriculum-scheduler";
 
@@ -213,7 +214,7 @@ export default function NewCurriculumPage() {
       </div>
 
       <div className="flex items-center gap-2">
-        {[1, 2, 3].map((s) => (
+        {[1, 2].map((s) => (
           <React.Fragment key={s}>
             <button
               type="button"
@@ -229,9 +230,9 @@ export default function NewCurriculumPage() {
               <span className="w-5 h-5 rounded-full bg-background/20 flex items-center justify-center text-xs">
                 {s}
               </span>
-              {s === 1 ? "মূল তথ্য" : s === 2 ? "বিষয়বস্তু" : "তৈরি"}
+              {s === 1 ? "মূল তথ্য" : "বিষয়বস্তু ও তৈরি"}
             </button>
-            {s < 3 && <div className="flex-1 h-px bg-border" />}
+            {s < 2 && <div className="flex-1 h-px bg-border" />}
           </React.Fragment>
         ))}
       </div>
@@ -316,27 +317,15 @@ export default function NewCurriculumPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="start_date">শুরুর তারিখ *</Label>
-                  <Input
-                    className="bg-background hover:bg-muted/30 focus:ring-primary/20 shadow-sm"
-                    id="start_date"
-                    type="date"
-                    value={formData.start_date}
-                    onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="end_date">শেষ তারিখ *</Label>
-                  <Input
-                    className="bg-background hover:bg-muted/30 focus:ring-primary/20 shadow-sm"
-                    id="end_date"
-                    type="date"
-                    value={formData.end_date}
-                    onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-                  />
-                </div>
+              <div className="grid gap-2">
+                <Label>শুরুর ও শেষ তারিখ <span className="text-destructive">*</span></Label>
+                <DateRangePicker
+                  startDate={formData.start_date}
+                  endDate={formData.end_date}
+                  onStartDateChange={(d) => setFormData({ ...formData, start_date: d })}
+                  onEndDateChange={(d) => setFormData({ ...formData, end_date: d })}
+                  className="w-full sm:w-[320px]"
+                />
               </div>
 
               <div className="space-y-3">
@@ -577,57 +566,12 @@ export default function NewCurriculumPage() {
               )}
             </CardContent>
             <CardFooter className="justify-between">
-              <Button variant="outline" onClick={() => setStep(1)}>
-                পেছনে
-              </Button>
-              <Button onClick={() => setStep(3)}>
-                পরের ধাপ <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </CardFooter>
-          </>
-        )}
-
-        {step === 3 && (
-          <>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-primary" />
-                রোডম্যাপ তৈরি
-              </CardTitle>
-              <CardDescription>
-                ক্লাসের দিন তৈরি হবে, ছুটির দিন মার্ক হবে, প্রতি ক্লাসে একটা টপিক বসবে, আর প্রতি অধ্যায় শেষে পরীক্ষা যোগ হবে।
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                <Stat label="ক্লাসের দিন" value={preview?.teachable ?? "—"} />
-                <Stat label="ছুটি*" value={preview?.holidays ?? "—"} hint="তৈরির সময় বাংলাদেশের সরকারি ছুটি যোগ হবে" />
-                <Stat label="টপিক" value={preview?.topics ?? "—"} />
-                <Stat label="অধ্যায় পরীক্ষা" value={preview?.exams ?? "—"} />
-              </div>
-              {preview && !preview.willFit && (
-                <p className="text-sm text-amber-600 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded-md p-3">
-                  সিলেবাসের জন্য প্রায় {preview.overflow}টি ক্লাস কম পড়ছে। বাড়তি টপিক ডান পাশের বাকি টপিক প্যানেলে থাকবে — পরে বসিয়ে নিতে পারবেন।
-                </p>
-              )}
-              {formData.template_id !== "none" && (
-                <p className="text-sm text-primary bg-primary/5 border border-primary/20 rounded-md p-3">
-                  টেমপ্লেট ব্যবহার হচ্ছে — সময়সূচি কপি হয়ে নতুন শুরুর তারিখ অনুযায়ী সাজবে।
-                </p>
-              )}
-              <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-5">
-                <li>শুরুতে স্ট্যাটাস থাকবে <strong>খসড়া</strong> — ইচ্ছেমতো এডিট করুন, শেষে প্রকাশ করুন।</li>
-                <li>ছুটির দিন ক্যালেন্ডারে থাকবে; যেকোনো দিন এক ক্লিকে স্কিপ করতে পারবেন।</li>
-                <li>বাকি টপিক ডান পাশের প্যানেল থেকে সহজে যোগ করতে পারবেন।</li>
-              </ul>
-            </CardContent>
-            <CardFooter className="justify-between">
-              <Button variant="outline" onClick={() => setStep(2)} disabled={isSubmitting}>
+              <Button variant="outline" onClick={() => setStep(1)} disabled={isSubmitting}>
                 পেছনে
               </Button>
               <Button onClick={handleSubmit} disabled={isSubmitting}>
                 {isSubmitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                তৈরি করে প্ল্যানার খুলুন
+                তৈরি করে প্ল্যানার খুলুন <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </CardFooter>
           </>

@@ -1,12 +1,15 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { PWAInstallProvider } from "@/components/public/PWAInstallContext";
 import { AosInitializer } from "@/components/public/AosInitializer";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const shikkhabhumi = localFont({
+  src: "./fonts/ShikkhabhumiFont.ttf",
+  variable: "--font-sans",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -44,7 +47,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="bn" suppressHydrationWarning className={cn("font-sans", inter.variable)}>
+    <html lang="bn" suppressHydrationWarning className={cn("font-sans", shikkhabhumi.variable)}>
       <head>
         <link rel="manifest" href="/manifest.json" />
         <link rel="apple-touch-icon" href="/icons/icon-180x180.png" />
@@ -54,7 +57,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-title" content="Institute Web" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
-      <body className={`${inter.variable} antialiased min-h-screen bg-background relative overflow-x-hidden`}>
+      <body className={`${shikkhabhumi.variable} antialiased min-h-screen bg-background relative overflow-x-hidden`}>
         {/* Global Animated Background Orbs */}
         <div className="fixed inset-0 overflow-hidden pointer-events-none z-[0] bg-background">
           <div 
