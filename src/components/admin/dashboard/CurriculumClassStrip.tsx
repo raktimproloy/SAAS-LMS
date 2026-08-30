@@ -52,9 +52,9 @@ function statusBadgeClass(s: DashClass["status"]) {
 }
 
 function cardStatusClass(s: DashClass["status"]) {
-  if (s === "running") return "border-emerald-400/50 bg-emerald-50/50 dark:bg-emerald-950/20 dark:border-emerald-800/60 shadow-sm ring-1 ring-emerald-500/20";
-  if (s === "done") return "border-slate-200 bg-slate-50/50 dark:border-slate-800/80 dark:bg-slate-900/30 opacity-75 grayscale-[0.3]";
-  return "border-sky-200 bg-sky-50/30 dark:border-sky-800/50 dark:bg-sky-950/20";
+  if (s === "running") return "border-emerald-500/30 bg-gradient-to-br from-emerald-50/80 to-emerald-100/50 dark:from-emerald-950/40 dark:to-emerald-900/20 shadow-md hover:shadow-lg ring-1 ring-emerald-500/20";
+  if (s === "done") return "border-slate-200/60 bg-gradient-to-br from-slate-50/50 to-slate-100/30 dark:border-slate-800/80 dark:from-slate-900/40 dark:to-slate-800/20 opacity-80 grayscale-[0.2]";
+  return "border-sky-200/50 bg-gradient-to-br from-sky-50/60 to-sky-100/30 dark:border-sky-800/50 dark:from-sky-950/30 dark:to-sky-900/20 shadow-sm";
 }
 
 function localDoneKey(batchId: number, date: string) {
@@ -351,11 +351,13 @@ export function CurriculumClassStrip() {
             <div
               key={`${c.batch_id}-${c.date}`}
               className={cn(
-                "w-[75%] sm:w-[45%] md:w-[32%] lg:w-[28%] shrink-0 snap-start rounded-2xl border bg-card/80 backdrop-blur-sm p-4 sm:p-5 flex flex-col justify-between transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5",
+                "w-[75%] sm:w-[45%] md:w-[32%] lg:w-[28%] shrink-0 snap-start rounded-3xl border backdrop-blur-xl p-5 sm:p-6 flex flex-col justify-between transition-all duration-500 hover:shadow-xl hover:-translate-y-1 group/classcard overflow-hidden relative",
                 cardStatusClass(st)
               )}
             >
-              <div className="min-w-0">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/40 dark:bg-black/20 rounded-full blur-[40px] -mr-10 -mt-10 pointer-events-none group-hover/classcard:bg-white/60 dark:group-hover/classcard:bg-white/5 transition-colors duration-500" />
+              
+              <div className="min-w-0 relative z-10">
                 <div className="flex flex-wrap items-center gap-2 mb-2">
                   <span
                     className={cn(
@@ -407,28 +409,28 @@ export function CurriculumClassStrip() {
                 )}
               </div>
 
-              <div className="mt-4 pt-3 border-t border-border/50 flex flex-wrap items-center gap-2">
+              <div className="mt-5 pt-4 border-t border-border/40 flex flex-wrap items-center gap-2 relative z-10">
                 <div className="flex gap-1.5">
                   {classHref ? (
                     <>
                       <Link
                         href={classHref}
-                        className="inline-flex items-center gap-1 rounded-md bg-green-500/10 dark:bg-green-500/20 px-2 py-1 text-xs font-medium text-green-700 dark:text-green-400 hover:bg-green-500/20 transition-colors"
+                        className="inline-flex items-center gap-1.5 rounded-full bg-green-500/10 dark:bg-green-500/20 px-2.5 py-1 text-xs font-bold text-green-700 dark:text-green-400 hover:bg-green-500/20 hover:scale-105 transition-all"
                       >
-                        <Users className="w-3 h-3" />
+                        <Users className="w-3.5 h-3.5" />
                         <span>{c.attendance.present + c.attendance.late}/{c.attendance.total}</span>
                       </Link>
                       <Link
                         href={classHref}
-                        className="inline-flex items-center gap-1 rounded-md bg-red-500/10 dark:bg-red-500/20 px-2 py-1 text-xs font-medium text-red-700 dark:text-red-400 hover:bg-red-500/20 transition-colors"
+                        className="inline-flex items-center gap-1.5 rounded-full bg-red-500/10 dark:bg-red-500/20 px-2.5 py-1 text-xs font-bold text-red-700 dark:text-red-400 hover:bg-red-500/20 hover:scale-105 transition-all"
                       >
-                        <UserX className="w-3 h-3" />
+                        <UserX className="w-3.5 h-3.5" />
                         <span>{c.attendance.absent}</span>
                       </Link>
                     </>
                   ) : (
-                    <span className="inline-flex items-center gap-1 rounded-md bg-secondary/50 px-2 py-1 text-xs font-medium text-muted-foreground">
-                      <Users className="w-3 h-3" />
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-secondary/60 px-2.5 py-1 text-xs font-bold text-muted-foreground">
+                      <Users className="w-3.5 h-3.5" />
                       {c.attendance.present + c.attendance.late}/{c.attendance.total}
                     </span>
                   )}
@@ -438,39 +440,39 @@ export function CurriculumClassStrip() {
                   {canDone && (
                     <Button
                       size="sm"
-                      className="h-7 px-2.5 gap-1.5 text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
+                      className="h-8 rounded-full px-4 gap-1.5 text-xs font-bold bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-md shadow-emerald-500/20 hover:shadow-emerald-500/40 transition-all duration-300 hover:scale-105"
                       disabled={marking}
                       onClick={() => markDone(c)}
                     >
                       {marking ? (
-                        <Loader2 className="w-3 h-3 animate-spin" />
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
                       ) : (
-                        <CheckCircle2 className="w-3 h-3" />
+                        <CheckCircle2 className="w-3.5 h-3.5" />
                       )}
                       Done
                     </Button>
                   )}
                   {st === "done" && (
-                    <Button size="sm" variant="outline" className="h-7 px-2.5 text-xs opacity-70" disabled>
+                    <Button size="sm" variant="outline" className="h-8 rounded-full px-4 text-xs font-bold opacity-60 bg-background/50 backdrop-blur-sm border-dashed" disabled>
                       Done
                     </Button>
                   )}
                   {classHref ? (
                     <Link href={classHref}>
-                      <Button size="sm" variant="outline" className="h-7 px-2.5 text-xs">
+                      <Button size="sm" variant="outline" className="h-8 rounded-full px-4 text-xs font-bold hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-300 hover:shadow-md hover:shadow-primary/20 bg-background/80 backdrop-blur-sm">
                         Open
                       </Button>
                     </Link>
                   ) : c.has_curriculum ? (
                     <Link href={curriculumHref}>
-                      <Button size="sm" variant="outline" className="h-7 px-2.5 text-xs">
+                      <Button size="sm" variant="outline" className="h-8 rounded-full px-4 text-xs font-bold hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-300 hover:shadow-md hover:shadow-primary/20 bg-background/80 backdrop-blur-sm">
                         View
                       </Button>
                     </Link>
                   ) : (
                     <Link href="/admin/curriculum">
-                      <Button size="sm" variant="outline" className="h-7 px-2.5 text-xs gap-1">
-                        <BookOpen className="w-3 h-3" />
+                      <Button size="sm" variant="outline" className="h-8 rounded-full px-4 text-xs font-bold gap-1.5 hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-300 hover:shadow-md hover:shadow-primary/20 bg-background/80 backdrop-blur-sm">
+                        <BookOpen className="w-3.5 h-3.5" />
                         Setup
                       </Button>
                     </Link>

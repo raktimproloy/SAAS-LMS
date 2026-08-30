@@ -48,9 +48,7 @@ export function ContactSection() {
   };
 
   const address = config.contact_address || "Farmgate, Dhaka, Bangladesh";
-  const directionsUrl = config.map_embed_url 
-    ? config.map_embed_url 
-    : `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
+  const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`;
 
   return (
     <section className="py-16 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
