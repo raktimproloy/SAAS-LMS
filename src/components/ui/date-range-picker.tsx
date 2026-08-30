@@ -115,7 +115,6 @@ export function DateRangePicker({
         <div className="bg-background rounded-xl p-0 border flex flex-col">
           <div className="flex">
             <Calendar
-              initialFocus
               mode="range"
               defaultMonth={date.from}
               selected={date}
@@ -124,8 +123,8 @@ export function DateRangePicker({
               }}
               numberOfMonths={1}
               captionLayout="dropdown"
-              fromYear={1900}
-              toYear={2100}
+              startMonth={new Date(1900, 0)}
+              endMonth={new Date(2100, 11)}
             />
           </div>
           <div className="flex justify-between items-center px-4 py-3 border-t">

@@ -19,6 +19,7 @@ export interface DatePickerProps {
   placeholder?: string
   className?: string
   disabled?: boolean
+  required?: boolean
 }
 
 export function DatePicker({
@@ -27,6 +28,7 @@ export function DatePicker({
   placeholder = "Pick a date",
   className,
   disabled,
+  required,
 }: DatePickerProps) {
   const [open, setOpen] = React.useState(false);
 
@@ -81,10 +83,9 @@ export function DatePicker({
             }
             setOpen(false); // Close the dialog after selection (whether they click the same or different date)
           }}
-          initialFocus
           captionLayout="dropdown"
-          fromYear={1900}
-          toYear={2100}
+          startMonth={new Date(1900, 0)}
+          endMonth={new Date(2100, 11)}
         />
           </div>
         </div>

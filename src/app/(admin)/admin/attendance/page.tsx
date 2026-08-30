@@ -148,7 +148,7 @@ export default function AttendancePage() {
               <Select
                 value={selectedCourse}
                 onValueChange={(val) => {
-                  setSelectedCourse(val);
+                  setSelectedCourse(val || "");
                   setSelectedBatch("");
                 }}
               >
@@ -172,7 +172,7 @@ export default function AttendancePage() {
               <Select
                 disabled={!selectedCourse}
                 value={selectedBatch}
-                onValueChange={setSelectedBatch}
+                onValueChange={(val) => setSelectedBatch(val || "")}
               >
                 <SelectTrigger id="batch" className="w-full bg-background hover:bg-muted/30 focus:ring-primary/20 shadow-sm">
                   <SelectValue placeholder="Choose batch…">
@@ -625,7 +625,7 @@ function MonthlyTab({ batchId }: { batchId: string }) {
         <div className="flex flex-wrap items-end gap-3">
           <div className="grid gap-1.5">
             <Label className="text-xs text-muted-foreground">Month</Label>
-            <Select value={month} onValueChange={setMonth}>
+            <Select value={month} onValueChange={(val) => setMonth(val || "")}>
               <SelectTrigger className="h-9 w-36">
                 <SelectValue placeholder="Select month" />
               </SelectTrigger>
@@ -640,7 +640,7 @@ function MonthlyTab({ batchId }: { batchId: string }) {
           </div>
           <div className="grid gap-1.5">
             <Label className="text-xs text-muted-foreground">Year</Label>
-            <Select value={year} onValueChange={setYear}>
+            <Select value={year} onValueChange={(val) => setYear(val || "")}>
               <SelectTrigger className="h-9 w-24">
                 <SelectValue placeholder="Select year" />
               </SelectTrigger>
