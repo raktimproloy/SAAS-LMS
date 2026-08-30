@@ -321,15 +321,15 @@ export function SiteSettingsForm() {
         <div className="space-y-4 md:col-span-2">
           <h3 className="font-semibold text-lg border-b pb-2 border-border/50 text-primary">Google Map Integration</h3>
           <div className="space-y-2">
-            <Label>Google Maps Embed URL (src attribute)</Label>
+            <Label>Google Maps Embed Link or Iframe Code</Label>
             <Textarea
               value={settings.map_embed_url}
               onChange={e => setSettings({ ...settings, map_embed_url: e.target.value })}
-              placeholder="https://www.google.com/maps/embed?pb=..."
+              placeholder="Paste the embed link or the full <iframe> code here..."
               rows={3}
             />
             <p className="text-xs text-muted-foreground mt-1">
-              Go to Google Maps, click Share &gt; Embed a map, and copy the link inside the <code>src="..."</code> attribute.
+              Go to Google Maps, click Share &gt; Embed a map, and paste the full HTML code here.
             </p>
           </div>
         </div>
