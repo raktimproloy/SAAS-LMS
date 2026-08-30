@@ -67,6 +67,14 @@ export type ScheduleMeta = {
   end_date: string;
   class_days: string[];
   holidays?: HolidayMap;
+  config?: GeneratorConfig;
+};
+
+export type GeneratorConfig = {
+  examFrequency: "chapter_end" | "topic_end" | "none";
+  examScheduling: "separate_day" | "same_day" | "specific_day";
+  examSpecificDays: string[];
+  daysPerTopic: number;
 };
 
 export const DAY_NAME_TO_INDEX: Record<string, number> = {

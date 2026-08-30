@@ -14,6 +14,7 @@ import {
   parseDateUTC,
   toDateKey,
   topicKey,
+  GeneratorConfig,
 } from "./types";
 
 export function cloneSessions(sessions: DraftSession[]): DraftSession[] {
@@ -373,50 +374,63 @@ function applyGroupsToTeachableSlots(
   return renumberSessions(next);
 }
 
-function makeExamTopic(prev: DraftTopic, chapter: string): DraftTopic {
+function makeExamTopic(prev: DraftTopic, title: string, isTopic: boolean = false): DraftTopic {
   return {
     id: nextTempId(),
     nctb_book_id: prev.nctb_book_id,
     subject: prev.subject,
-    chapter_name: `Exam: ${chapter}`,
-    topic_name: "Chapter Final Exam",
+    chapter_name: `Exam: ${title}`,
+    topic_name: isTopic ? "Topic Test" : "Chapter Final Exam",
     size: 1,
     is_custom: true,
   };
 }
 
-function poolToTopic(p: PoolTopic): DraftTopic {
+function poolToTopic(p: PoolTopic, config?: GeneratorConfig): DraftTopic {
   return {
     id: nextTempId(),
     nctb_book_id: p.nctb_book_id,
     subject: p.subject,
     chapter_name: p.chapter_name,
     topic_name: p.topic_name,
-    size: p.size,
+    size: config?.daysPerTopic ? p.size * config.daysPerTopic : p.size,
     is_custom: false,
   };
 }
 
-/** Build fill items: topics + chapter exam after each chapter ends. */
-export function buildFillItems(books: NctbBookLike[]): DraftTopic[] {
+/** Build fill items: topics + exams based on config. */
+export function buildFillItems(books: NctbBookLike[], config?: GeneratorConfig): DraftTopic[] {
   const pool = flattenBooksToPool(books);
   const items: DraftTopic[] = [];
   let currentChapter: string | null = null;
+  const examFrequency = config?.examFrequency || "chapter_end";
 
   for (let i = 0; i < pool.length; i++) {
     const p = pool[i];
-    if (currentChapter && currentChapter !== p.chapter_name && items.length > 0) {
+    if (examFrequency === "chapter_end" && currentChapter && currentChapter !== p.chapter_name && items.length > 0) {
       const prev = items[items.length - 1];
-      items.push(makeExamTopic(prev, currentChapter));
+      items.push(makeExamTopic(prev, currentChapter, false));
     }
+    
     currentChapter = p.chapter_name;
-    items.push(poolToTopic(p));
+    const daysPerTopic = config?.daysPerTopic || 1;
+    for (let d = 0; d < daysPerTopic; d++) {
+      const newTopic = poolToTopic(p, config);
+      if (daysPerTopic > 1) {
+        newTopic.topic_name = `${newTopic.topic_name} (Part ${d + 1})`;
+      }
+      items.push(newTopic);
+    }
+
+    if (examFrequency === "topic_end") {
+      items.push(makeExamTopic(items[items.length - 1], p.topic_name || p.chapter_name, true));
+    }
   }
 
-  if (currentChapter && items.length > 0) {
+  if (examFrequency === "chapter_end" && currentChapter && items.length > 0) {
     const last = items[items.length - 1];
     if (!String(last.chapter_name).startsWith("Exam:")) {
-      items.push(makeExamTopic(last, currentChapter));
+      items.push(makeExamTopic(last, currentChapter, false));
     }
   }
 
@@ -462,19 +476,46 @@ export function clearTopics(
 export function autoFillFromBooks(
   sessions: DraftSession[],
   books: NctbBookLike[],
-  classDays?: string[]
+  classDays?: string[],
+  config?: GeneratorConfig
 ): DraftSession[] {
   const next = clearTopics(sessions, classDays);
-  const items = buildFillItems(books);
+  const items = buildFillItems(books, config);
   const teachableIdx = next
-    .map((s, i) => ({ s, i }))
+    .map((s, i) => ({ s, i, date: parseDateUTC(s.date) }))
     .filter(({ s }) => isTeachable(s) || s.session_type === "class");
 
   let cursor = 0;
   for (const item of items) {
     if (cursor >= teachableIdx.length) break;
-    const { i } = teachableIdx[cursor];
     const isExam = !!item.is_custom && String(item.chapter_name).startsWith("Exam:");
+    
+    if (isExam && config?.examScheduling === "same_day") {
+      if (cursor > 0) {
+        const prevIdx = teachableIdx[cursor - 1].i;
+        next[prevIdx] = applySessionTypeFlags({
+          ...next[prevIdx],
+          topics: [...next[prevIdx].topics, { ...item, sort_order: next[prevIdx].topics.length }],
+        });
+        continue;
+      }
+    } else if (isExam && config?.examScheduling === "specific_day" && config.examSpecificDays?.length) {
+      const targetDayIndices = config.examSpecificDays.map(d => DAY_NAME_TO_INDEX[d]).filter(d => d !== undefined);
+      if (targetDayIndices.length > 0) {
+        let tempCursor = cursor;
+        while (tempCursor < teachableIdx.length) {
+          if (targetDayIndices.includes(teachableIdx[tempCursor].date.getUTCDay())) {
+            cursor = tempCursor;
+            break;
+          }
+          tempCursor++;
+        }
+      }
+    }
+
+    if (cursor >= teachableIdx.length) break;
+
+    const { i } = teachableIdx[cursor];
     next[i] = applySessionTypeFlags({
       ...next[i],
       session_type: isExam ? "exam" : "class",
@@ -494,7 +535,7 @@ export function generateInitialSchedule(
 ): DraftSession[] {
   const empty = generateEmptySessions(meta);
   if (!books.length) return empty;
-  return autoFillFromBooks(empty, books);
+  return autoFillFromBooks(empty, books, undefined, meta.config);
 }
 
 export function skipSession(
@@ -1317,19 +1358,21 @@ export function estimateScheduleStats(
   const sessions = generateEmptySessions(meta);
   const holidays = sessions.filter((s) => s.session_type === "holiday").length;
   const teachable = sessions.filter((s) => isTeachable(s)).length;
-  const items = books.length ? buildFillItems(books) : [];
+  const items = books.length ? buildFillItems(books, meta.config) : [];
   const exams = items.filter(
     (t) => t.is_custom && String(t.chapter_name).startsWith("Exam:")
   ).length;
+  const examDaysConsumed = meta.config?.examScheduling === "same_day" ? 0 : exams;
   const topics = items.length - exams;
+  const totalConsumed = topics + examDaysConsumed;
   return {
     totalDays: sessions.length,
     teachable,
     holidays,
     topics,
     exams,
-    willFit: items.length <= teachable,
-    overflow: Math.max(0, items.length - teachable),
+    willFit: totalConsumed <= teachable,
+    overflow: Math.max(0, totalConsumed - teachable),
   };
 }
 

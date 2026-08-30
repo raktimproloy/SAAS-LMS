@@ -47,6 +47,12 @@ export default function NewCurriculumPage() {
     is_public: false,
     template_id: "none",
     books: [] as number[],
+    config: {
+      examFrequency: "chapter_end" as "chapter_end" | "topic_end" | "none",
+      examScheduling: "separate_day" as "separate_day" | "same_day" | "specific_day",
+      examSpecificDays: [] as string[],
+      daysPerTopic: 1,
+    },
   });
 
   useEffect(() => {
@@ -115,10 +121,11 @@ export default function NewCurriculumPage() {
         end_date: formData.end_date,
         class_days: formData.class_days,
         holidays: new Map(),
+        config: formData.config,
       },
-    selectedBooks
+      selectedBooks
     );
-  }, [formData.start_date, formData.end_date, formData.class_days, selectedBooks]);
+  }, [formData.start_date, formData.end_date, formData.class_days, selectedBooks, formData.config]);
 
   const handleDayToggle = (day: string) => {
     setFormData((prev) => ({
@@ -245,6 +252,7 @@ export default function NewCurriculumPage() {
                   কারিকুলামের নাম <span className="text-destructive">*</span>
                 </Label>
                 <Input
+                  className="bg-background hover:bg-muted/30 focus:ring-primary/20 shadow-sm"
                   id="title"
                   placeholder="যেমন: ক্লাস ১০ পদার্থবিজ্ঞান ২০২৬"
                   value={formData.title}
@@ -261,7 +269,7 @@ export default function NewCurriculumPage() {
                       setFormData({ ...formData, course_id: val as string, batch_id: "" })
                     }
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="bg-background hover:bg-muted/30 focus:ring-primary/20 shadow-sm">
                       <SelectValue placeholder="কোর্স সিলেক্ট করুন">
                         {courses.find((c) => c.id.toString() === formData.course_id)?.title ||
                           "কোর্স সিলেক্ট করুন"}
@@ -283,7 +291,7 @@ export default function NewCurriculumPage() {
                     onValueChange={(val) => setFormData({ ...formData, batch_id: val as string })}
                     disabled={!formData.course_id || batches.length === 0}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="bg-background hover:bg-muted/30 focus:ring-primary/20 shadow-sm">
                       <SelectValue
                         placeholder={
                           formData.course_id
@@ -312,6 +320,7 @@ export default function NewCurriculumPage() {
                 <div className="grid gap-2">
                   <Label htmlFor="start_date">শুরুর তারিখ *</Label>
                   <Input
+                    className="bg-background hover:bg-muted/30 focus:ring-primary/20 shadow-sm"
                     id="start_date"
                     type="date"
                     value={formData.start_date}
@@ -321,6 +330,7 @@ export default function NewCurriculumPage() {
                 <div className="grid gap-2">
                   <Label htmlFor="end_date">শেষ তারিখ *</Label>
                   <Input
+                    className="bg-background hover:bg-muted/30 focus:ring-primary/20 shadow-sm"
                     id="end_date"
                     type="date"
                     value={formData.end_date}
@@ -382,7 +392,7 @@ export default function NewCurriculumPage() {
                   value={formData.template_id}
                   onValueChange={(val) => setFormData({ ...formData, template_id: val as string })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-background hover:bg-muted/30 focus:ring-primary/20 shadow-sm">
                     <SelectValue placeholder="কপি নয় — নতুন করে বানাব">
                       {formData.template_id === "none"
                         ? "কপি নয় — নতুন করে বানাব"
@@ -444,7 +454,99 @@ export default function NewCurriculumPage() {
                 </div>
               </div>
 
-              <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer">
+              <div className="space-y-4 pt-4 border-t">
+                <h3 className="text-lg font-medium">অ্যাডভান্সড সেটিংস (Advanced Settings)</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid gap-2">
+                    <Label>পরীক্ষা কখন হবে (Exam Frequency)</Label>
+                    <Select
+                      value={formData.config.examFrequency}
+                      onValueChange={(val: any) => setFormData({ ...formData, config: { ...formData.config, examFrequency: val } })}
+                    >
+                      <SelectTrigger className="bg-background hover:bg-muted/30 focus:ring-primary/20 shadow-sm">
+                        <SelectValue>
+                          {formData.config.examFrequency === "chapter_end" ? "অধ্যায় শেষে (Chapter End)" :
+                           formData.config.examFrequency === "topic_end" ? "টপিক শেষে কুইজ (Topic Quiz)" :
+                           "কোনো পরীক্ষা নেই (No Exams)"}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="chapter_end">অধ্যায় শেষে (Chapter End)</SelectItem>
+                        <SelectItem value="topic_end">টপিক শেষে কুইজ (Topic Quiz)</SelectItem>
+                        <SelectItem value="none">কোনো পরীক্ষা নেই (No Exams)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label>প্রতি টপিকের জন্য ক্লাস (Days per Topic)</Label>
+                    <Input
+                      className="bg-background hover:bg-muted/30 focus:ring-primary/20 shadow-sm"
+                      type="number"
+                      min={1}
+                      max={10}
+                      value={formData.config.daysPerTopic}
+                      onChange={(e) => setFormData({ ...formData, config: { ...formData.config, daysPerTopic: parseInt(e.target.value) || 1 } })}
+                    />
+                  </div>
+                </div>
+
+                {formData.config.examFrequency !== "none" && (
+                  <div className="grid gap-2">
+                    <Label>পরীক্ষার দিন (Exam Scheduling)</Label>
+                    <Select
+                      value={formData.config.examScheduling}
+                      onValueChange={(val: any) => setFormData({ ...formData, config: { ...formData.config, examScheduling: val } })}
+                    >
+                      <SelectTrigger className="bg-background hover:bg-muted/30 focus:ring-primary/20 shadow-sm">
+                        <SelectValue>
+                          {formData.config.examScheduling === "separate_day" ? "আলাদা দিনে (Separate Day)" :
+                           formData.config.examScheduling === "same_day" ? "ক্লাসের দিনেই (Same Day as Class)" :
+                           "সপ্তাহের নির্দিষ্ট দিনে (Specific Routine Day)"}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="separate_day">আলাদা দিনে (Separate Day)</SelectItem>
+                        <SelectItem value="same_day">ক্লাসের দিনেই (Same Day as Class)</SelectItem>
+                        <SelectItem value="specific_day">সপ্তাহের নির্দিষ্ট দিনে (Specific Routine Day)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {formData.config.examFrequency !== "none" && formData.config.examScheduling === "specific_day" && (
+                  <div className="space-y-3">
+                    <Label>কোন দিন পরীক্ষা হবে? (Select Exam Days)</Label>
+                    <div className="flex flex-wrap gap-2">
+                      {DAYS_OF_WEEK.map((day) => {
+                        const active = formData.config.examSpecificDays.includes(day);
+                        return (
+                          <button
+                            key={day}
+                            type="button"
+                            onClick={() => {
+                              const newDays = active
+                                ? formData.config.examSpecificDays.filter((d) => d !== day)
+                                : [...formData.config.examSpecificDays, day];
+                              setFormData({ ...formData, config: { ...formData.config, examSpecificDays: newDays } });
+                            }}
+                            className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
+                              active
+                                ? "bg-primary text-primary-foreground border-primary"
+                                : "bg-background hover:bg-muted"
+                            }`}
+                          >
+                            {DAY_BN[day] || day.slice(0, 3)}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer bg-muted/20 hover:bg-muted/50 transition-colors">
                 <Checkbox
                   checked={formData.is_public}
                   onCheckedChange={(c) => setFormData({ ...formData, is_public: !!c })}
@@ -456,6 +558,23 @@ export default function NewCurriculumPage() {
                   </p>
                 </div>
               </label>
+
+              {preview && (
+                <div className="pt-4 border-t space-y-4">
+                  <h3 className="text-lg font-medium text-primary">রোডম্যাপ প্রিভিউ (Preview)</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <Stat label="ক্লাসের দিন" value={preview.teachable} />
+                    <Stat label="ছুটি*" value={preview.holidays} hint="তৈরির সময় বাংলাদেশের সরকারি ছুটি যোগ হবে" />
+                    <Stat label="টপিক" value={preview.topics} />
+                    <Stat label="পরীক্ষা" value={preview.exams} />
+                  </div>
+                  {!preview.willFit && (
+                    <p className="text-sm text-amber-600 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded-md p-3">
+                      সিলেবাসের জন্য প্রায় {preview.overflow}টি ক্লাস কম পড়ছে। বাড়তি টপিক ডান পাশের বাকি টপিক প্যানেলে থাকবে — পরে বসিয়ে নিতে পারবেন।
+                    </p>
+                  )}
+                </div>
+              )}
             </CardContent>
             <CardFooter className="justify-between">
               <Button variant="outline" onClick={() => setStep(1)}>
@@ -528,9 +647,9 @@ function Stat({
   hint?: string;
 }) {
   return (
-    <div className="rounded-lg border bg-muted/30 p-3" title={hint}>
-      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">{label}</p>
-      <p className="text-2xl font-bold mt-1">{value}</p>
+    <div className="rounded-xl border border-primary/10 bg-gradient-to-br from-background to-primary/5 p-4 shadow-sm hover:shadow-md transition-shadow" title={hint}>
+      <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium">{label}</p>
+      <p className="text-3xl font-bold mt-2 text-primary">{value}</p>
     </div>
   );
 }

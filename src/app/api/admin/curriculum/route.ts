@@ -123,6 +123,7 @@ export async function POST(request: Request) {
       is_public,
       books,
       template_id,
+      config,
     } = body;
 
     if (!title || !course_id || !batch_id || !start_date || !end_date || !class_days) {
@@ -169,6 +170,7 @@ export async function POST(request: Request) {
           end_date,
           class_days,
           holidays: holidayMap,
+          config,
         },
         selectedBooks as any
       );

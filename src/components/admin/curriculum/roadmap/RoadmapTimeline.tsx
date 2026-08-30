@@ -242,7 +242,7 @@ function SessionCard({
 }) {
   const type = session.session_type;
   const softHoliday = isSoftHoliday(session);
-  const canTeach = type === "class" || type === "exam" || (type as string) === "empty-calendar-day";
+  const canTeach = type === "class" || type === "exam";
 
   const border = isSelected 
     ? "border-primary ring-2 ring-primary/20 bg-primary/5" 
@@ -333,7 +333,7 @@ function SessionCard({
                 isSelected ? "text-primary" : "text-foreground dark:text-gray-100",
                 (type as string) === "empty-calendar-day" ? "opacity-70 font-medium" : ""
               )}>
-                {format(parseISO(session.date), "EEE, MMM d")}
+                {["রবি", "সোম", "মঙ্গল", "বুধ", "বৃহঃ", "শুক্র", "শনি"][parseISO(session.date).getDay()]}, {format(parseISO(session.date), "MMM d")}
               </span>
               {isTodayClass && (
                 <Badge className="bg-primary text-primary-foreground text-xs px-2 shadow-sm font-bold">
@@ -511,6 +511,12 @@ function SessionCard({
                 <span className="sm:hidden">ড্র্যাগ করুন বা টপিক যোগ করুন</span>
               </p>
             )}
+            {(type as string) === "empty-calendar-day" && !readOnly && (
+              <p className="text-xs sm:text-sm font-medium text-muted-foreground text-center py-3 sm:py-4 px-2 border-2 border-dashed rounded-lg bg-muted/10 leading-tight">
+                এই দিনে কোনো ক্লাস নেই।<br className="mb-1" />
+                ক্লাস নিতে চাইলে <strong className="text-primary font-bold">ক্লাস যোগ করুন</strong> চাপুন।
+              </p>
+            )}
           </div>
         </div>
         
@@ -551,27 +557,27 @@ function SessionCard({
                     </ControlBtn>
                   )}
                   {type === "class" && onAddFromPool && (
-                    <ControlBtn onClick={() => onAddFromPool(session.id)} className="text-primary dark:text-white hover:bg-primary/15 hover:border-primary/40 col-span-2 sm:col-span-1">
-                      <BookOpen className="w-4 h-4 mr-1.5" /> সিলেবাস থেকে যোগ
+                    <ControlBtn onClick={() => onAddFromPool(session.id)} className="text-primary dark:text-white hover:bg-primary/15 hover:border-primary/40 col-span-2">
+                      <BookOpen className="w-4 h-4 mr-1.5 shrink-0" /> সিলেবাস থেকে যোগ
                     </ControlBtn>
                   )}
                   {type === "class" && onAddExam && (
-                    <ControlBtn onClick={() => onAddExam(session.id)} className="text-blue-600 dark:text-white hover:bg-blue-500/15 hover:border-blue-500/40">
-                      <FileSignature className="w-4 h-4 mr-1.5" /> পরীক্ষা যোগ
+                    <ControlBtn onClick={() => onAddExam(session.id)} className="text-blue-600 dark:text-white hover:bg-blue-500/15 hover:border-blue-500/40 col-span-1">
+                      <FileSignature className="w-4 h-4 mr-1.5 shrink-0" /> পরীক্ষা যোগ
                     </ControlBtn>
                   )}
                   {(type as string) === "empty-calendar-day" && onAddDay && (
                     <ControlBtn onClick={() => onAddDay(session.id, session.date.substring(0, 10))} className="text-primary dark:text-white hover:bg-primary/15 hover:border-primary/40 col-span-2">
-                      <Plus className="w-4 h-4 mr-1.5" /> ক্লাস যোগ করুন
+                      <Plus className="w-4 h-4 mr-1.5 shrink-0" /> ক্লাস যোগ করুন
                     </ControlBtn>
                   )}
                   {onRemoveDay && type !== "holiday" && (type as string) !== "empty-calendar-day" && (
                     <ControlBtn onClick={() => {
                         onRemoveDay(session.id);
                       }} 
-                      className="text-destructive dark:text-red-400 hover:bg-destructive/15 hover:border-destructive/40 border-dashed col-span-2 sm:col-span-1"
+                      className="text-destructive dark:text-red-400 hover:bg-destructive/15 hover:border-destructive/40 border-dashed col-span-1"
                     >
-                      <Trash2 className="w-4 h-4 mr-1.5 opacity-70" /> দিনটি মুছুন
+                      <Trash2 className="w-4 h-4 mr-1.5 opacity-70 shrink-0" /> দিনটি মুছুন
                     </ControlBtn>
                   )}
                 </div>

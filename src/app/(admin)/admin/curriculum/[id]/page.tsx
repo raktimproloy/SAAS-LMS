@@ -63,21 +63,8 @@ export default function CurriculumPlannerPage() {
     };
   }, []);
 
-  const asideRef = useRef<HTMLElement>(null);
-  const placeholderRef = useRef<HTMLDivElement>(null);
-
   useEffect(() => {
     if (isLoading) return;
-    
-    const syncPos = () => {
-      if (placeholderRef.current && asideRef.current) {
-        const rect = placeholderRef.current.getBoundingClientRect();
-        asideRef.current.style.left = `${rect.left}px`;
-        asideRef.current.style.width = `${rect.width}px`;
-      }
-    };
-    syncPos();
-    window.addEventListener('resize', syncPos);
     
     const timer = setTimeout(() => {
       if (!headerRef.current) return;
@@ -85,7 +72,6 @@ export default function CurriculumPlannerPage() {
       const observer = new ResizeObserver(() => {
         if (headerRef.current) {
           setHeaderHeight(headerRef.current.offsetHeight);
-          syncPos();
         }
       });
       observer.observe(headerRef.current);
@@ -96,7 +82,6 @@ export default function CurriculumPlannerPage() {
     }, 50);
     
     return () => {
-      window.removeEventListener('resize', syncPos);
       clearTimeout(timer);
       if ((headerRef as any)._observer) {
         (headerRef as any)._observer.disconnect();
@@ -321,21 +306,17 @@ export default function CurriculumPlannerPage() {
             />
           </div>
 
-          {/* Placeholder to maintain flex layout space */}
-          <div ref={placeholderRef} className="hidden xl:block w-full xl:w-[360px] 2xl:w-[400px] shrink-0" />
-
-          {/* Fixed Aside */}
+          {/* Sticky Aside */}
           {showDesktopSyllabus && (
             <aside 
-              ref={asideRef}
-              className="hidden xl:block shrink-0 z-20" 
+              className="hidden xl:block shrink-0 w-[360px] 2xl:w-[400px] sticky z-20" 
               style={{ 
-                position: 'fixed',
-                top: `${headerHeight + 68}px`, // 60px Admin header + 8px gap
-                bottom: `70px` // ~60px footer + 10px gap
+                top: `${headerHeight + 68}px`,
+                height: `calc(100vh - ${headerHeight + 68 + 70}px)`
               }}
             >
               <SyllabusPoolPanel
+                className="h-full"
                 pool={pool}
                 selectedTopicKeys={selectedTopicKeys}
                 onAddToNext={actions.addFromPool}
