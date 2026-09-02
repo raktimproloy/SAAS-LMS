@@ -45,12 +45,21 @@ const AVAILABLE_PERMISSIONS = [
   { id: "all", label: "All Permissions (Super Admin Equivalent)" },
   { id: "assistants", label: "Assistants Team" },
   { id: "courses", label: "Courses & Batches" },
-  { id: "students", label: "Student Management" },
+  { id: "curriculum", label: "Curriculum Planner" },
+  { id: "students", label: "Student Management & Attendance" },
+  { id: "reports", label: "Student Reports" },
   { id: "payments", label: "Student Payment" },
   { id: "expenses", label: "Expenses Management" },
   { id: "exams", label: "Exams Management" },
   { id: "materials", label: "Study Materials & Videos" },
+  { id: "sms", label: "SMS Logs & Messaging" },
   { id: "content", label: "Website Content (Notices/Hero)" },
+  { id: "settings", label: "Global Settings" },
+  { id: "leads", label: "Leads & Inquiries" },
+  { id: "offline_results", label: "Offline Results" },
+  { id: "qr_scanner", label: "QR Scanner & Cards" },
+  { id: "question_bank", label: "Question Bank" },
+  { id: "video_courses", label: "Video Courses" },
 ];
 
 export default function AssistantsPage() {

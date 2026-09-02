@@ -288,7 +288,7 @@ function DailyTab({
                 <DatePicker
                   value={date}
                   onChange={setDate}
-                  className="h-9 w-[180px]"
+                  className="h-9 w-[180px] print:hidden"
                 />
                 {isClassDay ? (
                   <span className="inline-flex items-center rounded-md border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
@@ -299,10 +299,14 @@ function DailyTab({
                     Not a class day ({dayName})
                   </span>
                 )}
+                <Button variant="outline" size="sm" className="gap-2 print:hidden ml-auto" onClick={() => window.print()} disabled={!students.length}>
+                  <Printer className="w-4 h-4" />
+                  Print Roster
+                </Button>
               </div>
             </div>
           </CardHeader>
-          <CardContent className="max-h-[600px] overflow-y-auto p-0">
+          <CardContent className="max-h-[600px] overflow-y-auto p-0 print:max-h-none print:overflow-visible">
             {loading ? (
               <div className="flex flex-col items-center gap-3 p-12 text-muted-foreground">
                 <div className="h-6 w-6 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -331,7 +335,7 @@ function DailyTab({
                         <div className="text-xs text-muted-foreground">{student.student_id}</div>
                       </div>
                     </div>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-wrap gap-2 print:hidden">
                       <Button
                         size="sm"
                         variant={student.attendance?.status === "present" ? "default" : "outline"}
@@ -369,6 +373,11 @@ function DailyTab({
                         <XCircle className="mr-1.5 h-4 w-4" /> Absent
                       </Button>
                     </div>
+                    <div className="hidden print:block font-bold">
+                      {student.attendance?.status === 'present' ? 'Present' : 
+                       student.attendance?.status === 'late' ? 'Late' : 
+                       student.attendance?.status === 'absent' ? 'Absent' : 'Not marked'}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -377,7 +386,7 @@ function DailyTab({
         </Card>
       </div>
 
-      <Card className="border border-border bg-card shadow-sm">
+      <Card className="border border-border bg-card shadow-sm print:hidden">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-lg">
             <UserPlus className="h-5 w-5 text-primary" />

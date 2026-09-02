@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { MessageSquare, Plus, Clock, CheckCircle2, XCircle, Save, CalendarClock, Loader2, Wallet, RefreshCw } from "lucide-react";
+import { MessageSquare, Plus, Clock, CheckCircle2, XCircle, Save, CalendarClock, Loader2, Wallet, RefreshCw, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -143,15 +143,21 @@ export default function SmsLogsPage() {
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4" data-aos="fade-down">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">SMS Operations</h1>
-          <p className="text-muted-foreground mt-1">Manage bulk messaging and view SMS delivery logs.</p>
+          <p className="text-muted-foreground mt-1 print:hidden">Manage bulk messaging and view SMS delivery logs.</p>
         </div>
-        <Button onClick={() => setIsSmsOpen(true)} className="gap-2">
-          <MessageSquare className="h-4 w-4" />
-          Send Custom SMS
-        </Button>
+        <div className="flex items-center gap-2 print:hidden">
+          <Button variant="outline" onClick={() => window.print()} className="gap-2">
+            <Printer className="h-4 w-4" />
+            Print
+          </Button>
+          <Button onClick={() => setIsSmsOpen(true)} className="gap-2">
+            <MessageSquare className="h-4 w-4" />
+            Send Custom SMS
+          </Button>
+        </div>
       </div>
 
-      <Card className="border-none shadow-sm bg-emerald-50/80 dark:bg-emerald-950/20" data-aos="fade-up" data-aos-delay="100">
+      <Card className="border-none shadow-sm bg-emerald-50/80 dark:bg-emerald-950/20 print:hidden" data-aos="fade-up" data-aos-delay="100">
         <CardContent className="pt-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-start gap-3">
@@ -188,7 +194,7 @@ export default function SmsLogsPage() {
         </CardContent>
       </Card>
 
-      <Card className="border-none shadow-md bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 overflow-hidden relative" data-aos="fade-up" data-aos-delay="200">
+      <Card className="border-none shadow-md bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 overflow-hidden relative print:hidden" data-aos="fade-up" data-aos-delay="200">
         <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none">
           <CalendarClock className="w-48 h-48" />
         </div>

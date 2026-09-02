@@ -38,6 +38,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 
 // Types
@@ -59,6 +60,9 @@ interface NoteMaterial {
   file_path: string;
   description: string | null;
   is_public: boolean;
+  collect_lead: boolean;
+  lead_mandatory: boolean;
+  lead_form_message: string | null;
   status: string;
   created_at: string;
   batch?: Batch | null;
@@ -88,6 +92,9 @@ export default function MaterialsPage() {
   const [fileUrl, setFileUrl] = useState("");
   const [description, setDescription] = useState("");
   const [isPublic, setIsPublic] = useState(false);
+  const [collectLead, setCollectLead] = useState(false);
+  const [leadMandatory, setLeadMandatory] = useState(false);
+  const [leadFormMessage, setLeadFormMessage] = useState("");
   const [status, setStatus] = useState("active");
 
   const fetchData = async () => {
@@ -154,6 +161,9 @@ export default function MaterialsPage() {
     setFileUrl("");
     setDescription("");
     setIsPublic(false);
+    setCollectLead(false);
+    setLeadMandatory(false);
+    setLeadFormMessage("");
     setStatus("active");
     setEditMode(false);
     setEditId(null);
@@ -176,6 +186,9 @@ export default function MaterialsPage() {
     setFileUrl(note.file_path);
     setDescription(note.description || "");
     setIsPublic(note.is_public);
+    setCollectLead(note.collect_lead || false);
+    setLeadMandatory(note.lead_mandatory || false);
+    setLeadFormMessage(note.lead_form_message || "");
     setStatus(note.status);
     setIsDialogOpen(true);
   };
@@ -202,6 +215,9 @@ export default function MaterialsPage() {
       file_path: fileUrl,
       description,
       is_public: isPublic,
+      collect_lead: collectLead,
+      lead_mandatory: leadMandatory,
+      lead_form_message: leadFormMessage,
       status
     };
 
@@ -436,23 +452,58 @@ export default function MaterialsPage() {
                   <Textarea id="description" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Optional description or instructions..." />
                 </div>
 
-                <div className="flex items-center space-x-2 bg-slate-50 dark:bg-slate-800 p-3 rounded-md border">
-                  <Checkbox 
-                    id="isPublic" 
-                    checked={isPublic} 
-                    onCheckedChange={(checked) => setIsPublic(checked as boolean)} 
-                  />
-                  <div className="grid gap-1.5 leading-none">
-                    <label
-                      htmlFor="isPublic"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      Make this material Public
-                    </label>
-                    <p className="text-sm text-muted-foreground">
-                      Public materials can be seen by unregistered students or visitors.
-                    </p>
+                <div className="space-y-4 py-4 border-y mt-2">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-base font-semibold">Make this material Public</Label>
+                      <p className="text-sm text-muted-foreground">Public materials can be seen by unregistered students or visitors.</p>
+                    </div>
+                    <Switch checked={isPublic} onCheckedChange={(checked) => {
+                      setIsPublic(checked);
+                      if (!checked) {
+                        setCollectLead(false);
+                        setLeadMandatory(false);
+                      }
+                    }} />
                   </div>
+
+                  {isPublic && (
+                    <div className="overflow-hidden">
+                      <div className="pt-4 border-t space-y-4 animate-in slide-in-from-top-2 duration-300">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label className="font-semibold">Enable Lead Collection</Label>
+                            <p className="text-sm text-muted-foreground">Ask visitors for their Name and Phone Number before they can view this material.</p>
+                          </div>
+                          <Switch checked={collectLead} onCheckedChange={(checked) => {
+                            setCollectLead(checked);
+                            if (!checked) setLeadMandatory(false);
+                          }} />
+                        </div>
+
+                        {collectLead && (
+                          <div className="space-y-4 pl-6 border-l-2 border-muted animate-in slide-in-from-top-2 duration-300">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <Label>Mandatory Collection</Label>
+                                <p className="text-sm text-muted-foreground">If checked, visitors cannot skip the form.</p>
+                              </div>
+                              <Switch checked={leadMandatory} onCheckedChange={setLeadMandatory} />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="leadFormMessage">Form Message (Optional)</Label>
+                              <Input 
+                                id="leadFormMessage" 
+                                placeholder="e.g. Please enter your details to view this note." 
+                                value={leadFormMessage} 
+                                onChange={(e) => setLeadFormMessage(e.target.value)} 
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
                 
                 <div className="pt-6 flex justify-end">

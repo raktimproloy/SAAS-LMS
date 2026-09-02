@@ -22,6 +22,9 @@ export default function PublicTakeExamPage() {
     batch?: { course?: { title: string } };
     start_time?: string;
     end_time?: string;
+    collect_lead?: boolean;
+    lead_mandatory?: boolean;
+    lead_form_message?: string;
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -174,6 +177,9 @@ export default function PublicTakeExamPage() {
         durationMinutes={exam.duration_minutes}
         questions={exam.questions}
         isPublic={true}
+        collectLead={exam.collect_lead}
+        leadMandatory={exam.lead_mandatory}
+        leadFormMessage={exam.lead_form_message}
       />
     </div>
   );

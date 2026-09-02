@@ -63,7 +63,7 @@ export default async function ExamQuestionsPage({ params }: { params: { id: stri
         </div>
       </div>
 
-      <QuestionEditor examId={params.id} initialQuestions={serializedQuestions} defaultMark={exam.total_marks} />
+      <QuestionEditor examId={params.id} initialQuestions={serializedQuestions} defaultMark={exam.total_marks} initialStatus={exam.status} />
     </div>
   );
 }

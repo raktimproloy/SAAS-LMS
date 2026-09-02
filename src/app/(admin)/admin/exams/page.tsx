@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Plus, Pencil, Settings, MoreHorizontal, Trash2, Database } from "lucide-react";
+import { Plus, Pencil, Settings, MoreHorizontal, Trash2, Database, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,6 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Switch } from "@/components/ui/switch";
 import {
   Table,
   TableBody,
@@ -27,6 +28,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -39,6 +41,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DateRangePicker } from "@/components/ui/date-range-picker";
 
 interface Course {
   id: number;
@@ -54,8 +57,12 @@ interface Batch {
 interface Exam {
   id: number;
   title: string;
+  description?: string | null;
   type: string;
   is_public: boolean;
+  collect_lead?: boolean;
+  lead_mandatory?: boolean;
+  lead_form_message?: string;
   start_time: string | null;
   end_time: string | null;
   duration_minutes: number;
@@ -82,8 +89,12 @@ export default function ExamsPage() {
 
   // Form Fields
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [type, setType] = useState("online_mcq");
   const [isPublic, setIsPublic] = useState(false);
+  const [collectLead, setCollectLead] = useState(false);
+  const [leadMandatory, setLeadMandatory] = useState(false);
+  const [leadFormMessage, setLeadFormMessage] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [durationMinutes, setDurationMinutes] = useState("");
@@ -137,9 +148,10 @@ export default function ExamsPage() {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          title, type, is_public: isPublic, start_time: startTime || null, end_time: endTime || null,
+          title, description, type, is_public: isPublic, start_time: startTime || null, end_time: endTime || null,
           duration_minutes: durationMinutes, total_marks: totalMarks, negative_marking: negativeMarking,
-          batch_id: batchId || null, course_id: courseId || null, status
+          batch_id: batchId || null, course_id: courseId || null, status,
+          collect_lead: collectLead, lead_mandatory: leadMandatory, lead_form_message: leadFormMessage || null
         }),
       });
       
@@ -163,8 +175,12 @@ export default function ExamsPage() {
 
   const resetForm = () => {
     setTitle("");
+    setDescription("");
     setType("online_mcq");
     setIsPublic(false);
+    setCollectLead(false);
+    setLeadMandatory(false);
+    setLeadFormMessage("");
     setStartTime("");
     setEndTime("");
     setDurationMinutes("");
@@ -179,8 +195,12 @@ export default function ExamsPage() {
   const handleEdit = (exam: Exam) => {
     setEditingExamId(exam.id);
     setTitle(exam.title);
+    setDescription(exam.description || "");
     setType(exam.type);
     setIsPublic(exam.is_public);
+    setCollectLead(exam.collect_lead || false);
+    setLeadMandatory(exam.lead_mandatory || false);
+    setLeadFormMessage(exam.lead_form_message || "");
     setStartTime(exam.start_time ? new Date(exam.start_time).toISOString().slice(0, 16) : "");
     setEndTime(exam.end_time ? new Date(exam.end_time).toISOString().slice(0, 16) : "");
     setDurationMinutes(exam.duration_minutes.toString());
@@ -308,6 +328,18 @@ export default function ExamsPage() {
                 <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} required />
               </div>
 
+              <div className="space-y-2">
+                <Label htmlFor="description">Description (Optional)</Label>
+                <Textarea 
+                  id="description" 
+                  value={description} 
+                  onChange={(e) => setDescription(e.target.value)} 
+                  placeholder="Enter exam instructions or details..."
+                  className="resize-none"
+                  rows={3}
+                />
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="type">Exam Type</Label>
@@ -322,16 +354,59 @@ export default function ExamsPage() {
                   </select>
                 </div>
                 
-                <div className="space-y-2 flex items-center h-full pt-6">
-                  <label className="flex items-center gap-2 text-sm font-medium">
-                    <input 
-                      type="checkbox" 
-                      className="rounded border-input h-4 w-4 text-primary"
-                      checked={isPublic} 
-                      onChange={(e) => setIsPublic(e.target.checked)} 
-                    />
-                    Make this a Public Exam (Open for all)
-                  </label>
+                <div className="space-y-4 md:col-span-2 py-4 border-y mt-2">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <Label className="text-base font-semibold">Public Exam (Open for all)</Label>
+                      <p className="text-sm text-muted-foreground">Allow anyone to take this exam via a public link.</p>
+                    </div>
+                    <Switch checked={isPublic} onCheckedChange={(checked) => {
+                      setIsPublic(checked);
+                      if (!checked) {
+                        setCollectLead(false);
+                        setLeadMandatory(false);
+                      }
+                    }} />
+                  </div>
+
+                  {isPublic && (
+                    <div className="overflow-hidden">
+                      <div className="pt-4 border-t space-y-4 animate-in slide-in-from-top-2 duration-300">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <Label className="font-semibold">Collect Lead Information</Label>
+                            <p className="text-sm text-muted-foreground">Ask users for Name, Phone, and Class Level before showing results.</p>
+                          </div>
+                          <Switch checked={collectLead} onCheckedChange={(checked) => {
+                            setCollectLead(checked);
+                            if (!checked) setLeadMandatory(false);
+                          }} />
+                        </div>
+
+                        {collectLead && (
+                          <div className="space-y-4 pl-6 border-l-2 border-muted animate-in slide-in-from-top-2 duration-300">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <Label>Mandatory Lead Collection</Label>
+                                <p className="text-sm text-muted-foreground">Users cannot skip the form to see results.</p>
+                              </div>
+                              <Switch checked={leadMandatory} onCheckedChange={setLeadMandatory} />
+                            </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="leadFormMessage">Custom Form Message (Optional)</Label>
+                              <Input 
+                                id="leadFormMessage" 
+                                placeholder="e.g. ফলাফল দেখতে আপনার তথ্য প্রদান করুন।" 
+                                value={leadFormMessage} 
+                                onChange={(e) => setLeadFormMessage(e.target.value)} 
+                              />
+                              <p className="text-xs text-muted-foreground">Overrides the default description shown on the lead collection form.</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                     <div className="space-y-2">
@@ -371,14 +446,17 @@ export default function ExamsPage() {
                       </select>
                     </div>
                 
-                <div className="space-y-2">
-                  <Label htmlFor="start_time">Start Time (Optional)</Label>
-                  <Input id="start_time" type="datetime-local" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="end_time">End Time (Optional)</Label>
-                  <Input id="end_time" type="datetime-local" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
+                <div className="space-y-2 md:col-span-2 py-2">
+                  <Label>Exam Schedule (Optional)</Label>
+                  <DateRangePicker 
+                    startDate={startTime ? startTime.split('T')[0] : ""}
+                    endDate={endTime ? endTime.split('T')[0] : ""}
+                    onStartDateChange={(date) => setStartTime(date ? `${date}T00:00` : "")}
+                    onEndDateChange={(date) => setEndTime(date ? `${date}T23:59` : "")}
+                    placeholder="Select start and end dates"
+                    className="w-full"
+                  />
+                  <p className="text-xs text-muted-foreground">Select date range. Times will be set to start of day and end of day respectively.</p>
                 </div>
                 
                 <div className="space-y-2">
@@ -553,6 +631,13 @@ export default function ExamsPage() {
                               <DropdownMenuItem onClick={() => openImportDialog(exam)}>
                                 <Database className="mr-2 h-4 w-4" />
                                 <span>Import from Question Bank</span>
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem className="p-0">
+                                <Link href={`/admin/exams/${exam.id}/results`} className="flex w-full items-center px-2 py-1.5 cursor-pointer text-amber-600 dark:text-amber-500 font-medium">
+                                  <Trophy className="mr-2 h-4 w-4" />
+                                  <span>Results & Leaderboard</span>
+                                </Link>
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem 

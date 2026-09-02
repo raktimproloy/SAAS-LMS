@@ -8,6 +8,7 @@ export interface JwtPayload {
   role: string; // 'super_admin' | 'assistant' | 'student'
   email?: string;
   student_id?: string;
+  permissions?: string[];
 }
 
 export const signToken = (payload: JwtPayload, expiresIn: string = JWT_EXPIRES_IN): string => {

@@ -79,6 +79,12 @@ export default async function PublicExamLandingPage({ params }: PageProps) {
             <h1 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-4 leading-tight">
               {exam.title}
             </h1>
+
+            {exam.description && (
+              <p className="text-slate-600 dark:text-slate-300 text-base sm:text-lg mb-6 leading-relaxed whitespace-pre-wrap">
+                {exam.description}
+              </p>
+            )}
             
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 mb-8">
               {(exam.course || exam.batch?.course) && (

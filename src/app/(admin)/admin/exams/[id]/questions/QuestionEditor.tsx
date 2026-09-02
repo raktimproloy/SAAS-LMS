@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 
 interface Option {
   id: string;
@@ -31,8 +32,9 @@ export interface Question {
   isNew?: boolean;
 }
 
-export default function QuestionEditor({ examId, initialQuestions, defaultMark }: { examId: string, initialQuestions: Question[], defaultMark?: number }) {
+export default function QuestionEditor({ examId, initialQuestions, defaultMark, initialStatus }: { examId: string, initialQuestions: Question[], defaultMark?: number, initialStatus?: string }) {
   const [questions, setQuestions] = useState<Question[]>(initialQuestions || []);
+  const [examStatus, setExamStatus] = useState(initialStatus || 'inactive');
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -41,7 +43,6 @@ export default function QuestionEditor({ examId, initialQuestions, defaultMark }
   // Auto-save logic
   useEffect(() => {
     // Avoid saving on initial load if empty or just loaded without changes
-    // But since this is a simple implementation, a debounced save on any change is fine
     if (questions.length === 0 && initialQuestions.length === 0) return;
     
     const timer = setTimeout(() => {
@@ -128,6 +129,30 @@ export default function QuestionEditor({ examId, initialQuestions, defaultMark }
       await fetch(`/api/admin/exams/${examId}/questions/${id}`, { method: 'DELETE' });
     } catch (e) {
       console.error("Failed to delete question", e);
+    }
+  };
+
+  const handleToggleExamStatus = async () => {
+    const previousStatus = examStatus;
+    const newStatus = examStatus === "active" ? "inactive" : "active";
+    
+    // Optimistic UI update
+    setExamStatus(newStatus);
+    
+    try {
+      const res = await fetch(`/api/admin/exams/${examId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus })
+      });
+      if (!res.ok) {
+        setExamStatus(previousStatus); // Revert
+        alert("Failed to change exam status");
+      }
+    } catch (err) {
+      console.error(err);
+      setExamStatus(previousStatus); // Revert
+      alert("Failed to change exam status");
     }
   };
 
@@ -244,30 +269,57 @@ export default function QuestionEditor({ examId, initialQuestions, defaultMark }
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap gap-3 p-4 bg-muted/30 rounded-lg border">
-        <Button variant="outline" onClick={() => window.open("/api/admin/exams/template?type=xlsx", "_blank")}>
-          <FileDown className="mr-2 h-4 w-4" /> Download Template
-        </Button>
-        <div className="relative">
-          <input 
-            type="file" 
-            ref={fileInputRef} 
-            onChange={handleFileUpload} 
-            accept=".xlsx,.csv,.docx" 
-            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-            disabled={isUploading}
-          />
-          <Button variant="secondary" disabled={isUploading}>
-            <UploadCloud className="mr-2 h-4 w-4" /> {isUploading ? "Uploading..." : "Upload File"}
+      {/* Sticky Header Panel */}
+      <div className="sticky -top-4 lg:-top-6 z-50 flex flex-col md:flex-row gap-4 py-3 px-4 lg:px-6 bg-background border-b shadow-sm justify-between items-start md:items-center -mx-4 lg:-mx-6 mb-6">
+        
+        {/* Left Side: Actions & Stats */}
+        <div className="flex items-center flex-wrap gap-4">
+          <Button variant="outline" size="sm" onClick={() => window.open("/api/admin/exams/template?type=xlsx", "_blank")}>
+            <FileDown className="mr-2 h-4 w-4" /> <span className="hidden sm:inline">Download Template</span>
           </Button>
+          
+          <div className="relative">
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              onChange={handleFileUpload} 
+              accept=".xlsx,.csv,.docx" 
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              disabled={isUploading}
+            />
+            <Button variant="secondary" size="sm" disabled={isUploading}>
+              <UploadCloud className="mr-2 h-4 w-4" /> {isUploading ? "Uploading..." : <span className="hidden sm:inline">Upload File</span>}
+            </Button>
+          </div>
+          
+          <div className="hidden md:block h-6 w-px bg-border mx-1"></div>
+          
+          <div className="text-sm font-medium text-muted-foreground whitespace-nowrap">
+            <span className="text-foreground">{questions.length}</span> blocks
+          </div>
         </div>
-      </div>
+        
+        {/* Right Side: Toggles & Save Status */}
+        <div className="flex items-center flex-wrap gap-6 w-full md:w-auto justify-between md:justify-end">
+          
+          {/* Exam Status Toggle */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-muted-foreground cursor-default">Status: {examStatus === "active" ? "Active" : "Inactive"}</span>
+            <Switch 
+              checked={examStatus === "active"} 
+              onCheckedChange={handleToggleExamStatus}
+            />
+          </div>
 
-      <div className="flex justify-between items-center text-sm text-muted-foreground">
-        <div>{questions.length} total blocks</div>
-        <div className="flex items-center gap-2">
-          {isSaving && <span className="animate-pulse text-amber-500">Saving changes...</span>}
-          {lastSaved && !isSaving && <span className="text-green-600">Saved</span>}
+          {/* Save Status */}
+          <div className="flex items-center min-w-[100px] justify-end">
+            {isSaving ? (
+              <span className="animate-pulse text-amber-500 font-medium text-xs bg-amber-500/10 px-2 py-1 rounded-md whitespace-nowrap">Saving...</span>
+            ) : lastSaved ? (
+              <span className="text-emerald-600 font-medium text-xs bg-emerald-500/10 px-2 py-1 rounded-md whitespace-nowrap">Saved</span>
+            ) : null}
+          </div>
+
         </div>
       </div>
 
@@ -410,127 +462,132 @@ export default function QuestionEditor({ examId, initialQuestions, defaultMark }
                             </div>
                             
                             {q.type === 'mcq' && q.options && (
-                              <div className="space-y-3 pl-4 border-l-2 border-muted">
-                                 {q.options.map((opt, oIdx) => (
-                                   <div key={opt.id} className="flex items-center gap-3">
-                                     <button
-                                       type="button"
-                                       title="Mark as correct option"
-                                       onClick={() => {
-                                         const newQs = structuredClone(questions);
-                                         newQs[index].correct_option = opt.id;
-                                         setQuestions(newQs);
-                                       }}
-                                       className={`w-8 h-8 flex items-center justify-center rounded-lg border transition-all shrink-0 cursor-pointer ${
-                                         q.correct_option === opt.id 
-                                           ? "bg-green-500 border-green-500 text-white shadow-sm shadow-green-500/30" 
-                                           : "bg-transparent border-green-500 text-transparent hover:bg-green-500/10 hover:text-green-500/30"
-                                       }`}
-                                     >
-                                       <Check strokeWidth={3} className="w-4 h-4" />
-                                     </button>
-                                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 font-bold text-sm ${
-                                       q.correct_option === opt.id ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 border border-transparent'
-                                     }`}>
-                                       {String.fromCharCode(65 + oIdx)}
-                                     </div>
-                                     <div className="flex flex-col flex-1 gap-2">
-                                       <Input 
-                                         value={opt.text}
-                                         placeholder="Option text..."
-                                         onChange={(e) => {
-                                           const newQs = structuredClone(questions);
-                                           if (newQs[index].options) {
-                                             newQs[index].options![oIdx].text = e.target.value;
-                                           }
-                                           setQuestions(newQs);
-                                         }}
-                                         className={q.correct_option === opt.id ? "border-green-500" : ""}
-                                       />
-                                       {opt.image_url && (
-                                         <div className="relative inline-block border rounded-md overflow-hidden bg-muted/30 p-1 self-start mt-2">
-                                           <img src={opt.image_url} alt="Option" className="max-h-24 object-contain" />
-                                           <Button
-                                             variant="destructive"
-                                             size="icon"
-                                             className="absolute top-1 right-1 h-5 w-5 rounded-full opacity-80 hover:opacity-100"
-                                             onClick={() => {
-                                               const newQs = structuredClone(questions);
-                                               if (newQs[index].options) {
-                                                 newQs[index].options![oIdx].image_url = undefined;
-                                               }
-                                               setQuestions(newQs);
-                                             }}
-                                           >
-                                             <X className="h-3 w-3" />
-                                           </Button>
-                                         </div>
-                                       )}
-                                     </div>
-                                     {!opt.image_url && (
-                                       <div className="flex shrink-0">
-                                          <input
-                                            type="file"
-                                            accept="image/*"
-                                            id={`opt-img-${index}-${oIdx}`}
-                                            className="hidden"
-                                            onChange={async (e) => {
-                                              const file = e.target.files?.[0];
-                                              if (file) {
-                                                const url = await handleSingleImageUpload(file);
-                                                if (url) {
-                                                  const newQs = structuredClone(questions);
-                                                  if (newQs[index].options) {
-                                                    newQs[index].options![oIdx].image_url = url;
-                                                  }
-                                                  setQuestions(newQs);
-                                                }
+                              <div className="space-y-4 pt-2 border-t border-muted mt-4">
+                                <h4 className="text-sm font-medium text-muted-foreground px-1">Options</h4>
+                                {q.options.map((opt, oIdx) => (
+                                  <div key={opt.id} className={`flex items-start gap-3 p-3 rounded-lg border transition-all ${
+                                    q.correct_option === opt.id 
+                                      ? 'border-green-500 bg-green-500/5 dark:bg-green-500/10' 
+                                      : 'border-border bg-background hover:border-muted-foreground/30'
+                                  }`}>
+                                    <div className="flex flex-col gap-2 mt-1 shrink-0">
+                                      <button
+                                        type="button"
+                                        title="Mark as correct option"
+                                        onClick={() => {
+                                          const newQs = structuredClone(questions);
+                                          newQs[index].correct_option = opt.id;
+                                          setQuestions(newQs);
+                                        }}
+                                        className={`w-10 h-10 flex items-center justify-center rounded-lg border font-bold text-sm transition-all cursor-pointer ${
+                                          q.correct_option === opt.id 
+                                            ? "bg-green-500 border-green-500 text-white shadow-sm shadow-green-500/30" 
+                                            : "bg-slate-100 dark:bg-slate-800 text-slate-500 border-transparent hover:bg-green-500/10 hover:text-green-500"
+                                        }`}
+                                      >
+                                        {String.fromCharCode(65 + oIdx)}
+                                      </button>
+                                    </div>
+                                    <div className="flex flex-col flex-1 gap-3">
+                                      <div className="flex items-center gap-2 w-full">
+                                        <Input 
+                                          value={opt.text}
+                                          placeholder="Option text..."
+                                          onChange={(e) => {
+                                            const newQs = structuredClone(questions);
+                                            if (newQs[index].options) {
+                                              newQs[index].options![oIdx].text = e.target.value;
+                                            }
+                                            setQuestions(newQs);
+                                          }}
+                                          className={`flex-1 ${q.correct_option === opt.id ? "border-green-500/50 focus-visible:ring-green-500/30" : ""}`}
+                                        />
+                                        {!opt.image_url && (
+                                          <div className="flex shrink-0">
+                                             <input
+                                               type="file"
+                                               accept="image/*"
+                                               id={`opt-img-${index}-${oIdx}`}
+                                               className="hidden"
+                                               onChange={async (e) => {
+                                                 const file = e.target.files?.[0];
+                                                 if (file) {
+                                                   const url = await handleSingleImageUpload(file);
+                                                   if (url) {
+                                                     const newQs = structuredClone(questions);
+                                                     if (newQs[index].options) {
+                                                       newQs[index].options![oIdx].image_url = url;
+                                                     }
+                                                     setQuestions(newQs);
+                                                   }
+                                                 }
+                                                 e.target.value = '';
+                                               }}
+                                             />
+                                             <Label htmlFor={`opt-img-${index}-${oIdx}`} className="cursor-pointer inline-flex items-center justify-center h-10 px-3 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors text-sm font-medium gap-2">
+                                               <ImagePlus className="h-4 w-4 text-muted-foreground" /> <span className="hidden sm:inline">Image</span>
+                                             </Label>
+                                          </div>
+                                        )}
+                                        <Button 
+                                          variant="outline" 
+                                          size="icon"
+                                          className="h-10 w-10 text-red-500 hover:text-red-700 hover:bg-red-50 hover:border-red-200 shrink-0"
+                                          onClick={() => {
+                                            const newQs = structuredClone(questions);
+                                            newQs[index].options?.splice(oIdx, 1);
+                                            setQuestions(newQs);
+                                          }}
+                                        >
+                                          <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                      </div>
+                                      {opt.image_url && (
+                                        <div className="relative inline-block border rounded-md overflow-hidden bg-muted/30 p-1 self-start">
+                                          <img src={opt.image_url} alt="Option" className="max-h-32 object-contain rounded" />
+                                          <Button
+                                            variant="destructive"
+                                            size="icon"
+                                            className="absolute top-1 right-1 h-6 w-6 rounded-full opacity-80 hover:opacity-100"
+                                            onClick={() => {
+                                              const newQs = structuredClone(questions);
+                                              if (newQs[index].options) {
+                                                newQs[index].options![oIdx].image_url = undefined;
                                               }
-                                              e.target.value = '';
+                                              setQuestions(newQs);
                                             }}
-                                          />
-                                          <Label htmlFor={`opt-img-${index}-${oIdx}`} className="cursor-pointer inline-flex items-center justify-center h-10 px-3 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors text-sm font-medium gap-2 shrink-0">
-                                            <ImagePlus className="h-4 w-4 text-muted-foreground" /> Add Image
-                                          </Label>
-                                       </div>
-                                     )}
-                                     <Button 
-                                       variant="ghost" 
-                                       size="icon"
-                                       className="h-10 w-10 text-red-500 hover:text-red-700 hover:bg-red-50 shrink-0"
-                                       onClick={() => {
-                                         const newQs = structuredClone(questions);
-                                         newQs[index].options?.splice(oIdx, 1);
-                                         setQuestions(newQs);
-                                       }}
-                                     >
-                                       <Trash2 className="h-4 w-4" />
-                                     </Button>
-                                   </div>
-                                 ))}
-                                 <Button 
-                                   variant="ghost" 
-                                   size="sm" 
-                                   className="mt-2 text-muted-foreground"
-                                   onClick={() => {
-                                     const newQs = structuredClone(questions);
-                                     const newOptId = Date.now().toString();
-                                     newQs[index].options?.push({ id: newOptId, text: "" });
-                                     setQuestions(newQs);
-                                   }}
-                                 >
-                                   <Plus className="h-4 w-4 mr-2" /> Add Option
-                                 </Button>
+                                          >
+                                            <X className="h-3 w-3" />
+                                          </Button>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))}
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="mt-2 w-full border-dashed"
+                                  onClick={() => {
+                                    const newQs = structuredClone(questions);
+                                    const newOptId = Date.now().toString();
+                                    newQs[index].options?.push({ id: newOptId, text: "" });
+                                    setQuestions(newQs);
+                                  }}
+                                >
+                                  <Plus className="h-4 w-4 mr-2" /> Add Option
+                                </Button>
                               </div>
                             )}
                             
                             {q.type !== 'passage' && (
-                              <div className="mt-4 flex gap-4">
-                                 <div className="w-24">
-                                   <Label className="text-xs text-muted-foreground">Marks</Label>
+                              <div className="mt-6 flex flex-col sm:flex-row gap-4 p-4 rounded-lg bg-muted/30 border border-muted">
+                                 <div className="w-full sm:w-32">
+                                   <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">Marks</Label>
                                    <Input 
                                      type="number" 
                                      step="0.5" 
+                                     className="bg-background"
                                      value={q.marks || 0} 
                                      onChange={(e) => {
                                        const newQs = structuredClone(questions);
@@ -540,8 +597,9 @@ export default function QuestionEditor({ examId, initialQuestions, defaultMark }
                                    />
                                  </div>
                                  <div className="flex-1">
-                                   <Label className="text-xs text-muted-foreground">Explanation / Solution</Label>
+                                   <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">Explanation / Solution</Label>
                                    <Input 
+                                     className="bg-background"
                                      value={q.explanation || ""} 
                                      onChange={(e) => {
                                        const newQs = structuredClone(questions);
@@ -563,13 +621,13 @@ export default function QuestionEditor({ examId, initialQuestions, defaultMark }
                                 {q.children?.map((cq, cIdx) => {
                                   const cqIdStr = cq.id?.toString() || "";
                                   return (
-                                    <div key={cq.id} className="mb-4 pl-4 border-l-2 py-2">
-                                      <div className="flex justify-between items-center mb-2">
-                                        <Badge variant="outline">{numberMap[cqIdStr]}</Badge>
+                                    <div key={cq.id} className="mb-6 p-4 rounded-lg border bg-background shadow-sm">
+                                      <div className="flex justify-between items-center mb-4">
+                                        <Badge variant="secondary" className="px-3 py-1">{numberMap[cqIdStr]}</Badge>
                                         <Button 
                                         variant="ghost" 
                                         size="icon"
-                                        className="h-6 w-6 text-red-500 hover:text-red-700 hover:bg-red-50"
+                                        className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
                                         onClick={() => {
                                           if (window.confirm('Delete this child question?')) {
                                             if (cq.id) deleteQuestionApi(cq.id);
@@ -670,150 +728,156 @@ export default function QuestionEditor({ examId, initialQuestions, defaultMark }
                                      </div>
                                     
                                     {cq.options && (
-                                      <div className="space-y-3 pl-4 border-l-2 border-muted mb-4">
-                                         {cq.options.map((opt, oIdx) => (
-                                           <div key={opt.id} className="flex items-center gap-3">
-                                             <button
-                                               type="button"
-                                               title="Mark as correct option"
-                                               onClick={() => {
-                                                 const newQs = structuredClone(questions);
-                                                 newQs[index].children![cIdx].correct_option = opt.id;
-                                                 setQuestions(newQs);
-                                               }}
-                                               className={`w-8 h-8 flex items-center justify-center rounded-lg border transition-all shrink-0 cursor-pointer ${
-                                                 cq.correct_option === opt.id 
-                                                   ? "bg-green-500 border-green-500 text-white shadow-sm shadow-green-500/30" 
-                                                   : "bg-transparent border-green-500 text-transparent hover:bg-green-500/10 hover:text-green-500/30"
-                                               }`}
-                                             >
-                                               <Check strokeWidth={3} className="w-4 h-4" />
-                                             </button>
-                                             <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 font-bold text-sm ${
-                                               cq.correct_option === opt.id ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 border border-transparent'
-                                             }`}>
-                                               {String.fromCharCode(65 + oIdx)}
-                                             </div>
-                                             <div className="flex flex-col flex-1 gap-2">
-                                               <Input 
-                                                 value={opt.text}
-                                                 placeholder="Option text..."
-                                                 onChange={(e) => {
-                                                   const newQs = structuredClone(questions);
-                                                   if (newQs[index].children![cIdx].options) {
-                                                     newQs[index].children![cIdx].options![oIdx].text = e.target.value;
-                                                   }
-                                                   setQuestions(newQs);
-                                                 }}
-                                                 className={cq.correct_option === opt.id ? "border-green-500" : ""}
-                                               />
-                                               {opt.image_url && (
-                                                 <div className="relative inline-block border rounded-md overflow-hidden bg-muted/30 p-1 self-start mt-2">
-                                                   <img src={opt.image_url} alt="Option" className="max-h-24 object-contain" />
-                                                   <Button
-                                                     variant="destructive"
-                                                     size="icon"
-                                                     className="absolute top-1 right-1 h-5 w-5 rounded-full opacity-80 hover:opacity-100"
-                                                     onClick={() => {
-                                                       const newQs = structuredClone(questions);
-                                                       if (newQs[index].children![cIdx].options) {
-                                                         newQs[index].children![cIdx].options![oIdx].image_url = undefined;
-                                                       }
-                                                       setQuestions(newQs);
-                                                     }}
-                                                   >
-                                                     <X className="h-3 w-3" />
-                                                   </Button>
-                                                 </div>
-                                               )}
-                                             </div>
-                                             {!opt.image_url && (
-                                               <div className="flex shrink-0">
-                                                  <input
-                                                    type="file"
-                                                    accept="image/*"
-                                                    id={`cq-img-${index}-${cIdx}-${oIdx}`}
-                                                    className="hidden"
-                                                    onChange={async (e) => {
-                                                      const file = e.target.files?.[0];
-                                                      if (file) {
-                                                        const url = await handleSingleImageUpload(file);
-                                                        if (url) {
-                                                          const newQs = structuredClone(questions);
-                                                          if (newQs[index].children![cIdx].options) {
-                                                            newQs[index].children![cIdx].options![oIdx].image_url = url;
-                                                          }
-                                                          setQuestions(newQs);
-                                                        }
+                                      <div className="space-y-4 pt-2 border-t border-muted mt-4">
+                                        <h4 className="text-sm font-medium text-muted-foreground px-1">Options</h4>
+                                        {cq.options.map((opt, oIdx) => (
+                                          <div key={opt.id} className={`flex items-start gap-3 p-3 rounded-lg border transition-all ${
+                                            cq.correct_option === opt.id 
+                                              ? 'border-green-500 bg-green-500/5 dark:bg-green-500/10' 
+                                              : 'border-border bg-background hover:border-muted-foreground/30'
+                                          }`}>
+                                            <div className="flex flex-col gap-2 mt-1 shrink-0">
+                                              <button
+                                                type="button"
+                                                title="Mark as correct option"
+                                                onClick={() => {
+                                                  const newQs = structuredClone(questions);
+                                                  newQs[index].children![cIdx].correct_option = opt.id;
+                                                  setQuestions(newQs);
+                                                }}
+                                                className={`w-10 h-10 flex items-center justify-center rounded-lg border font-bold text-sm transition-all cursor-pointer ${
+                                                  cq.correct_option === opt.id 
+                                                    ? "bg-green-500 border-green-500 text-white shadow-sm shadow-green-500/30" 
+                                                    : "bg-slate-100 dark:bg-slate-800 text-slate-500 border-transparent hover:bg-green-500/10 hover:text-green-500"
+                                                }`}
+                                              >
+                                                {String.fromCharCode(65 + oIdx)}
+                                              </button>
+                                            </div>
+                                            <div className="flex flex-col flex-1 gap-3">
+                                              <div className="flex items-center gap-2 w-full">
+                                                <Input 
+                                                  value={opt.text}
+                                                  placeholder="Option text..."
+                                                  onChange={(e) => {
+                                                    const newQs = structuredClone(questions);
+                                                    if (newQs[index].children![cIdx].options) {
+                                                      newQs[index].children![cIdx].options![oIdx].text = e.target.value;
+                                                    }
+                                                    setQuestions(newQs);
+                                                  }}
+                                                  className={`flex-1 ${cq.correct_option === opt.id ? "border-green-500/50 focus-visible:ring-green-500/30" : ""}`}
+                                                />
+                                                {!opt.image_url && (
+                                                  <div className="flex shrink-0">
+                                                     <input
+                                                       type="file"
+                                                       accept="image/*"
+                                                       id={`cq-img-${index}-${cIdx}-${oIdx}`}
+                                                       className="hidden"
+                                                       onChange={async (e) => {
+                                                         const file = e.target.files?.[0];
+                                                         if (file) {
+                                                           const url = await handleSingleImageUpload(file);
+                                                           if (url) {
+                                                             const newQs = structuredClone(questions);
+                                                             if (newQs[index].children![cIdx].options) {
+                                                               newQs[index].children![cIdx].options![oIdx].image_url = url;
+                                                             }
+                                                             setQuestions(newQs);
+                                                           }
+                                                         }
+                                                         e.target.value = '';
+                                                       }}
+                                                     />
+                                                     <Label htmlFor={`cq-img-${index}-${cIdx}-${oIdx}`} className="cursor-pointer inline-flex items-center justify-center h-10 px-3 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors text-sm font-medium gap-2">
+                                                       <ImagePlus className="h-4 w-4 text-muted-foreground" /> <span className="hidden sm:inline">Image</span>
+                                                     </Label>
+                                                  </div>
+                                                )}
+                                                <Button 
+                                                  variant="outline" 
+                                                  size="icon"
+                                                  className="h-10 w-10 text-red-500 hover:text-red-700 hover:bg-red-50 hover:border-red-200 shrink-0"
+                                                  onClick={() => {
+                                                    const newQs = structuredClone(questions);
+                                                    newQs[index].children![cIdx].options?.splice(oIdx, 1);
+                                                    setQuestions(newQs);
+                                                  }}
+                                                >
+                                                  <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                              </div>
+                                              {opt.image_url && (
+                                                <div className="relative inline-block border rounded-md overflow-hidden bg-muted/30 p-1 self-start">
+                                                  <img src={opt.image_url} alt="Option" className="max-h-32 object-contain rounded" />
+                                                  <Button
+                                                    variant="destructive"
+                                                    size="icon"
+                                                    className="absolute top-1 right-1 h-6 w-6 rounded-full opacity-80 hover:opacity-100"
+                                                    onClick={() => {
+                                                      const newQs = structuredClone(questions);
+                                                      if (newQs[index].children![cIdx].options) {
+                                                        newQs[index].children![cIdx].options![oIdx].image_url = undefined;
                                                       }
-                                                      e.target.value = '';
+                                                      setQuestions(newQs);
                                                     }}
-                                                  />
-                                                  <Label htmlFor={`cq-img-${index}-${cIdx}-${oIdx}`} className="cursor-pointer inline-flex items-center justify-center h-10 px-3 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors text-sm font-medium gap-2 shrink-0">
-                                                    <ImagePlus className="h-4 w-4 text-muted-foreground" /> Add Image
-                                                  </Label>
-                                               </div>
-                                             )}
-                                             <Button 
-                                               variant="ghost" 
-                                               size="icon"
-                                               className="h-10 w-10 text-red-500 hover:text-red-700 hover:bg-red-50 shrink-0"
-                                               onClick={() => {
-                                                 const newQs = structuredClone(questions);
-                                                 newQs[index].children![cIdx].options?.splice(oIdx, 1);
-                                                 setQuestions(newQs);
-                                               }}
-                                             >
-                                               <Trash2 className="h-4 w-4" />
-                                             </Button>
-                                           </div>
-                                         ))}
-                                         <Button 
-                                           variant="ghost" 
-                                           size="sm" 
-                                           className="mt-2 text-muted-foreground"
-                                           onClick={() => {
-                                             const newQs = structuredClone(questions);
-                                             const newOptId = Date.now().toString();
-                                             newQs[index].children![cIdx].options?.push({ id: newOptId, text: "" });
-                                             setQuestions(newQs);
-                                           }}
-                                         >
-                                           <Plus className="h-4 w-4 mr-2" /> Add Option
-                                         </Button>
+                                                  >
+                                                    <X className="h-3 w-3" />
+                                                  </Button>
+                                                </div>
+                                              )}
+                                            </div>
+                                          </div>
+                                        ))}
+                                        <Button 
+                                          variant="outline" 
+                                          size="sm" 
+                                          className="mt-2 w-full border-dashed"
+                                          onClick={() => {
+                                            const newQs = structuredClone(questions);
+                                            const newOptId = Date.now().toString();
+                                            newQs[index].children![cIdx].options?.push({ id: newOptId, text: "" });
+                                            setQuestions(newQs);
+                                          }}
+                                        >
+                                          <Plus className="h-4 w-4 mr-2" /> Add Option
+                                        </Button>
                                       </div>
                                     )}
 
-                                    <div className="mt-4 flex gap-4">
-                                       <div className="w-24">
-                                         <Label className="text-xs text-muted-foreground">Marks</Label>
-                                         <Input 
-                                           type="number" 
-                                           step="0.5" 
-                                           value={cq.marks || 0} 
-                                           onChange={(e) => {
-                                             const newQs = structuredClone(questions);
-                                             newQs[index].children![cIdx].marks = parseFloat(e.target.value);
-                                             setQuestions(newQs);
-                                           }}
-                                         />
-                                       </div>
-                                       <div className="flex-1">
-                                         <Label className="text-xs text-muted-foreground">Explanation / Solution</Label>
-                                         <Input 
-                                           value={cq.explanation || ""} 
-                                           onChange={(e) => {
-                                             const newQs = structuredClone(questions);
-                                             newQs[index].children![cIdx].explanation = e.target.value;
-                                             setQuestions(newQs);
-                                           }}
-                                           placeholder="Add explanation..."
-                                         />
-                                       </div>
+                                     <div className="mt-6 flex flex-col sm:flex-row gap-4 p-4 rounded-lg bg-muted/30 border border-muted">
+                                        <div className="w-full sm:w-32">
+                                          <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">Marks</Label>
+                                          <Input 
+                                            type="number" 
+                                            step="0.5" 
+                                            className="bg-background"
+                                            value={cq.marks || 0} 
+                                            onChange={(e) => {
+                                              const newQs = structuredClone(questions);
+                                              newQs[index].children![cIdx].marks = parseFloat(e.target.value);
+                                              setQuestions(newQs);
+                                            }}
+                                          />
+                                        </div>
+                                        <div className="flex-1">
+                                          <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">Explanation / Solution</Label>
+                                          <Input 
+                                            className="bg-background"
+                                            value={cq.explanation || ""} 
+                                            onChange={(e) => {
+                                              const newQs = structuredClone(questions);
+                                              newQs[index].children![cIdx].explanation = e.target.value;
+                                              setQuestions(newQs);
+                                            }}
+                                            placeholder="Add explanation..."
+                                          />
+                                        </div>
+                                     </div>
                                     </div>
-                                  </div>
-                                );
-                              })}
+                                  );
+                                })}
                                 <div className="mt-4 pt-4 border-t border-dashed flex justify-center">
                                   <Button variant="outline" onClick={() => handleAddMCQ(q.id)} className="w-full max-w-sm border-dashed">
                                     <Plus className="h-4 w-4 mr-2" /> Add another child MCQ

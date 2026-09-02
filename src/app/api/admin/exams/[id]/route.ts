@@ -50,6 +50,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     // We can accept a partial body for toggles, or a full body for edits
     const updateData: Record<string, unknown> = {};
     if (body.title !== undefined) updateData.title = body.title;
+    if (body.description !== undefined) updateData.description = body.description;
     if (body.type !== undefined) updateData.type = body.type;
     if (body.start_time !== undefined) updateData.start_time = body.start_time ? new Date(body.start_time) : null;
     if (body.end_time !== undefined) updateData.end_time = body.end_time ? new Date(body.end_time) : null;
@@ -61,6 +62,9 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     if (body.batch_id !== undefined) updateData.batch_id = body.batch_id ? parseInt(body.batch_id) : null;
     if (body.course_id !== undefined) updateData.course_id = body.course_id ? parseInt(body.course_id) : null;
     if (body.is_grading_enabled !== undefined) updateData.is_grading_enabled = body.is_grading_enabled;
+    if (body.collect_lead !== undefined) updateData.collect_lead = body.is_public ? body.collect_lead : false;
+    if (body.lead_mandatory !== undefined) updateData.lead_mandatory = body.is_public && body.collect_lead ? body.lead_mandatory : false;
+    if (body.lead_form_message !== undefined) updateData.lead_form_message = body.is_public && body.collect_lead ? (body.lead_form_message || null) : null;
 
     const updatedExam = await prisma.exam.update({
       where: { id },

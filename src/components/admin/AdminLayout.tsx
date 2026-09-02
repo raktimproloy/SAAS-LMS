@@ -49,8 +49,8 @@ const sidebarLinks: SidebarLink[] = [
     name: "QR Code",
     icon: QrCode,
     subItems: [
-      { name: "QR Scanner", href: "/admin/qr-scanner", perm: "students" },
-      { name: "QR Generate", href: "/admin/qr-cards", perm: "students" },
+      { name: "QR Scanner", href: "/admin/qr-scanner", perm: "qr_scanner" },
+      { name: "QR Generate", href: "/admin/qr-cards", perm: "qr_scanner" },
     ],
   },
   { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
@@ -63,27 +63,28 @@ const sidebarLinks: SidebarLink[] = [
       { name: "Student List", href: "/admin/students", perm: "students" },
       { name: "Attendance", href: "/admin/attendance", perm: "students" },
       { name: "Report", href: "/admin/reports", perm: "reports" },
-      { name: "Result", href: "/admin/offline-results", perm: "exams" },
+      { name: "Result", href: "/admin/offline-results", perm: "offline_results" },
     ],
   },
   {
-    name: "Financial",
+    name: "Finance",
     icon: Wallet,
     subItems: [
+      { name: "Analytics", href: "/admin/analytics", perm: "analytics" },
       { name: "Payment", href: "/admin/payments", perm: "payments" },
       { name: "Expenses", href: "/admin/expenses", perm: "expenses" },
     ],
   },
   { name: "Study Material", href: "/admin/materials", icon: ClipboardList, perm: "materials" },
   { name: "Notice", href: "/admin/notices", icon: Bell, perm: "content" },
-  { name: "Leads & Inquiries", href: "/admin/leads", icon: MessageSquare, perm: "students" },
+  { name: "Leads & Inquiries", href: "/admin/leads", icon: MessageSquare, perm: "leads" },
   { name: "Online Exam", href: "/admin/exams", icon: FileText, perm: "exams" },
-  { name: "Question Bank", href: "/admin/question-bank", icon: Database, perm: "exams" },
-  { name: "Video Courses", href: "/admin/video-courses", icon: Video, perm: "courses" },
+  { name: "Question Bank", href: "/admin/question-bank", icon: Database, perm: "question_bank" },
+  { name: "Video Courses", href: "/admin/video-courses", icon: Video, perm: "video_courses" },
   { name: "Assistant Team", href: "/admin/assistants", icon: UserCog, perm: "assistants" },
   { name: "SMS Logs", href: "/admin/sms", icon: MessageSquare, perm: "sms" },
   { name: "Website Content", href: "/admin/content", icon: Globe, perm: "content" },
-  { name: "Settings", href: "/admin/settings", icon: Settings },
+  { name: "Settings", href: "/admin/settings", icon: Settings, perm: "settings" },
 ];
 
 interface AdminUser {
@@ -129,7 +130,7 @@ const SidebarContent = ({
   const [isVerifying, setIsVerifying] = useState(false);
 
   const toggleMenu = (name: string) => {
-    if (name === "Financial" && hasFinancialPassword && !isFinancialUnlocked) {
+    if (name === "Finance" && hasFinancialPassword && !isFinancialUnlocked) {
       if (openMenus[name]) {
         setOpenMenus(prev => ({ ...prev, [name]: false }));
       } else {
@@ -156,7 +157,7 @@ const SidebarContent = ({
         setIsFinancialUnlocked(true);
         setShowPasswordDialog(false);
         setPasswordInput("");
-        setOpenMenus(prev => ({ ...prev, Financial: true }));
+        setOpenMenus(prev => ({ ...prev, Finance: true }));
       } else {
         const data = await res.json();
         setPasswordError(data.error || "Incorrect password");
@@ -407,7 +408,7 @@ export function AdminLayout({
   })();
 
   return (
-    <div className="grid h-screen overflow-hidden w-full md:grid-cols-[220px_1fr] lg:grid-cols-[260px_1fr]">
+    <div className="grid h-screen overflow-hidden w-full md:grid-cols-[220px_1fr] lg:grid-cols-[260px_1fr] print:block print:h-auto print:overflow-visible">
       {/* Desktop Sidebar */}
       <div className="hidden border-r bg-muted/20 md:block sticky top-0 h-screen print:hidden">
         <SidebarContent
@@ -421,7 +422,7 @@ export function AdminLayout({
         />
       </div>
 
-      <div className="flex flex-col h-full overflow-hidden">
+      <div className="flex flex-col h-full overflow-hidden print:h-auto print:overflow-visible print:block">
         {/* Header */}
         <header className="flex h-14 items-center gap-4 border-b bg-muted/20 px-4 lg:h-[60px] lg:px-6 sticky top-0 z-30 backdrop-blur-sm print:hidden">
           <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
@@ -467,7 +468,7 @@ export function AdminLayout({
         </header>
 
         {/* Main Content */}
-        <main className={cn("flex flex-1 flex-col bg-slate-50/50 dark:bg-transparent relative print:p-0 print:m-0 print:bg-transparent", isQuestionBank ? "overflow-hidden" : isCurriculumPlanner ? "overflow-auto" : "gap-4 p-4 lg:gap-6 lg:p-6 overflow-auto")}>
+        <main className={cn("flex flex-1 flex-col bg-slate-50/50 dark:bg-transparent relative print:p-0 print:m-0 print:bg-transparent print:block print:h-auto print:overflow-visible", isQuestionBank ? "overflow-hidden" : isCurriculumPlanner ? "overflow-auto" : "gap-4 p-4 lg:gap-6 lg:p-6 overflow-auto")}>
           {!hasAccess ? (
             <div className="flex flex-col items-center justify-center flex-1 h-[60vh]">
               <div className="text-center space-y-4">

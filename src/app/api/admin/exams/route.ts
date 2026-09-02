@@ -42,8 +42,9 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { 
-      title, type, start_time, end_time, duration_minutes, 
-      total_marks, negative_marking, is_public, batch_id, course_id, status, is_grading_enabled
+      title, description, type, start_time, end_time, duration_minutes, 
+      total_marks, negative_marking, is_public, batch_id, course_id, status, is_grading_enabled,
+      collect_lead, lead_mandatory, lead_form_message
     } = body;
 
     if (!title || !type || !duration_minutes || !total_marks) {
@@ -57,6 +58,7 @@ export async function POST(request: Request) {
     const newExam = await prisma.exam.create({
       data: {
         title,
+        description: description || null,
         type,
         start_time: start_time ? new Date(start_time) : null,
         end_time: end_time ? new Date(end_time) : null,
@@ -65,6 +67,9 @@ export async function POST(request: Request) {
         negative_marking: negative_marking ? parseFloat(negative_marking) : 0,
         status: status || "inactive",
         is_public: is_public || false,
+        collect_lead: is_public ? (collect_lead || false) : false,
+        lead_mandatory: is_public && collect_lead ? (lead_mandatory || false) : false,
+        lead_form_message: is_public && collect_lead ? (lead_form_message || null) : null,
         batch_id: batch_id ? parseInt(batch_id) : null,
         course_id: course_id ? parseInt(course_id) : null,
         is_grading_enabled: is_grading_enabled || false,

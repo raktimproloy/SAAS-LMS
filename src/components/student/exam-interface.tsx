@@ -28,9 +28,12 @@ interface ExamInterfaceProps {
   durationMinutes: number;
   questions: Question[];
   isPublic?: boolean;
+  collectLead?: boolean;
+  leadMandatory?: boolean;
+  leadFormMessage?: string | null;
 }
 
-export function ExamInterface({ examId, title, durationMinutes, questions, isPublic }: ExamInterfaceProps) {
+export function ExamInterface({ examId, title, durationMinutes, questions, isPublic, collectLead, leadMandatory, leadFormMessage }: ExamInterfaceProps) {
   const router = useRouter();
   
   const [answers, setAnswers] = useState<Record<number, string>>({});
@@ -45,7 +48,7 @@ export function ExamInterface({ examId, title, durationMinutes, questions, isPub
   const [showLeadForm, setShowLeadForm] = useState(false);
   const [leadName, setLeadName] = useState("");
   const [leadPhone, setLeadPhone] = useState("");
-  const [leadLocation, setLeadLocation] = useState("");
+  const [leadClassLevel, setLeadClassLevel] = useState("");
 
   const autoSubmitTriggered = useRef(false);
 
@@ -97,7 +100,11 @@ export function ExamInterface({ examId, title, durationMinutes, questions, isPub
     if (timeLeft <= 0) {
       if (!autoSubmitTriggered.current) {
         autoSubmitTriggered.current = true;
-        handleSubmit(); // auto-submit
+        if (isPublic) {
+          handleSubmit(true, true, false);
+        } else {
+          handleSubmit(); // auto-submit
+        }
       }
       return;
     }
@@ -108,7 +115,11 @@ export function ExamInterface({ examId, title, durationMinutes, questions, isPub
           clearInterval(timerId);
           if (!autoSubmitTriggered.current) {
             autoSubmitTriggered.current = true;
-            handleSubmit();
+            if (isPublic) {
+              handleSubmit(true, true, false);
+            } else {
+              handleSubmit();
+            }
           }
           return 0;
         }
@@ -119,11 +130,11 @@ export function ExamInterface({ examId, title, durationMinutes, questions, isPub
     return () => clearInterval(timerId);
   }, [timeLeft, isReady, isSubmitting]);
 
-  const handleSubmit = async (skipLeadForm: boolean = false) => {
+  const handleSubmit = async (skipLeadForm: boolean = false, isDryRun: boolean = false, redirectToLeaderboard: boolean = false) => {
     if (isSubmitting) return;
     
     // For public exams, intercept submission to show lead form
-    if (isPublic && skipLeadForm !== true) {
+    if (isPublic && collectLead && !skipLeadForm && !isDryRun && !redirectToLeaderboard) {
       setTimeout(() => setShowLeadForm(true), 150);
       return;
     }
@@ -144,9 +155,14 @@ export function ExamInterface({ examId, title, durationMinutes, questions, isPub
       };
       
       if (isPublic) {
-        payload.name = leadName;
-        payload.phone = leadPhone;
-        payload.location = leadLocation;
+        if (!isDryRun && collectLead) {
+          payload.lead_name = leadName;
+          payload.lead_phone = leadPhone;
+          payload.lead_class = leadClassLevel;
+        }
+        if (isDryRun) {
+          payload.dry_run = true;
+        }
       }
 
       const res = await fetch(endpoint, {
@@ -161,8 +177,14 @@ export function ExamInterface({ examId, title, durationMinutes, questions, isPub
         localStorage.removeItem(`lms_exam_${examId}_answers`);
         localStorage.removeItem(`lms_exam_${examId}_start`);
 
+        if (isPublic) setShowLeadForm(false);
+
+        if (redirectToLeaderboard) {
+          router.push(isPublic ? `/exams/${examId}/leaderboard` : `/student/exams/${examId}/leaderboard`);
+          return;
+        }
+
         if (data.is_practice && data.practice_result) {
-          if (isPublic) setShowLeadForm(false);
           setPracticeResultData(data.practice_result);
           setTimeout(() => {
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -217,10 +239,30 @@ export function ExamInterface({ examId, title, durationMinutes, questions, isPub
                 <Clock className="w-4 h-4" /> Time Taken: {Math.floor(result.time_taken_seconds / 60)}m {result.time_taken_seconds % 60}s
               </p>
             </div>
-            <div className="flex gap-8 text-center">
+            <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-8 text-center">
               <div>
                 <div className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-1">Score</div>
                 <div className="text-4xl font-bold text-primary">{result.obtained_marks} <span className="text-lg text-muted-foreground/70">/ {result.total_marks}</span></div>
+              </div>
+              
+              <div className="h-12 w-px bg-border hidden sm:block"></div>
+              
+              <div className="flex flex-col gap-2">
+                {isPublic ? (
+                  <Button size="lg" className="bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold shadow-md" onClick={() => {
+                    if (collectLead) {
+                      setShowLeadForm(true);
+                    } else {
+                      handleSubmit(true, false, true);
+                    }
+                  }}>
+                    লিডারবোর্ড দেখুন (Leaderboard)
+                  </Button>
+                ) : (
+                  <Button size="lg" className="bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold shadow-md" onClick={() => router.push(`/student/exams/${examId}/leaderboard`)}>
+                    View Leaderboard
+                  </Button>
+                )}
               </div>
             </div>
           </div>
@@ -662,7 +704,11 @@ export function ExamInterface({ examId, title, durationMinutes, questions, isPub
                 className="w-full sm:w-1/2 rounded-xl h-12 font-bold bg-gradient-to-r from-blue-500 via-cyan-500 to-blue-500 bg-[length:200%_auto] animate-gradient text-white hover:scale-[1.02] transition-all shadow-[0_0_20px_rgba(6,182,212,0.3)] border-0"
                 onClick={() => {
                   setShowConfirmDialog(false);
-                  handleSubmit();
+                  if (isPublic) {
+                    handleSubmit(true, true, false);
+                  } else {
+                    handleSubmit(true, false, false);
+                  }
                 }}
               >
                 Confirm Submit
@@ -677,9 +723,9 @@ export function ExamInterface({ examId, title, durationMinutes, questions, isPub
         <DialogContent className="sm:max-w-md p-0 overflow-hidden border-0 shadow-2xl rounded-3xl">
           <div className="bg-background p-6 sm:p-8 relative">
             <DialogHeader className="space-y-2 relative z-10 mb-6">
-              <DialogTitle className="text-2xl font-bold text-foreground">পরীক্ষা জমা দিন</DialogTitle>
+              <DialogTitle className="text-2xl font-bold text-foreground">লিডারবোর্ডে যুক্ত হোন</DialogTitle>
               <DialogDescription className="text-base text-muted-foreground/90">
-                ফলাফল দেখতে আপনার তথ্য প্রদান করুন।
+                {leadFormMessage || "লিডারবোর্ডে আপনার অবস্থান দেখতে তথ্য প্রদান করুন।"}
               </DialogDescription>
             </DialogHeader>
             
@@ -716,13 +762,13 @@ export function ExamInterface({ examId, title, durationMinutes, questions, isPub
                 )}
               </div>
               <div className="space-y-1.5">
-                <label className="text-sm font-semibold text-foreground">ঠিকানা (ঐচ্ছিক)</label>
+                <label className="text-sm font-semibold text-foreground">ক্লাস / শ্রেণী (Class Level)</label>
                 <input 
                   type="text" 
-                  value={leadLocation} 
-                  onChange={(e) => setLeadLocation(e.target.value)} 
+                  value={leadClassLevel} 
+                  onChange={(e) => setLeadClassLevel(e.target.value)} 
                   className="flex h-11 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1" 
-                  placeholder="উদাঃ ঢাকা"
+                  placeholder="উদাঃ দশম শ্রেণী / HSC"
                 />
               </div>
             </div>
@@ -733,19 +779,33 @@ export function ExamInterface({ examId, title, durationMinutes, questions, isPub
                 className="w-full rounded-xl h-12 font-bold shadow-md bg-primary hover:bg-primary/90"
                 disabled={isSubmitting || !leadName || !/^(?:\+88|88)?(01[3-9]\d{8})$/.test(leadPhone)}
                 onClick={() => {
-                  handleSubmit(true);
+                  handleSubmit(true, false, true);
                 }}
               >
-                {isSubmitting ? "জমা হচ্ছে..." : "ফলাফল দেখুন"}
+                {isSubmitting ? "জমা হচ্ছে..." : "লিডারবোর্ড দেখুন (View Leaderboard)"}
               </Button>
+              {!leadMandatory && (
+                <Button 
+                  variant="outline"
+                  size="lg"
+                  className="w-full rounded-xl border-dashed border-primary/30 text-primary hover:bg-primary/5"
+                  onClick={() => {
+                    setShowLeadForm(false);
+                    router.push(`/exams/${examId}/leaderboard`);
+                  }}
+                  disabled={isSubmitting}
+                >
+                  Skip & View Leaderboard
+                </Button>
+              )}
               <Button 
                 variant="ghost"
                 size="lg"
-                className="w-full rounded-xl text-muted-foreground"
+                className="w-full rounded-xl text-muted-foreground hover:bg-muted"
                 onClick={() => setShowLeadForm(false)}
                 disabled={isSubmitting}
               >
-                ফিরে যান
+                ফিরে যান (Cancel)
               </Button>
             </DialogFooter>
           </div>

@@ -112,6 +112,7 @@ model Routine {
 model Exam {
   id               Int       @id @default(autoincrement())
   title            String
+  description      String?   @db.Text
   batch_id         Int? // Nullable for course-wide or public exams
   course_id        Int?
   type             String // "online_mcq" | "offline"
@@ -123,6 +124,9 @@ model Exam {
   status           String    @default("active") // "active" | "inactive" | "completed"
   negative_marking Float     @default(0.0)
   is_grading_enabled Boolean @default(false)
+  collect_lead     Boolean   @default(false)
+  lead_mandatory   Boolean   @default(false)
+  lead_form_message String?  @db.Text
   created_at       DateTime  @default(now())
 
   batch               Batch?                  @relation(fields: [batch_id], references: [id], onDelete: SetNull)
@@ -345,6 +349,9 @@ model NoteMaterial {
   type        String // "book" | "note"
   description String?  @db.Text
   is_public   Boolean  @default(false)
+  collect_lead Boolean @default(false)
+  lead_mandatory Boolean @default(false)
+  lead_form_message String? @db.Text
   status      String   @default("active") // "active" | "inactive"
   sort_order  Int      @default(0)
   created_at  DateTime @default(now())

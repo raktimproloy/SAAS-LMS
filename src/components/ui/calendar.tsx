@@ -59,17 +59,17 @@ function Calendar({
         ),
         month: cn("flex w-full flex-col gap-4", defaultClassNames.month),
         nav: cn(
-          "absolute inset-x-0 top-1 flex w-full items-center justify-between px-1 gap-1",
+          "absolute inset-x-0 top-1 flex w-full items-center justify-between px-1 gap-1 z-10 pointer-events-none",
           defaultClassNames.nav
         ),
         button_previous: cn(
           buttonVariants({ variant: buttonVariant }),
-          "h-7 w-7 p-0 select-none aria-disabled:opacity-50",
+          "h-7 w-7 p-0 select-none aria-disabled:opacity-50 pointer-events-auto",
           defaultClassNames.button_previous
         ),
         button_next: cn(
           buttonVariants({ variant: buttonVariant }),
-          "h-7 w-7 p-0 select-none aria-disabled:opacity-50",
+          "h-7 w-7 p-0 select-none aria-disabled:opacity-50 pointer-events-auto",
           defaultClassNames.button_next
         ),
         month_caption: cn(

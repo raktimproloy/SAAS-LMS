@@ -53,6 +53,7 @@ export default function NewCurriculumPage() {
       examScheduling: "separate_day" as "separate_day" | "same_day" | "specific_day",
       examSpecificDays: [] as string[],
       daysPerTopic: 1,
+      includeGovtHolidays: false,
     },
   });
 
@@ -147,8 +148,14 @@ export default function NewCurriculumPage() {
   };
 
   const validateStep1 = () => {
-    if (!formData.title || !formData.course_id || !formData.batch_id || !formData.start_date || !formData.end_date) {
-      toast({ title: "তথ্য অসম্পূর্ণ", description: "নাম, কোর্স, ব্যাচ আর তারিখ পূরণ করুন।", variant: "destructive" });
+    const missing: string[] = [];
+    if (!formData.title) missing.push("কারিকুলামের নাম");
+    if (!formData.course_id) missing.push("কোর্স");
+    if (!formData.batch_id) missing.push("ব্যাচ");
+    if (!formData.start_date || !formData.end_date) missing.push("শুরুর ও শেষ তারিখ");
+
+    if (missing.length > 0) {
+      toast({ title: "তথ্য অসম্পূর্ণ", description: `অনুগ্রহ করে পূরণ করুন: ${missing.join(", ")}`, variant: "destructive" });
       return false;
     }
     if (formData.class_days.length === 0) {
@@ -322,8 +329,8 @@ export default function NewCurriculumPage() {
                 <DateRangePicker
                   startDate={formData.start_date}
                   endDate={formData.end_date}
-                  onStartDateChange={(d) => setFormData({ ...formData, start_date: d })}
-                  onEndDateChange={(d) => setFormData({ ...formData, end_date: d })}
+                  onStartDateChange={(d) => setFormData(prev => ({ ...prev, start_date: d }))}
+                  onEndDateChange={(d) => setFormData(prev => ({ ...prev, end_date: d }))}
                   className="w-full sm:w-[320px]"
                 />
               </div>
@@ -491,13 +498,13 @@ export default function NewCurriculumPage() {
                       <SelectTrigger className="bg-background hover:bg-muted/30 focus:ring-primary/20 shadow-sm">
                         <SelectValue>
                           {formData.config.examScheduling === "separate_day" ? "আলাদা দিনে (Separate Day)" :
-                           formData.config.examScheduling === "same_day" ? "ক্লাসের দিনেই (Same Day as Class)" :
+                           formData.config.examScheduling === "same_day" ? "ক্লাসের সাথেই (Same Day as Class)" :
                            "সপ্তাহের নির্দিষ্ট দিনে (Specific Routine Day)"}
                         </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="separate_day">আলাদা দিনে (Separate Day)</SelectItem>
-                        <SelectItem value="same_day">ক্লাসের দিনেই (Same Day as Class)</SelectItem>
+                        <SelectItem value="same_day">ক্লাসের সাথেই (Same Day as Class)</SelectItem>
                         <SelectItem value="specific_day">সপ্তাহের নির্দিষ্ট দিনে (Specific Routine Day)</SelectItem>
                       </SelectContent>
                     </Select>
@@ -533,6 +540,20 @@ export default function NewCurriculumPage() {
                     </div>
                   </div>
                 )}
+
+                <label className="flex items-start gap-3 mt-4 pt-4 border-t cursor-pointer">
+                  <Checkbox
+                    className="mt-1"
+                    checked={formData.config.includeGovtHolidays}
+                    onCheckedChange={(c) => setFormData({ ...formData, config: { ...formData.config, includeGovtHolidays: !!c } })}
+                  />
+                  <div>
+                    <p className="text-sm font-medium">সরকারি ছুটি (Government Holidays)</p>
+                    <p className="text-xs text-muted-foreground">
+                      সরকারি ছুটির দিনগুলোতে অটোমেটিক ছুটি দিয়ে দিন (যদি সেদিন রুটিনে ক্লাস পড়ে)।
+                    </p>
+                  </div>
+                </label>
               </div>
 
               <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer bg-muted/20 hover:bg-muted/50 transition-colors">

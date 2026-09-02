@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { PWAInstallProvider } from "@/components/public/PWAInstallContext";
 import { AosInitializer } from "@/components/public/AosInitializer";
+import { Toaster } from "@/components/ui/toast";
 
 const shikkhabhumi = localFont({
   src: "./fonts/ShikkhabhumiFont.ttf",
@@ -80,6 +81,7 @@ export default function RootLayout({
             <div className="relative z-10 flex flex-col min-h-screen">
               {children}
             </div>
+            <Toaster />
           </PWAInstallProvider>
         </ThemeProvider>
       </body>

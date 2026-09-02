@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Loader2, Trash2, CheckCircle, Clock } from "lucide-react";
+import { Loader2, Trash2, CheckCircle, Clock, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -21,7 +21,9 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface Lead {
-  id: number;
+  id: string;
+  raw_id: number;
+  kind: "form" | "exam";
   name: string;
   phone: string;
   email: string | null;
@@ -29,7 +31,7 @@ interface Lead {
   type: string;
   status: string;
   created_at: string;
-  course: { title: string } | null;
+  source: string;
 }
 
 export default function LeadsAdminPage() {
@@ -53,7 +55,7 @@ export default function LeadsAdminPage() {
     }
   };
 
-  const handleStatusChange = async (id: number, newStatus: string) => {
+  const handleStatusChange = async (id: string, newStatus: string) => {
     try {
       const res = await fetch(`/api/admin/leads/${id}`, {
         method: "PATCH",
@@ -68,7 +70,7 @@ export default function LeadsAdminPage() {
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this lead?")) return;
     try {
       const res = await fetch(`/api/admin/leads/${id}`, { method: "DELETE" });
@@ -85,8 +87,12 @@ export default function LeadsAdminPage() {
       <div className="flex justify-between items-center" data-aos="fade-down">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Leads & Inquiries</h1>
-          <p className="text-muted-foreground text-sm sm:text-base mt-1">Manage form submissions from contact forms and marketing pages.</p>
+          <p className="text-muted-foreground text-sm sm:text-base mt-1 print:hidden">Manage form submissions from contact forms and marketing pages.</p>
         </div>
+        <Button variant="outline" className="gap-2 print:hidden" onClick={() => window.print()}>
+          <Printer className="w-4 h-4" />
+          Print
+        </Button>
       </div>
 
       <div className="bg-card rounded-xl border shadow-sm overflow-x-auto" data-aos="fade-up" data-aos-delay="100">
@@ -98,7 +104,7 @@ export default function LeadsAdminPage() {
               <TableHead>Message</TableHead>
               <TableHead>Date</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead className="text-right print:hidden">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -142,7 +148,7 @@ export default function LeadsAdminPage() {
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-col">
-                      <span className="text-sm font-medium">{lead.course ? lead.course.title : "General Inquiry"}</span>
+                      <span className="text-sm font-medium">{lead.source}</span>
                       <span className="text-xs bg-primary/10 text-primary w-fit px-1.5 py-0.5 rounded mt-1">
                         {lead.type}
                       </span>
@@ -157,28 +163,31 @@ export default function LeadsAdminPage() {
                     {new Date(lead.created_at).toLocaleDateString()}
                   </TableCell>
                   <TableCell>
-                    <Select 
-                      value={lead.status} 
-                      onValueChange={(val) => val && handleStatusChange(lead.id, val)}
-                    >
-                      <SelectTrigger className="w-[130px] h-8 text-xs">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="PENDING">
-                          <div className="flex items-center text-amber-600">
-                            <Clock className="w-3 h-3 mr-1" /> Pending
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="CONTACTED">
-                          <div className="flex items-center text-green-600">
-                            <CheckCircle className="w-3 h-3 mr-1" /> Contacted
-                          </div>
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
+                    {lead.kind === 'form' ? (
+                      <button
+                        onClick={() => handleStatusChange(lead.id, lead.status === 'PENDING' ? 'CONTACTED' : 'PENDING')}
+                        className={`w-[130px] h-8 text-xs flex items-center justify-center rounded-md print:hidden border transition-all duration-300 ${
+                          lead.status === 'PENDING' 
+                            ? 'bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:hover:bg-amber-900/50 dark:text-amber-400 dark:border-amber-800/50' 
+                            : 'bg-green-50 hover:bg-green-100 text-green-700 border-green-200 dark:bg-green-950/30 dark:hover:bg-green-900/50 dark:text-green-400 dark:border-green-800/50'
+                        }`}
+                      >
+                        {lead.status === 'PENDING' ? (
+                          <><Clock className="w-3 h-3 mr-1.5" /> Pending</>
+                        ) : (
+                          <><CheckCircle className="w-3 h-3 mr-1.5" /> Contacted</>
+                        )}
+                      </button>
+                    ) : (
+                      <div className="w-[130px] h-8 text-xs flex items-center justify-center bg-slate-100 dark:bg-slate-800 rounded-md print:hidden text-muted-foreground border">
+                        <CheckCircle className="w-3 h-3 mr-1" /> Collected
+                      </div>
+                    )}
+                    <div className="hidden print:block font-bold">
+                      {lead.status === "CONTACTED" ? "Contacted" : lead.status === "COLLECTED" ? "Collected" : "Pending"}
+                    </div>
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-right print:hidden">
                     <Button 
                       variant="ghost" 
                       size="sm"

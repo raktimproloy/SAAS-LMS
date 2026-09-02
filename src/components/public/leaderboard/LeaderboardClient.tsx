@@ -1,56 +1,64 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Trophy, Menu, Medal, ChevronRight, User } from "lucide-react";
+import { Trophy, Menu, Medal, ChevronRight, User, Loader2 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetHeader } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 
-interface Course {
+interface Exam {
   id: number | string;
   title: string;
 }
 
 interface LeaderboardClientProps {
-  courses: Course[];
+  exams: Exam[];
 }
 
-// Mock data for leaderboard
-const generateMockLeaderboard = (courseId: string | number) => {
-  return Array.from({ length: 15 }).map((_, i) => ({
-    id: i + 1,
-    rank: i + 1,
-    name: `Student Name ${i + 1}`,
-    score: 100 - (i * 2),
-    institution: i % 2 === 0 ? "Dhaka College" : "Notre Dame College",
-    avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${courseId}-${i}`
-  }));
-};
-
-export function LeaderboardClient({ courses }: LeaderboardClientProps) {
-  const [activeCourseId, setActiveCourseId] = useState<string | number>(courses[0]?.id || 1);
+export function LeaderboardClient({ exams }: LeaderboardClientProps) {
+  const [activeExamId, setActiveExamId] = useState<string | number>(exams[0]?.id || 0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [leaderboardData, setLeaderboardData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const leaderboardData = generateMockLeaderboard(activeCourseId);
-  const activeCourse = courses.find(c => c.id === activeCourseId) || courses[0];
+  useEffect(() => {
+    if (!activeExamId) return;
+    setLoading(true);
+    fetch(`/api/public/leaderboard?examId=${activeExamId}`)
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setLeaderboardData(data);
+        } else {
+          setLeaderboardData([]);
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        setLeaderboardData([]);
+      })
+      .finally(() => setLoading(false));
+  }, [activeExamId]);
+
+  const activeExam = exams.find(e => e.id === activeExamId) || exams[0];
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full bg-card/40 backdrop-blur-md rounded-2xl border border-border/60 p-4">
       <div className="mb-6 px-2">
         <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
           <Trophy className="w-5 h-5 text-primary" />
-          ক্যাটাগরি
+          পরীক্ষা
         </h3>
       </div>
       
       <div className="space-y-2 overflow-y-auto custom-scrollbar pr-2 flex-grow">
-        {courses.map((course) => {
-          const isActive = activeCourseId === course.id;
+        {exams.map((exam) => {
+          const isActive = activeExamId === exam.id;
           return (
             <button
-              key={course.id}
+              key={exam.id}
               onClick={() => {
-                setActiveCourseId(course.id);
+                setActiveExamId(exam.id);
                 setIsMobileMenuOpen(false);
               }}
               className={`w-full text-left px-4 py-3 rounded-xl transition-all flex items-center justify-between group ${
@@ -59,7 +67,7 @@ export function LeaderboardClient({ courses }: LeaderboardClientProps) {
                 : "text-foreground hover:bg-muted font-semibold"
               }`}
             >
-              <span className="line-clamp-1 pr-2">{course.title}</span>
+              <span className="line-clamp-1 pr-2">{exam.title}</span>
               <ChevronRight className={`w-4 h-4 transition-transform ${isActive ? "text-primary-foreground" : "text-foreground/90 group-hover:text-foreground group-hover:translate-x-1"}`} />
             </button>
           );
@@ -75,7 +83,7 @@ export function LeaderboardClient({ courses }: LeaderboardClientProps) {
       <div className="md:hidden flex justify-between items-center bg-card p-4 rounded-2xl border border-border shadow-sm">
         <div className="flex items-center gap-2">
           <Trophy className="w-5 h-5 text-primary" />
-          <span className="font-bold text-foreground line-clamp-1">{activeCourse?.title || "Select Category"}</span>
+          <span className="font-bold text-foreground line-clamp-1">{activeExam?.title || "Select Exam"}</span>
         </div>
         <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
           <SheetTrigger render={<Button variant="outline" size="icon" className="shrink-0 bg-primary/10 border-primary/20 text-primary hover:bg-primary/20" />}>
@@ -85,7 +93,7 @@ export function LeaderboardClient({ courses }: LeaderboardClientProps) {
             <SheetHeader className="p-4 border-b border-border/50 bg-muted/30">
               <SheetTitle className="text-left flex items-center gap-2">
                 <Trophy className="w-5 h-5 text-primary" />
-                ক্যাটাগরি নির্বাচন
+                পরীক্ষা নির্বাচন
               </SheetTitle>
             </SheetHeader>
             <div className="p-4 h-[calc(100vh-80px)]">
@@ -109,7 +117,7 @@ export function LeaderboardClient({ courses }: LeaderboardClientProps) {
             <div>
               <h2 className="text-2xl sm:text-3xl font-extrabold text-foreground mb-2">
                 <span className="text-primary mr-2">#</span> 
-                {activeCourse?.title}
+                {activeExam?.title}
               </h2>
               <p className="text-foreground font-semibold">টপ পারফর্মার তালিকা</p>
             </div>
@@ -139,57 +147,70 @@ export function LeaderboardClient({ courses }: LeaderboardClientProps) {
               <div className="w-16 text-right">Score</div>
             </div>
 
-            {leaderboardData.map((student, index) => (
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.05 }}
-                key={student.id}
-                className={`group grid grid-cols-[auto_1fr_auto] sm:grid-cols-[auto_1fr_auto_auto] gap-4 items-center px-4 sm:px-6 py-4 rounded-2xl transition-all border ${
-                  index === 0 ? "bg-amber-500/10 border-amber-500/30 hover:border-amber-500/60" :
-                  index === 1 ? "bg-slate-300/10 border-slate-300/30 hover:border-slate-300/60" :
-                  index === 2 ? "bg-orange-400/10 border-orange-400/30 hover:border-orange-400/60" :
-                  "bg-card/50 border-border/40 hover:border-primary/30 hover:bg-muted/50"
-                }`}
-              >
-                {/* Rank */}
-                <div className="w-12 flex justify-center">
-                  {index === 0 ? <Medal className="w-8 h-8 text-amber-500 fill-amber-500/20" /> :
-                   index === 1 ? <Medal className="w-7 h-7 text-slate-400 fill-slate-400/20" /> :
-                   index === 2 ? <Medal className="w-6 h-6 text-orange-400 fill-orange-400/20" /> :
-                   <span className="text-xl font-bold text-foreground">{student.rank}</span>
-                  }
-                </div>
-                
-                {/* Name & Avatar */}
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-muted overflow-hidden shrink-0 border border-border group-hover:border-primary/30 transition-colors">
-                    <img src={student.avatar} alt={student.name} className="w-full h-full object-cover" />
+            {loading ? (
+              <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+                <Loader2 className="w-10 h-10 animate-spin mb-4 text-primary" />
+                <p>Loading leaderboard...</p>
+              </div>
+            ) : leaderboardData.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-20 text-muted-foreground text-center bg-card/50 rounded-2xl border border-border/50">
+                <Trophy className="w-12 h-12 mb-4 text-muted-foreground/30" />
+                <p className="text-lg font-medium">No results found for this exam yet.</p>
+                <p className="text-sm">Be the first one to take this exam!</p>
+              </div>
+            ) : (
+              leaderboardData.map((student, index) => (
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                  key={student.id}
+                  className={`group grid grid-cols-[auto_1fr_auto] sm:grid-cols-[auto_1fr_auto_auto] gap-4 items-center px-4 sm:px-6 py-4 rounded-2xl transition-all border ${
+                    index === 0 ? "bg-amber-500/10 border-amber-500/30 hover:border-amber-500/60" :
+                    index === 1 ? "bg-slate-300/10 border-slate-300/30 hover:border-slate-300/60" :
+                    index === 2 ? "bg-orange-400/10 border-orange-400/30 hover:border-orange-400/60" :
+                    "bg-card/50 border-border/40 hover:border-primary/30 hover:bg-muted/50"
+                  }`}
+                >
+                  {/* Rank */}
+                  <div className="w-12 flex justify-center">
+                    {index === 0 ? <Medal className="w-8 h-8 text-amber-500 fill-amber-500/20" /> :
+                     index === 1 ? <Medal className="w-7 h-7 text-slate-400 fill-slate-400/20" /> :
+                     index === 2 ? <Medal className="w-6 h-6 text-orange-400 fill-orange-400/20" /> :
+                     <span className="text-xl font-bold text-foreground">{student.rank}</span>
+                    }
                   </div>
-                  <div>
-                    <div className="font-bold text-foreground text-sm sm:text-base line-clamp-1 group-hover:text-primary transition-colors">{student.name}</div>
-                    <div className="text-xs text-foreground/90 sm:hidden line-clamp-1">{student.institution}</div>
+                  
+                  {/* Name & Avatar */}
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-muted overflow-hidden shrink-0 border border-border group-hover:border-primary/30 transition-colors">
+                      <img src={student.avatar} alt={student.name} className="w-full h-full object-cover" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-foreground text-sm sm:text-base line-clamp-1 group-hover:text-primary transition-colors">{student.name}</div>
+                      <div className="text-xs text-foreground/90 sm:hidden line-clamp-1">{student.institution}</div>
+                    </div>
                   </div>
-                </div>
 
-                {/* Institution (Desktop) */}
-                <div className="hidden sm:block w-48 text-sm font-medium text-foreground/90 line-clamp-1 text-left">
-                  {student.institution}
-                </div>
+                  {/* Institution (Desktop) */}
+                  <div className="hidden sm:block w-48 text-sm font-medium text-foreground/90 line-clamp-1 text-left">
+                    {student.institution}
+                  </div>
 
-                {/* Score */}
-                <div className="w-16 text-right">
-                  <span className={`font-black text-lg ${
-                    index === 0 ? "text-amber-500" :
-                    index === 1 ? "text-slate-500" :
-                    index === 2 ? "text-orange-500" :
-                    "text-foreground"
-                  }`}>
-                    {student.score}
-                  </span>
-                </div>
-              </motion.div>
-            ))}
+                  {/* Score */}
+                  <div className="w-16 text-right">
+                    <span className={`font-black text-lg ${
+                      index === 0 ? "text-amber-500" :
+                      index === 1 ? "text-slate-500" :
+                      index === 2 ? "text-orange-500" :
+                      "text-foreground"
+                    }`}>
+                      {student.score}
+                    </span>
+                  </div>
+                </motion.div>
+              ))
+            )}
           </div>
         </div>
       </div>

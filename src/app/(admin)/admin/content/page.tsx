@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Pencil, Trash2, Megaphone, Layout, Settings, Image as ImageIcon, MoreHorizontal, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Megaphone, Layout, Settings, Image as ImageIcon, MoreHorizontal, Loader2, Video } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { GalleryManager } from "@/components/admin/GalleryManager";
 import { SiteSettingsForm } from "@/components/admin/SiteSettingsForm";
+import { WelcomePopupForm } from "@/components/admin/WelcomePopupForm";
 import {
   Table,
   TableBody,
@@ -63,6 +64,7 @@ export default function ContentManagementPage() {
     { label: "সাফল্যের হার", value: "৯৮%" }
   ]);
   const [isUploadingHero, setIsUploadingHero] = useState(false);
+  const [isUploadingVideo, setIsUploadingVideo] = useState(false);
 
   // Payment Types states
   const [paymentTypes, setPaymentTypes] = useState<any[]>([]);
@@ -162,6 +164,33 @@ export default function ContentManagementPage() {
     }
   };
 
+  const handleVideoFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingVideo(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      
+      const uploadRes = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const uploadData = await uploadRes.json();
+      
+      if (!uploadRes.ok) throw new Error(uploadData.error || "Failed to upload file");
+      
+      setTeacherVideoUrl(uploadData.url);
+    } catch (err: any) {
+      alert(err.message || "An error occurred during upload");
+    } finally {
+      setIsUploadingVideo(false);
+      e.target.value = '';
+    }
+  };
+
   const handleAddPaymentType = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmittingType(true);
@@ -212,7 +241,7 @@ export default function ContentManagementPage() {
         </div>
 
         {/* Custom Tab Switcher */}
-        <div className="flex p-1 bg-slate-200/50 dark:bg-slate-800/50 rounded-lg max-w-xl w-full flex-wrap md:flex-nowrap gap-1 overflow-x-auto hide-scrollbar">
+        <div className="flex p-1 bg-slate-200/50 dark:bg-slate-800/50 rounded-lg w-full flex-nowrap gap-1 overflow-x-auto hide-scrollbar">
 
           <button
             onClick={() => setActiveTab("hero")}
@@ -254,6 +283,16 @@ export default function ContentManagementPage() {
             <Settings className="w-4 h-4 hidden sm:block" />
             Payment Types
           </button>
+          <button
+            onClick={() => setActiveTab("welcome-popup")}
+            className={cn(
+              "flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-md text-sm font-medium transition-all duration-200 whitespace-nowrap",
+              activeTab === "welcome-popup" ? "bg-white dark:bg-slate-950 shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Megaphone className="w-4 h-4 hidden sm:block" />
+            Welcome Popup
+          </button>
         </div>
       </div>
 
@@ -266,12 +305,14 @@ export default function ContentManagementPage() {
               {activeTab === "site-settings" && "Site Configuration"}
               {activeTab === "gallery" && "Gallery"}
               {activeTab === "payment-types" && "Payment Types"}
+              {activeTab === "welcome-popup" && "Welcome Popup"}
             </CardTitle>
             <CardDescription className="mt-1">
               {activeTab === "hero" && "Update the main banner shown to public visitors."}
               {activeTab === "site-settings" && "Manage contact information, social links, and map location."}
               {activeTab === "gallery" && "Manage public gallery."}
               {activeTab === "payment-types" && "Manage payment types for financial transactions."}
+              {activeTab === "welcome-popup" && "Manage the first-time welcome popup for visitors."}
             </CardDescription>
           </div>
         </CardHeader>
@@ -327,12 +368,23 @@ export default function ContentManagementPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Intro Video URL (YouTube Embed)</Label>
+                  <Label>Intro Video URL (YouTube Embed or Video File)</Label>
                   <Input 
                     value={teacherVideoUrl} 
                     onChange={(e) => setTeacherVideoUrl(e.target.value)} 
-                    placeholder="https://www.youtube.com/embed/..." 
+                    placeholder="https://www.youtube.com/embed/... or .mp4 URL" 
                   />
+                  <div className="mt-2 flex items-center gap-4">
+                    <Label className="cursor-pointer bg-secondary text-secondary-foreground hover:bg-secondary/80 h-9 px-4 py-2 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors">
+                      {isUploadingVideo ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : "Upload Video"}
+                      <input type="file" className="hidden" accept="video/*" onChange={handleVideoFileUpload} disabled={isUploadingVideo} />
+                    </Label>
+                    {teacherVideoUrl && teacherVideoUrl.match(/\.(mp4|webm|ogg|mov)$/i) && (
+                      <div className="text-sm text-primary font-medium flex items-center gap-2">
+                        <Video className="w-4 h-4" /> Video uploaded
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="space-y-4 border p-4 rounded-md">
@@ -451,6 +503,12 @@ export default function ContentManagementPage() {
                   </TableBody>
                 </Table>
               </div>
+            </div>
+          )}
+
+          {activeTab === "welcome-popup" && (
+            <div className="p-6">
+              <WelcomePopupForm />
             </div>
           )}
         </CardContent>

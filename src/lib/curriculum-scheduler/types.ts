@@ -75,6 +75,7 @@ export type GeneratorConfig = {
   examScheduling: "separate_day" | "same_day" | "specific_day";
   examSpecificDays: string[];
   daysPerTopic: number;
+  includeGovtHolidays?: boolean;
 };
 
 export const DAY_NAME_TO_INDEX: Record<string, number> = {

@@ -116,7 +116,7 @@ export default function OfflineResultsPage() {
           <h1 className="text-3xl font-bold tracking-tight">Offline Exam Results</h1>
           <p className="text-muted-foreground mt-1">Manage and publish offline exam results for students.</p>
         </div>
-        <div className="flex items-center gap-2 w-full md:w-auto">
+        <div className="flex items-center gap-2 w-full md:w-auto print:hidden">
           <Button variant="outline" onClick={() => window.print()} className="flex-1 md:flex-none">
             <Printer className="h-4 w-4 mr-2" />
             Print
@@ -131,7 +131,7 @@ export default function OfflineResultsPage() {
       </div>
 
       <Card data-aos="fade-up" data-aos-delay="100">
-        <CardHeader className="pb-3 border-b">
+        <CardHeader className="pb-3 border-b print:hidden">
           <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
             <div className="flex items-center gap-2 w-full max-w-sm">
               <Input

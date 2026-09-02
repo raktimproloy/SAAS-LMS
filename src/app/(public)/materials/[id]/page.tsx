@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { FileText, Download, ShieldCheck, CheckCircle2, Calendar } from "lucide-react";
 import { Metadata } from "next";
+import { PublicMaterialClient } from "./PublicMaterialClient";
 
 interface PageProps {
   params: { id: string };
@@ -100,16 +101,13 @@ export default async function PublicMaterialPage({ params }: PageProps) {
               </p>
             )}
 
-            <div className="flex flex-col sm:flex-row gap-4">
-              {fileUrls.map((url, idx) => (
-                <a key={idx} href={url} target="_blank" rel="noopener noreferrer" className="flex-1 sm:flex-none">
-                  <Button size="lg" className="w-full sm:w-auto rounded-xl font-bold h-14 px-8 shadow-md">
-                    <Download className="w-5 h-5 mr-2" />
-                    ফাইল ডাউনলোড করুন {fileUrls.length > 1 ? idx + 1 : ''}
-                  </Button>
-                </a>
-              ))}
-            </div>
+            <PublicMaterialClient 
+              materialId={material.id} 
+              fileUrls={fileUrls} 
+              collectLead={material.collect_lead}
+              leadMandatory={material.lead_mandatory}
+              leadFormMessage={material.lead_form_message}
+            />
           </div>
         </div>
 

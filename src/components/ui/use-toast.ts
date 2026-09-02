@@ -1,6 +1,12 @@
+import { toast as realToast } from "./toast";
+
 export function toast(props: { title?: string; description?: string; variant?: "default" | "destructive" }) {
-  // Fallback toast function that just logs to console
-  console.log("Toast:", props);
+  const type = props.variant === "destructive" ? "error" : "info";
+  realToast.add({
+    title: props.title,
+    description: props.description,
+    type,
+  });
 }
 
 export function useToast() {

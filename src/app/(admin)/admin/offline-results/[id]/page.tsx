@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { DatePicker } from "@/components/ui/date-picker";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 
@@ -562,7 +563,11 @@ export default function EditOfflineResultPage({ params }: { params: { id: string
 
               <div className="space-y-2">
                 <Label>Date Held</Label>
-                <Input type="datetime-local" value={startTime} onChange={(e) => setStartTime(e.target.value)} />
+                <DatePicker 
+                  value={startTime ? startTime.split('T')[0] : ""} 
+                  onChange={(date) => setStartTime(date ? `${date}T00:00` : "")} 
+                  className="w-full"
+                />
               </div>
 
               <div className="space-y-2 flex flex-col justify-center">

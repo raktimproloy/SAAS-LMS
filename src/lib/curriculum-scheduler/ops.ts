@@ -116,16 +116,20 @@ export function generateEmptySessions(meta: ScheduleMeta): DraftSession[] {
   let n = 1;
 
   while (cursor <= end) {
-    if (targetDays.includes(cursor.getUTCDay())) {
-      const dateKey = cursor.toISOString().slice(0, 10);
-      const holidayName = holidays.get(dateKey) || null;
+    const isTargetDay = targetDays.includes(cursor.getUTCDay());
+    const dateKey = cursor.toISOString().slice(0, 10);
+    const holidayName = holidays.get(dateKey) || null;
+    const includeGovt = meta.config?.includeGovtHolidays;
+
+    if (isTargetDay) {
+      const isHoliday = !!(includeGovt && holidayName);
       sessions.push(
         applySessionTypeFlags({
           id: nextTempId(),
           date: cursor.toISOString(),
           session_number: n++,
-          session_type: "class",
-          is_holiday: false,
+          session_type: isHoliday ? "holiday" : "class",
+          is_holiday: isHoliday,
           holiday_name: holidayName,
           topics: [],
         })

@@ -30,6 +30,9 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     if (body.type !== undefined) updateData.type = body.type;
     if (body.description !== undefined) updateData.description = body.description;
     if (body.is_public !== undefined) updateData.is_public = body.is_public;
+    if (body.collect_lead !== undefined) updateData.collect_lead = body.collect_lead;
+    if (body.lead_mandatory !== undefined) updateData.lead_mandatory = body.lead_mandatory;
+    if (body.lead_form_message !== undefined) updateData.lead_form_message = body.lead_form_message;
     if (body.status !== undefined) updateData.status = body.status;
     if (body.batch_id !== undefined) updateData.batch_id = body.batch_id ? parseInt(body.batch_id) : null;
     if (body.course_id !== undefined) updateData.course_id = body.course_id ? parseInt(body.course_id) : null;

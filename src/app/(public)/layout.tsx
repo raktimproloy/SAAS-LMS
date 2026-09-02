@@ -4,6 +4,7 @@ import { Footer } from "@/components/public/Footer";
 import { FloatingActions } from "@/components/public/FloatingActions";
 import { PWAInstallPrompt } from "@/components/public/PWAInstallPrompt";
 import { MotifBackground } from "@/components/public/motif";
+import { WelcomePopup } from "@/components/public/WelcomePopup";
 import { siteConfig } from "@/config/site.config";
 import prisma from "@/lib/db";
 
@@ -41,6 +42,12 @@ export default async function PublicLayout({
       </div>
       <FloatingActions />
       <PWAInstallPrompt />
+      <WelcomePopup 
+        enabled={config.welcome_popup_enabled === "true"}
+        title={config.welcome_popup_title || ""}
+        text={config.welcome_popup_text || ""}
+        image={config.welcome_popup_image || ""}
+      />
     </div>
   );
 }
